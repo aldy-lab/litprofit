@@ -259,7 +259,7 @@ def cta(heading, text, primary=("Send an enquiry", "/contacts/"),
         href = secondary[1] if secondary[1].startswith("tel:") else u(secondary[1])
         sec = '<a class="btn btn-outline" href="%s">%s</a>' % (href, secondary[0])
     return """
-    <section class="cta">
+    <section class="cta seam-top">
       <div class="container reveal">
         <h2>{heading}</h2>
         <p>{text}</p>
@@ -536,7 +536,7 @@ def home():
       </div>
     </section>
 
-    <section class="section section-tight partners-band">
+    <section class="section section-tight partners-band seam-top seam-bottom">
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow">Representation</p>
@@ -868,7 +868,7 @@ def partners():
         "Two authorised representations, and a client list built up over more than a "
         "decade.",
         [("Home", "/"), ("Partners", None)]) + """
-    <section class="section partners-band" style="padding-top: clamp(30px, 4vw, 56px)">
+    <section class="section partners-band seam-top seam-bottom" style="padding-top: clamp(46px, 5vw, 72px)">
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow">Representation</p>

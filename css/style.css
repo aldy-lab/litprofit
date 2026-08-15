@@ -60,17 +60,47 @@
   --nav-h: 76px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* ---------- the brand pattern (Guidelines › Graphic › Pattern) ----------
-     "Small squares arranged in a strict grid, expressing the brand's
-     technological focus, precision and engineering character."
+  /* ---------- rivets (Guidelines › Graphic › Pattern) ----------
+     The guidelines call for "small squares arranged in a strict grid". Drawn
+     as a flat all-over field, that reads as a blueprint grid — which is the
+     ALPROJECTS motif, and this is a different company. So: the same square at
+     the same strict spacing, but built as a RIVET — a bright square face with
+     a dark square dropped a fraction down-right, so it sits proud of the
+     surface the way a fastener does on steel plate.
 
-     A data URI rather than a file: it is smaller than the HTTP request that
-     would fetch it, and it cannot 404. Opacity is deliberately NOT baked in
-     here — the tile is drawn at full white and every use dials it down with
-     its own `opacity`, so one tile serves every context. */
-  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Crect width='9' height='9' fill='%23ffffff'/%3E%3C/svg%3E");
-  --pattern-size: 44px 44px;
+     That also decides where it belongs. Rivets run along seams and plate
+     edges, not across open faces, so the primary use is a seam at a section
+     boundary rather than wallpaper behind the text.
+
+     A data URI rather than a file: smaller than the request that would fetch
+     it, and it cannot 404. Opacity is deliberately NOT baked in — the tile is
+     drawn at full strength and each use dials it down, so one tile serves
+     every context. */
+  --rivet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='11.7' y='11.7' width='9' height='9' rx='1.8' fill='%23000000' fill-opacity='0.55'/%3E%3Crect x='10.5' y='10.5' width='9' height='9' rx='1.8' fill='%23ffffff'/%3E%3C/svg%3E");
+  --rivet-pitch: 30px;
 }
+
+/* ============================================================
+   RIVET SEAM
+   A single row of rivets along a section edge, like the joint between
+   two plates. `.seam-top` / `.seam-bottom` are opt-in, so a section only
+   gets a seam where a seam makes sense.
+   ============================================================ */
+.seam-top, .seam-bottom { position: relative; }
+.seam-top::before, .seam-bottom::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: var(--rivet-pitch);
+  background-image: var(--rivet);
+  background-size: var(--rivet-pitch) var(--rivet-pitch);
+  background-repeat: repeat-x;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 2;
+}
+.seam-top::before { top: 0; }
+.seam-bottom::after { bottom: 0; }
 
 /* ============================================================
    RESET
@@ -388,18 +418,10 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
     radial-gradient(90% 70% at 78% 8%, rgba(38, 38, 140, 0.5), transparent 60%),
     linear-gradient(180deg, rgba(8,8,31,0.86) 0%, rgba(8,8,31,0.5) 42%, var(--navy-900) 96%);
 }
-/* the brand square pattern, masked so it fades out at the edges */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: var(--pattern);
-  background-size: var(--pattern-size);
-  opacity: 0.11;
-  mask-image: radial-gradient(78% 70% at 40% 46%, #000 12%, transparent 78%);
-  -webkit-mask-image: radial-gradient(78% 70% at 40% 46%, #000 12%, transparent 78%);
-}
+/* No all-over field here — the photograph is the texture, and a grid over it
+   was the thing that read as the ALPROJECTS blueprint. The hero closes on a
+   rivet seam instead (`.seam-bottom` in the markup), so the section boundary
+   reads as a plate joint. */
 
 .hero-inner { width: 100%; }
 .hero h1 { max-width: 15ch; margin-bottom: 30px; }
@@ -441,22 +463,15 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
    The two representations are the company's strongest credential, so
    they get a section of their own rather than a line in a list.
    ============================================================ */
-.partners-band { background: var(--bg-2); position: relative; overflow: hidden; }
-.partners-band::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(70% 120% at 88% 50%, rgba(45, 53, 190, 0.30), transparent 66%);
-}
-.partners-band::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--pattern);
-  background-size: var(--pattern-size);
-  opacity: 0.09;
-  mask-image: linear-gradient(255deg, #000 6%, transparent 58%);
-  -webkit-mask-image: linear-gradient(255deg, #000 6%, transparent 58%);
+/* The glow is a background LAYER, not a pseudo-element: .seam-top and
+   .seam-bottom need ::before and ::after, and a section can only have one
+   of each. */
+.partners-band {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 120% at 88% 50%, rgba(45, 53, 190, 0.30), transparent 66%),
+    var(--bg-2);
 }
 .partners-band > * { position: relative; z-index: 1; }
 
@@ -628,29 +643,28 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 }
 .media-panel img { width: 100%; object-fit: cover; opacity: 0.8; filter: saturate(0.65); }
 
-/* ---------- corner squares ----------
-   The guidelines' pattern block sets a solid white square at each of its four
-   corners, against the muted field. Reused here as a framing device on image
-   panels. Drawn with two elements, each carrying two squares as background
-   images, rather than four pseudo-elements. */
+/* ---------- corner rivets ----------
+   The guidelines' pattern block sets a solid square at each of its four
+   corners. Here that becomes four rivets, as though the panel were bolted
+   down at the corners. Two elements carrying two rivets each, rather than
+   four pseudo-elements. */
 .cornered { position: relative; }
 .cornered::before,
 .cornered::after {
   content: "";
   position: absolute;
-  left: 12px; right: 12px;
-  height: 7px;
-  background-image:
-    linear-gradient(var(--white), var(--white)),
-    linear-gradient(var(--white), var(--white));
-  background-size: 7px 7px;
+  left: 14px; right: 14px;
+  height: var(--rivet-pitch);
+  background-image: var(--rivet), var(--rivet);
+  background-size: var(--rivet-pitch) var(--rivet-pitch);
   background-repeat: no-repeat;
   background-position: left center, right center;
+  opacity: 0.85;
   pointer-events: none;
   z-index: 2;
 }
-.cornered::before { top: 12px; }
-.cornered::after { bottom: 12px; }
+.cornered::before { top: 6px; }
+.cornered::after { bottom: 6px; }
 
 /* ============================================================
    LOGO WALL (clients)
@@ -806,17 +820,7 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
    CTA BAND
    ============================================================ */
 .cta { background: var(--brand); padding-block: clamp(58px, 8vw, 118px); position: relative; overflow: hidden; }
-.cta::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--pattern);
-  background-size: var(--pattern-size);
-  opacity: 0.14;
-  mask-image: linear-gradient(105deg, transparent 26%, #000 72%);
-  -webkit-mask-image: linear-gradient(105deg, transparent 26%, #000 72%);
-}
-.cta > * { position: relative; }
+.cta > * { position: relative; z-index: 1; }
 .cta h2 { margin-bottom: 18px; }
 .cta p { color: rgba(255, 255, 255, 0.8); font-size: var(--text-xl); max-width: 54ch; }
 .cta .btn-solid { background: var(--white); color: var(--navy-900); }

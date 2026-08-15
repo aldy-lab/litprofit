@@ -73,12 +73,27 @@ Nothing dead ever ships: each one degrades to something that works.
 full-bleed background rect of the supplied SVG), not sampled off a compressed
 render. The rest of `--navy-*` is that hue carried down to usable grounds.
 
-**The pattern** — "small squares arranged in a strict grid, expressing the
-brand's technological focus, precision and engineering character" — is a CSS
-data URI in `--pattern`, drawn at full white with every use dialling it down
-via its own `opacity`. It carries the hero, the partnership band and the CTA.
-The pattern page's white corner squares are reused as the `.cornered` framing
-device on image panels.
+**The pattern, as rivets.** The guidelines call for "small squares arranged in
+a strict grid". Drawn as a flat all-over field, that reads as a blueprint grid
+— which is the ALPROJECTS motif, and this is a different company. So the square
+and its strict spacing are kept, but built as a **rivet**: a bright square face
+with a dark square dropped a fraction down-right, so it sits proud of the
+surface like a fastener on steel plate.
+
+That also decides placement. Rivets run along seams and plate edges, not across
+open faces, so the main use is `.seam-top` / `.seam-bottom` — a single row at a
+section boundary, reading as a plate joint. The pattern page's corner squares
+become four corner rivets on image panels (`.cornered`), as though the panel
+were bolted down.
+
+Both come from one `--rivet` data URI, drawn at full strength with each use
+dialling it down through its own `opacity`.
+
+Two things to know if you edit this: `.seam-top` and `.seam-bottom` occupy
+`::before` and `::after`, which is why the partnership band's glow is a
+background *layer* rather than a pseudo-element. And a seam on both sides of one
+boundary stacks two rivet rows at double opacity — the hero deliberately has no
+bottom seam because the band below it already carries a top one.
 
 ### Two traps in the supplied artwork
 
