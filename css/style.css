@@ -1596,16 +1596,73 @@ html.is-frost::after {
 }
 @keyframes frost-in { to { opacity: 1; } }
 
+/* ---------- ice ferns ---------- */
+#frostIce {
+  position: fixed;
+  inset: 0;
+  z-index: 191;
+  pointer-events: none;
+  overflow: hidden;
+}
+#frostIce.is-out { animation: ice-out 1s var(--ease) forwards; }
+@keyframes ice-out { to { opacity: 0; } }
+
+.fern {
+  position: absolute;
+  width: clamp(220px, 26vw, 400px);
+  height: clamp(220px, 26vw, 400px);
+}
+.f-tl { top: 0; left: 0; }
+.f-tr { top: 0; right: 0; transform: scaleX(-1); }
+.f-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+.f-br { bottom: 0; right: 0; transform: scale(-1, -1); }
+
+.fern path {
+  fill: none;
+  stroke: rgba(226, 242, 255, 0.85);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+  /* drawn on: one long dash retreating along the whole path, so the branches
+     appear in the order the generator produced them — trunk first */
+  stroke-dasharray: 4200;
+  stroke-dashoffset: 4200;
+  animation: fern-draw 3.4s var(--ease) forwards;
+  filter: drop-shadow(0 0 3px rgba(150, 200, 255, 0.5));
+}
+.f-tr path { animation-delay: 0.25s; }
+.f-bl path { animation-delay: 0.5s; }
+.f-br path { animation-delay: 0.75s; }
+@keyframes fern-draw { to { stroke-dashoffset: 0; } }
+
+/* ---------- drifting crystals ---------- */
+.flake {
+  position: absolute;
+  top: -12px;
+  width: 5px;
+  height: 5px;
+  background: rgba(226, 242, 255, 0.75);
+  transform: rotate(45deg);
+  animation-name: flake-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes flake-fall {
+  0%   { transform: translate3d(0, -20px, 0) rotate(45deg); opacity: 0; }
+  12%  { opacity: 0.8; }
+  88%  { opacity: 0.8; }
+  100% { transform: translate3d(26px, 100vh, 0) rotate(225deg); opacity: 0; }
+}
+
+/* ---------- the probe ---------- */
 #frostProbe {
   position: fixed;
   right: clamp(16px, 3vw, 40px);
   bottom: clamp(16px, 3vw, 40px);
   z-index: 195;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  padding: 14px 20px;
-  background: rgba(7, 8, 36, 0.82);
+  display: grid;
+  gap: 2px;
+  padding: 14px 20px 12px;
+  background: rgba(7, 8, 36, 0.86);
   border: 1px solid rgba(178, 214, 255, 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -1613,13 +1670,39 @@ html.is-frost::after {
   color: #dff0ff;
   pointer-events: none;
   animation: probe-in 0.5s var(--ease) both;
+  transition: border-color 0.6s var(--ease), box-shadow 0.6s var(--ease);
 }
+#frostProbe.is-below { border-color: rgba(178, 214, 255, 0.8); }
+#frostProbe.is-held { box-shadow: 0 0 40px rgba(120, 180, 255, 0.28); }
 #frostProbe.is-out { animation: probe-in 0.6s var(--ease) reverse forwards; }
-#frostProbe .fp-t { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-#frostProbe .fp-u { font-size: 13px; letter-spacing: 0.16em; opacity: 0.8; }
+
+.fp-label, .fp-state {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(200, 226, 255, 0.6);
+}
+.fp-sep { color: rgba(200, 226, 255, 0.35); }
+.fp-row { display: flex; align-items: baseline; gap: 4px; }
+.fp-t {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.fp-u { font-size: 13px; letter-spacing: 0.16em; opacity: 0.8; }
+/* the state line blinks only while it is still falling */
+#frostProbe:not(.is-held) .fp-state { animation: blink 1.1s steps(2, end) infinite; }
+@keyframes blink { 50% { opacity: 0.35; } }
 @keyframes probe-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
+/* Under reduced motion the ice still appears — it is the point of the egg —
+   but nothing draws, drifts or blinks its way in. */
 @media (prefers-reduced-motion: reduce) {
   html.is-frost::before, html.is-frost::after { animation: none; opacity: 1; }
   #frostProbe { animation: none; }
+  .fern path { animation: none; stroke-dashoffset: 0; }
+  .flake { display: none; }
+  #frostProbe:not(.is-held) .fp-state { animation: none; }
 }

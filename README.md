@@ -208,12 +208,23 @@ says.
 
 - **A console signature.** Open devtools and the `//` device is drawn in ASCII,
   raked at the monogram's angle, with the company line and who built it.
-- **Frost.** Type `FROST`. The page ices over from the edges, and a probe
-  readout falls from deck temperature to the &minus;25&nbsp;&deg;C an RSW tank
-  or blast freezer actually runs at. It thaws by itself after eleven seconds —
-  an easter egg you cannot get out of is a bug. The frost texture is
-  `feTurbulence` fractal noise generated inside an SVG data URI, so there is no
-  texture file to ship.
+- **Frost.** Type `FROST`. Ice ferns grow in from the four corners, crystals
+  drift down, the page cools, and a probe reads out `RSW TANK // PROBE`,
+  falling from deck temperature to the &minus;25&nbsp;&deg;C an RSW tank or
+  blast freezer actually runs at — blinking `Cooling` on the way down, then
+  settling to `Holding`. It thaws by itself after **11 seconds**, or type
+  `FROST` again to stop it early; an easter egg you cannot get out of is a bug.
+
+  The fern is a real dendrite — a stem with recursively smaller branches at a
+  fixed 58&deg;, which is roughly how ice grows on glass. It was generated
+  once by a script (340 segments) and baked in as path data, so nothing
+  computes it at runtime, and one crystal is mirrored into all four corners.
+  It draws itself on by retreating a single long dash along the path, so the
+  branches appear trunk-first in the order the generator produced them.
+
+  Under `prefers-reduced-motion` the ice still appears — that is the point of
+  the egg — but nothing draws, drifts or blinks its way in.
+
 - **The work light.** Double-click the hero. The photograph sits at 30% under a
   heavy gradient; a second copy at full strength is revealed inside a soft
   circle that follows the cursor, with a warm rim so it reads as a lamp rather
