@@ -81,7 +81,7 @@ def canonical(path):
 def lockup():
     """The brand lockup: monogram + name."""
     if LOGO_LOCKUP:
-        return '<img class="brand-lockup" src="%s" alt="%s" width="572" height="100">' % (
+        return '<img class="brand-lockup" src="%s" alt="%s" width="637" height="100">' % (
             u(LOGO_LOCKUP), NAME)
     # alt="" on the mark: the adjacent text already names the company, and a
     # second "LITPROFIT" would be read out twice by a screen reader.
