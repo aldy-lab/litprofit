@@ -447,6 +447,39 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   opacity: 0.3;
   filter: saturate(0.55) contrast(1.05);
 }
+/* ---------- the work light ----------
+   Double-click the hero and you get a hand lamp: the photograph is held at
+   30% under a heavy gradient, and this layer is the SAME photograph at full
+   strength, revealed only inside a soft circle that follows the cursor. It is
+   the gesture of walking into a dark engine room with a torch, which is the
+   job. Quiet, on-brand, and it disturbs nothing when it is off. */
+.hero-lamp {
+  position: absolute;
+  inset: 0;
+  z-index: 2;                    /* above .hero-media::after, the dark wash */
+  background-position: center;
+  background-size: cover;
+  filter: saturate(1.2) brightness(1.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s var(--ease);
+  -webkit-mask-image: radial-gradient(circle 180px at var(--mx, 50%) var(--my, 45%),
+      #000 0%, rgba(0,0,0,0.72) 42%, transparent 70%);
+  mask-image: radial-gradient(circle 180px at var(--mx, 50%) var(--my, 45%),
+      #000 0%, rgba(0,0,0,0.72) 42%, transparent 70%);
+}
+.hero.is-lamp .hero-lamp { opacity: 1; }
+/* a warm rim, so it reads as a lamp rather than a hole cut in the artwork */
+.hero.is-lamp .hero-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(circle 210px at var(--mx, 50%) var(--my, 45%),
+      rgba(255, 236, 190, 0.10) 0%, transparent 62%);
+}
+
 .hero-media::after {
   content: "";
   position: absolute;
@@ -1206,85 +1239,4 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   .site-header, .burger, .cta, .form, .hero-media { display: none; }
   body { background: #fff; color: #000; }
   a { text-decoration: underline; }
-}
-
-/* ============================================================
-   SHOP DRAWING MODE  —  type RIVET, or add ?draw to the URL
-   The brand book calls the pattern an expression of "precision and
-   engineering character". This takes that literally: the page becomes
-   the technical drawing it was laid out on. Entirely opt-in, entirely
-   decorative, and it changes nothing the page says.
-   ============================================================ */
-/* The grid goes on the OVERLAY, not on <body>. Every section paints its own
-   background, so a grid on body sits underneath all of them — the hero hid it
-   entirely and the mode looked like it had not fired. */
-.shop-drawing #shopLayer {
-  background-image:
-    repeating-linear-gradient(
-      calc(90deg - var(--slant)),
-      rgba(125, 140, 255, 0.30) 0 1px, transparent 1px 120px),
-    linear-gradient(rgba(255,255,255,0.11) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.11) 1px, transparent 1px);
-  background-size: auto, 30px 30px, 30px 30px;
-}
-
-/* every section gets a hairline box, like a drawing frame */
-.shop-drawing main > section {
-  outline: 1px dashed rgba(255, 255, 255, 0.5);
-  outline-offset: -1px;
-}
-
-/* the real laid-out boxes, called out */
-.shop-drawing .container > * { outline: 1px dotted rgba(125, 140, 255, 0.6); }
-
-#shopLayer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 60;
-}
-html:not(.shop-drawing) #shopLayer { display: none; }
-
-.shop-dim, .shop-idx {
-  position: absolute;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: var(--white);
-  white-space: nowrap;
-}
-/* dimension text runs up the left edge, the way it does on a real drawing */
-.shop-dim {
-  left: 6px;
-  writing-mode: vertical-rl;
-  display: grid;
-  place-items: center;
-  border-left: 1px solid rgba(255,255,255,0.4);
-  padding-left: 4px;
-  opacity: 0.75;
-}
-.shop-idx {
-  right: 8px;
-  background: var(--brand);
-  padding: 3px 8px;
-  opacity: 0.9;
-}
-
-/* the mode announces itself, once, in the corner */
-.shop-drawing::after {
-  content: "SHOP DRAWING // RIVET TO EXIT";
-  position: fixed;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
-  z-index: 120;
-  background: var(--brand);
-  color: var(--white);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  padding: 12px 22px;
-  border: 1px solid rgba(255,255,255,0.55);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  pointer-events: none;
 }

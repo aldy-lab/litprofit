@@ -131,22 +131,30 @@ still needed.**
 
 ## Hidden features
 
-Nothing here is announced, required, or changes what the page says. All of it
-is keyboard-safe and suppressed under `prefers-reduced-motion`.
+Nothing here is announced or required, and none of it changes what the page
+says.
 
 - **A console signature.** Open devtools and the `//` device is drawn in ASCII,
   raked at the monogram's angle, with the company line and who built it.
-- **Shop drawing mode.** Type `RIVET` anywhere on the page — or add `?draw` to
-  the URL to demo it — and the site becomes the technical drawing it was laid
-  out on: the construction grid, the monogram's 24.4° angle, dashed frames on
-  every section, `02 // 07` indices, and dimensions *measured off the real
-  laid-out boxes* rather than written by hand. Type `RIVET` again to exit.
-  The brand book calls the pattern an expression of "precision and engineering
-  character"; this takes that literally.
+- **The work light.** Double-click the hero. The photograph sits at 30% under a
+  heavy gradient; a second copy at full strength is revealed inside a soft
+  circle that follows the cursor, with a warm rim so it reads as a lamp rather
+  than a hole cut in the artwork. It is the gesture of walking into a dark
+  engine room with a torch, which is the job. Moving the pointer off the hero
+  puts it away.
 
-The key handler ignores keystrokes inside inputs, textareas and selects, and
-bails on any modifier combination, so it can never hijack someone filling in
-the enquiry form. That is verified, not assumed.
+Implementation notes: the pointer position is written to a CSS custom property
+once per animation frame, because `pointermove` fires far faster than the
+screen repaints and every write invalidates style. The whole thing is behind a
+`CSS.supports("mask-image", …)` check, and a double-click landing on a link or
+button is ignored so it cannot swallow a real click.
+
+### What was here before
+
+A "shop drawing" mode that turned the page into a blueprint. It was cut: it
+looked cluttered, and it retreads the blueprint motif already used on the
+ALPROJECTS site, which is the opposite of making this one feel like its own
+company.
 
 ## The brand angle
 

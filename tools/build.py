@@ -531,6 +531,8 @@ def home():
     <section class="hero">
       <div class="hero-media">
         <img src="{hero_img}" alt="" width="800" height="533" fetchpriority="high">
+        <span class="hero-lamp" aria-hidden="true"
+              style="background-image:url({hero_img})"></span>
       </div>
       <div class="container hero-inner">
         <p class="eyebrow eyebrow-plain">Klaipeda, Lithuania <span class="sep">//</span> since {founded}</p>

@@ -203,87 +203,58 @@
       "  ╱╱   ╱╱       Klaipeda, Lithuania // since 2010",
       " ╱╱   ╱╱",
       "                Site by ALDY",
-      "                Type RIVET for shop drawing mode",
+      "                Double-click the hero for a work light",
       ""
     ].join("\n");
     console.log("%c" + mark, "color:#8d90a6;font-family:monospace;line-height:1.35");
   } catch (e) { /* console is not guaranteed to exist */ }
 
-  /* ---------- 2. shop drawing mode ----------
-     Type RIVET, or add ?draw to the URL, and the page turns into the
-     technical drawing it was laid out on: the brand grid, the monogram's
-     24.4-degree construction angle, and dimensions on the real elements.
-     The brand book calls the pattern an expression of "precision and
-     engineering character" — this is that, taken literally. */
-  var SEQ = "RIVET";
-  var typed = "";
+  /* ---------- 2. the work light ----------
+     Double-click the hero. The photograph sits at 30% under a heavy gradient;
+     a second copy at full strength is revealed inside a soft circle that
+     follows the pointer. Nothing announces it, and it costs nothing until it
+     is switched on. */
+  var hero = doc.querySelector(".hero");
+  if (hero && CSS && CSS.supports && (CSS.supports("mask-image", "radial-gradient(#000,#000)") ||
+                                      CSS.supports("-webkit-mask-image", "radial-gradient(#000,#000)"))) {
+    var lampOn = false, pending = null, lx = 0, ly = 0;
 
-  function drawingMode(on) {
-    doc.documentElement.classList.toggle("shop-drawing", on);
-    var old = doc.getElementById("shopLayer");
-    if (old && old.parentNode) old.parentNode.removeChild(old);
-    if (on) annotate();
-  }
+    var place = function () {
+      pending = null;
+      hero.style.setProperty("--mx", lx + "px");
+      hero.style.setProperty("--my", ly + "px");
+    };
 
-  function annotate() {
-    var layer = doc.createElement("div");
-    layer.id = "shopLayer";
-    layer.setAttribute("aria-hidden", "true");   /* decoration, not content */
-
-    /* An absolutely positioned box with no positioned ancestor is sized
-       against the initial containing block — the VIEWPORT, not the document.
-       inset:0 alone therefore drew the grid over the first screen only, so
-       the height is set explicitly. */
-    layer.style.height = doc.documentElement.scrollHeight + "px";
-
-    /* Dimension every section against the real laid-out box, so the numbers
-       are measured rather than invented. */
-    var sections = all("main > section");
-    sections.forEach(function (sec, i) {
-      var r = sec.getBoundingClientRect();
-      var tag = doc.createElement("span");
-      tag.className = "shop-dim";
-      tag.style.top = (r.top + window.scrollY) + "px";
-      tag.style.height = r.height + "px";
-      tag.textContent = String(Math.round(r.height)) + " \u00d7 " +
-                        String(Math.round(r.width));
-      layer.appendChild(tag);
-
-      var idx = doc.createElement("span");
-      idx.className = "shop-idx";
-      idx.style.top = (r.top + window.scrollY + 10) + "px";
-      idx.textContent = ("0" + (i + 1)).slice(-2) + " // " +
-                        ("0" + sections.length).slice(-2);
-      layer.appendChild(idx);
+    on(hero, "pointermove", function (e) {
+      if (!lampOn) return;
+      var r = hero.getBoundingClientRect();
+      lx = Math.round(e.clientX - r.left);
+      ly = Math.round(e.clientY - r.top);
+      /* one write per frame — pointermove fires far faster than the screen
+         repaints, and setting a custom property invalidates style each time */
+      if (!pending) pending = window.requestAnimationFrame(place);
     });
 
-    doc.body.appendChild(layer);
+    on(hero, "dblclick", function (e) {
+      /* never swallow a double-click meant for a link or a button */
+      if (e.target.closest && e.target.closest("a, button")) return;
+      lampOn = !lampOn;
+      hero.classList.toggle("is-lamp", lampOn);
+      if (lampOn) {
+        var r = hero.getBoundingClientRect();
+        lx = Math.round(e.clientX - r.left);
+        ly = Math.round(e.clientY - r.top);
+        place();
+      }
+    });
+
+    /* moving the pointer off the hero puts the lamp away */
+    on(hero, "pointerleave", function () {
+      if (!lampOn) return;
+      lampOn = false;
+      hero.classList.remove("is-lamp");
+    });
   }
-
-  /* the measurements and the layer height are only true for one viewport */
-  on(window, "resize", function () {
-    if (doc.documentElement.classList.contains("shop-drawing")) {
-      var old = doc.getElementById("shopLayer");
-      if (old && old.parentNode) old.parentNode.removeChild(old);
-      annotate();
-    }
-  });
-
-  on(doc, "keydown", function (e) {
-    /* never hijack typing in a field, and never fight a modifier shortcut */
-    var t = e.target;
-    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (!e.key || e.key.length !== 1) return;
-
-    typed = (typed + e.key.toUpperCase()).slice(-SEQ.length);
-    if (typed === SEQ) {
-      drawingMode(!doc.documentElement.classList.contains("shop-drawing"));
-      typed = "";
-    }
-  });
-
-  if (/[?&]draw\b/.test(window.location.search)) drawingMode(true);
 
   /* ---------- analytics (opt-in, cookieless) ---------- */
   if (ANALYTICS_DOMAIN) {
