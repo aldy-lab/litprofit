@@ -1,16 +1,80 @@
 # LITPROFIT — website
 
-Static site (HTML/CSS/JS, no build step), rebuilding **litprofit.com** for
-UAB "Litprofit". Same architecture as the ALPROJECTS Group site. Made by ALDY.
+Static site (HTML/CSS/JS, no build step to serve), rebuilding **litprofit.com**
+for UAB "Litprofit". Same architecture as the ALPROJECTS Group site.
+Made by ALDY.
 
-Status: **foundation** — repo scaffolded, existing site content and assets
-harvested. The visual design is pending the Figma corporate style export.
+**Preview:** https://aldy-lab.github.io/litprofit/
+
+Status: **English site built and audited.** The visual layer is provisional —
+it is driven entirely by CSS tokens, pending the brand guidelines' colour and
+typography pages. Lithuanian and Russian are to follow.
+
+## Build
+
+```
+python3 tools/build.py     # regenerates every page, sitemap.xml, robots.txt
+python3 tools/audit.py     # device audit — must pass before committing
+```
+
+The output is committed, so nothing runs to serve the site. Everything is
+generated, including `index.html`, which is what makes the base-path switch
+below possible.
+
+## Structure
+
+```
+tools/build.py       every page's content and the page shell — the only file
+                     to edit for copy changes
+tools/audit.py       Playwright audit: structure, links, mobile
+css/style.css        design tokens + all styles
+css/fonts.css        self-hosted Montserrat @font-face
+js/main.js           config block, header, menu, reveals, enquiry form
+assets/brand/        logo
+assets/clients/      ten client logos
+assets/certs/        RINA and PRS certificates (PDF)
+docs/                harvested source content, brand notes
+```
+
+Pages: home, about, services (+ four service pages), completed works, partners,
+certificates, contacts, privacy, 404.
+
+## Going live on the real domain
+
+The site currently serves from a GitHub *project* URL, so every absolute path
+carries a `/litprofit` prefix. To move to the real domain:
+
+1. in `tools/build.py`, set `BASE = ""` and `ORIGIN = "https://litprofit.com"`;
+2. add a `CNAME` file containing the domain;
+3. `python3 tools/build.py` and commit.
+
+No `CNAME` is committed yet on purpose — adding one before the DNS exists takes
+the github.io preview down too, leaving nothing to look at.
+
+## What is provisional
+
+- **The palette.** `--navy-*` in `css/style.css` is estimated from the brand
+  guidelines' mockup pages, which are compressed artwork. The colour page has
+  not arrived. Replacing that one block recolours the whole site; nothing
+  outside it names a colour.
+- **The typeface.** Montserrat is a stand-in. The wordmark in the guidelines is
+  a heavier geometric sans. If the brand face is licensed, using it as a webfont
+  needs a separate **web** licence.
+- **The logo.** `assets/brand/` still holds the logo from the *old* site — it
+  contains red, which appears nowhere in the new identity. The new monogram is
+  needed as SVG.
+- **Completed works.** The old site's version was two headings and two stock
+  photos. The page is written from what the rest of the site establishes, but to
+  be genuinely useful it needs, per project: vessel or plant name, year, port,
+  scope, and a photograph.
+
+See [`docs/brand-notes.md`](docs/brand-notes.md) for what the guidelines
+establish so far and what is still outstanding.
 
 ## The company
 
-UAB "Litprofit" — ship repair and maintenance, worldwide. Founded 2010,
-based in Klaipeda, Lithuania. Positioning line: *We consult → We organise →
-We ensure*.
+UAB "Litprofit" — ship repair and maintenance, worldwide. Founded 2010, based in
+Klaipeda, Lithuania. Positioning: *We consult → We organise → We ensure*.
 
 | | |
 |---|---|
@@ -22,64 +86,71 @@ We ensure*.
 | Insurance | Compensa Vienna Insurance Group ADB, EUR 250,000 (policy 230 0008143 / 2020) |
 
 Authorised partner of **BITZER**; marine line representative for **DANFOSS**.
-Certified by **RINA** and **PRS** (PDFs in `assets/certs/`).
+Certified by **RINA** and **PRS**.
 
-## Brand colours
+## What changed from the old site
 
-Sampled from the company logo — the starting palette until the Figma export
-lands:
+The old site's full English text is preserved in
+[`docs/source-site-EN.txt`](docs/source-site-EN.txt). Every equipment list,
+manufacturer name, certificate and number carries over exactly; the prose around
+them is rewritten. Fixed in the process:
 
-| Token | Value | Where it comes from |
-|---|---|---|
-| deep blue | `#273e94` | logo wordmark, dominant |
-| red | `#ed1c25` | logo accent |
-| light blue | `#79aee2` | logo secondary |
+- **English URLs.** The old English pages sat on Lithuanian slugs
+  (`/paslaugos/saldymo-sistemos-ir-iranga`), which costs relevance on English
+  queries. Now `/services/refrigeration-systems/`.
+- **Untranslated Lithuanian.** "Skaityti toliau" appeared as the read-more link
+  on every English page, and the contact form's labels were Lithuanian
+  (Vardas / Telefonas / El. paštas / Žinutė).
+- **Meta descriptions.** Only the homepage had one, and it was in Lithuanian.
+  Every page now has its own, plus canonical, Open Graph and
+  `Organization` structured data.
+- **The two thin pages.** "Completed works" and "Partners" were headings with
+  almost nothing under them.
 
-## Structure of the old site
+## Mobile and accessibility
 
-Eleven pages, trilingual (EN at root, `/lt`, `/ru`), on Lithuanian slugs:
+`tools/audit.py` drives a real device context — DPR 3, touch — at 360, 375, 390,
+412 and 430px, because Chrome's headless window clamps around 500px and these
+widths cannot be tested by resizing.
 
-```
-/                                              home
-/about-us                                      about
-/paslaugos                                     services index
-/paslaugos/laivu-irangos-ir-varikliu-remontas  ship equipment and engine repair
-/paslaugos/saldymo-sistemos-ir-iranga          refrigeration systems and equipment
-/paslaugos/laivu-korpusu-ir-vamzdynu-darbai    hull and piping works
-/paslaugos/atsarginiu-daliu-tiekimas           supply of spare parts
-/projektai                                     completed works
-/clients                                       partners
-/sertifikatai                                  certificates
-/contacts                                      contacts
-```
+It checks, on all 13 pages: one `<h1>`, no heading-level jumps, no image without
+`alt`, no link without an accessible name, no duplicate `id`s, no JS errors,
+every internal link resolving to a file that exists, no horizontal overflow, no
+tap target under 24px (WCAG 2.2), and no text field under 16px — below that, iOS
+Safari zooms the page on focus. It also drives the menu: open, close,
+`aria-expanded`, and the body scroll lock and its restore.
 
-Full text of every English page is preserved in
-[`docs/source-site-EN.txt`](docs/source-site-EN.txt) so nothing is lost in the
-rebuild.
+The first run reported 393 problems. What it caught:
 
-Known weaknesses in the old site, to fix in this one:
+- inline and footer links 16–19px tall, under the 24px minimum. `padding-block`
+  on an *inline* element grows the hit area without pushing lines apart, so this
+  costs nothing visually;
+- the consent checkbox at 20×20;
+- heading-level jumps from `h1` straight to `h3` where a page had no `h2` of its
+  own — the footer and contact-block headings are levelled to `h2`, and the
+  services index cards to `h2`. The CSS targets those by **class**, not by tag,
+  so a level can change without breaking the styling.
 
-- "Skaityti toliau" (Lithuanian for *read more*) is left untranslated on the
-  English pages, including the homepage;
-- the contact form labels are Lithuanian on the English page
-  (Vardas / Telefonas / El. paštas / Žinutė);
-- only the homepage has a `<meta name="description">`, and it is in Lithuanian
-  on the English page;
-- "Completed works" and "Partners" are effectively empty — a heading and some
-  logos, no project copy;
-- the English slugs are Lithuanian, which costs relevance on English queries.
+### Two bugs the audit could not have caught
 
-## What is here now
+Both were found by looking at screenshots:
 
-```
-assets/brand/     logo.svg, logo-inverted.svg (from the live site)
-assets/clients/   ten client/partner logos, 400x400 PNG
-assets/certs/     RINA and PRS certificates, PDF
-docs/             harvested source content
-```
+- **`.reveal` hid the whole site.** Scroll-reveal started at `opacity: 0`, so
+  every section below the hero rendered blank until JavaScript ran — and stayed
+  blank if it never did. The rules are now scoped to `.js`, set by an inline
+  script in `<head>` before the stylesheet paints. A stylesheet should not hide
+  content by default.
+- **The client logos were destroyed by a filter.** Knocking them out to white
+  with `brightness(0) invert(1)` flattens every opaque pixel to white, so any
+  mark with knockout detail — Ocean Whale, LZK, OWH — collapsed into a
+  featureless white disc. They now sit on white tiles, unaltered. They are other
+  companies' trademarks; recolouring them is not ours to do.
 
-## Hosting
+## No horizontal scrolling — how it is enforced
 
-GitHub Pages off `main`. Until a domain is pointed at it, the site serves from
-the project URL — no `CNAME` file is committed yet, because adding one before
-DNS exists takes the default URL down too.
+`overflow-x` lives on `<html>`, not `<body>`: setting it on body makes body a
+scroll container, which changes how `position: sticky` resolves. That is the
+safety net, not the fix. The actual guarantee is `min-width: 0` on grid and flex
+children (they default to `min-width: auto` and refuse to shrink below their
+content), `overflow-wrap: break-word` on body, and no `100vw` anywhere — it
+includes the scrollbar and overflows by its width.
