@@ -337,7 +337,8 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
    24px target minimum that the old <img> met by accident. */
 .brand { display: flex; align-items: center; gap: 11px; flex: none; min-height: 44px; }
 .brand-mark { height: 25px; width: auto; }
-.brand-lockup { height: 26px; width: auto; }
+.brand-lockup { height: 27px; width: auto; }
+.footer-brand .brand-lockup { height: 30px; }
 
 /* The name alongside the monogram. Montserrat 700 stands in for the
    guidelines' heavier geometric wordmark until that is supplied as vector

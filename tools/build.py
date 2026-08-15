@@ -45,14 +45,12 @@ COMPANY_ID = "302568798"
 VAT = "LT100005766815"
 FOUNDED = "2010"
 
-# The logo lockup is the supplied monogram plus the name set in the site
-# typeface. The guidelines' own heavy wordmark has not been supplied as
-# vector artwork — the only outlined lettering in the page SVG is the section
-# title "FONTS" and the light page furniture, neither of which is the
-# wordmark. Set LOGO_LOCKUP to a real lockup SVG when one arrives and it
-# replaces mark + text everywhere.
+# The lockup is the supplied monogram plus the supplied wordmark, both as
+# outlined paths — so no font is loaded, no web licence is needed, and the
+# lettering is pixel-identical everywhere. Set LOGO_LOCKUP to "" to fall back
+# to mark + the name set in the site typeface.
 LOGO_MARK = "/assets/brand/logo-mark-white.svg"
-LOGO_LOCKUP = ""
+LOGO_LOCKUP = "/assets/brand/logo-lockup.svg"
 
 # Header call-to-action. Set this to the company's Calendly link and the
 # button points at it; while it is empty the button falls back to the
@@ -83,7 +81,7 @@ def canonical(path):
 def lockup():
     """The brand lockup: monogram + name."""
     if LOGO_LOCKUP:
-        return '<img class="brand-lockup" src="%s" alt="%s" width="467" height="100">' % (
+        return '<img class="brand-lockup" src="%s" alt="%s" width="572" height="100">' % (
             u(LOGO_LOCKUP), NAME)
     # alt="" on the mark: the adjacent text already names the company, and a
     # second "LITPROFIT" would be read out twice by a screen reader.

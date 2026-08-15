@@ -65,6 +65,8 @@ Nothing dead ever ships: each one degrades to something that works.
 
 | Asset | File | Notes |
 |---|---|---|
+| Lockup | `assets/brand/logo-lockup.svg` | monogram + wordmark, what the site renders |
+| Wordmark | `assets/brand/logo-wordmark.svg` | supplied, outlined paths |
 | Monogram | `assets/brand/logo-mark.svg` | supplied artwork, `currentColor` for inline use |
 | Monogram, white | `assets/brand/logo-mark-white.svg` | for `<img>` on the navy ground |
 | Favicon | `assets/brand/favicon.svg` | white mark on a `#15196D` tile |
@@ -103,11 +105,10 @@ resolves to its initial value — black — and a white-on-navy mark vanishes.
 Hence the separate `logo-mark-white.svg`.
 
 **The big outlined word in the page SVG is not the wordmark.** It reads
-**FONTS** — it is page 14's section title, exactly as page 21's is `GRAPHIC`.
-It was briefly shipped as the logo before a screenshot caught it. The only
-`LITPROFIT` lettering in that file is the light 40%-opacity page furniture,
-which is not the wordmark weight either. **The heavy wordmark as vector is
-still needed.**
+**FONTS** — page 14's section title, exactly as page 21's is `GRAPHIC`. It was
+briefly shipped as the logo before a screenshot caught it. The real wordmark
+was supplied separately and is now in `logo-wordmark.svg`; anything extracted
+from a guideline page SVG should be rendered and read before it is trusted.
 
 ## Design notes
 
@@ -256,12 +257,9 @@ confirm these are the approved marks in the approved treatment before launch.
 
 ## What is provisional
 
-- **The typeface.** Montserrat is a stand-in, including for the name beside the
-  monogram. The guidelines' wordmark is a heavier geometric sans and has not
-  been supplied as vector artwork. If the brand face is licensed, using it as a
-  webfont needs a separate **web** licence.
-- **The wordmark.** Only the monogram was supplied as vector. The lockup is
-  therefore monogram + `LITPROFIT` set in the site face. See the note below.
+- **The typeface.** Montserrat is a stand-in for body and headings. It is no
+  longer used for the logo — the wordmark is supplied artwork now, so no web
+  font licence question touches the brand mark itself.
 - **Photography.** `assets/photos/` is re-encoded from the old site, which caps
   at **800px wide** — fine for cards, soft for a full-bleed hero, which is why
   the hero image is held back to 30% opacity and reads as texture. Real
