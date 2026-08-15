@@ -76,7 +76,7 @@
      it, and it cannot 404. Opacity is deliberately NOT baked in — the tile is
      drawn at full strength and each use dials it down, so one tile serves
      every context. */
-  --rivet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='11.7' y='11.7' width='9' height='9' rx='1.8' fill='%23000000' fill-opacity='0.55'/%3E%3Crect x='10.5' y='10.5' width='9' height='9' rx='1.8' fill='%23ffffff'/%3E%3C/svg%3E");
+  --rivet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='11.7' y='11.7' width='9' height='9' rx='1.8' fill='%23000000' fill-opacity='0.7'/%3E%3Crect x='10.5' y='10.5' width='9' height='9' rx='1.8' fill='%23ffffff'/%3E%3C/svg%3E");
   --rivet-pitch: 30px;
 
   /* ---------- the brand angle ----------
@@ -1514,4 +1514,111 @@ a.pg-cell:hover .pg-name { color: var(--accent); }
   .pg-of { grid-column: 1 / -1; grid-row: 1; text-align: center; padding-top: 14px; }
   .pg-cell { padding-block: 18px; }
   .pg-name { font-size: var(--text-l); }
+}
+
+/* ============================================================
+   SCROLL PROGRESS
+   A hairline on the header's own bottom edge. It reads as part of the
+   rule that is already there, rather than as a bar bolted on top.
+   ============================================================ */
+.progress {
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  transform: scaleX(var(--p, 0));
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--navy-400), var(--grey-200));
+  pointer-events: none;
+}
+
+/* the hero photograph drifts; the transform is written by JS */
+.hero-media img { will-change: transform; }
+
+/* ============================================================
+   STAGGER
+   Grid children arrive in sequence rather than all at once. Small
+   delays only — enough to read as deliberate, not as waiting.
+   ============================================================ */
+.js .card-grid > .reveal:nth-child(2) { transition-delay: 0.07s; }
+.js .card-grid > .reveal:nth-child(3) { transition-delay: 0.14s; }
+.js .card-grid > .reveal:nth-child(4) { transition-delay: 0.21s; }
+.js .pillars > .pillar { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .js .card-grid > .reveal { transition-delay: 0s; }
+}
+
+/* ============================================================
+   FROST  —  type FROST
+   Ice creeps in from the edges, the page cools, and a probe readout
+   falls to the temperature an RSW tank or blast freezer actually runs
+   at. Thaws by itself after eleven seconds.
+   ============================================================ */
+:root {
+  /* fractal noise, generated in the SVG itself — a frost texture without
+     shipping a texture */
+  --frost-tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' seed='7'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23f)' opacity='0.7'/%3E%3C/svg%3E");
+}
+
+/* The cooling is done with an overlay, NOT `filter` on <body>.
+   A filter on an element makes it the containing block for every
+   position:fixed descendant — with it on body, the probe rendered at
+   y=7388 instead of pinned to the corner, and the site header would have
+   come unstuck from the top the moment frost switched on. */
+
+html.is-frost::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+  pointer-events: none;
+  background-image: var(--frost-tex);
+  background-size: 320px 320px;
+  /* held to the edges, so the middle of the page stays readable */
+  mask-image: radial-gradient(120% 105% at 50% 50%, transparent 22%, #000 92%);
+  -webkit-mask-image: radial-gradient(120% 105% at 50% 50%, transparent 22%, #000 92%);
+  opacity: 0;
+  animation: frost-in 2.2s var(--ease) forwards;
+  mix-blend-mode: screen;
+}
+html.is-frost::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 189;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 105% at 50% 50%,
+      rgba(150, 195, 240, 0.07) 0%, rgba(150, 195, 240, 0.10) 38%,
+      rgba(186, 219, 255, 0.40) 100%);
+  opacity: 0;
+  animation: frost-in 2.2s var(--ease) forwards;
+}
+@keyframes frost-in { to { opacity: 1; } }
+
+#frostProbe {
+  position: fixed;
+  right: clamp(16px, 3vw, 40px);
+  bottom: clamp(16px, 3vw, 40px);
+  z-index: 195;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 14px 20px;
+  background: rgba(7, 8, 36, 0.82);
+  border: 1px solid rgba(178, 214, 255, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #dff0ff;
+  pointer-events: none;
+  animation: probe-in 0.5s var(--ease) both;
+}
+#frostProbe.is-out { animation: probe-in 0.6s var(--ease) reverse forwards; }
+#frostProbe .fp-t { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+#frostProbe .fp-u { font-size: 13px; letter-spacing: 0.16em; opacity: 0.8; }
+@keyframes probe-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html.is-frost::before, html.is-frost::after { animation: none; opacity: 1; }
+  #frostProbe { animation: none; }
 }

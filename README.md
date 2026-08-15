@@ -187,6 +187,19 @@ Footer, bottom right: the ALDY mark plus "Made by ALDY". `ALDY_URL` at the top
 of `tools/build.py` is empty, so it renders as text and mark with no dead link
 — set it to the studio URL and it becomes one.
 
+## Scroll behaviour
+
+- **Progress**: a hairline on the header's own bottom edge, so it reads as part
+  of the rule already there rather than a bar bolted on top.
+- **Parallax**: the hero photograph drifts at 0.16 of the scroll rate, and only
+  while the hero is still on screen.
+- **Stagger**: grid children arrive in sequence, 70ms apart.
+
+All three are skipped entirely under `prefers-reduced-motion` — not shortened,
+skipped, since a parallax that still moves is the thing that setting is about.
+Verified by running the page in a reduced-motion context and confirming the
+transform is never written.
+
 ## Hidden features
 
 Nothing here is announced or required, and none of it changes what the page
@@ -194,6 +207,12 @@ says.
 
 - **A console signature.** Open devtools and the `//` device is drawn in ASCII,
   raked at the monogram's angle, with the company line and who built it.
+- **Frost.** Type `FROST`. The page ices over from the edges, and a probe
+  readout falls from deck temperature to the &minus;25&nbsp;&deg;C an RSW tank
+  or blast freezer actually runs at. It thaws by itself after eleven seconds —
+  an easter egg you cannot get out of is a bug. The frost texture is
+  `feTurbulence` fractal noise generated inside an SVG data URI, so there is no
+  texture file to ship.
 - **The work light.** Double-click the hero. The photograph sits at 30% under a
   heavy gradient; a second copy at full strength is revealed inside a soft
   circle that follows the cursor, with a warm rim so it reads as a lamp rather

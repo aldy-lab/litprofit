@@ -109,6 +109,45 @@
     }
   }
 
+  /* ---------- scroll: progress, parallax ----------
+     Both are read-only decoration and both are skipped entirely when the
+     visitor has asked for reduced motion — not merely shortened, since a
+     parallax that still moves is exactly what that setting is about. */
+  var ticking = false;
+  var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var bar = doc.querySelector(".progress");
+  var heroImg = doc.querySelector(".hero-media img");
+
+  function scrollFxFrame() {
+    ticking = false;
+    var d = doc.documentElement;
+
+    if (bar) {
+      var max = d.scrollHeight - d.clientHeight;
+      bar.style.setProperty("--p", max > 0 ? (window.scrollY / max).toFixed(4) : "0");
+    }
+
+    /* the hero photograph drifts at a fraction of the scroll rate, and only
+       while the hero is still on screen — past that it is wasted work */
+    if (heroImg && !calm) {
+      var y = window.scrollY;
+      if (y < d.clientHeight * 1.2) {
+        heroImg.style.transform = "translate3d(0," + (y * 0.16).toFixed(1) + "px,0) scale(1.06)";
+      }
+    }
+  }
+
+  function scrollFx() {
+    if (!ticking) { ticking = true; window.requestAnimationFrame(scrollFxFrame); }
+  }
+
+  if (bar || heroImg) {
+    on(window, "scroll", scrollFx, { passive: true });
+    on(window, "resize", scrollFx);
+    scrollFxFrame();
+  }
+
   /* ---------- current year in the footer ---------- */
   all("[data-year]").forEach(function (el) {
     el.textContent = String(new Date().getFullYear());
@@ -236,6 +275,7 @@
       " ╱╱   ╱╱",
       "                Site by ALDY",
       "                Double-click the hero for a work light",
+      "                Type FROST to ice the place over",
       ""
     ].join("\n");
     console.log("%c" + mark, "color:#8d90a6;font-family:monospace;line-height:1.35");
@@ -287,6 +327,64 @@
       hero.classList.remove("is-lamp");
     });
   }
+
+  /* ---------- 3. frost ----------
+     Type FROST. The page ices over from the edges in and a probe readout
+     falls from deck temperature to the -25 C a blast freezer or RSW tank
+     actually runs at, then thaws on its own. This company freezes fish for
+     a living; it seemed a waste not to. */
+  var FSEQ = "FROST";
+  var ftyped = "";
+  var frostTimer = null;
+
+  function setFrost(on) {
+    var root = doc.documentElement;
+    root.classList.toggle("is-frost", on);
+
+    var probe = doc.getElementById("frostProbe");
+    if (on) {
+      if (!probe) {
+        probe = doc.createElement("div");
+        probe.id = "frostProbe";
+        probe.setAttribute("aria-hidden", "true");
+        probe.innerHTML = '<span class="fp-t">0</span><span class="fp-u">&deg;C</span>';
+        doc.body.appendChild(probe);
+      }
+      var t = 18, target = -25;
+      var readout = probe.querySelector(".fp-t");
+      clearInterval(probe._iv);
+      probe._iv = setInterval(function () {
+        t -= 1;
+        readout.textContent = String(t);
+        if (t <= target) clearInterval(probe._iv);
+      }, 60);
+
+      /* it thaws by itself — an easter egg you cannot get out of is a bug */
+      clearTimeout(frostTimer);
+      frostTimer = setTimeout(function () { setFrost(false); }, 11000);
+    } else {
+      clearTimeout(frostTimer);
+      if (probe) {
+        clearInterval(probe._iv);
+        probe.classList.add("is-out");
+        setTimeout(function () {
+          if (probe && probe.parentNode) probe.parentNode.removeChild(probe);
+        }, 900);
+      }
+    }
+  }
+
+  on(doc, "keydown", function (e) {
+    var t = e.target;
+    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!e.key || e.key.length !== 1) return;
+    ftyped = (ftyped + e.key.toUpperCase()).slice(-FSEQ.length);
+    if (ftyped === FSEQ) {
+      setFrost(!doc.documentElement.classList.contains("is-frost"));
+      ftyped = "";
+    }
+  });
 
   /* ---------- analytics (opt-in, cookieless) ---------- */
   if (ANALYTICS_DOMAIN) {

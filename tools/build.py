@@ -127,6 +127,7 @@ def header(active):
           <span></span><span></span><span></span>
         </button>
       </div>
+      <span class="progress" aria-hidden="true"></span>
     </nav>
   </header>""".format(home=u("/"), logo=lockup(),
                       name=NAME, items=items,
@@ -386,7 +387,6 @@ SERVICES = [
     dict(
         slug="ship-engine-repair",
         img=("svc-engine-repair.webp", 600, 410, "Marine diesel engine in a ship's engine room"),
-        num="01",
         title="Ship equipment and engine repair",
         short="Maintenance and overhaul of 4-stroke and 2-stroke diesel engines, "
               "engine room machinery and deck equipment.",
@@ -422,7 +422,6 @@ SERVICES = [
     dict(
         slug="refrigeration-systems",
         img=("svc-refrigeration.webp", 800, 609, "Industrial refrigeration compressor plant"),
-        num="02",
         title="Refrigeration systems and equipment",
         short="Design, modernisation, compressor overhaul, installation and "
               "commissioning of marine and industrial refrigeration.",
@@ -465,7 +464,6 @@ SERVICES = [
     dict(
         slug="hull-and-piping",
         img=("svc-hull-piping.webp", 800, 533, "Welder joining a steel pipe bend"),
-        num="03",
         title="Hull and piping works",
         short="Steel and stainless steel pipe systems for shipbuilding, ship repair "
               "and industry, including surface coating.",
@@ -493,7 +491,6 @@ SERVICES = [
     dict(
         slug="spare-parts",
         img=("svc-spare-parts.webp", 450, 300, "Spare parts warehouse shelving"),
-        num="04",
         title="Supply of spare parts",
         short="Sourcing and delivery of spare parts and consumables for marine "
               "engines and refrigeration compressors.",
@@ -586,15 +583,21 @@ def card(s, level="h3", variant=""):
 
 # Refrigeration leads: it is the company's original discipline and the one it
 # has the deepest bench in, so it gets the feature card rather than being one
-# of four equal boxes.
+# of four equal boxes — and, being first, it is 01.
 FEATURE_SLUG = "refrigeration-systems"
+
+# Display order = numbering order. SERVICES is written in the order the four
+# were originally documented; this is the order they are shown in, feature
+# first, and the 01..04 labels are derived from it so the two cannot disagree.
+ORDERED = ([x for x in SERVICES if x["slug"] == FEATURE_SLUG] +
+           [x for x in SERVICES if x["slug"] != FEATURE_SLUG])
+for _i, _s in enumerate(ORDERED):
+    _s["num"] = "%02d" % (_i + 1)
 
 
 def service_cards(level="h3"):
-    feature = [x for x in SERVICES if x["slug"] == FEATURE_SLUG]
-    rest = [x for x in SERVICES if x["slug"] != FEATURE_SLUG]
-    out = [card(x, level, "feature") for x in feature]
-    out += [card(x, level, "compact") for x in rest]
+    out = [card(ORDERED[0], level, "feature")]
+    out += [card(x, level, "compact") for x in ORDERED[1:]]
     return "\n".join(out)
 
 
@@ -1075,7 +1078,7 @@ def service_page(s):
         blocks.append("      <h2>%s</h2>\n%s" % (
             heading, "\n".join("      " + p for p in paras)))
 
-    others = [o for o in SERVICES if o["slug"] != s["slug"]]
+    others = [o for o in ORDERED if o["slug"] != s["slug"]]
     more = "\n".join(card(o, "h3") for o in others)
 
     f, w, h, alt = s["img"]
@@ -1488,7 +1491,7 @@ PAGES = [
 for path, title, desc, fn, extra in PAGES:
     write(outfile(path), page(path, title, desc, fn(), head_extra=extra))
 
-for s in SERVICES:
+for s in ORDERED:
     p = "/services/%s/" % s["slug"]
     write(outfile(p), page(p, s["title"], s["meta"], service_page(s)))
 
@@ -1519,7 +1522,7 @@ write("404.html", page("/404.html", "Page not found",
 # never leave a dead URL behind in the sitemap.
 SITEMAP = [("/", "monthly", "1.0"),
            ("/services/", "monthly", "0.9")] + \
-          [("/services/%s/" % s["slug"], "monthly", "0.8") for s in SERVICES] + \
+          [("/services/%s/" % s["slug"], "monthly", "0.8") for s in ORDERED] + \
           [("/about/", "monthly", "0.8"),
            ("/completed-works/", "monthly", "0.7"),
            ("/partners/", "monthly", "0.7"),
