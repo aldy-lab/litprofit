@@ -188,24 +188,6 @@ Footer, bottom right: the ALDY mark plus "Made by ALDY". `ALDY_URL` at the top
 of `tools/build.py` is empty, so it renders as text and mark with no dead link
 — set it to the studio URL and it becomes one.
 
-## The hero plant readout
-
-Pinned bottom-right while the hero is on screen: `PLANT // PULL-DOWN`, a
-temperature falling from deck ambient to setpoint as you scroll, a trace that
-draws itself, and a state that flips from `Cooling` to `At setpoint`. The
-company builds automatic control systems for refrigeration compressors — this
-is that discipline as page furniture, and it releases once the hero is behind
-you.
-
-The curve is an **exponential decay**, which is the shape a plant pulling down
-actually makes, generated rather than drawn as a decorative swoosh.
-
-It is a **direct child of `<body>`, not of the hero**. `.hero` carries
-`overflow: hidden`, and Chrome clips `position: fixed` descendants of that —
-inside the hero it rendered nowhere at all while still reporting a valid
-bounding box. `elementFromPoint` at its own centre returned the container
-underneath, which is how it was caught.
-
 ## Scroll behaviour
 
 - **Progress**: a hairline on the header's own bottom edge, so it reads as part
@@ -226,8 +208,10 @@ says.
 
 - **A console signature.** Open devtools and the `//` device is drawn in ASCII,
   raked at the monogram's angle, with the company line and who built it.
-- **Frost.** Type `FROST`. The page enters a cold test: registration marks
-  strike the corners, ice grains drift down, the page cools, and a probe reads out `RSW TANK // PROBE`,
+- **Frost.** Type `FROST`. The page goes on cold test: a banner strikes across
+  the top reading `Cold test // RSW circuit // Setpoint -25 C // Recording`,
+  registration marks land in the corners, the glass frosts over, ice grains
+  drift down, and a probe reads out `RSW TANK // PROBE`,
   falling from deck temperature to the &minus;25&nbsp;&deg;C an RSW tank or
   blast freezer actually runs at — blinking `Cooling` on the way down, then
   settling to `Holding`. It thaws by itself after **11 seconds**, or type

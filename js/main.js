@@ -119,18 +119,6 @@
   var bar = doc.querySelector(".progress");
   var heroImg = doc.querySelector(".hero-media img");
 
-  /* the hero plant readout: scrolling the hero pulls the plant down */
-  var plant = doc.querySelector(".plant");
-  var plantT = plant && plant.querySelector(".plant-t");
-  var plantState = plant && plant.querySelector(".plant-state");
-  var trace = plant && plant.querySelector(".pc-trace");
-  var traceLen = 0;
-  if (trace && trace.getTotalLength) {
-    traceLen = trace.getTotalLength();
-    trace.style.setProperty("--len", traceLen);
-    trace.style.setProperty("--off", traceLen);
-  }
-  var AMBIENT = 18, SETPOINT = -25;
 
   function scrollFxFrame() {
     ticking = false;
@@ -139,19 +127,6 @@
     if (bar) {
       var max = d.scrollHeight - d.clientHeight;
       bar.style.setProperty("--p", max > 0 ? (window.scrollY / max).toFixed(4) : "0");
-    }
-
-    if (plant) {
-      var hero = doc.querySelector(".hero");
-      var span = hero ? hero.offsetHeight * 0.8 : d.clientHeight;
-      var prog = Math.max(0, Math.min(1, window.scrollY / span));
-      var temp = Math.round(AMBIENT + (SETPOINT - AMBIENT) * prog);
-      plantT.textContent = (temp > 0 ? "+" : "") + temp;
-      plant.classList.toggle("is-cold", temp <= 0);
-      plantState.textContent = prog >= 0.995 ? "At setpoint" : "Cooling";
-      if (trace) trace.style.setProperty("--off", (traceLen * (1 - prog)).toFixed(1));
-      /* let it go once the hero is fully behind you */
-      plant.classList.toggle("is-gone", hero && window.scrollY > hero.offsetHeight * 0.98);
     }
 
     /* the hero photograph drifts at a fraction of the scroll rate, and only
@@ -372,6 +347,18 @@
     var wrap = doc.createElement("div");
     wrap.id = "frostIce";
     wrap.setAttribute("aria-hidden", "true");
+
+    /* A test banner across the top, so the mode announces itself. Without it
+       the cold read as "nothing happened" — the earlier ferns were doing all
+       the signalling, and cutting them left the effect invisible. */
+    var banner = doc.createElement("div");
+    banner.className = "cold-bar";
+    banner.innerHTML =
+      '<span>Cold test</span><span class="cb-sep">//</span>' +
+      '<span>RSW circuit</span><span class="cb-sep">//</span>' +
+      '<span>Setpoint &minus;25 &deg;C</span><span class="cb-sep">//</span>' +
+      '<span class="cb-live">Recording</span>';
+    wrap.appendChild(banner);
 
     /* registration marks at the corners — a print convention, not a
        snowflake. This is a plant under test, not a Christmas card. */

@@ -1575,10 +1575,10 @@ html.is-frost::before {
   background-image: var(--frost-tex);
   background-size: 320px 320px;
   /* held to the edges, so the middle of the page stays readable */
-  mask-image: radial-gradient(120% 105% at 50% 50%, transparent 22%, #000 92%);
-  -webkit-mask-image: radial-gradient(120% 105% at 50% 50%, transparent 22%, #000 92%);
+  mask-image: radial-gradient(120% 105% at 50% 50%, transparent 12%, #000 78%);
+  -webkit-mask-image: radial-gradient(120% 105% at 50% 50%, transparent 12%, #000 78%);
   opacity: 0;
-  animation: frost-in 2.2s var(--ease) forwards;
+  animation: frost-in 1.6s var(--ease) forwards;
   mix-blend-mode: screen;
 }
 html.is-frost::after {
@@ -1589,8 +1589,8 @@ html.is-frost::after {
   pointer-events: none;
   background:
     radial-gradient(120% 105% at 50% 50%,
-      rgba(150, 195, 240, 0.07) 0%, rgba(150, 195, 240, 0.10) 38%,
-      rgba(186, 219, 255, 0.40) 100%);
+      rgba(150, 195, 240, 0.10) 0%, rgba(158, 201, 255, 0.20) 34%,
+      rgba(196, 226, 255, 0.62) 100%);
   opacity: 0;
   animation: frost-in 2.2s var(--ease) forwards;
 }
@@ -1607,11 +1607,46 @@ html.is-frost::after {
 #frostIce.is-out { animation: ice-out 1s var(--ease) forwards; }
 @keyframes ice-out { to { opacity: 0; } }
 
+/* the test banner — the mode has to announce itself */
+.cold-bar {
+  position: absolute;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 9px 16px;
+  background: rgba(7, 8, 36, 0.9);
+  border-block: 1px solid rgba(178, 214, 255, 0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #cfe6ff;
+  transform: translateY(-100%);
+  animation: bar-in 0.55s var(--ease) 0.1s forwards;
+}
+@keyframes bar-in { to { transform: none; } }
+.cb-sep { color: rgba(207, 230, 255, 0.35); }
+.cb-live { color: #9ec9ff; }
+.cb-live::before {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  margin-right: 7px;
+  background: #9ec9ff;
+  vertical-align: middle;
+  animation: cb-blink 1.2s steps(2, end) infinite;
+}
+@keyframes cb-blink { 50% { opacity: 0.2; } }
+
 /* registration marks — the corner crosses on a technical print */
 .reg {
   position: absolute;
-  width: 34px;
-  height: 34px;
+  width: 46px;
+  height: 46px;
   opacity: 0;
   animation: reg-in 0.7s var(--ease) forwards;
 }
@@ -1620,10 +1655,10 @@ html.is-frost::after {
   position: absolute;
   background: rgba(200, 230, 255, 0.75);
 }
-.reg::before { left: 0; top: 16px; width: 34px; height: 1px; }
-.reg::after  { top: 0; left: 16px; width: 1px; height: 34px; }
-.reg-tl { top: 26px; left: 26px; }
-.reg-tr { top: 26px; right: 26px; animation-delay: 0.1s; }
+.reg::before { left: 0; top: 22px; width: 46px; height: 1px; }
+.reg::after  { top: 0; left: 22px; width: 1px; height: 46px; }
+.reg-tl { top: 118px; left: 26px; }
+.reg-tr { top: 118px; right: 26px; animation-delay: 0.1s; }
 .reg-bl { bottom: 26px; left: 26px; animation-delay: 0.2s; }
 .reg-br { bottom: 26px; right: 26px; animation-delay: 0.3s; }
 @keyframes reg-in { to { opacity: 1; } }
@@ -1696,74 +1731,10 @@ html.is-frost::after {
   html.is-frost::before, html.is-frost::after { animation: none; opacity: 1; }
   #frostProbe { animation: none; }
   .reg { animation: none; opacity: 1; }
+  .cold-bar { animation: none; transform: none; }
+  .cb-live::before { animation: none; }
   .flake { display: none; }
   #frostProbe:not(.is-held) .fp-state { animation: none; }
 }
 
-/* ============================================================
-   HERO — PLANT PULL-DOWN
-   The company builds automatic control systems for refrigeration
-   compressors; this is that, as page furniture. Scrolling the hero
-   pulls the temperature down from deck ambient to setpoint, and the
-   trace draws the real curve a plant makes — an exponential decay,
-   not a decorative swoosh.
-   ============================================================ */
-/* Pinned, not parked in the hero. Absolutely positioned inside the hero it
-   scrolled up under the fixed header and collided with the nav — and it is
-   the one element that exists to respond to scroll, so it has to still be on
-   screen while the scrolling happens. It sits above where the frost probe
-   appears, so the two never stack. */
-.plant {
-  position: fixed;
-  right: var(--pad);
-  bottom: clamp(90px, 12vh, 150px);
-  z-index: 90;
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
-  width: 216px;
-  padding: 16px 18px 14px;
-  background: rgba(7, 8, 36, 0.58);
-  border: 1px solid var(--line-2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-.plant-head, .plant-foot {
-  font-size: 9.5px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--grey-400);
-}
-.plant-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }
-.plant-read { display: flex; align-items: baseline; gap: 4px; margin-top: 6px; }
-.plant-t {
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--white);
-  font-variant-numeric: tabular-nums;
-  transition: color 0.6s var(--ease);
-}
-.plant-u { font-size: 12px; letter-spacing: 0.14em; color: var(--grey-300); }
-.plant.is-cold .plant-t { color: #a9d4ff; }
-.plant.is-cold .plant-state { color: #a9d4ff; }
 
-.plant-curve { display: block; width: 100%; height: 46px; margin-top: 10px; overflow: visible; }
-.pc-grid { stroke: rgba(255, 255, 255, 0.09); stroke-width: 1; }
-.pc-trace {
-  fill: none;
-  stroke: #9ec9ff;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  /* the trace is revealed by scroll, not by a timer — JS writes the offset */
-  stroke-dasharray: var(--len, 200);
-  stroke-dashoffset: var(--off, 200);
-}
-
-/* released once the hero is behind you — it is a hero instrument, not a
-   permanent HUD */
-.plant.is-gone { opacity: 0; transform: translateY(14px); pointer-events: none; }
-
-/* Below this the hero is text-first and the panel would crowd it; the page
-   loses a decoration, not information — it is aria-hidden either way. */
-@media (max-width: 1100px) { .plant { display: none; } }
