@@ -1215,25 +1215,27 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
    the technical drawing it was laid out on. Entirely opt-in, entirely
    decorative, and it changes nothing the page says.
    ============================================================ */
-.shop-drawing body {
-  /* the construction grid, and the monogram's own 24.4deg diagonal */
+/* The grid goes on the OVERLAY, not on <body>. Every section paints its own
+   background, so a grid on body sits underneath all of them — the hero hid it
+   entirely and the mode looked like it had not fired. */
+.shop-drawing #shopLayer {
   background-image:
     repeating-linear-gradient(
       calc(90deg - var(--slant)),
-      rgba(45, 53, 190, 0.16) 0 1px, transparent 1px 120px),
-    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      rgba(125, 140, 255, 0.30) 0 1px, transparent 1px 120px),
+    linear-gradient(rgba(255,255,255,0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.11) 1px, transparent 1px);
   background-size: auto, 30px 30px, 30px 30px;
 }
 
 /* every section gets a hairline box, like a drawing frame */
 .shop-drawing main > section {
-  outline: 1px dashed rgba(255, 255, 255, 0.22);
+  outline: 1px dashed rgba(255, 255, 255, 0.5);
   outline-offset: -1px;
 }
 
 /* the real laid-out boxes, called out */
-.shop-drawing .container > * { outline: 1px dotted rgba(45, 53, 190, 0.55); }
+.shop-drawing .container > * { outline: 1px dotted rgba(125, 140, 255, 0.6); }
 
 #shopLayer {
   position: absolute;
@@ -1278,10 +1280,11 @@ html:not(.shop-drawing) #shopLayer { display: none; }
   z-index: 120;
   background: var(--brand);
   color: var(--white);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0.22em;
-  padding: 8px 16px;
-  border: 1px solid var(--line-2);
+  padding: 12px 22px;
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   pointer-events: none;
 }

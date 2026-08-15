@@ -220,18 +220,26 @@
 
   function drawingMode(on) {
     doc.documentElement.classList.toggle("shop-drawing", on);
+    var old = doc.getElementById("shopLayer");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
     if (on) annotate();
   }
 
   function annotate() {
-    if (doc.getElementById("shopLayer")) return;
     var layer = doc.createElement("div");
     layer.id = "shopLayer";
     layer.setAttribute("aria-hidden", "true");   /* decoration, not content */
 
+    /* An absolutely positioned box with no positioned ancestor is sized
+       against the initial containing block — the VIEWPORT, not the document.
+       inset:0 alone therefore drew the grid over the first screen only, so
+       the height is set explicitly. */
+    layer.style.height = doc.documentElement.scrollHeight + "px";
+
     /* Dimension every section against the real laid-out box, so the numbers
        are measured rather than invented. */
-    all("main > section").forEach(function (sec, i) {
+    var sections = all("main > section");
+    sections.forEach(function (sec, i) {
       var r = sec.getBoundingClientRect();
       var tag = doc.createElement("span");
       tag.className = "shop-dim";
@@ -245,12 +253,21 @@
       idx.className = "shop-idx";
       idx.style.top = (r.top + window.scrollY + 10) + "px";
       idx.textContent = ("0" + (i + 1)).slice(-2) + " // " +
-                        ("0" + all("main > section").length).slice(-2);
+                        ("0" + sections.length).slice(-2);
       layer.appendChild(idx);
     });
 
     doc.body.appendChild(layer);
   }
+
+  /* the measurements and the layer height are only true for one viewport */
+  on(window, "resize", function () {
+    if (doc.documentElement.classList.contains("shop-drawing")) {
+      var old = doc.getElementById("shopLayer");
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+      annotate();
+    }
+  });
 
   on(doc, "keydown", function (e) {
     /* never hijack typing in a field, and never fight a modifier shortcut */
