@@ -568,7 +568,7 @@ def home():
         <div class="partner-grid reveal">
           <div class="partner">
             <p class="partner-role">Authorised partner</p>
-            <p class="partner-name">BITZER</p>
+            <h3 class="partner-logo"><img src="{bitzer}" alt="BITZER" width="454" height="163"></h3>
             <p>One of the largest independent manufacturers of refrigeration
             compressors in the world. As an authorised partner we supply and service
             BITZER equipment directly, rather than through an intermediary — which
@@ -576,7 +576,7 @@ def home():
           </div>
           <div class="partner">
             <p class="partner-role">Marine line representative</p>
-            <p class="partner-name">DANFOSS</p>
+            <h3 class="partner-logo"><img src="{danfoss}" alt="Danfoss" width="126" height="55"></h3>
             <p>We represent the Danfoss marine line: controls, valves and components
             for refrigeration and engine room systems, specified and supplied for
             vessels rather than adapted from shore equipment.</p>
@@ -681,6 +681,8 @@ def home():
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
                 cards=cards, logos=logos,
+                bitzer=u("/assets/partners/bitzer.webp"),
+                danfoss=u("/assets/partners/danfoss.svg"),
                 hero_img=u("/assets/photos/hero-welding.webp"),
                 plant_img=u("/assets/photos/plant-room.webp"),
                 refrig=u("/services/refrigeration-systems/"),
@@ -899,7 +901,7 @@ def partners():
         <div class="partner-grid reveal">
           <div class="partner">
             <p class="partner-role">Authorised partner</p>
-            <h3 class="partner-name">BITZER</h3>
+            <h3 class="partner-logo"><img src="{bitzer}" alt="BITZER" width="454" height="163"></h3>
             <p>BITZER is one of the largest independent manufacturers of refrigeration
             compressors in the world. Being an authorised partner means we supply and
             service the equipment directly rather than through an intermediary, which
@@ -907,7 +909,7 @@ def partners():
           </div>
           <div class="partner">
             <p class="partner-role">Marine line representative</p>
-            <h3 class="partner-name">DANFOSS</h3>
+            <h3 class="partner-logo"><img src="{danfoss}" alt="Danfoss" width="126" height="55"></h3>
             <p>We represent the Danfoss marine line: controls, valves and components
             for refrigeration and engine room systems, specified and supplied for
             vessels rather than adapted from shore equipment.</p>
@@ -926,6 +928,8 @@ def partners():
       </div>
     </section>
 {cta}""".format(logos=logos,
+                bitzer=u("/assets/partners/bitzer.webp"),
+                danfoss=u("/assets/partners/danfoss.svg"),
                 cta=cta("Work with us",
                         "We take one-off jobs and regular contracted service work "
                         "alike."))

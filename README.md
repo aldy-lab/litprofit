@@ -129,6 +129,46 @@ still needed.**
   narrowed the lead inside it — the heading and the lead now get their own
   `max-width`, with `text-wrap: balance` evening out the last line.
 
+## Hidden features
+
+Nothing here is announced, required, or changes what the page says. All of it
+is keyboard-safe and suppressed under `prefers-reduced-motion`.
+
+- **A console signature.** Open devtools and the `//` device is drawn in ASCII,
+  raked at the monogram's angle, with the company line and who built it.
+- **Shop drawing mode.** Type `RIVET` anywhere on the page — or add `?draw` to
+  the URL to demo it — and the site becomes the technical drawing it was laid
+  out on: the construction grid, the monogram's 24.4° angle, dashed frames on
+  every section, `02 // 07` indices, and dimensions *measured off the real
+  laid-out boxes* rather than written by hand. Type `RIVET` again to exit.
+  The brand book calls the pattern an expression of "precision and engineering
+  character"; this takes that literally.
+
+The key handler ignores keystrokes inside inputs, textareas and selects, and
+bails on any modifier combination, so it can never hijack someone filling in
+the enquiry form. That is verified, not assumed.
+
+## The brand angle
+
+The monogram is built on one diagonal. Measured off the supplied artwork, its
+long slash runs **24.41°** from vertical and its short slash **25.03°** — they
+agree, so it is a real constant of the mark rather than a guess. `--slant` is
+that value, and it drives the eyebrow tick, the slice cut off each card index
+badge, and the light sweep that crosses a card on hover. Using the mark's own
+geometry is what makes the styling read as LITPROFIT's rather than as generic
+diagonal decoration.
+
+## Partner logos
+
+`assets/partners/` holds BITZER's and Danfoss's own marks, taken from their
+official sites and shown on white plates because both are full-colour brand
+assets — recolouring another company's trademark is not ours to do.
+
+Using them to state a factual partnership is ordinary nominative use, and the
+partnership is real. **Both companies publish partner logo kits and usage
+rules, though**, so it is worth having whoever manages each relationship
+confirm these are the approved marks in the approved treatment before launch.
+
 ## What is provisional
 
 - **The typeface.** Montserrat is a stand-in, including for the name beside the

@@ -78,6 +78,18 @@
      every context. */
   --rivet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='11.7' y='11.7' width='9' height='9' rx='1.8' fill='%23000000' fill-opacity='0.55'/%3E%3Crect x='10.5' y='10.5' width='9' height='9' rx='1.8' fill='%23ffffff'/%3E%3C/svg%3E");
   --rivet-pitch: 30px;
+
+  /* ---------- the brand angle ----------
+     The monogram is built on a single diagonal. Measured off the artwork,
+     its long slash runs 24.41deg from vertical and the short one 25.03deg —
+     they agree, so this is a real constant of the mark rather than a guess.
+     Every slanted element on the site uses it, which is what makes the
+     geometry read as LITPROFIT's rather than as generic diagonal styling. */
+  --slant: 24.4deg;
+
+  /* The monogram as a data URI, so the watermark does not depend on BASE and
+     cannot 404. White-filled; dialled down by whatever uses it. */
+  --mark-img: url("data:image/svg+xml,<svg width="272" height="200" viewBox="0 0 272 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LITPROFIT"> <path d="M0.577201 199.507C0.258422 199.507 0 199.249 0 198.93V24.7151C0 24.3963 0.258416 24.1379 0.577195 24.1379H130.854L141.971 0.332973C142.066 0.12983 142.269 0 142.494 0H196.616C197.034 0 197.314 0.430806 197.143 0.812608L186.724 24.1379H222.381C249.863 24.1379 267.882 53.0312 255.904 77.8935L232.232 127.028C225.681 140.625 211.974 149.261 196.945 149.261H156.752C156.33 149.261 156.051 148.824 156.228 148.441L178.728 99.8421C178.822 99.638 179.027 99.5074 179.252 99.5074H186.22C190.975 99.5074 195.263 96.6287 197.085 92.213L203.994 75.4642C207.205 67.6793 201.513 59.1133 193.129 59.1133H86.6278C86.4013 59.1133 86.1957 59.2457 86.1022 59.452L22.6978 199.169C22.6042 199.375 22.3987 199.507 22.1722 199.507H0.577201Z" fill="#ffffff"/> <path d="M159.339 79.4005C159.51 79.0185 159.231 78.5866 158.812 78.5866H104.698C104.471 78.5866 104.265 78.7203 104.172 78.928L50.353 199.187C50.1821 199.569 50.4615 200 50.8799 200H271.423C271.742 200 272 199.742 272 199.423V125.208C272 124.889 271.742 124.631 271.423 124.631H258.186C257.946 124.631 257.729 124.785 257.644 125.009C242.906 163.617 215.566 174.384 193.095 174.384H117.534C117.115 174.384 116.836 173.952 117.007 173.57L159.339 79.4005Z" fill="#ffffff"/> </svg>");
 }
 
 /* ============================================================
@@ -217,6 +229,16 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   background: linear-gradient(90deg, var(--line), transparent);
   max-width: 180px;
 }
+/* a slanted tick leading it, cut at the monogram's own angle */
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: 3px;
+  height: 13px;
+  background: var(--white);
+  transform: skewX(calc(var(--slant) * -1));
+}
+.eyebrow-plain::before { display: none; }
 .eyebrow-plain { display: block; }
 .eyebrow-plain::after { display: none; }
 
@@ -562,6 +584,25 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   line-height: 1;
   color: var(--white);
 }
+
+/* ---------- partner logo plate ----------
+   A heading whose content IS the logo, so the alt text is the heading text
+   and the name is not announced twice. White plate because both marks are
+   full-colour brand assets — BITZER's green diamond, Danfoss's red badge —
+   and recolouring another company's trademark is not ours to do. */
+.partner-logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 22px 26px;
+  background: var(--white);
+  border-radius: 2px;
+  align-self: flex-start;
+  max-width: 240px;
+  width: 100%;
+}
+.partner-logo img { max-height: 54px; width: auto; max-width: 100%; }
 .partner .partner-role {
   display: inline-flex;
   align-self: flex-start;
@@ -642,6 +683,26 @@ a.card:hover {
   border-color: var(--line-2);
   transform: translateY(-5px);
 }
+/* A light sweep across the card, skewed to the monogram's diagonal so the
+   movement traces the mark's own geometry. Purely decorative, so it is
+   hidden from assistive tech by being a pseudo-element, and suppressed
+   under prefers-reduced-motion by the global rule at the top of the file. */
+a.card { position: relative; }
+a.card::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -60%;
+  width: 34%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent);
+  transform: skewX(calc(var(--slant) * -1)) translateX(0);
+  transition: transform 0.85s var(--ease), opacity 0.4s var(--ease);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+a.card:hover::after { opacity: 1; transform: skewX(calc(var(--slant) * -1)) translateX(460%); }
 
 .card-media {
   position: relative;
@@ -682,12 +743,16 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 }
 .card-num {
   position: absolute;
-  left: 20px; top: 16px;
+  left: 0; top: 14px;
   z-index: 1;
+  padding: 5px 14px 5px 18px;
+  background: var(--brand);
   font-size: var(--label);
   font-weight: 600;
   letter-spacing: 0.18em;
   color: var(--white);
+  /* the trailing edge is cut on the monogram's diagonal */
+  clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
 }
 
 .card-body { display: flex; flex-direction: column; flex: 1; padding: 26px 26px 24px; }
@@ -912,7 +977,26 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
    CTA BAND
    ============================================================ */
 .cta { background: var(--brand); padding-block: clamp(58px, 8vw, 118px); position: relative; overflow: hidden; }
+/* The mark itself, oversized and barely there, bleeding off the right edge —
+   the kind of thing you only notice on the second look.
+
+   On ::after, NOT ::before: .cta carries .seam-top, which owns ::before. Put
+   this on ::before and it silently replaces the rivet seam, same specificity,
+   later in the file. .cta has no .seam-bottom, so ::after is free. */
+.cta::after {
+  content: "";
+  position: absolute;
+  right: -6%;
+  top: 50%;
+  width: min(46vw, 620px);
+  aspect-ratio: 272 / 200;
+  transform: translateY(-50%);
+  background: var(--mark-img) right center / contain no-repeat;
+  opacity: 0.17;
+  pointer-events: none;
+}
 .cta > * { position: relative; z-index: 1; }
+@media (max-width: 780px) { .cta::after { display: none; } }
 .cta h2 { margin-bottom: 18px; }
 .cta p { color: rgba(255, 255, 255, 0.8); font-size: var(--text-xl); max-width: 54ch; }
 .cta .btn-solid { background: var(--white); color: var(--navy-900); }
@@ -1122,4 +1206,82 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   .site-header, .burger, .cta, .form, .hero-media { display: none; }
   body { background: #fff; color: #000; }
   a { text-decoration: underline; }
+}
+
+/* ============================================================
+   SHOP DRAWING MODE  —  type RIVET, or add ?draw to the URL
+   The brand book calls the pattern an expression of "precision and
+   engineering character". This takes that literally: the page becomes
+   the technical drawing it was laid out on. Entirely opt-in, entirely
+   decorative, and it changes nothing the page says.
+   ============================================================ */
+.shop-drawing body {
+  /* the construction grid, and the monogram's own 24.4deg diagonal */
+  background-image:
+    repeating-linear-gradient(
+      calc(90deg - var(--slant)),
+      rgba(45, 53, 190, 0.16) 0 1px, transparent 1px 120px),
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: auto, 30px 30px, 30px 30px;
+}
+
+/* every section gets a hairline box, like a drawing frame */
+.shop-drawing main > section {
+  outline: 1px dashed rgba(255, 255, 255, 0.22);
+  outline-offset: -1px;
+}
+
+/* the real laid-out boxes, called out */
+.shop-drawing .container > * { outline: 1px dotted rgba(45, 53, 190, 0.55); }
+
+#shopLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+}
+html:not(.shop-drawing) #shopLayer { display: none; }
+
+.shop-dim, .shop-idx {
+  position: absolute;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--white);
+  white-space: nowrap;
+}
+/* dimension text runs up the left edge, the way it does on a real drawing */
+.shop-dim {
+  left: 6px;
+  writing-mode: vertical-rl;
+  display: grid;
+  place-items: center;
+  border-left: 1px solid rgba(255,255,255,0.4);
+  padding-left: 4px;
+  opacity: 0.75;
+}
+.shop-idx {
+  right: 8px;
+  background: var(--brand);
+  padding: 3px 8px;
+  opacity: 0.9;
+}
+
+/* the mode announces itself, once, in the corner */
+.shop-drawing::after {
+  content: "SHOP DRAWING // RIVET TO EXIT";
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 120;
+  background: var(--brand);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  padding: 8px 16px;
+  border: 1px solid var(--line-2);
+  pointer-events: none;
 }

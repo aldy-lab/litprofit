@@ -180,6 +180,94 @@
     });
   }
 
+
+  /* ============================================================
+     HIDDEN — things that reward a second look.
+     None of it is announced, none of it is required, and none of it
+     changes what the page says. All of it is keyboard- and
+     reduced-motion-safe, and nothing here runs for a visitor who never
+     goes looking.
+     ============================================================ */
+
+  /* ---------- 1. the mark, in the console ----------
+     Drawn from the monogram's own geometry. Developers, competitors and
+     the occasional curious client open devtools; this is who built it. */
+  try {
+    /* The // device, raked at the monogram's own angle — a block letter
+       would have said nothing particular about this company. */
+    var mark = [
+      "",
+      "     ╱╱   ╱╱",
+      "    ╱╱   ╱╱     L I T P R O F I T",
+      "   ╱╱   ╱╱      Ship repair and maintenance, worldwide",
+      "  ╱╱   ╱╱       Klaipeda, Lithuania // since 2010",
+      " ╱╱   ╱╱",
+      "                Site by ALDY",
+      "                Type RIVET for shop drawing mode",
+      ""
+    ].join("\n");
+    console.log("%c" + mark, "color:#8d90a6;font-family:monospace;line-height:1.35");
+  } catch (e) { /* console is not guaranteed to exist */ }
+
+  /* ---------- 2. shop drawing mode ----------
+     Type RIVET, or add ?draw to the URL, and the page turns into the
+     technical drawing it was laid out on: the brand grid, the monogram's
+     24.4-degree construction angle, and dimensions on the real elements.
+     The brand book calls the pattern an expression of "precision and
+     engineering character" — this is that, taken literally. */
+  var SEQ = "RIVET";
+  var typed = "";
+
+  function drawingMode(on) {
+    doc.documentElement.classList.toggle("shop-drawing", on);
+    if (on) annotate();
+  }
+
+  function annotate() {
+    if (doc.getElementById("shopLayer")) return;
+    var layer = doc.createElement("div");
+    layer.id = "shopLayer";
+    layer.setAttribute("aria-hidden", "true");   /* decoration, not content */
+
+    /* Dimension every section against the real laid-out box, so the numbers
+       are measured rather than invented. */
+    all("main > section").forEach(function (sec, i) {
+      var r = sec.getBoundingClientRect();
+      var tag = doc.createElement("span");
+      tag.className = "shop-dim";
+      tag.style.top = (r.top + window.scrollY) + "px";
+      tag.style.height = r.height + "px";
+      tag.textContent = String(Math.round(r.height)) + " \u00d7 " +
+                        String(Math.round(r.width));
+      layer.appendChild(tag);
+
+      var idx = doc.createElement("span");
+      idx.className = "shop-idx";
+      idx.style.top = (r.top + window.scrollY + 10) + "px";
+      idx.textContent = ("0" + (i + 1)).slice(-2) + " // " +
+                        ("0" + all("main > section").length).slice(-2);
+      layer.appendChild(idx);
+    });
+
+    doc.body.appendChild(layer);
+  }
+
+  on(doc, "keydown", function (e) {
+    /* never hijack typing in a field, and never fight a modifier shortcut */
+    var t = e.target;
+    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!e.key || e.key.length !== 1) return;
+
+    typed = (typed + e.key.toUpperCase()).slice(-SEQ.length);
+    if (typed === SEQ) {
+      drawingMode(!doc.documentElement.classList.contains("shop-drawing"));
+      typed = "";
+    }
+  });
+
+  if (/[?&]draw\b/.test(window.location.search)) drawingMode(true);
+
   /* ---------- analytics (opt-in, cookieless) ---------- */
   if (ANALYTICS_DOMAIN) {
     var s = doc.createElement("script");
