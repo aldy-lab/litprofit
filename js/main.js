@@ -181,20 +181,20 @@
   }
 
 
-  /* ---------- the refrigeration cycle ----------
-     Hover or focus a station and the matching box lights up in the schematic.
+  /* ---------- the general arrangement drawing ----------
+     Hover or focus a part and it lights up in the drawing, the rest fading back.
      aria-expanded carries the open/closed state, so the control reports what
      it does rather than only looking like it. */
-  var cycle = doc.getElementById("cycle");
-  if (cycle) {
-    var stages = all(".stage", cycle);
+  var drawing = doc.getElementById("drawing");
+  if (drawing) {
+    var stages = all(".part", drawing);
 
     var select = function (btn) {
       stages.forEach(function (b) {
         b.setAttribute("aria-expanded", b === btn ? "true" : "false");
       });
-      if (btn) cycle.setAttribute("data-active", btn.getAttribute("data-stn"));
-      else cycle.removeAttribute("data-active");
+      if (btn) drawing.setAttribute("data-active", btn.getAttribute("data-prt"));
+      else drawing.removeAttribute("data-active");
     };
 
     stages.forEach(function (btn) {
@@ -207,9 +207,9 @@
       });
     });
 
-    on(cycle, "mouseleave", function () {
+    on(drawing, "mouseleave", function () {
       /* do not yank the panel away from someone reading it via the keyboard */
-      if (!cycle.contains(doc.activeElement)) select(null);
+      if (!drawing.contains(doc.activeElement)) select(null);
     });
   }
 

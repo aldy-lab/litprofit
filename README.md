@@ -129,35 +129,39 @@ still needed.**
   narrowed the lead inside it — the heading and the lead now get their own
   `max-width`, with `text-wrap: balance` evening out the last line.
 
-## The refrigeration cycle
+## The general arrangement drawing
 
-The homepage carries an interactive schematic of a vapour-compression loop —
-compressor, condenser, expansion valve, evaporator — because refrigeration is
-what the company actually sells and nothing on the old site showed it.
+Homepage section `04 // General arrangement`, anchored at `#drawing`. A side
+elevation of a skid-mounted marine screw compressor package — the machine this
+company overhauls more than any other — drawn to workshop conventions: hairline
+geometry, a dash-dot shaft centre line, ticked dimension lines whose labels
+interrupt the line rather than sit on it, a hatched skid, numbered balloons on
+leaders, and a title block.
 
-A 3D model was the alternative and was rejected: it needs a WebGL library
-vendored into a site whose whole premise is no dependencies and no third-party
-requests, plus a licensed compressor model nobody has. A drawing is lighter,
-exact, and can say things a render cannot.
+Take a part and the rest of the package fades back while that assembly lights
+up in brand navy with its balloon.
 
-The copy names what fails at each station — scaled condenser tubes showing up
-as rising head pressure, superheat set at the expansion valve exposing a plant
-that was never properly commissioned. That is the register a chief engineer
-reads in, and it is the company's own field.
+**A 3D model was considered and rejected.** It needs a WebGL library vendored
+into a site whose premise is no dependencies and no third-party requests, plus
+a licensed compressor model nobody has. Hand-drawn SVG is lighter, exact, and
+recolours with the palette for free.
+
+**An earlier version was a four-box refrigeration-cycle flowchart.** It was
+accurate but read as a teaching aid rather than as design, so it was replaced
+rather than tuned.
 
 Two implementation points:
 
-- **The SVG is `aria-hidden` and the four buttons carry the content.** A screen
-  reader gets an ordered, readable description of the cycle rather than a soup
-  of unlabelled shapes, and the section is fully operable from the keyboard.
-  Hover and focus light the same station; `aria-expanded` reports state.
-- **The `0fr` → `1fr` accordion needs an inner element with `min-height: 0`.**
-  Without it the grid row keeps its min-content height and nothing collapses —
-  which is what happened on the first build, leaving every stage full-size.
+- **The SVG is `aria-hidden` and the five buttons carry the content.** A screen
+  reader gets an ordered description of the package instead of unlabelled
+  shapes, and the section is fully operable from the keyboard. Hover and focus
+  light the same part; `aria-expanded` reports state.
+- **The `0fr` → `1fr` accordion needs an inner element with `min-height: 0`**,
+  or the grid row keeps its min-content height and nothing collapses.
 
-Temperature coding — warm on the high-pressure leg, cool on the low — is the
-one place a colour outside the brand palette earns its keep. It is what makes
-a schematic legible at a glance.
+The dimension figures (4250 mm, 2100 mm) are plausible for a package of this
+type but are **illustrative, not a real machine's**. Swap them for a genuine
+unit's if the drawing is ever used as anything but decoration.
 
 ## Hidden features
 

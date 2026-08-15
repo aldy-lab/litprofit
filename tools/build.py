@@ -683,7 +683,7 @@ def home():
       </div>
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
-                cards=cards, logos=logos, cycle=cycle_diagram(),
+                cards=cards, logos=logos, cycle=compressor_drawing(),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
                 hero_img=u("/assets/photos/hero-welding.webp"),
@@ -700,109 +700,187 @@ def home():
 
 
 # ============================================================
-# THE REFRIGERATION CYCLE
-# A vapour-compression loop, drawn to the standard four stations:
-# compressor -> condenser -> expansion valve -> evaporator -> back.
-# The copy is deliberately specific about what fails at each station,
-# because that is what a chief engineer reading this actually wants to
-# know, and it is the company's own field.
+# GENERAL ARRANGEMENT DRAWING
+# A side elevation of a skid-mounted marine screw compressor package —
+# the machine this company overhauls more than any other. Drawn to the
+# conventions of a real workshop drawing: centre lines, dimension lines
+# with ticks, hatched skid, leader lines to numbered balloons, and a
+# title block. The point is the drawing; the labels come second.
 # ============================================================
-STAGES = [
-    dict(n="01", key="compressor", title="Compressor",
-         side="Low pressure in, high pressure out",
-         text="Draws low-pressure vapour off the evaporator and compresses it to a "
-              "hot, high-pressure gas. This is the station we overhaul most often — "
-              "SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, HALLSCREW, GRASSO and MYCOM."),
-    dict(n="02", key="condenser", title="Condenser",
-         side="Heat goes overboard",
-         text="Seawater carries the heat away and the gas condenses to a high-pressure "
-              "liquid. Fouled or scaled tubes show up here first, as head pressure "
-              "climbing and capacity falling off."),
-    dict(n="03", key="expansion", title="Expansion valve",
-         side="Pressure drops",
-         text="Throttles the liquid, so pressure and temperature fall sharply. "
-              "Superheat is set at this valve, and a plant that was never properly "
-              "commissioned usually gives itself away right here."),
-    dict(n="04", key="evaporator", title="Evaporator",
-         side="Heat comes out of the cargo",
-         text="In the fish hold, RSW tank or cold store the refrigerant boils, pulling "
-              "heat out of the cargo, and returns to the compressor as vapour. "
-              "The loop closes and starts again."),
+PARTS = [
+    dict(n="01", key="motor", title="Electric motor",
+         text="Drives the compressor through the coupling. Bearings, insulation "
+              "resistance and alignment are checked before anything is reassembled."),
+    dict(n="02", key="coupling", title="Coupling",
+         text="Where misalignment turns into vibration and a wrecked bearing. "
+              "Set cold, then checked again once the package has run up to temperature."),
+    dict(n="03", key="screw", title="Screw compressor",
+         text="Rotors, slide valve, shaft seal and bearings. This is the overhaul "
+              "itself &mdash; SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM."),
+    dict(n="04", key="separator", title="Oil separator",
+         text="Takes the oil back out of the discharge gas and returns it. Carry-over "
+              "here shows up much later as poor heat transfer in the condenser."),
+    dict(n="05", key="lines", title="Suction &amp; discharge",
+         text="Refrigerant piping to class requirements, then pressure testing and "
+              "commissioning before the plant is handed over."),
 ]
 
 
-def cycle_diagram():
-    """The loop as an SVG schematic, plus the four stations as real buttons.
+def compressor_drawing():
+    def balloon(x, y, n, key, lx, ly):
+        """A numbered balloon with a leader line, drawing-office style."""
+        return ('      <g class="ball" data-prt="{k}">'
+                '<line x1="{x}" y1="{y}" x2="{lx}" y2="{ly}"/>'
+                '<circle cx="{x}" cy="{y}" r="15"/>'
+                '<text x="{x}" y="{ty}">{n}</text></g>').format(
+                    k=key, x=x, y=y, lx=lx, ly=ly, ty=y + 5, n=n)
 
-    The SVG is aria-hidden and the buttons carry the content: a screen reader
-    gets an ordered, readable description of the cycle instead of a soup of
-    unlabelled shapes, and the whole thing works from the keyboard."""
+    fins = "".join('<line x1="%d" y1="318" x2="%d" y2="432"/>' % (fx, fx)
+                   for fx in range(140, 305, 15))
+    hatch = "".join('<line x1="%d" y1="500" x2="%d" y2="512"/>' % (hx, hx - 12)
+                    for hx in range(82, 846, 16))
+    # bolt circles on the two flanges
+    sbolts = "".join('<circle cx="374" cy="%d" r="2.5"/>' % by for by in (346, 358, 370, 382))
+    dbolts = "".join('<circle cx="606" cy="%d" r="2.5"/>' % by for by in (406, 418, 430))
 
-    def station(x, y, n, label, key):
-        return """      <g class="stn" data-stn="{key}">
-        <rect x="{bx}" y="{by}" width="160" height="92" rx="2"/>
-        <text class="stn-n" x="{tx}" y="{ty1}">{n}</text>
-        <text class="stn-t" x="{tx}" y="{ty2}">{label}</text>
-      </g>""".format(key=key, bx=x - 80, by=y - 46, tx=x - 62,
-                     ty1=y - 12, ty2=y + 16, n=n, label=label.upper())
-
-    stations = "\n".join([
-        station(140, 460, "01", "Compressor", "compressor"),
-        station(140, 100, "02", "Condenser",  "condenser"),
-        station(620, 100, "03", "Expansion",  "expansion"),
-        station(620, 460, "04", "Evaporator", "evaporator"),
-    ])
-
-    buttons = "\n".join("""          <button type="button" class="stage" data-stn="{key}">
-            <span class="stage-n">{n}</span>
-            <span class="stage-body">
-              <span class="stage-title">{title}</span>
-              <span class="stage-side">{side}</span>
-              <span class="stage-text"><span>{text}</span></span>
+    buttons = "\n".join("""          <button type="button" class="part" data-prt="{key}">
+            <span class="part-n">{n}</span>
+            <span class="part-body">
+              <span class="part-title">{title}</span>
+              <span class="part-text"><span>{text}</span></span>
             </span>
-          </button>""".format(**st) for st in STAGES)
+          </button>""".format(**pt) for pt in PARTS)
 
     return """
-    <section class="section section-alt cycle-section seam-top">
+    <section class="section section-alt drawing-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>How it works</p>
-          <h2>A ship&rsquo;s refrigeration plant, in four stations</h2>
-          <p class="lead">Every system we overhaul is this loop, whatever the badge on
-          the compressor. Take a station to see what happens there &mdash; and what
-          tends to go wrong.</p>
+          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>General arrangement</p>
+          <h2>The machine we take apart most</h2>
+          <p class="lead">A skid-mounted marine screw compressor package, in side
+          elevation. Take a balloon to see what we do to that part.</p>
         </div>
 
-        <div class="cycle reveal" id="cycle">
-          <svg class="cycle-svg" viewBox="0 0 760 560" aria-hidden="true"
+        <div class="drawing reveal" id="drawing">
+          <svg class="ga" viewBox="0 0 900 660" aria-hidden="true"
                preserveAspectRatio="xMidYMid meet">
-            <!-- the pipe: casing first, refrigerant over it -->
-            <path class="pipe" d="M140 460 L140 100 L620 100 L620 460 Z"/>
-            <path class="flow flow-hot"  d="M140 460 L140 100 L620 100"/>
-            <path class="flow flow-cold" d="M620 100 L620 460 L140 460"/>
 
-            <!-- direction of travel -->
-            <g class="arrows">
-              <path d="M134 296 L140 282 L146 296 Z"/>
-              <path d="M374 94 L388 100 L374 106 Z"/>
-              <path d="M614 264 L620 278 L626 264 Z"/>
-              <path d="M386 454 L372 460 L386 466 Z"/>
+            <!-- shaft centre line, dash-dot, the way a drawing marks an axis -->
+            <line class="cl" x1="92" y1="375" x2="640" y2="375"/>
+
+            <!-- 01 motor -->
+            <g class="prt" data-prt="motor">
+              <rect class="body" x="122" y="305" width="196" height="140" rx="10"/>
+              <g class="thin">{fins}</g>
+              <rect class="body" x="196" y="278" width="56" height="27" rx="2"/>
+              <rect class="body" x="142" y="445" width="26" height="41"/>
+              <rect class="body" x="272" y="445" width="26" height="41"/>
             </g>
 
-            <!-- pressure legend, on the legs it belongs to -->
-            <text class="leg" x="158" y="292">HIGH PRESSURE</text>
-            <text class="leg leg-cold" x="602" y="292" text-anchor="end">LOW PRESSURE</text>
+            <!-- 02 coupling guard -->
+            <g class="prt" data-prt="coupling">
+              <rect class="body" x="318" y="336" width="62" height="78" rx="3"/>
+              <g class="thin"><line x1="334" y1="346" x2="334" y2="404"/>
+                <line x1="349" y1="346" x2="349" y2="404"/>
+                <line x1="364" y1="346" x2="364" y2="404"/></g>
+            </g>
 
-{stations}
+            <!-- 03 screw compressor -->
+            <g class="prt" data-prt="screw">
+              <rect class="body" x="380" y="318" width="222" height="128" rx="8"/>
+              <circle class="body" cx="404" cy="375" r="17"/>
+              <g class="thin"><circle cx="404" cy="375" r="7"/></g>
+              <rect class="body" x="400" y="446" width="26" height="40"/>
+              <rect class="body" x="556" y="446" width="26" height="40"/>
+              <!-- gauges -->
+              <g class="thin">
+                <line x1="446" y1="318" x2="446" y2="296"/>
+                <line x1="506" y1="318" x2="506" y2="296"/>
+              </g>
+              <circle class="body" cx="446" cy="284" r="13"/>
+              <circle class="body" cx="506" cy="284" r="13"/>
+              <g class="thin"><line x1="446" y1="284" x2="452" y2="276"/>
+                <line x1="506" y1="284" x2="500" y2="276"/></g>
+            </g>
+
+            <!-- 04 oil separator -->
+            <g class="prt" data-prt="separator">
+              <rect class="body" x="662" y="186" width="128" height="272" rx="30"/>
+              <rect class="body" x="712" y="162" width="28" height="24"/>
+              <g class="thin">
+                <line x1="662" y1="228" x2="790" y2="228"/>
+                <line x1="662" y1="416" x2="790" y2="416"/>
+                <rect x="714" y="308" width="24" height="72" rx="2"/>
+                <line x1="714" y1="344" x2="738" y2="344"/>
+              </g>
+              <rect class="body" x="678" y="458" width="22" height="28"/>
+              <rect class="body" x="752" y="458" width="22" height="28"/>
+            </g>
+
+            <!-- 05 suction and discharge lines -->
+            <g class="prt" data-prt="lines">
+              <path class="pipe" d="M74 256 L352 256 L352 362 L380 362"/>
+              <path class="pipe" d="M602 424 L636 424 L636 232 L662 232"/>
+              <rect class="body" x="368" y="340" width="12" height="48"/>
+              <rect class="body" x="602" y="402" width="12" height="34"/>
+              <g class="thin">{sbolts}{dbolts}</g>
+            </g>
+
+            <!-- skid -->
+            <g class="prt" data-prt="skid">
+              <rect class="body" x="70" y="486" width="760" height="14"/>
+              <rect class="body" x="70" y="500" width="760" height="12"/>
+              <g class="thin">{hatch}</g>
+            </g>
+
+            <!-- dimensions -->
+            <g class="dim">
+              <line x1="70" y1="556" x2="830" y2="556"/>
+              <line x1="70" y1="546" x2="70" y2="566"/>
+              <line x1="830" y1="546" x2="830" y2="566"/>
+              <path d="M78 552 L70 556 L78 560 Z"/>
+              <path d="M822 552 L830 556 L822 560 Z"/>
+              <rect class="dim-bg" x="404" y="544" width="92" height="24"/>
+              <text x="450" y="561" text-anchor="middle">4250 mm</text>
+
+              <line x1="862" y1="162" x2="862" y2="512"/>
+              <line x1="852" y1="162" x2="872" y2="162"/>
+              <line x1="852" y1="512" x2="872" y2="512"/>
+              <path d="M858 170 L862 162 L866 170 Z"/>
+              <path d="M858 504 L862 512 L866 504 Z"/>
+              <text class="vert" x="862" y="337" text-anchor="middle"
+                    transform="rotate(-90 862 337)">2100 mm</text>
+            </g>
+
+            <!-- balloons -->
+{balloons}
+
+            <!-- title block -->
+            <g class="tb">
+              <rect x="556" y="588" width="330" height="58"/>
+              <line x1="556" y1="616" x2="886" y2="616"/>
+              <line x1="762" y1="588" x2="762" y2="646"/>
+              <text x="568" y="607">SCREW COMPRESSOR PACKAGE</text>
+              <text x="568" y="636">SIDE ELEVATION</text>
+              <text class="tb-b" x="774" y="607">LITPROFIT</text>
+              <text x="774" y="636">DWG 04 // 06</text>
+            </g>
           </svg>
 
-          <ol class="cycle-list">
+          <ol class="part-list">
 {buttons}
           </ol>
         </div>
       </div>
     </section>
-""".format(stations=stations, buttons=buttons)
+""".format(fins=fins, hatch=hatch, sbolts=sbolts, dbolts=dbolts, buttons=buttons,
+           balloons="\n".join([
+               balloon(176, 240, "01", "motor", 210, 300),
+               balloon(330, 292, "02", "coupling", 344, 332),
+               balloon(534, 236, "03", "screw", 512, 280),
+               balloon(836, 120, "04", "separator", 790, 176),
+               balloon(96, 196, "05", "lines", 110, 250),
+           ]))
 
 
 # ============================================================
