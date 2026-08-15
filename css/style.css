@@ -2,21 +2,21 @@
    LITPROFIT — style.css
    Made by ALDY
 
-   PROVISIONAL PALETTE. The brand guidelines' colour page has not
-   arrived yet; the values in --navy-* are estimated off the page
-   33-36 mockup renders, which are JPEG-compressed artwork. Replace
-   the "brand palette" block below with the guideline hexes and the
-   whole site follows — nothing outside that block names a colour.
+   The brand navy is #15196D, taken from the guideline artwork itself
+   (the full-bleed background of the supplied page SVG) rather than
+   sampled off a compressed render. The rest of the --navy-* ramp is
+   that hue carried down to usable ground tones. Nothing outside the
+   palette block below names a colour.
    ============================================================ */
 
 :root {
   /* ---------- brand palette (Brand Guidelines › Colour) ---------- */
-  --navy-900: #08081f;   /* deepest ground */
-  --navy-800: #0d0d2e;
-  --navy-700: #13133f;
-  --navy-600: #1b1b63;   /* the brand navy — containers, sign face */
-  --navy-500: #26268c;
-  --navy-400: #3a3ab8;
+  --navy-900: #070824;   /* deepest ground */
+  --navy-800: #0b0d3a;
+  --navy-700: #0f1250;
+  --navy-600: #15196D;   /* THE brand navy — containers, sign face, CTA */
+  --navy-500: #1c2191;
+  --navy-400: #2d35be;
   --white:    #ffffff;
   --grey-200: #d6d8e2;
   --grey-300: #b0b3c4;
@@ -59,6 +59,17 @@
   --pad: clamp(20px, 4vw, 64px);
   --nav-h: 76px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ---------- the brand pattern (Guidelines › Graphic › Pattern) ----------
+     "Small squares arranged in a strict grid, expressing the brand's
+     technological focus, precision and engineering character."
+
+     A data URI rather than a file: it is smaller than the HTTP request that
+     would fetch it, and it cannot 404. Opacity is deliberately NOT baked in
+     here — the tile is drawn at full white and every use dials it down with
+     its own `opacity`, so one tile serves every context. */
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Crect width='9' height='9' fill='%23ffffff'/%3E%3C/svg%3E");
+  --pattern-size: 44px 44px;
 }
 
 /* ============================================================
@@ -257,22 +268,24 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 /* min-height, not padding: the wordmark placeholder is text, so without it
    the brand link is only as tall as its line box (19px) and misses the
    24px target minimum that the old <img> met by accident. */
-.brand { display: flex; align-items: center; flex: none; min-height: 44px; }
-.brand img { height: 28px; width: auto; }
+.brand { display: flex; align-items: center; gap: 11px; flex: none; min-height: 44px; }
+.brand-mark { height: 25px; width: auto; }
+.brand-lockup { height: 26px; width: auto; }
 
-/* Wordmark placeholder, used while LOGO_FILE is unset in tools/build.py.
-   The old site's logo carries a red mark that is absent from the new
-   identity, so shipping it would be worse than shipping no mark at all.
-   Set LOGO_FILE to the real SVG and this is replaced by an <img>. */
+/* The name alongside the monogram. Montserrat 700 stands in for the
+   guidelines' heavier geometric wordmark until that is supplied as vector
+   artwork; the tracking is tightened to sit closer to it. */
 .brand-word {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   line-height: 1;
   color: var(--white);
   white-space: nowrap;
 }
-.footer-brand .brand-word { font-size: 21px; display: block; margin-bottom: 18px; }
+.footer-brand .brand { margin-bottom: 18px; }
+.footer-brand .brand-mark { height: 28px; }
+.footer-brand .brand-word { font-size: 22px; }
 
 .nav-links {
   display: flex;
@@ -375,19 +388,17 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
     radial-gradient(90% 70% at 78% 8%, rgba(38, 38, 140, 0.5), transparent 60%),
     linear-gradient(180deg, rgba(8,8,31,0.86) 0%, rgba(8,8,31,0.5) 42%, var(--navy-900) 96%);
 }
-/* technical grid, masked so it fades out at the edges */
+/* the brand square pattern, masked so it fades out at the edges */
 .hero::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 104px 104px;
-  opacity: 0.4;
-  mask-image: radial-gradient(76% 66% at 42% 44%, #000 18%, transparent 76%);
-  -webkit-mask-image: radial-gradient(76% 66% at 42% 44%, #000 18%, transparent 76%);
+  background-image: var(--pattern);
+  background-size: var(--pattern-size);
+  opacity: 0.11;
+  mask-image: radial-gradient(78% 70% at 40% 46%, #000 12%, transparent 78%);
+  -webkit-mask-image: radial-gradient(78% 70% at 40% 46%, #000 12%, transparent 78%);
 }
 
 .hero-inner { width: 100%; }
@@ -435,9 +446,19 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(70% 120% at 88% 50%, rgba(38,38,140,0.34), transparent 66%);
+  background: radial-gradient(70% 120% at 88% 50%, rgba(45, 53, 190, 0.30), transparent 66%);
 }
-.partners-band > * { position: relative; }
+.partners-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern);
+  background-size: var(--pattern-size);
+  opacity: 0.09;
+  mask-image: linear-gradient(255deg, #000 6%, transparent 58%);
+  -webkit-mask-image: linear-gradient(255deg, #000 6%, transparent 58%);
+}
+.partners-band > * { position: relative; z-index: 1; }
 
 .partner-grid {
   display: grid;
@@ -607,6 +628,30 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 }
 .media-panel img { width: 100%; object-fit: cover; opacity: 0.8; filter: saturate(0.65); }
 
+/* ---------- corner squares ----------
+   The guidelines' pattern block sets a solid white square at each of its four
+   corners, against the muted field. Reused here as a framing device on image
+   panels. Drawn with two elements, each carrying two squares as background
+   images, rather than four pseudo-elements. */
+.cornered { position: relative; }
+.cornered::before,
+.cornered::after {
+  content: "";
+  position: absolute;
+  left: 12px; right: 12px;
+  height: 7px;
+  background-image:
+    linear-gradient(var(--white), var(--white)),
+    linear-gradient(var(--white), var(--white));
+  background-size: 7px 7px;
+  background-repeat: no-repeat;
+  background-position: left center, right center;
+  pointer-events: none;
+  z-index: 2;
+}
+.cornered::before { top: 12px; }
+.cornered::after { bottom: 12px; }
+
 /* ============================================================
    LOGO WALL (clients)
    ============================================================ */
@@ -765,12 +810,11 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   content: "";
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
-  background-size: 104px 104px;
-  mask-image: radial-gradient(70% 90% at 80% 50%, #000, transparent 72%);
-  -webkit-mask-image: radial-gradient(70% 90% at 80% 50%, #000, transparent 72%);
+  background-image: var(--pattern);
+  background-size: var(--pattern-size);
+  opacity: 0.14;
+  mask-image: linear-gradient(105deg, transparent 26%, #000 72%);
+  -webkit-mask-image: linear-gradient(105deg, transparent 26%, #000 72%);
 }
 .cta > * { position: relative; }
 .cta h2 { margin-bottom: 18px; }
@@ -866,7 +910,7 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   padding-block: 4px;   /* 18px of text is under the 24px minimum on its own */
 }
 .footer-col a:hover { color: var(--white); }
-.footer-brand img { height: 28px; margin-bottom: 18px; }
+
 .footer-brand p { font-size: var(--text-m); color: var(--muted-2); max-width: 30ch; }
 
 .footer-bottom {

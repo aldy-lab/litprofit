@@ -55,25 +55,53 @@ the github.io preview down too, leaving nothing to look at.
 
 | Constant | Effect while empty | Set it to |
 |---|---|---|
-| `LOGO_FILE` | header and footer render a plain `LITPROFIT` wordmark | the new logo SVG |
+| `LOGO_LOCKUP` | header/footer render the monogram + the name in Montserrat | a real lockup SVG |
 | `BOOKING_URL` | the "Book a call" button falls back to `/contacts/` | the Calendly link |
 | `BASE` / `ORIGIN` | site serves from the `/litprofit/` project path | `""` + the real domain |
 
 Nothing dead ever ships: each one degrades to something that works.
 
+## Brand
+
+| Asset | File | Notes |
+|---|---|---|
+| Monogram | `assets/brand/logo-mark.svg` | supplied artwork, `currentColor` for inline use |
+| Monogram, white | `assets/brand/logo-mark-white.svg` | for `<img>` on the navy ground |
+| Favicon | `assets/brand/favicon.svg` | white mark on a `#15196D` tile |
+
+**Navy is `#15196D`** — taken from the guideline page artwork itself (the
+full-bleed background rect of the supplied SVG), not sampled off a compressed
+render. The rest of `--navy-*` is that hue carried down to usable grounds.
+
+**The pattern** — "small squares arranged in a strict grid, expressing the
+brand's technological focus, precision and engineering character" — is a CSS
+data URI in `--pattern`, drawn at full white with every use dialling it down
+via its own `opacity`. It carries the hero, the partnership band and the CTA.
+The pattern page's white corner squares are reused as the `.cornered` framing
+device on image panels.
+
+### Two traps in the supplied artwork
+
+**`currentColor` does not work through `<img>`.** An SVG referenced with `<img>`
+loads as an independent document with no CSS inheritance, so `currentColor`
+resolves to its initial value — black — and a white-on-navy mark vanishes.
+Hence the separate `logo-mark-white.svg`.
+
+**The big outlined word in the page SVG is not the wordmark.** It reads
+**FONTS** — it is page 14's section title, exactly as page 21's is `GRAPHIC`.
+It was briefly shipped as the logo before a screenshot caught it. The only
+`LITPROFIT` lettering in that file is the light 40%-opacity page furniture,
+which is not the wordmark weight either. **The heavy wordmark as vector is
+still needed.**
+
 ## What is provisional
 
-- **The palette.** `--navy-*` in `css/style.css` is estimated from the brand
-  guidelines' mockup pages, which are compressed artwork. The colour page has
-  not arrived. Replacing that one block recolours the whole site; nothing
-  outside it names a colour.
-- **The typeface.** Montserrat is a stand-in. The wordmark in the guidelines is
-  a heavier geometric sans. If the brand face is licensed, using it as a webfont
-  needs a separate **web** licence.
-- **The logo.** `assets/brand/` holds the logo from the *old* site. It contains
-  red, which appears nowhere in the new identity, so it is **not used** — the
-  header and footer render a wordmark instead. Shipping no mark beats shipping
-  the wrong one. Set `LOGO_FILE` when the new monogram is exported.
+- **The typeface.** Montserrat is a stand-in, including for the name beside the
+  monogram. The guidelines' wordmark is a heavier geometric sans and has not
+  been supplied as vector artwork. If the brand face is licensed, using it as a
+  webfont needs a separate **web** licence.
+- **The wordmark.** Only the monogram was supplied as vector. The lockup is
+  therefore monogram + `LITPROFIT` set in the site face. See the note below.
 - **Photography.** `assets/photos/` is re-encoded from the old site, which caps
   at **800px wide** — fine for cards, soft for a full-bleed hero, which is why
   the hero image is held back to 30% opacity and reads as texture. Real

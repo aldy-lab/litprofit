@@ -45,12 +45,14 @@ COMPANY_ID = "302568798"
 VAT = "LT100005766815"
 FOUNDED = "2010"
 
-# The logo. The file in assets/brand/ is the OLD site's logo — it contains a
-# red mark that appears nowhere in the new brand guidelines, so it is not used.
-# Point this at the new logo SVG once it is exported from Figma and both the
-# header and the footer pick it up; while it is empty, a plain wordmark is
-# rendered instead, which is honest about being a placeholder.
-LOGO_FILE = ""        # e.g. "/assets/brand/logo-2026.svg"
+# The logo lockup is the supplied monogram plus the name set in the site
+# typeface. The guidelines' own heavy wordmark has not been supplied as
+# vector artwork — the only outlined lettering in the page SVG is the section
+# title "FONTS" and the light page furniture, neither of which is the
+# wordmark. Set LOGO_LOCKUP to a real lockup SVG when one arrives and it
+# replaces mark + text everywhere.
+LOGO_MARK = "/assets/brand/logo-mark-white.svg"
+LOGO_LOCKUP = ""
 
 # Header call-to-action. Set this to the company's Calendly link and the
 # button points at it; while it is empty the button falls back to the
@@ -75,11 +77,14 @@ def canonical(path):
 
 
 def lockup():
-    """Logo image if one is configured, otherwise the wordmark placeholder."""
-    if LOGO_FILE:
-        return ('<img src="%s" alt="%s" width="120" height="28">'
-                % (u(LOGO_FILE), NAME))
-    return '<span class="brand-word">%s</span>' % NAME
+    """The brand lockup: monogram + name."""
+    if LOGO_LOCKUP:
+        return '<img class="brand-lockup" src="%s" alt="%s" width="467" height="100">' % (
+            u(LOGO_LOCKUP), NAME)
+    # alt="" on the mark: the adjacent text already names the company, and a
+    # second "LITPROFIT" would be read out twice by a screen reader.
+    return ('<img class="brand-mark" src="%s" alt="" width="272" height="200">'
+            '<span class="brand-word">%s</span>' % (u(LOGO_MARK), NAME))
 
 
 # ============================================================
@@ -130,7 +135,7 @@ FOOTER = """  <footer class="site-footer">
     <div class="container">
       <div class="footer-top">
         <div class="footer-col footer-brand">
-          {logo}
+          <div class="brand">{logo}</div>
           <p>{tagline}</p>
         </div>
 
@@ -189,7 +194,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
   <meta name="description" content="{description}">
   <link rel="canonical" href="{canon}">
   <meta name="robots" content="{robots}">
-  <meta name="theme-color" content="#0b0b26">
+  <meta name="theme-color" content="#070824">
   <meta property="og:site_name" content="{name}">
   <meta property="og:title" content="{full_title}">
   <meta property="og:description" content="{description}">
@@ -220,7 +225,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
 </body>
 </html>
 """.format(full_title=full_title, description=description, canon=canonical(path),
-           robots=robots, name=NAME, icon=u("/assets/brand/logo.svg"),
+           robots=robots, name=NAME, icon=u("/assets/brand/favicon.svg"),
            font=u("/assets/fonts/montserrat-latin.woff2"),
            fonts_css=u("/css/fonts.css"), style_css=u("/css/style.css"),
            js=u("/js/main.js"), head_extra=head_extra,
@@ -639,7 +644,7 @@ def home():
               <a class="btn btn-outline" href="{refrig}">Refrigeration systems</a>
             </div>
           </div>
-          <div class="media-panel reveal">
+          <div class="media-panel cornered reveal">
             <img src="{plant_img}" alt="Industrial refrigeration compressor plant"
                  width="800" height="555" loading="lazy">
           </div>
@@ -778,7 +783,7 @@ def service_page(s):
         "Service " + s["num"], s["title"], s["lead"],
         [("Home", "/"), ("Services", "/services/"), (s["title"], None)]) + """
     <div class="container">
-      <div class="page-media reveal">
+      <div class="page-media cornered reveal">
         <img src="{img}" alt="{alt}" width="{w}" height="{h}">
       </div>
     </div>
@@ -1118,7 +1123,7 @@ def org_ld():
                 "name": LEGAL,
                 "alternateName": NAME,
                 "url": canonical("/"),
-                "logo": ORIGIN + u("/assets/brand/logo.svg"),
+                "logo": ORIGIN + u("/assets/brand/favicon.svg"),
                 "foundingDate": FOUNDED,
                 "description": TAGLINE,
                 "vatID": VAT,
