@@ -129,6 +129,36 @@ still needed.**
   narrowed the lead inside it — the heading and the lead now get their own
   `max-width`, with `text-wrap: balance` evening out the last line.
 
+## The refrigeration cycle
+
+The homepage carries an interactive schematic of a vapour-compression loop —
+compressor, condenser, expansion valve, evaporator — because refrigeration is
+what the company actually sells and nothing on the old site showed it.
+
+A 3D model was the alternative and was rejected: it needs a WebGL library
+vendored into a site whose whole premise is no dependencies and no third-party
+requests, plus a licensed compressor model nobody has. A drawing is lighter,
+exact, and can say things a render cannot.
+
+The copy names what fails at each station — scaled condenser tubes showing up
+as rising head pressure, superheat set at the expansion valve exposing a plant
+that was never properly commissioned. That is the register a chief engineer
+reads in, and it is the company's own field.
+
+Two implementation points:
+
+- **The SVG is `aria-hidden` and the four buttons carry the content.** A screen
+  reader gets an ordered, readable description of the cycle rather than a soup
+  of unlabelled shapes, and the section is fully operable from the keyboard.
+  Hover and focus light the same station; `aria-expanded` reports state.
+- **The `0fr` → `1fr` accordion needs an inner element with `min-height: 0`.**
+  Without it the grid row keeps its min-content height and nothing collapses —
+  which is what happened on the first build, leaving every stage full-size.
+
+Temperature coding — warm on the high-pressure leg, cool on the low — is the
+one place a colour outside the brand palette earns its keep. It is what makes
+a schematic legible at a glance.
+
 ## Hidden features
 
 Nothing here is announced or required, and none of it changes what the page

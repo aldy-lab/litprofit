@@ -181,6 +181,38 @@
   }
 
 
+  /* ---------- the refrigeration cycle ----------
+     Hover or focus a station and the matching box lights up in the schematic.
+     aria-expanded carries the open/closed state, so the control reports what
+     it does rather than only looking like it. */
+  var cycle = doc.getElementById("cycle");
+  if (cycle) {
+    var stages = all(".stage", cycle);
+
+    var select = function (btn) {
+      stages.forEach(function (b) {
+        b.setAttribute("aria-expanded", b === btn ? "true" : "false");
+      });
+      if (btn) cycle.setAttribute("data-active", btn.getAttribute("data-stn"));
+      else cycle.removeAttribute("data-active");
+    };
+
+    stages.forEach(function (btn) {
+      btn.setAttribute("aria-expanded", "false");
+      on(btn, "mouseenter", function () { select(btn); });
+      on(btn, "focus", function () { select(btn); });
+      /* click keeps it open on touch, where there is no hover at all */
+      on(btn, "click", function () {
+        select(btn.getAttribute("aria-expanded") === "true" ? null : btn);
+      });
+    });
+
+    on(cycle, "mouseleave", function () {
+      /* do not yank the panel away from someone reading it via the keyboard */
+      if (!cycle.contains(doc.activeElement)) select(null);
+    });
+  }
+
   /* ============================================================
      HIDDEN — things that reward a second look.
      None of it is announced, none of it is required, and none of it

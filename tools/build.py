@@ -653,11 +653,12 @@ def home():
       </div>
     </section>
 
+{cycle}
     <section class="section section-alt">
       <div class="container">
         <div class="split" style="align-items: center">
           <div class="reveal">
-            <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>Capability</p>
+            <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>Capability</p>
             <h2>A decade of refrigeration, on ships and ashore</h2>
             <p class="lead">Compressor overhauls, class-approved design
             documentation, plant installation and commissioning — on fishing vessels
@@ -673,7 +674,7 @@ def home():
         </div>
 
         <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">
-          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>Clients</p>
+          <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>Clients</p>
           <h2>Who we work with</h2>
         </div>
         <ul class="logo-wall reveal">
@@ -682,7 +683,7 @@ def home():
       </div>
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
-                cards=cards, logos=logos,
+                cards=cards, logos=logos, cycle=cycle_diagram(),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
                 hero_img=u("/assets/photos/hero-welding.webp"),
@@ -696,6 +697,112 @@ def home():
                         "We are ready to provide prompt and competent assistance — "
                         "tell us the vessel, the equipment and the port, and we will "
                         "come back with a plan."))
+
+
+# ============================================================
+# THE REFRIGERATION CYCLE
+# A vapour-compression loop, drawn to the standard four stations:
+# compressor -> condenser -> expansion valve -> evaporator -> back.
+# The copy is deliberately specific about what fails at each station,
+# because that is what a chief engineer reading this actually wants to
+# know, and it is the company's own field.
+# ============================================================
+STAGES = [
+    dict(n="01", key="compressor", title="Compressor",
+         side="Low pressure in, high pressure out",
+         text="Draws low-pressure vapour off the evaporator and compresses it to a "
+              "hot, high-pressure gas. This is the station we overhaul most often — "
+              "SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, HALLSCREW, GRASSO and MYCOM."),
+    dict(n="02", key="condenser", title="Condenser",
+         side="Heat goes overboard",
+         text="Seawater carries the heat away and the gas condenses to a high-pressure "
+              "liquid. Fouled or scaled tubes show up here first, as head pressure "
+              "climbing and capacity falling off."),
+    dict(n="03", key="expansion", title="Expansion valve",
+         side="Pressure drops",
+         text="Throttles the liquid, so pressure and temperature fall sharply. "
+              "Superheat is set at this valve, and a plant that was never properly "
+              "commissioned usually gives itself away right here."),
+    dict(n="04", key="evaporator", title="Evaporator",
+         side="Heat comes out of the cargo",
+         text="In the fish hold, RSW tank or cold store the refrigerant boils, pulling "
+              "heat out of the cargo, and returns to the compressor as vapour. "
+              "The loop closes and starts again."),
+]
+
+
+def cycle_diagram():
+    """The loop as an SVG schematic, plus the four stations as real buttons.
+
+    The SVG is aria-hidden and the buttons carry the content: a screen reader
+    gets an ordered, readable description of the cycle instead of a soup of
+    unlabelled shapes, and the whole thing works from the keyboard."""
+
+    def station(x, y, n, label, key):
+        return """      <g class="stn" data-stn="{key}">
+        <rect x="{bx}" y="{by}" width="160" height="92" rx="2"/>
+        <text class="stn-n" x="{tx}" y="{ty1}">{n}</text>
+        <text class="stn-t" x="{tx}" y="{ty2}">{label}</text>
+      </g>""".format(key=key, bx=x - 80, by=y - 46, tx=x - 62,
+                     ty1=y - 12, ty2=y + 16, n=n, label=label.upper())
+
+    stations = "\n".join([
+        station(140, 460, "01", "Compressor", "compressor"),
+        station(140, 100, "02", "Condenser",  "condenser"),
+        station(620, 100, "03", "Expansion",  "expansion"),
+        station(620, 460, "04", "Evaporator", "evaporator"),
+    ])
+
+    buttons = "\n".join("""          <button type="button" class="stage" data-stn="{key}">
+            <span class="stage-n">{n}</span>
+            <span class="stage-body">
+              <span class="stage-title">{title}</span>
+              <span class="stage-side">{side}</span>
+              <span class="stage-text"><span>{text}</span></span>
+            </span>
+          </button>""".format(**st) for st in STAGES)
+
+    return """
+    <section class="section section-alt cycle-section seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>How it works</p>
+          <h2>A ship&rsquo;s refrigeration plant, in four stations</h2>
+          <p class="lead">Every system we overhaul is this loop, whatever the badge on
+          the compressor. Take a station to see what happens there &mdash; and what
+          tends to go wrong.</p>
+        </div>
+
+        <div class="cycle reveal" id="cycle">
+          <svg class="cycle-svg" viewBox="0 0 760 560" aria-hidden="true"
+               preserveAspectRatio="xMidYMid meet">
+            <!-- the pipe: casing first, refrigerant over it -->
+            <path class="pipe" d="M140 460 L140 100 L620 100 L620 460 Z"/>
+            <path class="flow flow-hot"  d="M140 460 L140 100 L620 100"/>
+            <path class="flow flow-cold" d="M620 100 L620 460 L140 460"/>
+
+            <!-- direction of travel -->
+            <g class="arrows">
+              <path d="M134 296 L140 282 L146 296 Z"/>
+              <path d="M374 94 L388 100 L374 106 Z"/>
+              <path d="M614 264 L620 278 L626 264 Z"/>
+              <path d="M386 454 L372 460 L386 466 Z"/>
+            </g>
+
+            <!-- pressure legend, on the legs it belongs to -->
+            <text class="leg" x="158" y="292">HIGH PRESSURE</text>
+            <text class="leg leg-cold" x="602" y="292" text-anchor="end">LOW PRESSURE</text>
+
+{stations}
+          </svg>
+
+          <ol class="cycle-list">
+{buttons}
+          </ol>
+        </div>
+      </div>
+    </section>
+""".format(stations=stations, buttons=buttons)
 
 
 # ============================================================
