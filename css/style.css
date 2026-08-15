@@ -1596,7 +1596,7 @@ html.is-frost::after {
 }
 @keyframes frost-in { to { opacity: 1; } }
 
-/* ---------- ice ferns ---------- */
+/* ---------- the cold-test overlay ---------- */
 #frostIce {
   position: fixed;
   inset: 0;
@@ -1607,50 +1607,43 @@ html.is-frost::after {
 #frostIce.is-out { animation: ice-out 1s var(--ease) forwards; }
 @keyframes ice-out { to { opacity: 0; } }
 
-.fern {
+/* registration marks — the corner crosses on a technical print */
+.reg {
   position: absolute;
-  width: clamp(220px, 26vw, 400px);
-  height: clamp(220px, 26vw, 400px);
+  width: 34px;
+  height: 34px;
+  opacity: 0;
+  animation: reg-in 0.7s var(--ease) forwards;
 }
-.f-tl { top: 0; left: 0; }
-.f-tr { top: 0; right: 0; transform: scaleX(-1); }
-.f-bl { bottom: 0; left: 0; transform: scaleY(-1); }
-.f-br { bottom: 0; right: 0; transform: scale(-1, -1); }
-
-.fern path {
-  fill: none;
-  stroke: rgba(226, 242, 255, 0.85);
-  stroke-width: 0.7;
-  stroke-linecap: round;
-  /* drawn on: one long dash retreating along the whole path, so the branches
-     appear in the order the generator produced them — trunk first */
-  stroke-dasharray: 4200;
-  stroke-dashoffset: 4200;
-  animation: fern-draw 3.4s var(--ease) forwards;
-  filter: drop-shadow(0 0 3px rgba(150, 200, 255, 0.5));
+.reg::before, .reg::after {
+  content: "";
+  position: absolute;
+  background: rgba(200, 230, 255, 0.75);
 }
-.f-tr path { animation-delay: 0.25s; }
-.f-bl path { animation-delay: 0.5s; }
-.f-br path { animation-delay: 0.75s; }
-@keyframes fern-draw { to { stroke-dashoffset: 0; } }
+.reg::before { left: 0; top: 16px; width: 34px; height: 1px; }
+.reg::after  { top: 0; left: 16px; width: 1px; height: 34px; }
+.reg-tl { top: 26px; left: 26px; }
+.reg-tr { top: 26px; right: 26px; animation-delay: 0.1s; }
+.reg-bl { bottom: 26px; left: 26px; animation-delay: 0.2s; }
+.reg-br { bottom: 26px; right: 26px; animation-delay: 0.3s; }
+@keyframes reg-in { to { opacity: 1; } }
 
-/* ---------- drifting crystals ---------- */
+/* ice grains, not snowflakes: small, square, and they fall straight */
 .flake {
   position: absolute;
-  top: -12px;
-  width: 5px;
-  height: 5px;
-  background: rgba(226, 242, 255, 0.75);
-  transform: rotate(45deg);
+  top: -10px;
+  width: 3px;
+  height: 3px;
+  background: rgba(214, 236, 255, 0.7);
   animation-name: flake-fall;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
 @keyframes flake-fall {
-  0%   { transform: translate3d(0, -20px, 0) rotate(45deg); opacity: 0; }
-  12%  { opacity: 0.8; }
-  88%  { opacity: 0.8; }
-  100% { transform: translate3d(26px, 100vh, 0) rotate(225deg); opacity: 0; }
+  0%   { transform: translate3d(0, -20px, 0); opacity: 0; }
+  10%  { opacity: 0.85; }
+  90%  { opacity: 0.85; }
+  100% { transform: translate3d(8px, 100vh, 0); opacity: 0; }
 }
 
 /* ---------- the probe ---------- */
@@ -1702,7 +1695,75 @@ html.is-frost::after {
 @media (prefers-reduced-motion: reduce) {
   html.is-frost::before, html.is-frost::after { animation: none; opacity: 1; }
   #frostProbe { animation: none; }
-  .fern path { animation: none; stroke-dashoffset: 0; }
+  .reg { animation: none; opacity: 1; }
   .flake { display: none; }
   #frostProbe:not(.is-held) .fp-state { animation: none; }
 }
+
+/* ============================================================
+   HERO — PLANT PULL-DOWN
+   The company builds automatic control systems for refrigeration
+   compressors; this is that, as page furniture. Scrolling the hero
+   pulls the temperature down from deck ambient to setpoint, and the
+   trace draws the real curve a plant makes — an exponential decay,
+   not a decorative swoosh.
+   ============================================================ */
+/* Pinned, not parked in the hero. Absolutely positioned inside the hero it
+   scrolled up under the fixed header and collided with the nav — and it is
+   the one element that exists to respond to scroll, so it has to still be on
+   screen while the scrolling happens. It sits above where the frost probe
+   appears, so the two never stack. */
+.plant {
+  position: fixed;
+  right: var(--pad);
+  bottom: clamp(90px, 12vh, 150px);
+  z-index: 90;
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  width: 216px;
+  padding: 16px 18px 14px;
+  background: rgba(7, 8, 36, 0.58);
+  border: 1px solid var(--line-2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.plant-head, .plant-foot {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+}
+.plant-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.plant-read { display: flex; align-items: baseline; gap: 4px; margin-top: 6px; }
+.plant-t {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.6s var(--ease);
+}
+.plant-u { font-size: 12px; letter-spacing: 0.14em; color: var(--grey-300); }
+.plant.is-cold .plant-t { color: #a9d4ff; }
+.plant.is-cold .plant-state { color: #a9d4ff; }
+
+.plant-curve { display: block; width: 100%; height: 46px; margin-top: 10px; overflow: visible; }
+.pc-grid { stroke: rgba(255, 255, 255, 0.09); stroke-width: 1; }
+.pc-trace {
+  fill: none;
+  stroke: #9ec9ff;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  /* the trace is revealed by scroll, not by a timer — JS writes the offset */
+  stroke-dasharray: var(--len, 200);
+  stroke-dashoffset: var(--off, 200);
+}
+
+/* released once the hero is behind you — it is a hero instrument, not a
+   permanent HUD */
+.plant.is-gone { opacity: 0; transform: translateY(14px); pointer-events: none; }
+
+/* Below this the hero is text-first and the panel would crowd it; the page
+   loses a decoration, not information — it is aria-hidden either way. */
+@media (max-width: 1100px) { .plant { display: none; } }
