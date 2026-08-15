@@ -1,0 +1,5 @@
+<svg width="709" height="709" viewBox="0 0 709 709" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ALDY">
+<!-- ALDY studio mark. Hard-coded white, not currentColor: referenced with
+     <img>, which loads as its own document with no CSS inheritance. -->
+<path d="M184.07 709H0L165.786 354.5L295.45 0H450.654L709 709H540.044C540.044 709 516.475 610.707 470.903 559.535C410.568 491.786 321.113 489.546 254.193 550.673C208.061 592.811 184.07 709 184.07 709ZM322.196 356.416L165.786 354.5L0 709C0 709 6 496.3 120.39 429.232C222.58 369.318 388.311 403.244 469.586 487.438C436.17 397.5 372.07 208.868 372.07 208.868L322.196 356.416Z" fill="#ffffff"/>
+</svg>

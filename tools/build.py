@@ -60,6 +60,10 @@ LOGO_LOCKUP = ""
 BOOKING_URL = ""      # e.g. "https://calendly.com/litprofit/30min"
 BOOKING_LABEL = "Book a call"
 
+# The studio credit in the footer. Leave ALDY_URL empty and the credit is
+# rendered as plain text plus the mark, with no dead link.
+ALDY_URL = ""         # e.g. "https://aldy.studio"
+
 LASTMOD = datetime.date.today().isoformat()
 
 
@@ -131,6 +135,16 @@ def header(active):
                       book_label=BOOKING_LABEL)
 
 
+def aldy_credit():
+    mark = ('<img src="%s" alt="" width="709" height="709">'
+            % u("/assets/brand/aldy.svg"))
+    inner = '%s<span>Made by <b>ALDY</b></span>' % mark
+    if ALDY_URL:
+        return ('<a class="aldy" href="%s" target="_blank" rel="noopener">%s</a>'
+                % (ALDY_URL, inner))
+    return '<span class="aldy">%s</span>' % inner
+
+
 FOOTER = """  <footer class="site-footer">
     <div class="container">
       <div class="footer-top">
@@ -168,15 +182,77 @@ FOOTER = """  <footer class="site-footer">
       <div class="footer-bottom">
         <span>&copy; {founded}&ndash;<span data-year>2026</span> {legal}</span>
         <span class="spacer"><a href="{privacy}">Privacy policy</a></span>
+        <span class="made">{made}</span>
       </div>
     </div>
   </footer>""".format(
     logo=lockup(), name=NAME, tagline=TAGLINE,
     street=STREET, city=CITY, country=COUNTRY, phone=PHONE, phone_href=PHONE_HREF,
     email=EMAIL, legal=LEGAL, cid=COMPANY_ID, vat=VAT, founded=FOUNDED,
-    privacy=u("/privacy/"),
+    privacy=u("/privacy/"), made=aldy_credit(),
     navlinks="\n".join('            <li><a href="%s">%s</a></li>' % (u(h), l)
                        for l, h in NAV))
+
+
+# The site read as a set of sheets, after the drawing's own title block
+# (DWG 04 // 06). Gives every interior page a position in a sequence and
+# somewhere obvious to go next, instead of dead-ending at the footer.
+SHEETS = [
+    ("/", "Home"),
+    ("/about/", "About"),
+    ("/services/", "Services"),
+    ("/completed-works/", "Completed works"),
+    ("/partners/", "Partners"),
+    ("/certificates/", "Certificates"),
+    ("/contacts/", "Contacts"),
+]
+
+
+def sheet_index(path):
+    for i, (href, _) in enumerate(SHEETS):
+        if href == path:
+            return i
+    return None
+
+
+def sheet_tag(path):
+    i = sheet_index(path)
+    if i is None:
+        return ""
+    return ('<span class="eyebrow-num">%02d</span><span class="sep">//</span>'
+            % (i + 1))
+
+
+def pager(path):
+    """Previous / next across the sheet set. A dead end at the bottom of a
+    page is a navigation failure, not a styling one."""
+    i = sheet_index(path)
+    if i is None:
+        return ""
+    prev = SHEETS[i - 1] if i > 0 else None
+    nxt = SHEETS[i + 1] if i < len(SHEETS) - 1 else None
+    if not prev and not nxt:
+        return ""
+
+    def cell(item, rel, label):
+        if not item:
+            return '<span class="pg-cell pg-empty"></span>'
+        href, name = item
+        return ("""<a class="pg-cell pg-{rel}" href="{href}" rel="{rel}">
+          <span class="pg-dir">{label}</span>
+          <span class="pg-name">{name}</span>
+        </a>""").format(rel=rel, href=u(href), label=label, name=name)
+
+    return """
+    <nav class="pager" aria-label="Sheets">
+      <div class="container pg-grid">
+        {prev}
+        <span class="pg-of">{n} // {total}</span>
+        {next}
+      </div>
+    </nav>
+""".format(prev=cell(prev, "prev", "Previous"), next=cell(nxt, "next", "Next"),
+           n="%02d" % (i + 1), total="%02d" % len(SHEETS))
 
 
 # ============================================================
@@ -217,7 +293,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
 
   <main id="main">
 {body}
-  </main>
+{pager}  </main>
 
 {footer}
 
@@ -230,7 +306,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
            fonts_css=u("/css/fonts.css"), style_css=u("/css/style.css"),
            js=u("/js/main.js"), head_extra=head_extra,
            header=header(active if active is not None else path), body=body,
-           footer=FOOTER)
+           pager=pager(path), footer=FOOTER)
 
 
 def write(path, html):
@@ -283,15 +359,16 @@ def crumb(trail):
     return '<p class="crumb">%s</p>' % '<span class="sep">//</span>'.join(parts)
 
 
-def page_head(eyebrow, h1, lead, trail=None):
+def page_head(eyebrow, h1, lead, trail=None, path=None):
     return """
     <section class="container page-head">
       {crumb}
-      <p class="eyebrow">{eyebrow}</p>
+      <p class="eyebrow">{sheet}{eyebrow}</p>
       <h1>{h1}</h1>
       <p class="lead">{lead}</p>
     </section>
-""".format(crumb=crumb(trail) if trail else "", eyebrow=eyebrow, h1=h1, lead=lead)
+""".format(crumb=crumb(trail) if trail else "", eyebrow=eyebrow, h1=h1, lead=lead,
+           sheet=sheet_tag(path) if path else "")
 
 
 def tags(items):
@@ -458,17 +535,21 @@ SERVICES = [
 # (display name, file, intrinsic width, intrinsic height) — the real pixel
 # dimensions, so the browser reserves the right box and the row does not
 # reflow as the logos load.
+# (display name, file, intrinsic width, intrinsic height, url)
+# URLs were verified by fetching each domain and matching the page title to
+# the company — the six left empty could not be confirmed, and a logo linked
+# to the wrong company is worse than a logo that does not link at all.
 CLIENTS = [
-    ("Norebo", "logo-norebo.png", 400, 69),
-    ("Sealord", "logo-sealord-paua.png", 140, 60),
-    ("Limarko Group", "limarko-group.png", 400, 120),
-    ("Ocean Whale Company", "ocean-whale-company.png", 400, 135),
-    ("Baltreids", "logo-baltreids.png", 66, 82),
-    ("Alliance Marine", "logo-alliance-marine.png", 248, 155),
-    ("Seafish Trade", "logo-seafish-trade.png", 282, 179),
-    ("Santavilte", "santavilte.png", 400, 89),
-    ("LZK", "logo-lzk.png", 208, 208),
-    ("OWH", "logo-owh.png", 246, 161),
+    ("Norebo", "logo-norebo.png", 400, 69, "https://norebo.com"),
+    ("Sealord", "logo-sealord-paua.png", 140, 60, "https://sealord.com"),
+    ("Limarko Group", "limarko-group.png", 400, 120, ""),
+    ("Ocean Whale Company", "ocean-whale-company.png", 400, 135, ""),
+    ("Baltreids", "logo-baltreids.png", 66, 82, ""),
+    ("Alliance Marine", "logo-alliance-marine.png", 248, 155, ""),
+    ("Seafish Trade", "logo-seafish-trade.png", 282, 179, "https://seafishtrade.com"),
+    ("Santavilte", "santavilte.png", 400, 89, "https://santavilte.lt"),
+    ("LZK", "logo-lzk.png", 208, 208, ""),
+    ("OWH", "logo-owh.png", 246, 161, ""),
 ]
 
 CERTIFICATES = [
@@ -517,15 +598,25 @@ def service_cards(level="h3"):
     return "\n".join(out)
 
 
+def client_tile(c):
+    """A client logo. Linked where the company's own site was verified,
+    plain where it was not — the alt text names it either way."""
+    name, f, w, h, url = c
+    img = ('<img src="%s" alt="%s" width="%d" height="%d" loading="lazy">'
+           % (u("/assets/clients/" + f), name, w, h))
+    if url:
+        return ('          <li><a href="%s" target="_blank" rel="noopener noreferrer">'
+                '%s</a></li>' % (url, img))
+    return "          <li>%s</li>" % img
+
+
 # ============================================================
 # HOME
 # ============================================================
 def home():
     cards = service_cards("h3")
 
-    logos = "\n".join(
-        '          <li><img src="%s" alt="%s" width="%d" height="%d" loading="lazy"></li>'
-        % (u("/assets/clients/" + f), n, w, h) for n, f, w, h in CLIENTS)
+    logos = "\n".join(client_tile(c) for c in CLIENTS)
 
     return """
     <section class="hero">
@@ -892,7 +983,7 @@ def about():
         "%s was established in %s. More than a decade in the refrigeration equipment "
         "market, a long list of completed projects, and business partners who have "
         "stayed." % (LEGAL, FOUNDED),
-        [("Home", "/"), ("About", None)]) + """
+        [("Home", "/"), ("About", None)], path="/about/") + """
     <section class="container prose">
       <h2>What we specialise in</h2>
       <ul>
@@ -964,7 +1055,7 @@ def services_index():
         "Services", "What we repair, supply and install",
         "Marine engines, refrigeration plant, pipe systems and the spare parts that "
         "keep all three running.",
-        [("Home", "/"), ("Services", None)]) + """
+        [("Home", "/"), ("Services", None)], path="/services/") + """
     <section class="section" style="padding-top: 0">
       <div class="container">
         <div class="card-grid">
@@ -1027,7 +1118,7 @@ def completed_works():
         "Completed works", "Where the work has been done",
         "Two strands run through everything the company has delivered since %s: "
         "engines, and refrigeration." % FOUNDED,
-        [("Home", "/"), ("Completed works", None)]) + """
+        [("Home", "/"), ("Completed works", None)], path="/completed-works/") + """
     <section class="container prose">
       <!-- NOTE(LITPROFIT): the old site's "Completed works" page was two headings
            and two stock photographs — no project detail at all. This page is written
@@ -1068,15 +1159,13 @@ def completed_works():
 # PARTNERS
 # ============================================================
 def partners():
-    logos = "\n".join(
-        '          <li><img src="%s" alt="%s" width="%d" height="%d" loading="lazy"></li>'
-        % (u("/assets/clients/" + f), n, w, h) for n, f, w, h in CLIENTS)
+    logos = "\n".join(client_tile(c) for c in CLIENTS)
 
     return page_head(
         "Partners", "Manufacturers we represent, clients we work for",
         "Two authorised representations, and a client list built up over more than a "
         "decade.",
-        [("Home", "/"), ("Partners", None)]) + """
+        [("Home", "/"), ("Partners", None)], path="/partners/") + """
     <section class="section partners-band seam-top seam-bottom" style="padding-top: clamp(46px, 5vw, 72px)">
       <div class="container">
         <div class="section-head reveal">
@@ -1135,7 +1224,7 @@ def certificates():
     return page_head(
         "Certificates", "Certification and cover",
         "Class approvals, and the liability insurance behind the work.",
-        [("Home", "/"), ("Certificates", None)]) + """
+        [("Home", "/"), ("Certificates", None)], path="/certificates/") + """
     <section class="section" style="padding-top: 0">
       <div class="container">
         <div class="docs reveal">
@@ -1174,7 +1263,7 @@ def contacts():
     return page_head(
         "Contacts", "Talk to us",
         "Enquiries reach people who can answer technical questions, not a call centre.",
-        [("Home", "/"), ("Contacts", None)]) + """
+        [("Home", "/"), ("Contacts", None)], path="/contacts/") + """
     <section class="section" style="padding-top: 0">
       <div class="container contact-grid">
         <div class="reveal">

@@ -163,6 +163,30 @@ The dimension figures (4250 mm, 2100 mm) are plausible for a package of this
 type but are **illustrative, not a real machine's**. Swap them for a genuine
 unit's if the drawing is ever used as anything but decoration.
 
+## Navigation and page furniture
+
+The site reads as a set of sheets, after the drawing's own title block
+(`DWG 04 // 06`). Every main page carries its sheet number in the eyebrow and
+ends with a **previous / next pager** — a page that dead-ends at the footer
+gives the reader nowhere to go, which is a navigation failure rather than a
+styling one. `SHEETS` in `tools/build.py` is the single ordered list driving
+both.
+
+## Client logos
+
+Linked where the company's own site could be **verified** — each candidate
+domain was fetched and its page title matched against the company name. Four
+of ten are confirmed: Norebo, Sealord, Seafish Trade, Santavilte. The other six
+render as plain tiles, because a logo linked to the wrong company is worse than
+a logo that does not link at all. Add a URL to `CLIENTS` and the tile becomes a
+link automatically.
+
+## The ALDY credit
+
+Footer, bottom right: the ALDY mark plus "Made by ALDY". `ALDY_URL` at the top
+of `tools/build.py` is empty, so it renders as text and mark with no dead link
+— set it to the studio URL and it becomes one.
+
 ## Hidden features
 
 Nothing here is announced or required, and none of it changes what the page
