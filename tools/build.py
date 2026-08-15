@@ -45,6 +45,19 @@ COMPANY_ID = "302568798"
 VAT = "LT100005766815"
 FOUNDED = "2010"
 
+# The logo. The file in assets/brand/ is the OLD site's logo — it contains a
+# red mark that appears nowhere in the new brand guidelines, so it is not used.
+# Point this at the new logo SVG once it is exported from Figma and both the
+# header and the footer pick it up; while it is empty, a plain wordmark is
+# rendered instead, which is honest about being a placeholder.
+LOGO_FILE = ""        # e.g. "/assets/brand/logo-2026.svg"
+
+# Header call-to-action. Set this to the company's Calendly link and the
+# button points at it; while it is empty the button falls back to the
+# contacts page, so nothing dead ever ships.
+BOOKING_URL = ""      # e.g. "https://calendly.com/litprofit/30min"
+BOOKING_LABEL = "Book a call"
+
 LASTMOD = datetime.date.today().isoformat()
 
 
@@ -57,6 +70,16 @@ def u(path):
 
 def canonical(path):
     return ORIGIN + u(path)
+
+
+
+
+def lockup():
+    """Logo image if one is configured, otherwise the wordmark placeholder."""
+    if LOGO_FILE:
+        return ('<img src="%s" alt="%s" width="120" height="28">'
+                % (u(LOGO_FILE), NAME))
+    return '<span class="brand-word">%s</span>' % NAME
 
 
 # ============================================================
@@ -81,32 +104,33 @@ def header(active):
 
   <header class="site-header">
     <nav class="nav" aria-label="Main">
-      <a class="brand" href="{home}" aria-label="{name} — home">
-        <img src="{logo}" alt="{name}" width="120" height="30">
-      </a>
+      <a class="brand" href="{home}" aria-label="{name} — home">{logo}</a>
 
       <div class="nav-links" id="navLinks">
 {items}
-        <a class="nav-phone-mobile" href="tel:{phone_href}">{phone}</a>
+        <a class="nav-cta-mobile" href="{book}"{book_attrs}>{book_label}</a>
       </div>
 
       <div class="nav-actions">
-        <a class="nav-phone" href="tel:{phone_href}">{phone}</a>
+        <a class="btn btn-book" href="{book}"{book_attrs}>{book_label}</a>
         <button class="burger" type="button" aria-label="Menu"
                 aria-expanded="false" aria-controls="navLinks">
           <span></span><span></span><span></span>
         </button>
       </div>
     </nav>
-  </header>""".format(home=u("/"), logo=u("/assets/brand/logo-inverted.svg"),
-                      name=NAME, items=items, phone=PHONE, phone_href=PHONE_HREF)
+  </header>""".format(home=u("/"), logo=lockup(),
+                      name=NAME, items=items,
+                      book=BOOKING_URL or u("/contacts/"),
+                      book_attrs=' target="_blank" rel="noopener"' if BOOKING_URL else "",
+                      book_label=BOOKING_LABEL)
 
 
 FOOTER = """  <footer class="site-footer">
     <div class="container">
       <div class="footer-top">
         <div class="footer-col footer-brand">
-          <img src="{logo}" alt="{name}" width="120" height="30">
+          {logo}
           <p>{tagline}</p>
         </div>
 
@@ -142,7 +166,7 @@ FOOTER = """  <footer class="site-footer">
       </div>
     </div>
   </footer>""".format(
-    logo=u("/assets/brand/logo-inverted.svg"), name=NAME, tagline=TAGLINE,
+    logo=lockup(), name=NAME, tagline=TAGLINE,
     street=STREET, city=CITY, country=COUNTRY, phone=PHONE, phone_href=PHONE_HREF,
     email=EMAIL, legal=LEGAL, cid=COMPANY_ID, vat=VAT, founded=FOUNDED,
     privacy=u("/privacy/"),
@@ -279,6 +303,7 @@ def tags(items):
 SERVICES = [
     dict(
         slug="ship-engine-repair",
+        img=("svc-engine-repair.webp", 600, 410, "Marine diesel engine in a ship's engine room"),
         num="01",
         title="Ship equipment and engine repair",
         short="Maintenance and overhaul of 4-stroke and 2-stroke diesel engines, "
@@ -314,6 +339,7 @@ SERVICES = [
     ),
     dict(
         slug="refrigeration-systems",
+        img=("svc-refrigeration.webp", 800, 609, "Industrial refrigeration compressor plant"),
         num="02",
         title="Refrigeration systems and equipment",
         short="Design, modernisation, compressor overhaul, installation and "
@@ -356,6 +382,7 @@ SERVICES = [
     ),
     dict(
         slug="hull-and-piping",
+        img=("svc-hull-piping.webp", 800, 533, "Welder joining a steel pipe bend"),
         num="03",
         title="Hull and piping works",
         short="Steel and stainless steel pipe systems for shipbuilding, ship repair "
@@ -383,6 +410,7 @@ SERVICES = [
     ),
     dict(
         slug="spare-parts",
+        img=("svc-spare-parts.webp", 450, 300, "Spare parts warehouse shelving"),
         num="04",
         title="Supply of spare parts",
         short="Sourcing and delivery of spare parts and consumables for marine "
@@ -446,16 +474,32 @@ CERTIFICATES = [
 ]
 
 
+
+def card(s, level="h3"):
+    """A service card. `level` keeps the document outline continuous: h2 where
+    the cards are the page's top-level content, h3 where a section heading
+    already sits above them."""
+    f, w, h, alt = s["img"]
+    return """          <a class="card reveal" href="{href}">
+            <span class="card-media">
+              <span class="card-num">{num}</span>
+              <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy">
+            </span>
+            <span class="card-body">
+              <{lv}>{title}</{lv}>
+              <p>{short}</p>
+              <span class="card-more">Read more</span>
+            </span>
+          </a>""".format(href=u("/services/%s/" % s["slug"]), img=u("/assets/photos/" + f),
+                         alt=alt, w=w, h=h, lv=level, num=s["num"],
+                         title=s["title"], short=s["short"])
+
+
 # ============================================================
 # HOME
 # ============================================================
 def home():
-    cards = "\n".join("""          <a class="card reveal" href="{href}">
-            <p class="card-num">{num}</p>
-            <h3>{title}</h3>
-            <p>{short}</p>
-            <span class="card-more">Read more</span>
-          </a>""".format(href=u("/services/%s/" % s["slug"]), **s) for s in SERVICES)
+    cards = "\n".join(card(s, "h3") for s in SERVICES)
 
     logos = "\n".join(
         '          <li><img src="%s" alt="%s" width="%d" height="%d" loading="lazy"></li>'
@@ -463,8 +507,11 @@ def home():
 
     return """
     <section class="hero">
-      <div class="container">
-        <p class="eyebrow">Klaipeda, Lithuania <span class="sep">//</span> since {founded}</p>
+      <div class="hero-media">
+        <img src="{hero_img}" alt="" width="800" height="533" fetchpriority="high">
+      </div>
+      <div class="container hero-inner">
+        <p class="eyebrow eyebrow-plain">Klaipeda, Lithuania <span class="sep">//</span> since {founded}</p>
         <h1>Ship repair and maintenance all over the world</h1>
         <p class="lead">{legal} overhauls marine engines, refrigeration plant and
         piping systems for fishing fleets, shipowners and shore installations —
@@ -473,8 +520,42 @@ def home():
           <b>We consult</b> <i>&rarr;</i> <b>We organise</b> <i>&rarr;</i> <b>We ensure</b>
         </p>
         <div class="btn-row">
-          <a class="btn btn-solid" href="{contacts}">Send an enquiry</a>
+          <a class="btn btn-solid" href="{book}"{book_attrs}>{book_label}</a>
           <a class="btn btn-outline" href="{services}">Our services</a>
+        </div>
+        <p class="hero-trust">
+          <span>Authorised partner <b>BITZER</b></span>
+          <span>Marine line representative <b>DANFOSS</b></span>
+          <span>Certified <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
+        </p>
+      </div>
+    </section>
+
+    <section class="section section-tight partners-band">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Representation</p>
+          <h2>We represent BITZER and DANFOSS</h2>
+          <p class="lead">Two of the biggest names in refrigeration and marine
+          controls appoint us directly. That is not a reseller arrangement — it is
+          factory backing on the parts, the pricing and the warranty.</p>
+        </div>
+        <div class="partner-grid reveal">
+          <div class="partner">
+            <p class="partner-role">Authorised partner</p>
+            <p class="partner-name">BITZER</p>
+            <p>One of the largest independent manufacturers of refrigeration
+            compressors in the world. As an authorised partner we supply and service
+            BITZER equipment directly, rather than through an intermediary — which
+            shortens both the parts chain and the warranty conversation.</p>
+          </div>
+          <div class="partner">
+            <p class="partner-role">Marine line representative</p>
+            <p class="partner-name">DANFOSS</p>
+            <p>We represent the Danfoss marine line: controls, valves and components
+            for refrigeration and engine room systems, specified and supplied for
+            vessels rather than adapted from shore equipment.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -547,25 +628,25 @@ def home():
 
     <section class="section section-alt">
       <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow">Representation</p>
-          <h2>We represent global manufacturers</h2>
-        </div>
-        <div class="rep reveal">
-          <div>
-            <h3>BITZER</h3>
-            <p>Authorised partner. German refrigeration compressors, supplied and
-            serviced directly.</p>
+        <div class="split" style="align-items: center">
+          <div class="reveal">
+            <p class="eyebrow">Capability</p>
+            <h2>A decade of refrigeration, on ships and ashore</h2>
+            <p class="lead">Compressor overhauls, class-approved design
+            documentation, plant installation and commissioning — on fishing vessels
+            and shore installations alike.</p>
+            <div class="btn-row">
+              <a class="btn btn-outline" href="{refrig}">Refrigeration systems</a>
+            </div>
           </div>
-          <div>
-            <h3>DANFOSS</h3>
-            <p>Marine line representative. Controls, valves and components for
-            refrigeration and engine room systems.</p>
+          <div class="media-panel reveal">
+            <img src="{plant_img}" alt="Industrial refrigeration compressor plant"
+                 width="800" height="555" loading="lazy">
           </div>
         </div>
 
-        <div class="section-head reveal" style="margin-top: clamp(48px, 6vw, 88px)">
-          <p class="eyebrow">Partners &amp; clients</p>
+        <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">
+          <p class="eyebrow">Clients</p>
           <h2>Who we work with</h2>
         </div>
         <ul class="logo-wall reveal">
@@ -573,8 +654,14 @@ def home():
         </ul>
       </div>
     </section>
-{cta}""".format(founded=FOUNDED, legal=LEGAL, contacts=u("/contacts/"),
-                services=u("/services/"), cards=cards, logos=logos,
+{cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
+                cards=cards, logos=logos,
+                hero_img=u("/assets/photos/hero-welding.webp"),
+                plant_img=u("/assets/photos/plant-room.webp"),
+                refrig=u("/services/refrigeration-systems/"),
+                book=BOOKING_URL or u("/contacts/"),
+                book_attrs=' target="_blank" rel="noopener"' if BOOKING_URL else "",
+                book_label=BOOKING_LABEL,
                 years=datetime.date.today().year - int(FOUNDED),
                 cta=cta("24/7 service",
                         "We are ready to provide prompt and competent assistance — "
@@ -657,12 +744,7 @@ def about():
 def services_index():
     # h2, not h3: this page has no section heading above the cards, so h3 here
     # would jump the outline straight from h1.
-    cards = "\n".join("""          <a class="card reveal" href="{href}">
-            <p class="card-num">{num}</p>
-            <h2>{title}</h2>
-            <p>{short}</p>
-            <span class="card-more">Read more</span>
-          </a>""".format(href=u("/services/%s/" % s["slug"]), **s) for s in SERVICES)
+    cards = "\n".join(card(s, "h2") for s in SERVICES)
 
     return page_head(
         "Services", "What we repair, supply and install",
@@ -689,16 +771,20 @@ def service_page(s):
             heading, "\n".join("      " + p for p in paras)))
 
     others = [o for o in SERVICES if o["slug"] != s["slug"]]
-    more = "\n".join(
-        '          <a class="card reveal" href="{href}"><p class="card-num">{num}</p>'
-        '<h3>{title}</h3><p>{short}</p>'
-        '<span class="card-more">Read more</span></a>'.format(
-            href=u("/services/%s/" % o["slug"]), **o) for o in others)
+    more = "\n".join(card(o, "h3") for o in others)
 
+    f, w, h, alt = s["img"]
     return page_head(
         "Service " + s["num"], s["title"], s["lead"],
         [("Home", "/"), ("Services", "/services/"), (s["title"], None)]) + """
-    <section class="container prose">
+    <div class="container">
+      <div class="page-media reveal">
+        <img src="{img}" alt="{alt}" width="{w}" height="{h}">
+      </div>
+    </div>
+
+    <section class="container prose">""".format(
+        img=u("/assets/photos/" + f), alt=alt, w=w, h=h) + """
 {blocks}
     </section>
 
@@ -777,25 +863,29 @@ def partners():
         "Two authorised representations, and a client list built up over more than a "
         "decade.",
         [("Home", "/"), ("Partners", None)]) + """
-    <section class="section" style="padding-top: 0">
+    <section class="section partners-band" style="padding-top: clamp(30px, 4vw, 56px)">
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow">Representation</p>
           <h2>Manufacturers we represent</h2>
+          <p class="lead">Two direct appointments — factory backing on parts, pricing
+          and warranty.</p>
         </div>
-        <div class="rep reveal">
-          <div>
-            <h3>BITZER</h3>
-            <p><strong>Authorised partner.</strong> BITZER is one of the largest
-            independent manufacturers of refrigeration compressors. Being an authorised
-            partner means we supply and service the equipment directly, rather than
-            through an intermediary.</p>
+        <div class="partner-grid reveal">
+          <div class="partner">
+            <p class="partner-role">Authorised partner</p>
+            <h3 class="partner-name">BITZER</h3>
+            <p>BITZER is one of the largest independent manufacturers of refrigeration
+            compressors in the world. Being an authorised partner means we supply and
+            service the equipment directly rather than through an intermediary, which
+            shortens both the parts chain and the warranty conversation.</p>
           </div>
-          <div>
-            <h3>DANFOSS</h3>
-            <p><strong>Marine line representative.</strong> Danfoss controls, valves
-            and components for refrigeration and engine room systems, supplied for the
-            marine sector.</p>
+          <div class="partner">
+            <p class="partner-role">Marine line representative</p>
+            <h3 class="partner-name">DANFOSS</h3>
+            <p>We represent the Danfoss marine line: controls, valves and components
+            for refrigeration and engine room systems, specified and supplied for
+            vessels rather than adapted from shore equipment.</p>
           </div>
         </div>
 

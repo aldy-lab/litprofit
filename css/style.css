@@ -11,26 +11,27 @@
 
 :root {
   /* ---------- brand palette (Brand Guidelines › Colour) ---------- */
-  --navy-900: #0b0b26;   /* deepest ground */
-  --navy-800: #101036;
-  --navy-700: #16164a;
+  --navy-900: #08081f;   /* deepest ground */
+  --navy-800: #0d0d2e;
+  --navy-700: #13133f;
   --navy-600: #1b1b63;   /* the brand navy — containers, sign face */
   --navy-500: #26268c;
+  --navy-400: #3a3ab8;
   --white:    #ffffff;
   --grey-200: #d6d8e2;
   --grey-300: #b0b3c4;
   --grey-400: #8d90a6;
   --grey-500: #6b6e85;
   --grey-600: #454863;
-  --black:    #050510;
+  --black:    #04040d;
 
   /* ---------- semantic roles ---------- */
   --bg:        var(--navy-900);
   --bg-2:      var(--navy-800);
   --panel:     rgba(255, 255, 255, 0.035);
-  --panel-2:   rgba(255, 255, 255, 0.06);
+  --panel-2:   rgba(255, 255, 255, 0.07);
   --line:      rgba(255, 255, 255, 0.10);
-  --line-2:    rgba(255, 255, 255, 0.18);
+  --line-2:    rgba(255, 255, 255, 0.20);
   --text:      var(--white);
   --muted:     var(--grey-300);
   --muted-2:   var(--grey-500);
@@ -43,9 +44,9 @@
      names it (and once a web licence is confirmed). */
   --font: "Montserrat", "Segoe UI", system-ui, -apple-system, sans-serif;
 
-  --h1: clamp(34px, 5.2vw, 76px);
-  --h2: clamp(27px, 3.4vw, 50px);
-  --h3: clamp(22px, 2.2vw, 34px);
+  --h1: clamp(38px, 6vw, 88px);
+  --h2: clamp(28px, 3.8vw, 58px);
+  --h3: clamp(22px, 2.3vw, 34px);
   --h4: clamp(19px, 1.6vw, 24px);
   --text-xl: clamp(17px, 1.5vw, 21px);
   --text-l: 16px;
@@ -103,10 +104,7 @@ a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 ul, ol { list-style: none; }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* anchor targets must not land underneath the fixed header */
 :target, [id] { scroll-margin-top: calc(var(--nav-h) + 24px); }
@@ -145,8 +143,8 @@ ul, ol { list-style: none; }
    ============================================================ */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
 }
 h1 { font-size: var(--h1); }
 h2 { font-size: var(--h2); }
@@ -156,21 +154,30 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 /* The guidelines set supporting text in light caps with wide tracking
    (`LITPROFIT`, `BRAND GUIDELINES`). This is that style. */
 .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   font-size: var(--label);
   font-weight: 500;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--muted-2);
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
+/* the hairline that trails an eyebrow — a technical-drawing tic */
+.eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), transparent);
+  max-width: 180px;
+}
+.eyebrow-plain { display: block; }
+.eyebrow-plain::after { display: none; }
 
 /* `//` is a brand device, taken from the guidelines' page numbering
    (`33 // 36`). Used as a separator in eyebrows and breadcrumbs. */
-.sep {
-  color: var(--grey-600);
-  margin-inline: 0.6em;
-  font-weight: 400;
-}
+.sep { color: var(--grey-600); margin-inline: 0.55em; font-weight: 400; }
 
 .lead {
   font-size: var(--text-xl);
@@ -179,10 +186,11 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   line-height: 1.6;
 }
 
-.section { padding-block: clamp(64px, 9vw, 140px); }
+.section { padding-block: clamp(66px, 9vw, 150px); }
 .section-alt { background: var(--bg-2); }
+.section-tight { padding-block: clamp(48px, 6vw, 96px); }
 
-.section-head { margin-bottom: clamp(36px, 5vw, 68px); max-width: 78ch; }
+.section-head { margin-bottom: clamp(38px, 5vw, 72px); max-width: 78ch; }
 .section-head h2 { margin-bottom: 22px; }
 
 /* ============================================================
@@ -195,11 +203,11 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 48px;
-  padding: 13px 28px;
+  min-height: 50px;
+  padding: 14px 30px;
   font-size: var(--text-m);
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   border: 1px solid transparent;
   border-radius: 2px;
@@ -211,14 +219,9 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .btn-solid:hover { background: var(--grey-200); transform: translateY(-2px); }
 
 .btn-outline { border-color: var(--line-2); color: var(--text); }
-.btn-outline:hover { border-color: var(--white); background: rgba(255,255,255,0.06); }
+.btn-outline:hover { border-color: var(--white); background: rgba(255,255,255,0.07); }
 
-.btn-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 36px;
-}
+.btn-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 38px; }
 
 /* ============================================================
    HEADER
@@ -230,38 +233,56 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   height: var(--nav-h);
   display: flex;
   align-items: center;
-  background: rgba(11, 11, 38, 0.72);
+  background: rgba(8, 8, 31, 0.7);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid transparent;
   transition: background 0.4s var(--ease), border-color 0.4s var(--ease);
 }
 .site-header.is-stuck {
-  background: rgba(11, 11, 38, 0.95);
+  background: rgba(8, 8, 31, 0.96);
   border-bottom-color: var(--line);
 }
 
 .nav {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
   width: 100%;
   max-width: var(--container);
   margin-inline: auto;
   padding-inline: var(--pad);
 }
 
-.brand { display: flex; align-items: center; gap: 12px; flex: none; }
-.brand img { height: 30px; width: auto; }
+/* min-height, not padding: the wordmark placeholder is text, so without it
+   the brand link is only as tall as its line box (19px) and misses the
+   24px target minimum that the old <img> met by accident. */
+.brand { display: flex; align-items: center; flex: none; min-height: 44px; }
+.brand img { height: 28px; width: auto; }
+
+/* Wordmark placeholder, used while LOGO_FILE is unset in tools/build.py.
+   The old site's logo carries a red mark that is absent from the new
+   identity, so shipping it would be worse than shipping no mark at all.
+   Set LOGO_FILE to the real SVG and this is replaced by an <img>. */
+.brand-word {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--white);
+  white-space: nowrap;
+}
+.footer-brand .brand-word { font-size: 21px; display: block; margin-bottom: 18px; }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: clamp(14px, 1.8vw, 30px);
+  gap: clamp(12px, 1.6vw, 28px);
   margin-left: auto;
   min-width: 0;
 }
 .nav-links a {
+  position: relative;
   font-size: var(--text-m);
   color: var(--muted);
   padding-block: 12px;
@@ -269,14 +290,30 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   white-space: nowrap;
 }
 .nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--white); }
-
-.nav-actions { display: flex; align-items: center; gap: 16px; flex: none; }
-.nav-phone {
-  font-size: var(--text-m);
-  font-weight: 600;
-  white-space: nowrap;
-  padding-block: 12px;
+/* underline marker on the current page — desktop only, where the nav is a row */
+@media (min-width: 981px) {
+  .nav-links a[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 6px;
+    height: 1px;
+    background: var(--white);
+  }
 }
+
+.nav-actions { display: flex; align-items: center; gap: 14px; flex: none; }
+
+/* the header call-to-action — Calendly when configured, contacts until then */
+.btn-book {
+  min-height: 42px;
+  padding: 10px 20px;
+  font-size: var(--text-s);
+  letter-spacing: 0.08em;
+  background: var(--white);
+  color: var(--navy-900);
+  white-space: nowrap;
+}
+.btn-book:hover { background: var(--grey-200); }
 
 .burger {
   display: none;
@@ -307,58 +344,146 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
    ============================================================ */
 .hero {
   position: relative;
-  min-height: clamp(560px, 88vh, 900px);
   display: flex;
   align-items: flex-end;
-  padding-top: calc(var(--nav-h) + 60px);
-  padding-bottom: clamp(50px, 7vw, 110px);
+  min-height: clamp(620px, 92vh, 960px);
+  padding-top: calc(var(--nav-h) + 70px);
+  padding-bottom: clamp(40px, 5vw, 72px);
   overflow: hidden;
-  background: var(--navy-800);
+  background: var(--navy-900);
+  isolation: isolate;
 }
-/* Placeholder ground until the guidelines' photography lands: the dark
-   industrial treatment the mockups use, built out of the palette. */
-.hero::before {
+/* The photograph is 800px wide at source, which is soft for a full-bleed
+   hero. Held well back it reads as texture rather than as a picture, which
+   is both truer to the brand's dark mockups and hides the resolution. */
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.hero-media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
+  filter: saturate(0.55) contrast(1.05);
+}
+.hero-media::after {
   content: "";
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 90% at 78% 12%, rgba(38, 38, 140, 0.55), transparent 62%),
-    linear-gradient(180deg, var(--navy-700) 0%, var(--navy-900) 100%);
+    radial-gradient(90% 70% at 78% 8%, rgba(38, 38, 140, 0.5), transparent 60%),
+    linear-gradient(180deg, rgba(8,8,31,0.86) 0%, rgba(8,8,31,0.5) 42%, var(--navy-900) 96%);
 }
-.hero::after {
+/* technical grid, masked so it fades out at the edges */
+.hero::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: -1;
   background-image:
     linear-gradient(var(--line) 1px, transparent 1px),
     linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 96px 96px;
-  opacity: 0.35;
-  mask-image: radial-gradient(80% 70% at 50% 40%, #000 20%, transparent 78%);
-  -webkit-mask-image: radial-gradient(80% 70% at 50% 40%, #000 20%, transparent 78%);
+  background-size: 104px 104px;
+  opacity: 0.4;
+  mask-image: radial-gradient(76% 66% at 42% 44%, #000 18%, transparent 76%);
+  -webkit-mask-image: radial-gradient(76% 66% at 42% 44%, #000 18%, transparent 76%);
 }
-.hero > * { position: relative; }
 
-.hero h1 { max-width: 17ch; margin-bottom: 28px; }
-.hero .lead { max-width: 54ch; }
+.hero-inner { width: 100%; }
+.hero h1 { max-width: 15ch; margin-bottom: 30px; }
+.hero .lead { max-width: 52ch; }
 
 /* We consult -> We organise -> We ensure */
 .promise {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 18px;
+  gap: 10px 16px;
   margin-top: 40px;
   font-size: var(--text-m);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
 }
 .promise b { font-weight: 600; color: var(--white); }
-.promise i { font-style: normal; color: var(--grey-600); }
+.promise i { font-style: normal; color: var(--navy-400); }
+
+/* trust strip pinned to the bottom of the hero */
+.hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 34px;
+  margin-top: clamp(38px, 5vw, 64px);
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-s);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.hero-trust b { color: var(--white); font-weight: 600; letter-spacing: 0.1em; }
 
 /* ============================================================
-   STAT / FACT STRIP
+   PARTNERSHIP BAND — BITZER / DANFOSS
+   The two representations are the company's strongest credential, so
+   they get a section of their own rather than a line in a list.
+   ============================================================ */
+.partners-band { background: var(--bg-2); position: relative; overflow: hidden; }
+.partners-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 120% at 88% 50%, rgba(38,38,140,0.34), transparent 66%);
+}
+.partners-band > * { position: relative; }
+
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.partner {
+  min-width: 0;
+  background: var(--bg-2);
+  padding: clamp(30px, 3.6vw, 52px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: background 0.35s var(--ease);
+}
+.partner:hover { background: var(--navy-700); }
+/* NB: these two are scoped `.partner .x` on purpose. Written as bare
+   `.partner-name`, the generic `.partner p` rule below out-specifies them
+   (class + element beats class), and both collapse to 14px body text. */
+.partner .partner-name {
+  font-size: clamp(30px, 3.6vw, 52px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--white);
+}
+.partner .partner-role {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  font-size: var(--label);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.partner p { color: var(--muted); font-size: var(--text-m); }
+
+/* ============================================================
+   FACT STRIP
    ============================================================ */
 .facts {
   display: grid;
@@ -367,16 +492,12 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   background: var(--line);
   border: 1px solid var(--line);
 }
-.fact {
-  background: var(--bg);
-  padding: 30px 26px;
-  min-width: 0;
-}
+.fact { background: var(--bg); padding: 32px 28px; min-width: 0; }
 .fact-value {
-  font-size: clamp(28px, 3vw, 42px);
+  font-size: clamp(30px, 3.2vw, 46px);
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
 }
 .fact-label {
   font-size: var(--label);
@@ -387,48 +508,73 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 }
 
 /* ============================================================
-   SERVICE CARDS
+   SERVICE CARDS — with media
    ============================================================ */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+  gap: 20px;
 }
 .card {
   display: flex;
   flex-direction: column;
   min-width: 0;                 /* grid children default to min-width:auto */
-  padding: 34px 30px 30px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 2px;
+  overflow: hidden;
   transition: background 0.35s var(--ease), border-color 0.35s var(--ease),
               transform 0.35s var(--ease);
 }
 a.card:hover {
   background: var(--panel-2);
   border-color: var(--line-2);
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+}
+
+.card-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--navy-700);
+}
+.card-media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.62;
+  filter: saturate(0.6);
+  transition: transform 0.6s var(--ease), opacity 0.4s var(--ease);
+}
+a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
+.card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8,8,31,0.15), rgba(8,8,31,0.85));
 }
 .card-num {
+  position: absolute;
+  left: 20px; top: 16px;
+  z-index: 1;
   font-size: var(--label);
+  font-weight: 600;
   letter-spacing: 0.18em;
-  color: var(--grey-600);
-  margin-bottom: 22px;
+  color: var(--white);
 }
-/* h2 on the services index (no section heading above them), h3 elsewhere —
-   same look either way, so the outline can stay continuous */
-.card h2, .card h3 { font-size: var(--h4); margin-bottom: 14px; letter-spacing: -0.01em; }
+
+.card-body { display: flex; flex-direction: column; flex: 1; padding: 26px 26px 24px; }
+.card h2, .card h3 { font-size: var(--h4); margin-bottom: 12px; letter-spacing: -0.01em; }
 .card p { color: var(--muted); font-size: var(--text-m); }
 .card-more {
   margin-top: auto;
-  padding-top: 26px;
+  padding-top: 24px;
   font-size: var(--text-s);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
 }
+.card-more::after { content: " \2192"; }
 
 /* ============================================================
    SPLIT (text + panel)
@@ -436,18 +582,33 @@ a.card:hover {
 .split {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: clamp(32px, 5vw, 76px);
+  gap: clamp(32px, 5vw, 80px);
   align-items: start;
 }
 .split > * { min-width: 0; }
 
-.pillars { display: grid; gap: 26px; }
-.pillar { padding-left: 24px; border-left: 2px solid var(--line-2); }
+.pillars { display: grid; gap: 4px; }
+.pillar {
+  padding: 24px 26px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.pillar:hover { background: var(--panel-2); border-color: var(--line-2); }
 .pillar h3 { font-size: var(--h4); margin-bottom: 10px; }
 .pillar p { color: var(--muted); font-size: var(--text-m); }
 
+/* a framed image panel */
+.media-panel {
+  position: relative;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: var(--navy-700);
+}
+.media-panel img { width: 100%; object-fit: cover; opacity: 0.8; filter: saturate(0.65); }
+
 /* ============================================================
-   LOGO WALL (clients / partners)
+   LOGO WALL (clients)
    ============================================================ */
 /* Fixed column counts, not auto-fill: there are ten logos, and ten divides
    evenly by 5 and by 2 only. auto-fill picked 8 across and left a ragged
@@ -459,9 +620,8 @@ a.card:hover {
   background: var(--line);
   border: 1px solid var(--line);
 }
-@media (max-width: 780px) {
-  .logo-wall { grid-template-columns: repeat(2, 1fr); }
-}
+@media (max-width: 780px) { .logo-wall { grid-template-columns: repeat(2, 1fr); } }
+
 /* White tiles, logos unaltered.
    The obvious alternative — knocking the logos out to white with
    `brightness(0) invert(1)` — destroys any mark that carries knockout
@@ -486,21 +646,6 @@ a.card:hover {
 }
 .logo-wall li:hover img { opacity: 1; filter: none; }
 
-/* Representation: BITZER / DANFOSS */
-.rep {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 22px;
-}
-.rep div {
-  min-width: 0;
-  padding: 30px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-}
-.rep h3 { font-size: var(--h4); margin-bottom: 8px; }
-.rep p { color: var(--muted); font-size: var(--text-m); }
-
 /* ============================================================
    DOCUMENT LIST (certificates)
    ============================================================ */
@@ -511,7 +656,7 @@ a.card:hover {
   align-items: center;
   gap: 8px 20px;
   background: var(--bg);
-  padding: 24px 28px;
+  padding: 26px 30px;
   min-width: 0;
   transition: background 0.3s var(--ease);
 }
@@ -528,36 +673,59 @@ a.card:hover {
 }
 
 /* ============================================================
-   PROSE (interior pages)
+   PAGE HEAD / PROSE
    ============================================================ */
-.page-head { padding-top: calc(var(--nav-h) + clamp(50px, 8vw, 120px)); padding-bottom: clamp(30px, 4vw, 56px); }
+.page-head {
+  padding-top: calc(var(--nav-h) + clamp(48px, 7vw, 104px));
+  padding-bottom: clamp(28px, 4vw, 52px);
+}
 .page-head h1 { margin-bottom: 24px; }
 
-.crumb {
-  font-size: var(--text-s);
-  color: var(--muted-2);
-  margin-bottom: 18px;
-}
+.crumb { font-size: var(--text-s); color: var(--muted-2); margin-bottom: 18px; }
 .crumb a { display: inline-block; padding-block: 4px; }
 .crumb a:hover { color: var(--white); }
 
+/* banner image at the top of a service page */
+.page-media {
+  position: relative;
+  margin-bottom: clamp(36px, 5vw, 64px);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  aspect-ratio: 21 / 8;
+  background: var(--navy-700);
+}
+.page-media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.72;
+  filter: saturate(0.6);
+}
+.page-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8,8,31,0.2), rgba(8,8,31,0.75));
+}
+
 .prose { max-width: 74ch; padding-bottom: clamp(50px, 7vw, 100px); }
-.prose h2 { font-size: var(--h3); margin-top: 56px; margin-bottom: 18px; }
+.prose h2 { font-size: var(--h3); margin-top: 58px; margin-bottom: 18px; }
 .prose h3 { font-size: var(--h4); margin-top: 38px; margin-bottom: 12px; }
 .prose > *:first-child { margin-top: 0; }
 .prose p { color: var(--muted); margin-bottom: 18px; }
 .prose strong { color: var(--text); font-weight: 600; }
 /* padding-block on an INLINE element grows the hit area without pushing the
    lines apart, so this buys the 24px target size for free */
-.prose a { color: var(--white); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); padding-block: 5px; }
+.prose a {
+  color: var(--white);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-2);
+  padding-block: 5px;
+}
 .prose a:hover { text-decoration-color: var(--white); }
 
 .prose ul { margin: 0 0 22px; display: grid; gap: 10px; }
-.prose ul li {
-  position: relative;
-  padding-left: 26px;
-  color: var(--muted);
-}
+.prose ul li { position: relative; padding-left: 26px; color: var(--muted); }
 .prose ul li::before {
   content: "//";
   position: absolute;
@@ -566,27 +734,47 @@ a.card:hover {
   font-size: var(--text-s);
 }
 
-/* equipment / manufacturer lists — these carry over from the old site
-   verbatim, so they get a denser treatment than prose bullets */
+/* Equipment / manufacturer lists — these carry over from the old site
+   verbatim, so they get a denser treatment than prose bullets.
+
+   Scoped `.prose .tags`, not bare `.tags`: every one of these lives inside
+   .prose, and `.prose ul` (class + element) out-specifies a lone class, so
+   the bare version loses `display:flex` to `display:grid` and each chip
+   stretches to a full-width row wearing a `//` bullet. */
+.prose .tags,
 .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.prose .tags li,
 .tags li {
-  padding: 7px 14px;
+  padding: 8px 14px;
   border: 1px solid var(--line);
   background: var(--panel);
   font-size: var(--text-s);
   letter-spacing: 0.04em;
   color: var(--muted);
+  transition: border-color 0.25s var(--ease), color 0.25s var(--ease);
 }
+.prose .tags li::before { content: none; }
+.prose .tags li:hover,
+.tags li:hover { border-color: var(--line-2); color: var(--white); }
 
 /* ============================================================
    CTA BAND
    ============================================================ */
-.cta {
-  background: var(--brand);
-  padding-block: clamp(56px, 8vw, 110px);
+.cta { background: var(--brand); padding-block: clamp(58px, 8vw, 118px); position: relative; overflow: hidden; }
+.cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 104px 104px;
+  mask-image: radial-gradient(70% 90% at 80% 50%, #000, transparent 72%);
+  -webkit-mask-image: radial-gradient(70% 90% at 80% 50%, #000, transparent 72%);
 }
+.cta > * { position: relative; }
 .cta h2 { margin-bottom: 18px; }
-.cta p { color: rgba(255, 255, 255, 0.78); font-size: var(--text-xl); max-width: 54ch; }
+.cta p { color: rgba(255, 255, 255, 0.8); font-size: var(--text-xl); max-width: 54ch; }
 .cta .btn-solid { background: var(--white); color: var(--navy-900); }
 .cta .btn-outline { border-color: rgba(255, 255, 255, 0.45); }
 
@@ -596,7 +784,7 @@ a.card:hover {
 .contact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: clamp(30px, 4vw, 60px);
+  gap: clamp(30px, 4vw, 64px);
 }
 .contact-grid > * { min-width: 0; }
 /* Targeted by class, not by tag: the heading LEVEL is chosen per page to keep
@@ -615,7 +803,7 @@ a.card:hover {
   padding-block: 4px;   /* WCAG 2.2 target size — 19px of text is not tappable */
 }
 .contact-block a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.contact-block + .contact-block { margin-top: 34px; }
+.contact-block + .contact-block { margin-top: 32px; }
 
 .form { display: grid; gap: 18px; }
 .field { display: grid; gap: 8px; min-width: 0; }
@@ -652,7 +840,7 @@ a.card:hover {
    ============================================================ */
 .site-footer {
   background: var(--black);
-  padding-block: clamp(50px, 6vw, 88px) 34px;
+  padding-block: clamp(52px, 6vw, 92px) 34px;
   border-top: 1px solid var(--line);
 }
 .footer-top {
@@ -678,7 +866,7 @@ a.card:hover {
   padding-block: 4px;   /* 18px of text is under the 24px minimum on its own */
 }
 .footer-col a:hover { color: var(--white); }
-.footer-brand img { height: 30px; margin-bottom: 18px; }
+.footer-brand img { height: 28px; margin-bottom: 18px; }
 .footer-brand p { font-size: var(--text-m); color: var(--muted-2); max-width: 30ch; }
 
 .footer-bottom {
@@ -695,15 +883,15 @@ a.card:hover {
 
 /* ============================================================
    REVEAL
-   ============================================================ */
-/* Scoped to .js — set by an inline script in <head>. Without that guard,
+   Scoped to .js — set by an inline script in <head>. Without that guard,
    opacity:0 is the DEFAULT state, so if the script fails, is blocked, or
    simply has not run yet, every section below the hero renders blank.
-   Hiding content by default is not something a stylesheet should do. */
+   Hiding content by default is not something a stylesheet should do.
+   ============================================================ */
 .js .reveal {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transform: translateY(24px);
+  transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
 }
 .js .reveal.is-in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
@@ -721,11 +909,11 @@ a.card:hover {
   padding-top: var(--nav-h);
 }
 .notfound .code {
-  font-size: clamp(70px, 14vw, 180px);
+  font-size: clamp(70px, 14vw, 190px);
   font-weight: 700;
   line-height: 1;
   color: var(--grey-600);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
 }
 
 /* ============================================================
@@ -760,24 +948,25 @@ a.card:hover {
 }
 
 @media (max-width: 620px) {
-  /* the phone number crowds the logo on a narrow screen — it moves into
+  /* the booking button crowds the logo on a narrow screen — it moves into
      the menu, where it becomes a full-width action */
-  .nav-phone { display: none; }
-  .nav-links .nav-phone-mobile {
+  .nav-actions .btn-book { display: none; }
+  .nav-links .nav-cta-mobile {
     display: block;
-    margin-top: 16px;
+    margin-top: 18px;
+    padding: 15px 0;
     text-align: center;
     border: 1px solid var(--line-2);
-    border-bottom: 1px solid var(--line-2);
     font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: var(--text-m);
   }
   .btn { width: 100%; }
   .btn-row { gap: 10px; }
   .footer-bottom .spacer { margin-left: 0; flex-basis: 100%; }
 }
-@media (min-width: 621px) {
-  .nav-links .nav-phone-mobile { display: none; }
-}
+@media (min-width: 621px) { .nav-links .nav-cta-mobile { display: none; } }
 
 @media (max-width: 620px) {
   /* iOS Safari zooms the page when a focused field is under 16px.
@@ -790,7 +979,7 @@ a.card:hover {
    PRINT
    ============================================================ */
 @media print {
-  .site-header, .burger, .cta, .form { display: none; }
+  .site-header, .burger, .cta, .form, .hero-media { display: none; }
   body { background: #fff; color: #000; }
   a { text-decoration: underline; }
 }

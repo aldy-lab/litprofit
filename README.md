@@ -51,6 +51,16 @@ carries a `/litprofit` prefix. To move to the real domain:
 No `CNAME` is committed yet on purpose — adding one before the DNS exists takes
 the github.io preview down too, leaving nothing to look at.
 
+## Three switches at the top of `tools/build.py`
+
+| Constant | Effect while empty | Set it to |
+|---|---|---|
+| `LOGO_FILE` | header and footer render a plain `LITPROFIT` wordmark | the new logo SVG |
+| `BOOKING_URL` | the "Book a call" button falls back to `/contacts/` | the Calendly link |
+| `BASE` / `ORIGIN` | site serves from the `/litprofit/` project path | `""` + the real domain |
+
+Nothing dead ever ships: each one degrades to something that works.
+
 ## What is provisional
 
 - **The palette.** `--navy-*` in `css/style.css` is estimated from the brand
@@ -60,13 +70,28 @@ the github.io preview down too, leaving nothing to look at.
 - **The typeface.** Montserrat is a stand-in. The wordmark in the guidelines is
   a heavier geometric sans. If the brand face is licensed, using it as a webfont
   needs a separate **web** licence.
-- **The logo.** `assets/brand/` still holds the logo from the *old* site — it
-  contains red, which appears nowhere in the new identity. The new monogram is
-  needed as SVG.
+- **The logo.** `assets/brand/` holds the logo from the *old* site. It contains
+  red, which appears nowhere in the new identity, so it is **not used** — the
+  header and footer render a wordmark instead. Shipping no mark beats shipping
+  the wrong one. Set `LOGO_FILE` when the new monogram is exported.
+- **Photography.** `assets/photos/` is re-encoded from the old site, which caps
+  at **800px wide** — fine for cards, soft for a full-bleed hero, which is why
+  the hero image is held back to 30% opacity and reads as texture. Real
+  photography of the company's own work would be the single biggest visual
+  upgrade available.
 - **Completed works.** The old site's version was two headings and two stock
   photos. The page is written from what the rest of the site establishes, but to
   be genuinely useful it needs, per project: vessel or plant name, year, port,
   scope, and a photograph.
+
+### One image was dropped on purpose
+
+The old site's `engine-repair.jpg` carries a **visible stock watermark** —
+diagonal lines and a circular agency mark, clear once the contrast is lifted.
+litprofit.com is serving an unlicensed comp image today. It is excluded from
+this build; the engine-repair card uses the ship's-engine-room photograph
+instead, which is more authentic anyway. Worth checking what licence the
+remaining stock images were bought under.
 
 See [`docs/brand-notes.md`](docs/brand-notes.md) for what the guidelines
 establish so far and what is still outstanding.
