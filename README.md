@@ -109,6 +109,26 @@ It was briefly shipped as the logo before a screenshot caught it. The only
 which is not the wordmark weight either. **The heavy wordmark as vector is
 still needed.**
 
+## Design notes
+
+- **The services grid is not four equal boxes.** Refrigeration is the company's
+  original discipline and its deepest bench, so it takes a feature card with
+  three compact cards beside it. Equal weighting would have said something
+  untrue about the business. Driven by `FEATURE_SLUG` in `tools/build.py`; the
+  grid only rearranges when a card is marked as the feature, so it degrades to
+  a plain responsive grid otherwise (`:has(.card--feature)`).
+- **Sections are numbered `01 // Services`**, after the guidelines' own page
+  numbering (`21 // 36`). Only the homepage is numbered — it is the one page
+  that reads as a sequence.
+- **The promise is three numbered steps**, not a run-on line with arrows. It is
+  a sequence, and numbering says so without the arrows.
+- **Figures use `tabular-nums`** so the four stats sit on a common rhythm
+  instead of each setting its own width.
+- **Measure is constrained per element, not per container.** Capping
+  `.section-head` itself squeezed 62px headings into four-line wraps *and*
+  narrowed the lead inside it — the heading and the lead now get their own
+  `max-width`, with `text-wrap: balance` evening out the last line.
+
 ## What is provisional
 
 - **The typeface.** Montserrat is a stand-in, including for the name beside the

@@ -44,8 +44,8 @@
      names it (and once a web licence is confirmed). */
   --font: "Montserrat", "Segoe UI", system-ui, -apple-system, sans-serif;
 
-  --h1: clamp(38px, 6vw, 88px);
-  --h2: clamp(28px, 3.8vw, 58px);
+  --h1: clamp(40px, 6.6vw, 104px);
+  --h2: clamp(29px, 4vw, 62px);
   --h3: clamp(22px, 2.3vw, 34px);
   --h4: clamp(19px, 1.6vw, 24px);
   --text-xl: clamp(17px, 1.5vw, 21px);
@@ -184,9 +184,13 @@ ul, ol { list-style: none; }
    ============================================================ */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
-  line-height: 1.06;
-  letter-spacing: -0.025em;
+  line-height: 1.04;
+  /* tracking tightens as the type grows — at 104px the default spacing
+     reads loose, at 19px the same value would read cramped */
+  letter-spacing: -0.032em;
+  text-wrap: balance;
 }
+h3, h4, h5, h6 { letter-spacing: -0.015em; }
 h1 { font-size: var(--h1); }
 h2 { font-size: var(--h2); }
 h3 { font-size: var(--h3); }
@@ -216,6 +220,11 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .eyebrow-plain { display: block; }
 .eyebrow-plain::after { display: none; }
 
+/* Section index, after the guidelines' own page numbering (`21 // 36`).
+   Gives the page a spine — you always know where you are in the sequence. */
+.eyebrow-num { color: var(--white); font-weight: 600; }
+.eyebrow-of { color: var(--grey-600); }
+
 /* `//` is a brand device, taken from the guidelines' page numbering
    (`33 // 36`). Used as a separator in eyebrows and breadcrumbs. */
 .sep { color: var(--grey-600); margin-inline: 0.55em; font-weight: 400; }
@@ -231,7 +240,13 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .section-alt { background: var(--bg-2); }
 .section-tight { padding-block: clamp(48px, 6vw, 96px); }
 
-.section-head { margin-bottom: clamp(38px, 5vw, 72px); max-width: 78ch; }
+/* 30ch here was a mistake worth naming: the cap applies to the whole
+   section-head, so it squeezed 62px headings into four-line wraps AND
+   narrowed the lead inside it. Constrain the heading and the lead
+   separately, and let text-wrap:balance even out the last line. */
+.section-head { margin-bottom: clamp(38px, 5vw, 72px); max-width: 68ch; }
+.section-head h2 { max-width: 20ch; }
+.section-head .lead { max-width: 54ch; }
 .section-head h2 { margin-bottom: 22px; }
 
 /* ============================================================
@@ -427,20 +442,40 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .hero h1 { max-width: 15ch; margin-bottom: 30px; }
 .hero .lead { max-width: 52ch; }
 
-/* We consult -> We organise -> We ensure */
+/* We consult -> We organise -> We ensure.
+   Set as three numbered steps rather than a run-on line: it is a sequence,
+   and numbering it says so without needing the arrows. */
 .promise {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 16px;
-  margin-top: 40px;
-  font-size: var(--text-m);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
+  gap: 0;
+  margin-top: clamp(34px, 4vw, 52px);
+  max-width: 620px;
+  border-top: 1px solid var(--line);
 }
-.promise b { font-weight: 600; color: var(--white); }
-.promise i { font-style: normal; color: var(--navy-400); }
+.promise li {
+  min-width: 0;
+  flex: 1 1 170px;
+  padding: 18px 22px 0 0;
+  border-top: 2px solid transparent;
+  margin-top: -1px;
+}
+.promise li:first-child { border-top-color: var(--white); }
+.promise .step-num {
+  display: block;
+  font-size: var(--label);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--grey-400);
+  margin-bottom: 7px;
+}
+.promise .step-label {
+  font-size: var(--text-m);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--white);
+}
 
 /* trust strip pinned to the bottom of the hero */
 .hero-trust {
@@ -457,6 +492,31 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   color: var(--muted-2);
 }
 .hero-trust b { color: var(--white); font-weight: 600; letter-spacing: 0.1em; }
+
+/* scroll cue — a rule that draws itself down, so the hero has a bottom edge
+   that invites rather than just stops */
+.scroll-cue {
+  position: absolute;
+  right: var(--pad);
+  bottom: 0;
+  width: 1px;
+  height: clamp(48px, 7vw, 92px);
+  background: linear-gradient(180deg, transparent, var(--line-2));
+  overflow: hidden;
+}
+.scroll-cue::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--white);
+  animation: cue 2.6s var(--ease) infinite;
+}
+@keyframes cue {
+  0%   { transform: translateY(-100%); }
+  60%  { transform: translateY(100%); }
+  100% { transform: translateY(100%); }
+}
+@media (max-width: 980px) { .scroll-cue { display: none; } }
 
 /* ============================================================
    PARTNERSHIP BAND — BITZER / DANFOSS
@@ -528,12 +588,15 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   background: var(--line);
   border: 1px solid var(--line);
 }
-.fact { background: var(--bg); padding: 32px 28px; min-width: 0; }
+.fact { background: var(--bg); padding: 36px 30px 32px; min-width: 0; }
 .fact-value {
-  font-size: clamp(30px, 3.2vw, 46px);
+  font-size: clamp(34px, 4.2vw, 62px);
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  /* tabular figures so the four values sit on a common rhythm rather than
+     each one setting its own width */
+  font-variant-numeric: tabular-nums lining;
 }
 .fact-label {
   font-size: var(--label);
@@ -546,10 +609,22 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 /* ============================================================
    SERVICE CARDS — with media
    ============================================================ */
+/* One feature card beside a stack of compact ones, rather than four equal
+   boxes. Four equal cards give every service the same weight, which is not
+   true — refrigeration is the company's deepest discipline and the page
+   should say so. Falls back to a plain responsive grid wherever no card is
+   marked as the feature. */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
-  gap: 20px;
+  gap: 18px;
+}
+@media (min-width: 900px) {
+  .card-grid:has(.card--feature) {
+    grid-template-columns: 1.08fr 1fr;
+    align-items: stretch;
+  }
+  .card--feature { grid-row: span 3; }
 }
 .card {
   display: flex;
@@ -573,6 +648,23 @@ a.card:hover {
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background: var(--navy-700);
+}
+.card--feature .card-media { aspect-ratio: 4 / 3; }
+.card--feature .card-body { padding: 34px 34px 32px; }
+.card--feature h2, .card--feature h3 { font-size: var(--h3); }
+.card--feature p { font-size: var(--text-l); }
+
+/* compact: thumbnail beside the text, so three of them stack neatly */
+@media (min-width: 900px) {
+  .card--compact { flex-direction: row; }
+  .card--compact .card-media {
+    width: 148px;
+    flex: none;
+    aspect-ratio: auto;
+    align-self: stretch;
+  }
+  .card--compact .card-body { padding: 22px 24px 20px; }
+  .card--compact .card-more { padding-top: 16px; }
 }
 .card-media img {
   width: 100%; height: 100%;
@@ -691,12 +783,12 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   background: var(--white);
   display: grid;
   place-items: center;
-  padding: 22px 18px;
+  padding: 26px 24px;
   min-width: 0;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 16 / 9;
 }
 .logo-wall img {
-  max-height: 58px;
+  max-height: 46px;
   max-width: 100%;
   width: auto;
   filter: grayscale(1);

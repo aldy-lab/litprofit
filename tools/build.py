@@ -480,12 +480,14 @@ CERTIFICATES = [
 
 
 
-def card(s, level="h3"):
+def card(s, level="h3", variant=""):
     """A service card. `level` keeps the document outline continuous: h2 where
     the cards are the page's top-level content, h3 where a section heading
-    already sits above them."""
+    already sits above them. `variant` is "feature" or "compact"; the grid
+    only rearranges itself when one card is marked as the feature."""
     f, w, h, alt = s["img"]
-    return """          <a class="card reveal" href="{href}">
+    cls = "card reveal" + (" card--" + variant if variant else "")
+    return """          <a class="{cls}" href="{href}">
             <span class="card-media">
               <span class="card-num">{num}</span>
               <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy">
@@ -495,16 +497,31 @@ def card(s, level="h3"):
               <p>{short}</p>
               <span class="card-more">Read more</span>
             </span>
-          </a>""".format(href=u("/services/%s/" % s["slug"]), img=u("/assets/photos/" + f),
+          </a>""".format(cls=cls, href=u("/services/%s/" % s["slug"]),
+                         img=u("/assets/photos/" + f),
                          alt=alt, w=w, h=h, lv=level, num=s["num"],
                          title=s["title"], short=s["short"])
+
+
+# Refrigeration leads: it is the company's original discipline and the one it
+# has the deepest bench in, so it gets the feature card rather than being one
+# of four equal boxes.
+FEATURE_SLUG = "refrigeration-systems"
+
+
+def service_cards(level="h3"):
+    feature = [x for x in SERVICES if x["slug"] == FEATURE_SLUG]
+    rest = [x for x in SERVICES if x["slug"] != FEATURE_SLUG]
+    out = [card(x, level, "feature") for x in feature]
+    out += [card(x, level, "compact") for x in rest]
+    return "\n".join(out)
 
 
 # ============================================================
 # HOME
 # ============================================================
 def home():
-    cards = "\n".join(card(s, "h3") for s in SERVICES)
+    cards = service_cards("h3")
 
     logos = "\n".join(
         '          <li><img src="%s" alt="%s" width="%d" height="%d" loading="lazy"></li>'
@@ -521,9 +538,11 @@ def home():
         <p class="lead">{legal} overhauls marine engines, refrigeration plant and
         piping systems for fishing fleets, shipowners and shore installations —
         wherever the vessel happens to be.</p>
-        <p class="promise">
-          <b>We consult</b> <i>&rarr;</i> <b>We organise</b> <i>&rarr;</i> <b>We ensure</b>
-        </p>
+        <ul class="promise">
+          <li><span class="step-num">01</span><span class="step-label">We consult</span></li>
+          <li><span class="step-num">02</span><span class="step-label">We organise</span></li>
+          <li><span class="step-num">03</span><span class="step-label">We ensure</span></li>
+        </ul>
         <div class="btn-row">
           <a class="btn btn-solid" href="{book}"{book_attrs}>{book_label}</a>
           <a class="btn btn-outline" href="{services}">Our services</a>
@@ -533,13 +552,14 @@ def home():
           <span>Marine line representative <b>DANFOSS</b></span>
           <span>Certified <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
         </p>
+        <span class="scroll-cue" aria-hidden="true"></span>
       </div>
     </section>
 
     <section class="section section-tight partners-band seam-top seam-bottom">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow">Representation</p>
+          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>Representation</p>
           <h2>We represent BITZER and DANFOSS</h2>
           <p class="lead">Two of the biggest names in refrigeration and marine
           controls appoint us directly. That is not a reseller arrangement — it is
@@ -591,7 +611,7 @@ def home():
     <section class="section section-alt" id="services">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow">Services</p>
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>Services</p>
           <h2>Four disciplines, one contractor</h2>
           <p class="lead">Most jobs need more than one of these at once. Handling them
           under a single contract is what removes the coordination problem from the
@@ -606,7 +626,7 @@ def home():
     <section class="section">
       <div class="container split">
         <div class="reveal">
-          <p class="eyebrow">How we work</p>
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>How we work</p>
           <h2>Consult, organise, ensure</h2>
           <p class="lead">Three steps, in that order — it is how the company has
           described itself for years, and it holds up.</p>
@@ -635,7 +655,7 @@ def home():
       <div class="container">
         <div class="split" style="align-items: center">
           <div class="reveal">
-            <p class="eyebrow">Capability</p>
+            <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>Capability</p>
             <h2>A decade of refrigeration, on ships and ashore</h2>
             <p class="lead">Compressor overhauls, class-approved design
             documentation, plant installation and commissioning — on fishing vessels
@@ -651,7 +671,7 @@ def home():
         </div>
 
         <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">
-          <p class="eyebrow">Clients</p>
+          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>Clients</p>
           <h2>Who we work with</h2>
         </div>
         <ul class="logo-wall reveal">
@@ -749,7 +769,7 @@ def about():
 def services_index():
     # h2, not h3: this page has no section heading above the cards, so h3 here
     # would jump the outline straight from h1.
-    cards = "\n".join(card(s, "h2") for s in SERVICES)
+    cards = service_cards("h2")
 
     return page_head(
         "Services", "What we repair, supply and install",
