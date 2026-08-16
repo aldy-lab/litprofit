@@ -6,9 +6,8 @@ Made by ALDY.
 
 **Preview:** https://aldy-lab.github.io/litprofit/
 
-Status: **English site built and audited.** The visual layer is provisional —
-it is driven entirely by CSS tokens, pending the brand guidelines' colour and
-typography pages. Lithuanian and Russian are to follow.
+Status: **Trilingual — English, Lithuanian and Russian — built and audited.**
+37 pages, all passing the device audit.
 
 ## Build
 
@@ -32,8 +31,8 @@ below possible.
 ## Structure
 
 ```
-tools/build.py       every page's content and the page shell — the only file
-                     to edit for copy changes
+tools/build.py       page shells and markup — the only file to edit for layout
+tools/i18n.py        every user-facing string in all three languages
 tools/audit.py       Playwright audit: structure, links, mobile
 css/style.css        design tokens + all styles
 css/fonts.css        self-hosted Montserrat @font-face
@@ -172,6 +171,39 @@ The dimension figures (4250 mm, 2100 mm) are plausible for a package of this
 type but are **illustrative, not a real machine's**. Swap them for a genuine
 unit's if the drawing is ever used as anything but decoration.
 
+## Languages
+
+English at the root, Lithuanian under `/lt/`, Russian under `/ru/` — 12 pages
+each, plus one shared 404.
+
+- **All strings live in `tools/i18n.py`.** The markup stays in `build.py`, so a
+  layout change is made once rather than three times. A missing key raises at
+  build time instead of silently shipping English into a Lithuanian page.
+- **The Lithuanian and Russian are the company's own wording** wherever their
+  old site had an equivalent — the equipment vocabulary, the service names and
+  the *Konsultuojame / Organizuojame / Užtikriname* triad are theirs.
+- **`u()` decides asset vs page.** Assets are shared between languages, pages
+  are not; deciding that in one function is what kept the language switch from
+  touching every template.
+- **hreflang on every page**, with `x-default` on English, and the sitemap
+  carries `xhtml:link` alternates. Without them the three versions of a page
+  compete with each other in search instead of being understood as
+  translations.
+- **The switcher goes to the same page in the other language**, not to its
+  homepage — dumping a reader back at the top is the usual way these get it
+  wrong. Verified: EN service page → LT stays on that service page.
+- **Cyrillic is a separate font subset** under `unicode-range`, so English and
+  Lithuanian pages never download it.
+- The 404 exists once, at the root. GitHub Pages serves it for any unmatched
+  path on the host, so `lang_url()` collapses `/404.html` to `/` — otherwise
+  the switcher pointed at `/lt/404.html`, which does not exist.
+
+⚠️ **The privacy policy is a legal text.** The Lithuanian and Russian are
+translations for convenience; have all three reviewed before launch.
+
+⚠️ **The address is inconsistent on the client's own site** and needs
+confirming — see below.
+
 ## Navigation and page furniture
 
 The site reads as a set of sheets, after the drawing's own title block
@@ -290,6 +322,23 @@ confirm these are the approved marks in the approved treatment before launch.
   photos. The page is written from what the rest of the site establishes, but to
   be genuinely useful it needs, per project: vessel or plant name, year, port,
   scope, and a photograph.
+
+### The address does not agree with itself
+
+Their existing site gives three different addresses:
+
+| Source | Address |
+|---|---|
+| English pages | Svajones str. **30** |
+| Lithuanian footer | Svajonės g. **3** |
+| Lithuanian contacts page | **Naujoji Uosto g. 3** |
+| Russian pages | ул. Svajones **3** |
+
+This site currently publishes the English one, `Svajones str. 30`, because
+changing it on a guess would be worse than keeping it. Two of the three
+languages say number 3, and the Lithuanian contacts page — the page most likely
+to have been updated on a move — gives a different street entirely. **Ask the
+client which is current before launch.** It is one constant in `build.py`.
 
 ### One image was dropped on purpose
 

@@ -19,6 +19,8 @@ import json
 import os
 import re
 
+import i18n
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ============================================================
@@ -57,7 +59,8 @@ LOGO_LOCKUP = "/assets/brand/logo-lockup.svg"
 # button points at it; while it is empty the button falls back to the
 # contacts page, so nothing dead ever ships.
 BOOKING_URL = ""      # e.g. "https://calendly.com/litprofit/30min"
-BOOKING_LABEL = "Book a call"
+# The label is translated per language in tools/i18n.py ("book").
+# Only the URL is configured here.
 
 # The studio credit in the footer. Leave ALDY_URL empty and the credit is
 # rendered as plain text plus the mark, with no dead link.
@@ -65,16 +68,76 @@ ALDY_URL = ""         # e.g. "https://aldy.studio"
 
 LASTMOD = datetime.date.today().isoformat()
 
+# The language currently being generated. Set once per pass in the build loop;
+# u() and every page builder read it. A module global rather than a parameter
+# threaded through forty call sites.
+LANG = "en"
+
+
+def T(key, **kw):
+    """A UI string in the current language, with optional interpolation."""
+    v = i18n.S[LANG][key]
+    return v % kw if kw else v
+
+
+def PT(key, **kw):
+    """A page string in the current language."""
+    v = i18n.P[LANG][key]
+    return v % kw if kw else v
+
+
+def lang_prefix(lang=None):
+    lang = lang or LANG
+    return "" if lang == "en" else "/" + lang
+
+
+# Paths that are the same file whatever the language. Everything else is a page
+# and gets the language prefix, so no call site has to know the difference.
+SHARED = ("/assets/", "/css/", "/js/", "/sitemap.xml", "/robots.txt", "/404.html")
+
 
 def u(path):
-    """Site-absolute URL for a path, honouring BASE."""
+    """Site-absolute URL, honouring BASE and the current language.
+
+    Assets are shared between languages; pages are not. Deciding that here
+    rather than at each call site is what kept the language switch from
+    touching every template."""
+    if path.startswith(SHARED):
+        return (BASE + path) if BASE else path
+    pre = BASE + lang_prefix()
     if path == "/":
-        return BASE + "/" if BASE else "/"
-    return BASE + path
+        return (pre + "/") if pre else "/"
+    return pre + path
 
 
 def canonical(path):
     return ORIGIN + u(path)
+
+
+def lang_url(lang, path):
+    # 404.html exists once, at the root — GitHub Pages serves it for any
+    # unmatched path on the host. Pointing the switcher or hreflang at
+    # /lt/404.html would be pointing at a file that does not exist.
+    if path == "/404.html":
+        path = "/"
+    pre = BASE + lang_prefix(lang)
+    if path == "/":
+        return ORIGIN + ((pre + "/") if pre else "/")
+    return ORIGIN + pre + path
+
+
+def alternates(path):
+    """hreflang for every language, plus x-default pointing at English.
+
+    Without these three languages of the same page compete with each other in
+    search results instead of being understood as translations."""
+    out = []
+    for lg in i18n.LANGS:
+        out.append('  <link rel="alternate" hreflang="%s" href="%s">'
+                   % (i18n.LOCALE[lg][0], lang_url(lg, path)))
+    out.append('  <link rel="alternate" hreflang="x-default" href="%s">'
+               % lang_url("en", path))
+    return "\n".join(out) + "\n"
 
 
 
@@ -108,22 +171,32 @@ def text(v):
 # ============================================================
 # NAVIGATION
 # ============================================================
-NAV = [
-    ("About", "/about/"),
-    ("Services", "/services/"),
-    ("Completed works", "/completed-works/"),
-    ("Partners", "/partners/"),
-    ("Certificates", "/certificates/"),
-    ("Contacts", "/contacts/"),
-]
 
 
-def header(active):
+def nav_items():
+    return i18n.NAV[LANG]
+
+
+def lang_switch(path):
+    """The language switcher. Each link goes to the SAME page in the other
+    language, not to its homepage — dumping a reader back at the top is the
+    usual way these get it wrong."""
+    out = []
+    for lg in i18n.LANGS:
+        cur = ' aria-current="true"' if lg == LANG else ""
+        href = lang_url(lg, path).replace(ORIGIN, "") or "/"
+        out.append('<a href="%s" hreflang="%s" lang="%s"%s>%s</a>'
+                   % (href, i18n.LOCALE[lg][0], i18n.LOCALE[lg][0], cur, i18n.LABEL[lg]))
+    return ('<div class="langs" role="group" aria-label="%s">%s</div>'
+            % (attr(T("lang_label")), "".join(out)))
+
+
+def header(active, path="/"):
     items = "\n".join(
         '        <a href="%s"%s>%s</a>' % (
             u(href), ' aria-current="page"' if href == active else "", label)
-        for label, href in NAV)
-    return """  <a class="skip-link" href="#main">Skip to content</a>
+        for label, href in nav_items())
+    return """  <a class="skip-link" href="#main">{skip}</a>
 
   <header class="site-header">
     <nav class="nav" aria-label="Main">
@@ -132,11 +205,13 @@ def header(active):
       <div class="nav-links" id="navLinks">
 {items}
         <a class="nav-cta-mobile" href="{book}"{book_attrs}>{book_label}</a>
+        {langs}
       </div>
 
       <div class="nav-actions">
+        {langs_desktop}
         <a class="btn btn-book" href="{book}"{book_attrs}>{book_label}</a>
-        <button class="burger" type="button" aria-label="Menu"
+        <button class="burger" type="button" aria-label="{menu}"
                 aria-expanded="false" aria-controls="navLinks">
           <span></span><span></span><span></span>
         </button>
@@ -147,7 +222,8 @@ def header(active):
                       name=NAME, items=items,
                       book=BOOKING_URL or u("/contacts/"),
                       book_attrs=' target="_blank" rel="noopener"' if BOOKING_URL else "",
-                      book_label=BOOKING_LABEL)
+                      book_label=attr(T("book")), skip=T("skip"), menu=attr(T("menu")),
+                      langs=lang_switch(path), langs_desktop=lang_switch(path))
 
 
 def aldy_credit():
@@ -160,7 +236,7 @@ def aldy_credit():
     return '<span class="aldy">%s</span>' % inner
 
 
-FOOTER = """  <footer class="site-footer">
+FOOTER_TPL = """  <footer class="site-footer">
     <div class="container">
       <div class="footer-top">
         <div class="footer-col footer-brand">
@@ -169,12 +245,12 @@ FOOTER = """  <footer class="site-footer">
         </div>
 
         <div class="footer-col">
-          <h2 class="col-title">Address</h2>
+          <h2 class="col-title">{f_address}</h2>
           <p>{street}<br>{city}<br>{country}</p>
         </div>
 
         <div class="footer-col">
-          <h2 class="col-title">Contacts</h2>
+          <h2 class="col-title">{f_contacts}</h2>
           <ul>
             <li><a href="tel:{phone_href}">{phone}</a></li>
             <li><a href="mailto:{email}">{email}</a></li>
@@ -182,12 +258,12 @@ FOOTER = """  <footer class="site-footer">
         </div>
 
         <div class="footer-col">
-          <h2 class="col-title">Company details</h2>
-          <p>{legal}<br>ID: {cid}<br>VAT: {vat}</p>
+          <h2 class="col-title">{f_details}</h2>
+          <p>{legal}<br>{l_cid}: {cid}<br>{l_vat}: {vat}</p>
         </div>
 
         <div class="footer-col">
-          <h2 class="col-title">Site</h2>
+          <h2 class="col-title">{f_site}</h2>
           <ul>
 {navlinks}
           </ul>
@@ -196,35 +272,35 @@ FOOTER = """  <footer class="site-footer">
 
       <div class="footer-bottom">
         <span>&copy; {founded}&ndash;<span data-year>2026</span> {legal}</span>
-        <span class="spacer"><a href="{privacy}">Privacy policy</a></span>
+        <span class="spacer"><a href="{privacy}">{l_privacy}</a></span>
         <span class="made">{made}</span>
       </div>
     </div>
-  </footer>""".format(
-    logo=lockup(), name=NAME, tagline=TAGLINE,
+  </footer>"""
+
+
+def footer():
+    return FOOTER_TPL.format(
+    logo=lockup(), name=NAME, tagline=T("tagline"),
     street=STREET, city=CITY, country=COUNTRY, phone=PHONE, phone_href=PHONE_HREF,
     email=EMAIL, legal=LEGAL, cid=COMPANY_ID, vat=VAT, founded=FOUNDED,
     privacy=u("/privacy/"), made=aldy_credit(),
+    f_address=T("f_address"), f_contacts=T("f_contacts"), f_details=T("f_details"),
+    f_site=T("f_site"), l_privacy=T("f_privacy"), l_cid=T("company_no"), l_vat=T("vat"),
     navlinks="\n".join('            <li><a href="%s">%s</a></li>' % (u(h), l)
-                       for l, h in NAV))
+                        for l, h in nav_items()))
 
 
 # The site read as a set of sheets, after the drawing's own title block
 # (DWG 04 // 06). Gives every interior page a position in a sequence and
 # somewhere obvious to go next, instead of dead-ending at the footer.
-SHEETS = [
-    ("/", "Home"),
-    ("/about/", "About"),
-    ("/services/", "Services"),
-    ("/completed-works/", "Completed works"),
-    ("/partners/", "Partners"),
-    ("/certificates/", "Certificates"),
-    ("/contacts/", "Contacts"),
-]
+def sheets():
+    """Home plus the six nav entries, in the language being built."""
+    return [("/", T("home"))] + [(h, l) for l, h in nav_items()]
 
 
 def sheet_index(path):
-    for i, (href, _) in enumerate(SHEETS):
+    for i, (href, _) in enumerate(sheets()):
         if href == path:
             return i
     return None
@@ -244,8 +320,9 @@ def pager(path):
     i = sheet_index(path)
     if i is None:
         return ""
-    prev = SHEETS[i - 1] if i > 0 else None
-    nxt = SHEETS[i + 1] if i < len(SHEETS) - 1 else None
+    sh = sheets()
+    prev = sh[i - 1] if i > 0 else None
+    nxt = sh[i + 1] if i < len(sh) - 1 else None
     if not prev and not nxt:
         return ""
 
@@ -259,15 +336,15 @@ def pager(path):
         </a>""").format(rel=rel, href=u(href), label=label, name=name)
 
     return """
-    <nav class="pager" aria-label="Sheets">
+    <nav class="pager" aria-label="{aria}">
       <div class="container pg-grid">
         {prev}
         <span class="pg-of">{n} // {total}</span>
         {next}
       </div>
     </nav>
-""".format(prev=cell(prev, "prev", "Previous"), next=cell(nxt, "next", "Next"),
-           n="%02d" % (i + 1), total="%02d" % len(SHEETS))
+""".format(prev=cell(prev, "prev", T("prev")), next=cell(nxt, "next", T("next")),
+           aria=attr(T("sheets")), n="%02d" % (i + 1), total="%02d" % len(sh))
 
 
 # Share card per page. Anything unmapped falls back to the home card rather
@@ -299,7 +376,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
     full_title = title if title.startswith(NAME) else "%s — %s" % (title, NAME)
     robots = "noindex, follow" if noindex else "index, follow"
     return """<!DOCTYPE html>
-<html lang="en">
+<html lang="{htmllang}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -313,7 +390,8 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
   <meta property="og:description" content="{description}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{canon}">
-  <meta property="og:locale" content="en">
+  <meta property="og:locale" content="{oglocale}">
+{alts}
   <meta property="og:image" content="{og}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -345,11 +423,13 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
 """.format(full_title=attr(full_title), full_title_text=text(full_title),
            description=attr(description), canon=canonical(path),
            robots=robots, name=NAME, icon=u("/assets/brand/favicon.svg"),
+           htmllang=i18n.LOCALE[LANG][0], oglocale=i18n.LOCALE[LANG][1],
+           alts=alternates(path),
            font=u("/assets/fonts/montserrat-latin.woff2"),
            fonts_css=u("/css/fonts.css"), style_css=u("/css/style.css"),
            js=u("/js/main.js"), head_extra=head_extra,
-           header=header(active if active is not None else path), body=body,
-           pager=pager(path), footer=FOOTER, og=og_image(path))
+           header=header(active if active is not None else path, path), body=body,
+           pager=pager(path), footer=footer(), og=og_image(path))
 
 
 def write(path, html):
@@ -362,17 +442,19 @@ def write(path, html):
 
 
 def outfile(url_path):
-    """/services/ -> services/index.html, so URLs stay clean."""
-    if url_path == "/":
-        return "index.html"
-    return url_path.strip("/") + "/index.html"
+    """/services/ -> services/index.html, under the language directory."""
+    pre = lang_prefix().strip("/")
+    rel = "index.html" if url_path == "/" else url_path.strip("/") + "/index.html"
+    return os.path.join(pre, rel) if pre else rel
 
 
 # ============================================================
 # SHARED FRAGMENTS
 # ============================================================
-def cta(heading, text, primary=("Send an enquiry", "/contacts/"),
-        secondary=("Call " + PHONE, "tel:" + PHONE_HREF)):
+def cta(heading, text, primary=None, secondary=None):
+    primary = primary or (T("cta_enquiry"), "/contacts/")
+    secondary = secondary if secondary is not None else (
+        T("cta_call") + " " + PHONE, "tel:" + PHONE_HREF)
     sec = ""
     if secondary:
         href = secondary[1] if secondary[1].startswith("tel:") else u(secondary[1])
@@ -425,159 +507,78 @@ def tags(items):
 # from litprofit.com verbatim. The prose around them is rewritten; the
 # lists are not, because they are the part a customer checks.
 # ============================================================
-SERVICES = [
-    dict(
-        slug="ship-engine-repair",
-        img=("svc-engine-repair.webp", 600, 410, "Marine diesel engine in a ship's engine room"),
-        title="Ship equipment and engine repair",
-        short="Maintenance and overhaul of 4-stroke and 2-stroke diesel engines, "
-              "engine room machinery and deck equipment.",
-        meta="Overhaul and repair of 4-stroke and 2-stroke marine diesel engines, "
-             "engine room machinery and deck equipment. MAN, Wartsila, Yanmar, "
-             "Hyundai Himsen, MAK, Caterpillar, Deutz, Daihatsu.",
-        lead="Keeping a vessel's machinery inside its operating envelope — main "
-             "engines, auxiliaries, and the deck equipment the crew depends on.",
-        blocks=[
-            ("Diesel engine overhaul",
-             ["<p>We overhaul and repair <strong>4-stroke and 2-stroke diesel "
-              "engines</strong> of most types and models. Work runs from diagnostics "
-              "through to the upgrades that restore efficiency and extend service "
-              "life, on main and auxiliary engines alike.</p>",
-              "<p>Engines we work on regularly:</p>",
-              tags(["MAN", "Wartsila", "Yanmar", "Hyundai Himsen", "MAK",
-                    "Caterpillar", "Deutz", "Daihatsu"])]),
-            ("Engine room machinery",
-             ["<p>Beyond the engines themselves, we maintain and repair the rest of "
-              "the machinery space — reduction gears, shafting and the auxiliary "
-              "equipment that surrounds the main plant.</p>"]),
-            ("Deck equipment",
-             ["<p>Deck equipment is maintained on a regular cycle so that it works "
-              "when it is needed: deck systems, ladders and steps, life-saving "
-              "appliances and associated gear. Where equipment has been damaged, we "
-              "repair it back to full working condition.</p>"]),
-            ("How we work",
-             ["<p>We use quality tooling and vetted sources of spare parts, and every "
-              "repair is carried out to meet the applicable safety standards. All "
-              "work and equipment carries our warranty.</p>"]),
-        ],
-    ),
-    dict(
-        slug="refrigeration-systems",
-        img=("svc-refrigeration.webp", 800, 609, "Industrial refrigeration compressor plant"),
-        title="Refrigeration systems and equipment",
-        short="Design, modernisation, compressor overhaul, installation and "
-              "commissioning of marine and industrial refrigeration.",
-        meta="Marine and industrial refrigeration: compressor overhaul, system "
-             "modernisation, class-approved design documentation, installation and "
-             "commissioning. SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM.",
-        lead="The company's original discipline, and still the deepest — more than "
-             "a decade of refrigeration work on fishing vessels and shore plant.",
-        blocks=[
-            ("What we carry out",
-             ["<ul>"
-              "<li>Diagnostics and repair of refrigeration compressors, at all levels "
-              "of complexity.</li>"
-              "<li>Diagnostics and repair of commercial and marine refrigeration "
-              "equipment.</li>"
-              "<li>Consultancy on selecting, installing and maintaining refrigeration "
-              "equipment.</li>"
-              "<li>Development of automatic control systems for compressors and "
-              "refrigeration plant.</li>"
-              "<li>Design documents and working drawings for ship refrigeration "
-              "equipment, prepared to classification society requirements — including "
-              "getting them approved.</li>"
-              "<li>Installation of refrigeration equipment and refrigerant piping.</li>"
-              "<li>Start-up, adjustment and handover to the client.</li>"
-              "</ul>",
-              "<p>We take both one-off jobs and regular contracted service work. All "
-              "equipment and spare parts we manufacture and supply comply with quality "
-              "and international standards.</p>"]),
-            ("Compressors we service",
-             [tags(["SABROE — Denmark", "BITZER — Germany", "HOWDEN — Scotland",
-                    "KUHLAUTOMAT — Germany", "STAL — Sweden", "HALLSCREW — England",
-                    "GRASSO — Netherlands", "MYCOM — Japan"])]),
-            ("Systems we modernise",
-             ["<p>Modernisation and repair of refrigeration systems for fishing "
-              "vessels and shore installations:</p>",
-              tags(["GRASSO / KUHLAUTOMAT", "HOWDEN", "MYCOM", "SABROE", "STAL",
-                    "AERZEN", "YORK DYKIN", "HITACHI"])]),
-        ],
-    ),
-    dict(
-        slug="hull-and-piping",
-        img=("svc-hull-piping.webp", 800, 533, "Welder joining a steel pipe bend"),
-        title="Hull and piping works",
-        short="Steel and stainless steel pipe systems for shipbuilding, ship repair "
-              "and industry, including surface coating.",
-        meta="Manufacture of steel and stainless steel pipe systems for shipbuilding, "
-             "ship repair and industry. Hull and steel structure repair, galvanising "
-             "and paint work, delivered worldwide.",
-        lead="Pipe systems and steel structures, from the drawing through to a "
-             "coated, finished product delivered wherever it is needed.",
-        blocks=[
-            ("Pipe systems",
-             ["<p>We manufacture <strong>all types of steel and stainless steel pipe "
-              "systems</strong> used in shipbuilding, ship repair and other "
-              "industries, and we carry out major repairs to hulls and other steel "
-              "structures.</p>",
-              "<p>Surface coating is done in house — galvanising and paint work — so "
-              "the product leaves finished rather than needing another supplier.</p>"]),
-            ("The full scope",
-             ["<p>Our team of qualified specialists can take a project end to end: "
-              "the design work, ordering and delivering the materials, and carrying "
-              "out the work itself to schedule and to standard.</p>",
-              "<p>At the customer's request, finished products are shipped to any "
-              "country in the world.</p>"]),
-        ],
-    ),
-    dict(
-        slug="spare-parts",
-        img=("svc-spare-parts.webp", 450, 300, "Spare parts warehouse shelving"),
-        title="Supply of spare parts",
-        short="Sourcing and delivery of spare parts and consumables for marine "
-              "engines and refrigeration compressors.",
-        meta="Supply of spare parts for marine engines and refrigeration compressors "
-             "— MAN, Wartsila, Caterpillar, SULZER, Sabroe, Bitzer, Howden, Mycom, "
-             "Danfoss valves. Warehouse in Klaipeda.",
-        lead="Selecting, ordering and delivering the parts a repair needs — with "
-             "stock held in Klaipeda so the common ones do not wait on a supplier.",
-        blocks=[
-            ("What we source",
-             ["<p>On request we will select, order and deliver spare parts and special "
-              "equipment.</p>",
-              "<h3>Compressors and their parts</h3>",
-              tags(["STALL", "Sabroe", "Bitzer", "Howden", "Mycom", "J&amp;E Hall"]),
-              "<h3>2-stroke and 4-stroke engine parts</h3>",
-              tags(["MAN", "VOLVO PENTA", "Wartsila", "STX", "Yanmar", "MTU",
-                    "Hyundai Himsen", "CUMMINS", "MAK", "SULZER", "Caterpillar",
-                    "DETROIT DIESEL", "Deutz", "ROLLS ROYCE", "Daihatsu", "SCANIA",
-                    "WICHMANN", "GUASCOR"]),
-              "<h3>Refrigerant pumps and their parts</h3>",
-              tags(["HERMETIC", "WITT"]),
-              "<h3>Turbogenerator parts</h3>",
-              tags(["ABB", "KBB", "MET", "NAPIER", "MAN"]),
-              "<h3>Also supplied</h3>",
-              "<ul>"
-              "<li>Parts for heat exchangers.</li>"
-              "<li>Valves and their parts — Danfoss, AWP and others.</li>"
-              "<li>Assembly and supply of complete refrigeration units.</li>"
-              "</ul>"]),
-            ("Delivery time",
-             ["<p>We work to keep delivery times short, and we hold a "
-              "<strong>warehouse in Klaipeda</strong> for that reason — it is what "
-              "lets us offer a better combination of price and delivery date than "
-              "sourcing every part from scratch.</p>"]),
-        ],
-    ),
-]
+def tags_of(items):
+    return tags(items)
 
-# (display name, file, intrinsic width, intrinsic height) — the real pixel
-# dimensions, so the browser reserves the right box and the row does not
-# reflow as the logos load.
-# (display name, file, intrinsic width, intrinsic height, url)
-# URLs were verified by fetching each domain and matching the page title to
-# the company — the six left empty could not be confirmed, and a logo linked
-# to the wrong company is worse than a logo that does not link at all.
+
+def services():
+    """The four services in the current language, in display order.
+
+    Numbers are derived from position, so the label on a card cannot disagree
+    with where the card actually sits."""
+    out = []
+    for i, slug in enumerate(i18n.ORDER):
+        d = dict(i18n.SVC[LANG][slug])
+        f, w, h = i18n.IMG[slug]
+        d.update(slug=slug, num="%02d" % (i + 1),
+                 img=(f, w, h, i18n.ALT[LANG][slug]))
+        d["blocks"] = SERVICE_BLOCKS[slug](d)
+        out.append(d)
+    return out
+
+
+def _refrig_blocks(d):
+    comps = ["%s &mdash; %s" % (c, n) for c, n in
+             zip(i18n.COMPRESSORS, i18n.COUNTRIES[LANG])]
+    return [
+        (d["h_works"],
+         ["<ul>%s</ul>" % "".join("<li>%s</li>" % w for w in d["works"]),
+          "<p>%s</p>" % d["note"]]),
+        (d["h_compressors"], [tags(comps)]),
+        (d["h_systems"], ["<p>%s</p>" % d["sys_note"], tags(i18n.SYSTEMS)]),
+    ]
+
+
+def _engine_blocks(d):
+    return [
+        (d["h_engines"], ["<p>%s</p>" % d["engines"],
+                          "<p>%s</p>" % d["engines_note"], tags(i18n.ENGINES)]),
+        (d["h_machinery"], ["<p>%s</p>" % d["machinery"]]),
+        (d["h_deck"], ["<p>%s</p>" % d["deck"]]),
+        (d["h_how"], ["<p>%s</p>" % d["how"]]),
+    ]
+
+
+def _hull_blocks(d):
+    return [
+        (d["h_pipes"], ["<p>%s</p>" % d["pipes"], "<p>%s</p>" % d["pipes2"]]),
+        (d["h_scope"], ["<p>%s</p>" % d["scope"], "<p>%s</p>" % d["scope2"]]),
+    ]
+
+
+def _parts_blocks(d):
+    return [
+        (d["h_source"],
+         ["<p>%s</p>" % d["intro"],
+          "<h3>%s</h3>" % d["h_c"], tags(i18n.PART_COMPRESSORS),
+          "<h3>%s</h3>" % d["h_e"], tags(i18n.PART_ENGINES),
+          "<h3>%s</h3>" % d["h_p"], tags(i18n.PUMPS),
+          "<h3>%s</h3>" % d["h_t"], tags(i18n.TURBO),
+          "<h3>%s</h3>" % d["h_o"],
+          "<ul>%s</ul>" % "".join("<li>%s</li>" % o for o in d["other"])]),
+        (d["h_delivery"], ["<p>%s</p>" % d["delivery"]]),
+    ]
+
+
+SERVICE_BLOCKS = {
+    "refrigeration-systems": _refrig_blocks,
+    "ship-engine-repair": _engine_blocks,
+    "hull-and-piping": _hull_blocks,
+    "spare-parts": _parts_blocks,
+}
+
+FEATURE_SLUG = i18n.ORDER[0]
+
 CLIENTS = [
     ("Norebo", "logo-norebo.png", 400, 69, "https://norebo.com"),
     ("Sealord", "logo-sealord-paua.png", 140, 60, "https://sealord.com"),
@@ -615,12 +616,12 @@ def card(s, level="h3", variant=""):
             <span class="card-body">
               <{lv}>{title}</{lv}>
               <p>{short}</p>
-              <span class="card-more">Read more</span>
+              <span class="card-more">{more}</span>
             </span>
           </a>""".format(cls=cls, href=u("/services/%s/" % s["slug"]),
                          img=u("/assets/photos/" + f),
                          alt=alt, w=w, h=h, lv=level, num=s["num"],
-                         title=s["title"], short=s["short"])
+                         title=s["title"], short=s["short"], more=T("read_more"))
 
 
 # Refrigeration leads: it is the company's original discipline and the one it
@@ -628,18 +629,13 @@ def card(s, level="h3", variant=""):
 # of four equal boxes — and, being first, it is 01.
 FEATURE_SLUG = "refrigeration-systems"
 
-# Display order = numbering order. SERVICES is written in the order the four
-# were originally documented; this is the order they are shown in, feature
-# first, and the 01..04 labels are derived from it so the two cannot disagree.
-ORDERED = ([x for x in SERVICES if x["slug"] == FEATURE_SLUG] +
-           [x for x in SERVICES if x["slug"] != FEATURE_SLUG])
-for _i, _s in enumerate(ORDERED):
-    _s["num"] = "%02d" % (_i + 1)
+
 
 
 def service_cards(level="h3"):
-    out = [card(ORDERED[0], level, "feature")]
-    out += [card(x, level, "compact") for x in ORDERED[1:]]
+    sv = services()
+    out = [card(sv[0], level, "feature")]
+    out += [card(x, level, "compact") for x in sv[1:]]
     return "\n".join(out)
 
 
@@ -671,24 +667,22 @@ def home():
               style="background-image:url({hero_img})"></span>
       </div>
       <div class="container hero-inner">
-        <p class="eyebrow eyebrow-plain">Klaipeda, Lithuania <span class="sep">//</span> since {founded}</p>
-        <h1>Ship repair and maintenance all over the world</h1>
-        <p class="lead">{legal} overhauls marine engines, refrigeration plant and
-        piping systems for fishing fleets, shipowners and shore installations —
-        wherever the vessel happens to be.</p>
+        <p class="eyebrow eyebrow-plain">{he} <span class="sep">//</span> {hs} {founded}</p>
+        <h1>{h1}</h1>
+        <p class="lead">{hlead}</p>
         <ul class="promise">
-          <li><span class="step-num">01</span><span class="step-label">We consult</span></li>
-          <li><span class="step-num">02</span><span class="step-label">We organise</span></li>
-          <li><span class="step-num">03</span><span class="step-label">We ensure</span></li>
+          <li><span class="step-num">01</span><span class="step-label">{s1}</span></li>
+          <li><span class="step-num">02</span><span class="step-label">{s2}</span></li>
+          <li><span class="step-num">03</span><span class="step-label">{s3}</span></li>
         </ul>
         <div class="btn-row">
           <a class="btn btn-solid" href="{book}"{book_attrs}>{book_label}</a>
-          <a class="btn btn-outline" href="{services}">Our services</a>
+          <a class="btn btn-outline" href="{services}">{hsvc}</a>
         </div>
         <p class="hero-trust">
-          <span>Authorised partner <b>BITZER</b></span>
-          <span>Marine line representative <b>DANFOSS</b></span>
-          <span>Certified <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
+          <span>{tp} <b>BITZER</b></span>
+          <span>{tr} <b>DANFOSS</b></span>
+          <span>{tc} <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
         </p>
         <span class="scroll-cue" aria-hidden="true"></span>
       </div>
@@ -698,27 +692,20 @@ def home():
     <section class="section section-tight partners-band seam-top seam-bottom">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>Representation</p>
-          <h2>We represent BITZER and DANFOSS</h2>
-          <p class="lead">Two of the biggest names in refrigeration and marine
-          controls appoint us directly. That is not a reseller arrangement — it is
-          factory backing on the parts, the pricing and the warranty.</p>
+          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>{rep_e}</p>
+          <h2>{rep_h}</h2>
+          <p class="lead">{rep_l}</p>
         </div>
         <div class="partner-grid reveal">
           <div class="partner">
-            <p class="partner-role">Authorised partner</p>
+            <p class="partner-role">{tp}</p>
             <h3 class="partner-logo"><img src="{bitzer}" alt="BITZER" width="454" height="163"></h3>
-            <p>One of the largest independent manufacturers of refrigeration
-            compressors in the world. As an authorised partner we supply and service
-            BITZER equipment directly, rather than through an intermediary — which
-            shortens both the parts chain and the warranty conversation.</p>
+            <p>{rep_b}</p>
           </div>
           <div class="partner">
-            <p class="partner-role">Marine line representative</p>
+            <p class="partner-role">{tr}</p>
             <h3 class="partner-logo"><img src="{danfoss}" alt="Danfoss" width="126" height="55"></h3>
-            <p>We represent the Danfoss marine line: controls, valves and components
-            for refrigeration and engine room systems, specified and supplied for
-            vessels rather than adapted from shore equipment.</p>
+            <p>{rep_d}</p>
           </div>
         </div>
       </div>
@@ -729,19 +716,19 @@ def home():
         <ul class="facts reveal">
           <li class="fact">
             <p class="fact-value">{years}+</p>
-            <p class="fact-label">Years in refrigeration</p>
+            <p class="fact-label">{f1}</p>
           </li>
           <li class="fact">
             <p class="fact-value">24/7</p>
-            <p class="fact-label">Service response</p>
+            <p class="fact-label">{f2}</p>
           </li>
           <li class="fact">
             <p class="fact-value">2</p>
-            <p class="fact-label">Class certificates</p>
+            <p class="fact-label">{f3}</p>
           </li>
           <li class="fact">
             <p class="fact-value">&euro;250k</p>
-            <p class="fact-label">Liability insured</p>
+            <p class="fact-label">{f4}</p>
           </li>
         </ul>
       </div>
@@ -750,11 +737,9 @@ def home():
     <section class="section section-alt" id="services">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>Services</p>
-          <h2>Four disciplines, one contractor</h2>
-          <p class="lead">Most jobs need more than one of these at once. Handling them
-          under a single contract is what removes the coordination problem from the
-          shipowner's desk.</p>
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{svc_e}</p>
+          <h2>{svc_h}</h2>
+          <p class="lead">{svc_l}</p>
         </div>
         <div class="card-grid">
 {cards}
@@ -765,26 +750,22 @@ def home():
     <section class="section">
       <div class="container split">
         <div class="reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>How we work</p>
-          <h2>Consult, organise, ensure</h2>
-          <p class="lead">Three steps, in that order — it is how the company has
-          described itself for years, and it holds up.</p>
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{how_e}</p>
+          <h2>{how_h}</h2>
+          <p class="lead">{how_l}</p>
         </div>
         <div class="pillars reveal">
           <div class="pillar">
-            <h3>We consult</h3>
-            <p>Advice shaped by experience, where the technology is going, and what
-            you actually need and can spend. Every customer gets proper time.</p>
+            <h3>{s1}</h3>
+            <p>{how1}</p>
           </div>
           <div class="pillar">
-            <h3>We organise</h3>
-            <p>We arrange and carry out every stage of the repair and service work,
-            because your time is worth more than the coordination.</p>
+            <h3>{s2}</h3>
+            <p>{how2}</p>
           </div>
           <div class="pillar">
-            <h3>We ensure</h3>
-            <p>We control the work as it runs and keep your representatives informed
-            of progress — no surprises at handover.</p>
+            <h3>{s3}</h3>
+            <p>{how3}</p>
           </div>
         </div>
       </div>
@@ -795,13 +776,11 @@ def home():
       <div class="container">
         <div class="split" style="align-items: center">
           <div class="reveal">
-            <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>Capability</p>
-            <h2>A decade of refrigeration, on ships and ashore</h2>
-            <p class="lead">Compressor overhauls, class-approved design
-            documentation, plant installation and commissioning — on fishing vessels
-            and shore installations alike.</p>
+            <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{cap_e}</p>
+            <h2>{cap_h}</h2>
+            <p class="lead">{cap_l}</p>
             <div class="btn-row">
-              <a class="btn btn-outline" href="{refrig}">Refrigeration systems</a>
+              <a class="btn btn-outline" href="{refrig}">{refrig_label}</a>
             </div>
           </div>
           <div class="media-panel cornered reveal">
@@ -811,8 +790,8 @@ def home():
         </div>
 
         <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">
-          <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>Clients</p>
-          <h2>Who we work with</h2>
+          <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{cl_e}</p>
+          <h2>{cl_h}</h2>
         </div>
         <ul class="logo-wall reveal">
 {logos}
@@ -820,6 +799,19 @@ def home():
       </div>
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
+                he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
+                hlead=T("hero_lead", legal=LEGAL), s1=T("step1"), s2=T("step2"),
+                s3=T("step3"), hsvc=T("hero_services"), tp=T("trust_partner"),
+                tr=T("trust_rep"), tc=T("trust_cert"), rep_e=T("rep_eyebrow"),
+                rep_h=T("rep_h2"), rep_l=T("rep_lead"), rep_b=T("rep_bitzer"),
+                rep_d=T("rep_danfoss"), f1=T("fact_years"), f2=T("fact_service"),
+                f3=T("fact_certs"), f4=T("fact_insured"), svc_e=T("svc_eyebrow"),
+                svc_h=T("svc_h2"), svc_l=T("svc_lead"), how_e=T("how_eyebrow"),
+                how_h=T("how_h2"), how_l=T("how_lead"), how1=T("how1"),
+                how2=T("how2"), how3=T("how3"), cap_e=T("cap_eyebrow"),
+                cap_h=T("cap_h2"), cap_l=T("cap_lead"), cl_e=T("clients_eyebrow"),
+                cl_h=T("clients_h2"),
+                refrig_label=i18n.SVC[LANG]["refrigeration-systems"]["title"],
                 cards=cards, logos=logos, cycle=compressor_drawing(),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
@@ -828,12 +820,9 @@ def home():
                 refrig=u("/services/refrigeration-systems/"),
                 book=BOOKING_URL or u("/contacts/"),
                 book_attrs=' target="_blank" rel="noopener"' if BOOKING_URL else "",
-                book_label=BOOKING_LABEL,
+                book_label=T("book"),
                 years=datetime.date.today().year - int(FOUNDED),
-                cta=cta("24/7 service",
-                        "We are ready to provide prompt and competent assistance — "
-                        "tell us the vessel, the equipment and the port, and we will "
-                        "come back with a plan."))
+                cta=cta(T("cta_h2"), T("cta_p")))
 
 
 # ============================================================
@@ -844,7 +833,7 @@ def home():
 # with ticks, hatched skid, leader lines to numbered balloons, and a
 # title block. The point is the drawing; the labels come second.
 # ============================================================
-PARTS = [
+_UNUSED_PARTS = [
     dict(n="01", key="motor", title="Electric motor",
          text="Drives the compressor through the coupling. Bearings, insulation "
               "resistance and alignment are checked before anything is reassembled."),
@@ -886,16 +875,18 @@ def compressor_drawing():
               <span class="part-title">{title}</span>
               <span class="part-text"><span>{text}</span></span>
             </span>
-          </button>""".format(**pt) for pt in PARTS)
+          </button>""".format(key=k, n="%02d" % (j + 1),
+                              title=i18n.PARTS[LANG][k][0],
+                              text=i18n.PARTS[LANG][k][1])
+                        for j, k in enumerate(i18n.PARTS_ORDER))
 
     return """
     <section class="section section-alt drawing-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>General arrangement</p>
-          <h2>The machine we take apart most</h2>
-          <p class="lead">A skid-mounted marine screw compressor package, in side
-          elevation. Take a balloon to see what we do to that part.</p>
+          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>{ga_e}</p>
+          <h2>{ga_h}</h2>
+          <p class="lead">{ga_l}</p>
         </div>
 
         <div class="drawing reveal" id="drawing">
@@ -997,8 +988,8 @@ def compressor_drawing():
               <rect x="556" y="588" width="330" height="58"/>
               <line x1="556" y1="616" x2="886" y2="616"/>
               <line x1="762" y1="588" x2="762" y2="646"/>
-              <text x="568" y="607">SCREW COMPRESSOR PACKAGE</text>
-              <text x="568" y="636">SIDE ELEVATION</text>
+              <text x="568" y="607">{tb1}</text>
+              <text x="568" y="636">{tb2}</text>
               <text class="tb-b" x="774" y="607">LITPROFIT</text>
               <text x="774" y="636">DWG 04 // 06</text>
             </g>
@@ -1011,6 +1002,8 @@ def compressor_drawing():
       </div>
     </section>
 """.format(fins=fins, hatch=hatch, sbolts=sbolts, dbolts=dbolts, buttons=buttons,
+           ga_e=T("ga_eyebrow"), ga_h=T("ga_h2"), ga_l=T("ga_lead"),
+           tb1=i18n.TB[LANG][0].upper(), tb2=i18n.TB[LANG][1].upper(),
            balloons="\n".join([
                balloon(176, 240, "01", "motor", 210, 300),
                balloon(330, 292, "02", "coupling", 344, 332),
@@ -1021,87 +1014,62 @@ def compressor_drawing():
 
 
 # ============================================================
-# ABOUT
+# INTERIOR PAGES
+# All prose comes from tools/i18n.py; the markup lives here once.
 # ============================================================
 def about():
-    return page_head(
-        "About us", "A Klaipeda ship repair company, working worldwide",
-        "%s was established in %s. More than a decade in the refrigeration equipment "
-        "market, a long list of completed projects, and business partners who have "
-        "stayed." % (LEGAL, FOUNDED),
-        [("Home", "/"), ("About", None)], path="/about/") + """
+    spec = "\n".join("        <li>%s</li>" % x for x in i18n.P[LANG]["a_spec_list"])
+    return page_head(PT("about_eyebrow"), PT("about_h1"),
+                     PT("about_lead", legal=LEGAL, founded=FOUNDED),
+                     [(T("home"), "/"), (PT("about_eyebrow"), None)],
+                     path="/about/") + """
     <section class="container prose">
-      <h2>What we specialise in</h2>
+      <h2>{h_spec}</h2>
       <ul>
-        <li>Design and selection of industrial refrigeration equipment.</li>
-        <li>Modernisation and repair of refrigeration systems for fishing boats and
-        shore installations.</li>
-        <li>Installation and supply of refrigeration equipment.</li>
-        <li>Overhaul of main and auxiliary engines.</li>
-        <li>Positioning of ships in the port of Klaipeda, Lithuania, for repair works.</li>
+{spec}
       </ul>
 
-      <h2>The people</h2>
-      <p>We have a team of reliable, qualified and time-tested professionals, and we
-      provide a <strong>warranty on all works and equipment</strong>. The company is
-      guided by what customers need now rather than what it was set up to do in
-      {founded} — our specialists are there to advise as much as to execute.</p>
-      <p>We are committed to continuous improvement and pay close attention to
-      developments in the market. We take each customer's wishes and suggestions into
-      account, and aim to offer the solution that is most sensible on cost, on time,
-      and on the equipment supplied.</p>
+      <h2>{h_people}</h2>
+      <p>{people1}</p>
+      <p>{people2}</p>
 
-      <h2>How we work</h2>
-      <h3>We consult</h3>
-      <p>Our consultations are guided by our experience, by where the technology is
-      heading, and by your own requirements and budget. We give each customer
-      exceptional attention and time.</p>
-      <h3>We organise</h3>
-      <p>Because we respect your time, we organise and carry out all the necessary
-      stages of the repair and service work ourselves.</p>
-      <h3>We ensure</h3>
-      <p>We control the work process and keep the customer's representatives informed
-      about progress as it happens.</p>
+      <h2>{h_how}</h2>
+      <h3>{s1}</h3><p>{how1}</p>
+      <h3>{s2}</h3><p>{how2}</p>
+      <h3>{s3}</h3><p>{how3}</p>
 
-      <h2>Certification and cover</h2>
-      <p>{legal} holds the <strong>RINA</strong> certificate, and is certified by the
-      <strong>Polish Register of Shipping (PRS)</strong>. Both are published in full on
-      the <a href="{certs}">certificates page</a>.</p>
-      <p>The company's civil liability is insured with <strong>Compensa Vienna
-      Insurance Group, ADB</strong> for <strong>EUR 250,000</strong>, under insurance
-      policy no. 230 0008143 / 2020.</p>
+      <h2>{h_cert}</h2>
+      <p>{cert1} <a href="{certs}">{c_more}</a></p>
+      <p>{cert2}</p>
 
-      <h2>Representation</h2>
-      <p>We represent two well-known manufacturers on the global market:
-      <strong>BITZER</strong>, for whom we are an authorised partner, and
-      <strong>DANFOSS</strong>, for whom we are a marine line representative. More on
-      the <a href="{partners}">partners page</a>.</p>
+      <h2>{h_rep}</h2>
+      <p>{rep_l} <a href="{partners}">{p_more}</a></p>
 
-      <h2>Company details</h2>
+      <h2>{h_details}</h2>
       <p>{legal}<br>{street}<br>{city}<br>{country}<br>
-      Company ID: {cid}<br>VAT code: {vat}</p>
+      {l_cid}: {cid}<br>{l_vat}: {vat}</p>
     </section>
-{cta}""".format(founded=FOUNDED, legal=LEGAL, certs=u("/certificates/"),
-                partners=u("/partners/"), street=STREET, city=CITY, country=COUNTRY,
-                cid=COMPANY_ID, vat=VAT,
-                cta=cta("Talk to us about your vessel",
-                        "Tell us the equipment and the port. We will tell you what it "
-                        "takes to put it right."))
+{cta}""".format(spec=spec, h_spec=PT("a_spec"), h_people=PT("a_people"),
+                people1=PT("a_people_1"), people2=PT("a_people_2"),
+                h_how=T("how_h2"), s1=T("step1"), s2=T("step2"), s3=T("step3"),
+                how1=T("how1"), how2=T("how2"), how3=T("how3"),
+                h_cert=PT("a_cert"), cert1=PT("a_cert_1", legal=LEGAL),
+                cert2=PT("a_cert_2"), certs=u("/certificates/"),
+                c_more=PT("c_eyebrow").lower(), h_rep=T("rep_eyebrow"),
+                rep_l=T("rep_lead"), partners=u("/partners/"),
+                p_more=PT("p_eyebrow").lower(), h_details=PT("a_details"),
+                legal=LEGAL, street=STREET, city=CITY, country=COUNTRY,
+                l_cid=T("company_no"), cid=COMPANY_ID, l_vat=T("vat"), vat=VAT,
+                cta=cta(T("cta_h2"), T("cta_p")))
 
 
 # ============================================================
 # SERVICES INDEX + DETAIL
 # ============================================================
 def services_index():
-    # h2, not h3: this page has no section heading above the cards, so h3 here
-    # would jump the outline straight from h1.
-    cards = service_cards("h2")
-
-    return page_head(
-        "Services", "What we repair, supply and install",
-        "Marine engines, refrigeration plant, pipe systems and the spare parts that "
-        "keep all three running.",
-        [("Home", "/"), ("Services", None)], path="/services/") + """
+    return page_head(T("svc_eyebrow"), PT("svc_h1"), PT("svc_page_lead"),
+                     [(T("home"), "/"), (T("svc_eyebrow"), None)],
+                     path="/services/") + """
     <section class="section" style="padding-top: 0">
       <div class="container">
         <div class="card-grid">
@@ -1109,96 +1077,77 @@ def services_index():
         </div>
       </div>
     </section>
-{cta}""".format(cards=cards,
-                cta=cta("Not sure which one you need?",
-                        "Most jobs cross more than one of these. Describe the problem "
-                        "and we will scope it."))
+{cta}""".format(cards=service_cards("h2"), cta=cta(T("cta_h2"), T("cta_p")))
 
 
 def service_page(s):
     blocks = []
     for heading, paras in s["blocks"]:
         blocks.append("      <h2>%s</h2>\n%s" % (
-            heading, "\n".join("      " + p for p in paras)))
-
-    others = [o for o in ORDERED if o["slug"] != s["slug"]]
+            heading, "\n".join("      " + x for x in paras)))
+    others = [o for o in services() if o["slug"] != s["slug"]]
     more = "\n".join(card(o, "h3") for o in others)
-
     f, w, h, alt = s["img"]
-    return page_head(
-        "Service " + s["num"], s["title"], s["lead"],
-        [("Home", "/"), ("Services", "/services/"), (s["title"], None)]) + """
+
+    return page_head("%s %s" % (T("svc_eyebrow"), s["num"]), s["title"], s["lead"],
+                     [(T("home"), "/"), (T("svc_eyebrow"), "/services/"),
+                      (s["title"], None)]) + """
     <div class="container">
       <div class="page-media cornered reveal">
         <img src="{img}" alt="{alt}" width="{w}" height="{h}">
       </div>
     </div>
 
-    <section class="container prose">""".format(
-        img=u("/assets/photos/" + f), alt=alt, w=w, h=h) + """
+    <section class="container prose">
 {blocks}
     </section>
 
     <section class="section section-alt">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow">Other services</p>
-          <h2>What else we do</h2>
+          <p class="eyebrow">{other_e}</p>
+          <h2>{other_h}</h2>
         </div>
         <div class="card-grid">
 {more}
         </div>
       </div>
     </section>
-{cta}""".format(blocks="\n\n".join(blocks), more=more,
-                cta=cta("Ask about " + s["title"].lower(),
-                        "Send us the equipment details and the port, and we will come "
-                        "back with a scope and a price."))
+{cta}""".format(img=u("/assets/photos/" + f), alt=alt, w=w, h=h,
+                blocks="\n\n".join(blocks), more=more,
+                other_e=T("svc_eyebrow"), other_h=PT("svc_h1"),
+                cta=cta(T("cta_h2"), T("cta_p")))
 
 
 # ============================================================
 # COMPLETED WORKS
 # ============================================================
 def completed_works():
-    return page_head(
-        "Completed works", "Where the work has been done",
-        "Two strands run through everything the company has delivered since %s: "
-        "engines, and refrigeration." % FOUNDED,
-        [("Home", "/"), ("Completed works", None)], path="/completed-works/") + """
+    return page_head(PT("cw_eyebrow"), PT("cw_h1"), PT("cw_lead", founded=FOUNDED),
+                     [(T("home"), "/"), (PT("cw_eyebrow"), None)],
+                     path="/completed-works/") + """
     <section class="container prose">
-      <!-- NOTE(LITPROFIT): the old site's "Completed works" page was two headings
-           and two stock photographs — no project detail at all. This page is written
-           from what the rest of the site establishes. To make it genuinely useful we
-           need, per project: vessel or plant name, year, port, scope of work, and a
-           photograph. That is the single highest-value thing the client can supply. -->
+      <!-- NOTE(LITPROFIT): the old site's version of this page was two headings and
+           two stock photographs. To make it genuinely useful we need, per project:
+           vessel or plant name, year, port, scope of work, and a photograph. That is
+           the single highest-value thing the client can supply. -->
+      <h2>{h1}</h2>
+      <p>{p1}</p>
+      {tags1}
 
-      <h2>Ship equipment and engine repair</h2>
-      <p>Overhauls of main and auxiliary engines carried out on fishing vessels and
-      commercial ships, covering both 4-stroke and 2-stroke plant from
-      <strong>MAN, Wartsila, Yanmar, Hyundai Himsen, MAK, Caterpillar, Deutz</strong>
-      and <strong>Daihatsu</strong>, alongside the engine room and deck equipment that
-      surrounds them.</p>
-      <p>Where a vessel needs to come alongside for the work, we arrange its
-      positioning in the port of Klaipeda.</p>
+      <h2>{h2}</h2>
+      <p>{p2}</p>
+      {tags2}
 
-      <h2>Refrigeration equipment</h2>
-      <p>The company's longest-running line of work: modernisation and repair of
-      refrigeration systems on fishing boats and shore installations, compressor
-      overhauls, class-approved design documentation, installation of plant and
-      refrigerant piping, and commissioning through to handover.</p>
-      <p>Systems worked on include <strong>GRASSO / KUHLAUTOMAT, HOWDEN, MYCOM,
-      SABROE, STAL, AERZEN, YORK DYKIN</strong> and <strong>HITACHI</strong>.</p>
-
-      <h2>Who the work was for</h2>
-      <p>Clients include <strong>Norebo</strong>, <strong>Sealord</strong>,
-      <strong>Limarko Group</strong>, <strong>Ocean Whale Company</strong> and
-      <strong>Baltreids</strong> — the full list is on the
-      <a href="{partners}">partners page</a>.</p>
+      <h2>{h3}</h2>
+      <p>Norebo, Sealord, Limarko Group, Ocean Whale Company, Baltreids &mdash;
+      <a href="{partners}">{p_more}</a>.</p>
     </section>
-{cta}""".format(partners=u("/partners/"),
-                cta=cta("Have a similar job?",
-                        "Tell us the vessel, the equipment and the port, and we will "
-                        "come back with a scope and a price."))
+{cta}""".format(h1=PT("cw_engines"), p1=PT("cw_engines_p"), tags1=tags(i18n.ENGINES),
+                h2=PT("cw_refrig"), p2=PT("cw_refrig_p"), tags2=tags(i18n.SYSTEMS),
+                h3=PT("cw_who"), partners=u("/partners/"),
+                p_more=PT("p_clients_h2").lower(),
+                cta=cta(T("cta_h2"), T("cta_p")))
 
 
 # ============================================================
@@ -1206,71 +1155,65 @@ def completed_works():
 # ============================================================
 def partners():
     logos = "\n".join(client_tile(c) for c in CLIENTS)
-
-    return page_head(
-        "Partners", "Manufacturers we represent, clients we work for",
-        "Two authorised representations, and a client list built up over more than a "
-        "decade.",
-        [("Home", "/"), ("Partners", None)], path="/partners/") + """
+    return page_head(PT("p_eyebrow"), PT("p_h1"), PT("p_lead"),
+                     [(T("home"), "/"), (PT("p_eyebrow"), None)],
+                     path="/partners/") + """
     <section class="section partners-band seam-top seam-bottom" style="padding-top: clamp(46px, 5vw, 72px)">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow">Representation</p>
-          <h2>Manufacturers we represent</h2>
-          <p class="lead">Two direct appointments — factory backing on parts, pricing
-          and warranty.</p>
+          <p class="eyebrow">{rep_e}</p>
+          <h2>{rep_h}</h2>
+          <p class="lead">{rep_l}</p>
         </div>
         <div class="partner-grid reveal">
           <div class="partner">
-            <p class="partner-role">Authorised partner</p>
-            <h3 class="partner-logo"><img src="{bitzer}" alt="BITZER" width="454" height="163"></h3>
-            <p>BITZER is one of the largest independent manufacturers of refrigeration
-            compressors in the world. Being an authorised partner means we supply and
-            service the equipment directly rather than through an intermediary, which
-            shortens both the parts chain and the warranty conversation.</p>
+            <p class="partner-role">{tp}</p>
+            <h3 class="partner-logo"><img src="{bitzer}" alt="BITZER" width="454" height="159"></h3>
+            <p>{rep_b}</p>
           </div>
           <div class="partner">
-            <p class="partner-role">Marine line representative</p>
+            <p class="partner-role">{tr}</p>
             <h3 class="partner-logo"><img src="{danfoss}" alt="Danfoss" width="126" height="55"></h3>
-            <p>We represent the Danfoss marine line: controls, valves and components
-            for refrigeration and engine room systems, specified and supplied for
-            vessels rather than adapted from shore equipment.</p>
+            <p>{rep_d}</p>
           </div>
         </div>
 
         <div class="section-head reveal" style="margin-top: clamp(48px, 6vw, 88px)">
-          <p class="eyebrow">Clients</p>
-          <h2>Companies we have worked for</h2>
-          <p class="lead">Fishing groups, shipowners and shipyards across the Baltic
-          and beyond.</p>
+          <p class="eyebrow">{cl_e}</p>
+          <h2>{cl_h}</h2>
+          <p class="lead">{cl_l}</p>
         </div>
         <ul class="logo-wall reveal">
 {logos}
         </ul>
       </div>
     </section>
-{cta}""".format(logos=logos,
+{cta}""".format(logos=logos, rep_e=T("rep_eyebrow"), rep_h=PT("p_rep_h2"),
+                rep_l=PT("p_rep_lead"), tp=T("trust_partner"), tr=T("trust_rep"),
+                rep_b=T("rep_bitzer"), rep_d=T("rep_danfoss"),
+                cl_e=T("clients_eyebrow"), cl_h=PT("p_clients_h2"),
+                cl_l=PT("p_clients_lead"),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
-                cta=cta("Work with us",
-                        "We take one-off jobs and regular contracted service work "
-                        "alike."))
+                cta=cta(T("cta_h2"), T("cta_p")))
 
 
 # ============================================================
 # CERTIFICATES
 # ============================================================
 def certificates():
+    notes = {"RINA": PT("c_rina_note"), "PRS": PT("c_prs_note")}
     docs = "\n".join("""        <a class="doc" href="{href}" target="_blank" rel="noopener">
           <span class="doc-name">{name}</span>
           <span class="doc-meta">{note} <span class="sep">//</span> PDF {size} <span class="sep">//</span> {date}</span>
-          <span class="doc-get">Open</span>
-        </a>""".format(href=u("/assets/certs/" + c["file"]), **c) for c in CERTIFICATES)
+          <span class="doc-get">{open}</span>
+        </a>""".format(href=u("/assets/certs/" + c["file"]), name=c["name"],
+                       note=notes[c["name"]], size=c["size"], date=c["date"],
+                       open=PT("c_open")) for c in CERTIFICATES)
 
-    return page_head(
-        "Certificates", "Certification and cover",
-        "Class approvals, and the liability insurance behind the work.",
-        [("Home", "/"), ("Certificates", None)], path="/certificates/") + """
+    return page_head(PT("c_eyebrow"), PT("c_h1"), PT("c_lead"),
+                     [(T("home"), "/"), (PT("c_eyebrow"), None)],
+                     path="/certificates/") + """
     <section class="section" style="padding-top: 0">
       <div class="container">
         <div class="docs reveal">
@@ -1280,182 +1223,143 @@ def certificates():
     </section>
 
     <section class="container prose">
-      <h2>What these cover</h2>
-      <p><strong>RINA</strong> is an Italian classification society; <strong>PRS</strong>
-      is the Polish Register of Shipping. Certification by a class society is what lets
-      a shipowner accept our work and documentation without commissioning a separate
-      inspection to verify it.</p>
-
-      <h2>Insurance</h2>
-      <p>The civil liability of {legal} is insured with <strong>Compensa Vienna
-      Insurance Group, ADB</strong> for the amount of <strong>EUR 250,000</strong>,
-      under insurance policy no. 230 0008143 / 2020.</p>
-
-      <h2>Warranty</h2>
-      <p>We provide a warranty on all works and equipment. All equipment and spare
-      parts manufactured and supplied by the company comply with quality and
-      international standards.</p>
+      <h2>{h_what}</h2>
+      <p>{p_what}</p>
+      <h2>{h_ins}</h2>
+      <p>{p_ins}</p>
+      <h2>{h_war}</h2>
+      <p>{p_war}</p>
     </section>
-{cta}""".format(docs=docs, legal=LEGAL,
-                cta=cta("Need our documents for a tender?",
-                        "We can supply certification and insurance paperwork on "
-                        "request."))
+{cta}""".format(docs=docs, h_what=PT("c_what"), p_what=PT("c_what_p"),
+                h_ins=PT("c_ins"), p_ins=PT("a_cert_2"),
+                h_war=PT("c_war"), p_war=PT("c_war_p"),
+                cta=cta(T("cta_h2"), T("cta_p")))
 
 
 # ============================================================
 # CONTACTS
 # ============================================================
 def contacts():
-    return page_head(
-        "Contacts", "Talk to us",
-        "Enquiries reach people who can answer technical questions, not a call centre.",
-        [("Home", "/"), ("Contacts", None)], path="/contacts/") + """
+    return page_head(PT("k_eyebrow"), PT("k_h1"), PT("k_lead"),
+                     [(T("home"), "/"), (PT("k_eyebrow"), None)],
+                     path="/contacts/") + """
     <section class="section" style="padding-top: 0">
       <div class="container contact-grid">
         <div class="reveal">
           <div class="contact-block">
-            <h2 class="col-title">Address</h2>
+            <h2 class="block-title">{l_addr}</h2>
             <p>{legal}<br>{street}<br>{city}<br>{country}</p>
           </div>
           <div class="contact-block">
-            <h2 class="block-title">Phone</h2>
+            <h2 class="block-title">{l_phone}</h2>
             <p><a href="tel:{phone_href}">{phone}</a></p>
           </div>
           <div class="contact-block">
-            <h2 class="block-title">Email</h2>
+            <h2 class="block-title">{l_email}</h2>
             <p><a href="mailto:{email}">{email}</a></p>
           </div>
           <div class="contact-block">
-            <h2 class="col-title">Company details</h2>
-            <p>Company No.: {cid}<br>VAT code: {vat}</p>
+            <h2 class="block-title">{l_details}</h2>
+            <p>{l_cid}: {cid}<br>{l_vat}: {vat}</p>
           </div>
           <div class="contact-block">
-            <h2 class="block-title">Service</h2>
-            <p>24/7 &mdash; we are ready to always provide prompt and competent
-            assistance.</p>
+            <h2 class="block-title">{l_service}</h2>
+            <p>{p_service}</p>
           </div>
         </div>
 
         <div class="reveal">
-          <h2>Send an enquiry</h2>
-          <p class="lead" style="margin-bottom: 28px; font-size: var(--text-m)">
-          The fastest route to a useful answer is the vessel or plant, the equipment,
-          the port and your timescale.</p>
+          <h2>{form_h2}</h2>
+          <p class="lead" style="margin-bottom: 28px; font-size: var(--text-m)">{form_lead}</p>
 
           <form class="form" id="enquiryForm" novalidate>
             <div class="field">
-              <label for="fName">Name</label>
+              <label for="fName">{f_name}</label>
               <input id="fName" name="name" type="text" required autocomplete="name">
             </div>
             <div class="field">
-              <label for="fCompany">Company <span class="opt">(optional)</span></label>
+              <label for="fCompany">{f_company} <span class="opt">{f_opt}</span></label>
               <input id="fCompany" name="company" type="text" autocomplete="organization">
             </div>
             <div class="field">
-              <label for="fPhone">Phone <span class="opt">(optional)</span></label>
+              <label for="fPhone">{f_phone} <span class="opt">{f_opt}</span></label>
               <input id="fPhone" name="phone" type="tel" autocomplete="tel">
             </div>
             <div class="field">
-              <label for="fEmail">Email</label>
+              <label for="fEmail">{f_email}</label>
               <input id="fEmail" name="email" type="email" required autocomplete="email">
             </div>
             <div class="field">
-              <label for="fMsg">Message</label>
+              <label for="fMsg">{f_msg}</label>
               <textarea id="fMsg" name="message" rows="6" required
-                        placeholder="Vessel or plant, the equipment, the port, and when you need it done."></textarea>
+                        placeholder="{f_ph}"></textarea>
             </div>
             <div class="field field-check">
               <input id="fConsent" name="consent" type="checkbox" required>
-              <label for="fConsent">I agree that {legal} may use these details to
-              respond to my enquiry, as described in the
-              <a href="{privacy}">privacy policy</a>.</label>
+              <label for="fConsent">{consent}</label>
             </div>
             <div class="field">
-              <button type="submit" class="btn btn-solid">Send enquiry</button>
+              <button type="submit" class="btn btn-solid">{f_send}</button>
               <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
             </div>
           </form>
         </div>
       </div>
     </section>
-""".format(legal=LEGAL, street=STREET, city=CITY, country=COUNTRY, phone=PHONE,
-           phone_href=PHONE_HREF, email=EMAIL, cid=COMPANY_ID, vat=VAT,
-           privacy=u("/privacy/"))
+""".format(l_addr=T("f_address"), legal=LEGAL, street=STREET, city=CITY,
+           country=COUNTRY, l_phone=T("form_phone"), phone=PHONE,
+           phone_href=PHONE_HREF, l_email=T("form_email"), email=EMAIL,
+           l_details=T("f_details"), l_cid=T("company_no"), cid=COMPANY_ID,
+           l_vat=T("vat"), vat=VAT, l_service=PT("k_service"),
+           p_service=PT("k_service_p"), form_h2=PT("k_form_h2"),
+           form_lead=PT("k_form_lead"), f_name=T("form_name"),
+           f_company=T("form_company"), f_opt=T("form_optional"),
+           f_phone=T("form_phone"), f_email=T("form_email"),
+           f_msg=T("form_message"), f_ph=attr(T("form_placeholder")),
+           f_send=T("form_send"),
+           consent=T("form_consent", legal=LEGAL,
+                     privacy='<a href="%s">%s</a>' % (u("/privacy/"),
+                                                      T("form_privacy_link"))))
 
 
 # ============================================================
 # PRIVACY
 # ============================================================
 def privacy():
-    return page_head(
-        "Legal", "Privacy policy",
-        "How %s handles personal data collected through this website." % LEGAL,
-        [("Home", "/"), ("Privacy", None)]) + """
+    h = i18n.P[LANG]["pr_h"]
+    return page_head(PT("pr_eyebrow"), PT("pr_h1"), PT("pr_lead", legal=LEGAL),
+                     [(T("home"), "/"), (PT("pr_h1"), None)],
+                     path="/privacy/") + """
     <section class="container prose">
       <!-- NOTE(LITPROFIT): this describes what the site technically does today.
-           It has NOT been reviewed by a lawyer. Have it checked against your actual
-           internal processes before relying on it. -->
-      <p><strong>Last updated:</strong> {today}</p>
+           It has NOT been reviewed by a lawyer, and the Lithuanian and Russian are
+           translations for convenience. Have all three checked before launch. -->
+      <p><strong>{l_upd}:</strong> {today}</p>
 
-      <h2>1. Who we are</h2>
-      <p>{legal} is the controller of personal data collected through this website.</p>
+      <h2>1. {h0}</h2>
+      <p>{who}</p>
       <ul>
         <li>{street}, {city}, {country}</li>
-        <li>Email: <a href="mailto:{email}">{email}</a></li>
-        <li>Phone: <a href="tel:{phone_href}">{phone}</a></li>
-        <li>Company ID: {cid}</li>
+        <li><a href="mailto:{email}">{email}</a></li>
+        <li><a href="tel:{phone_href}">{phone}</a></li>
+        <li>{l_cid}: {cid}</li>
       </ul>
 
-      <h2>2. What we collect</h2>
-      <p>This website has no user accounts, no analytics and sets no cookies of its
-      own. Data reaches us in three ways:</p>
-      <ul>
-        <li><strong>The enquiry form.</strong> The name, company, phone, email and
-        message you enter, in order to answer your enquiry.</li>
-        <li><strong>Direct contact.</strong> If you email or call us, we receive
-        whatever you choose to send.</li>
-        <li><strong>Server logs.</strong> The site is hosted on GitHub Pages, which
-        records technical request data including IP address and browser user-agent for
-        security and reliability.</li>
-      </ul>
-
-      <h2>3. Third parties that receive data</h2>
-      <ul>
-        <li><strong>GitHub, Inc.</strong> &mdash; website hosting and request logs.</li>
-      </ul>
-      <p>This site loads no third-party scripts, fonts, analytics or embeds. The
-      typeface is served from our own domain, so browsing this site does not disclose
-      your IP address to any advertising or analytics company.</p>
-
-      <h2>4. Legal basis</h2>
-      <ul>
-        <li><strong>Consent</strong> (GDPR Art. 6(1)(a)) &mdash; submitting the enquiry
-        form. You may withdraw it at any time.</li>
-        <li><strong>Legitimate interest</strong> (Art. 6(1)(f)) &mdash; responding to
-        enquiries, and keeping the site secure and available.</li>
-      </ul>
-
-      <h2>5. How long we keep it</h2>
-      <p>Enquiries are kept as long as needed for the enquiry or the resulting project,
-      and for any statutory retention period that applies to it. Hosting logs are
-      retained according to GitHub's own schedule.</p>
-
-      <h2>6. Your rights</h2>
-      <p>Under the GDPR you may request access to your data, correction, erasure,
-      restriction of processing, portability, and you may object to processing based on
-      legitimate interest. Write to <a href="mailto:{email}">{email}</a> and we will
-      respond within one month.</p>
-      <p>If you believe we have handled your data improperly, you may lodge a complaint
-      with the Lithuanian State Data Protection Inspectorate (Valstybine duomenu
-      apsaugos inspekcija), L. Sapiegos g. 17, Vilnius.</p>
-
-      <h2>7. Changes</h2>
-      <p>If this policy changes, the revised version will be published on this page
-      with a new date at the top.</p>
+      <h2>2. {h1}</h2><p>{collect}</p>
+      <h2>3. {h2}</h2><p>{third}</p>
+      <h2>4. {h3}</h2><p>{basis}</p>
+      <h2>5. {h4}</h2><p>{keep}</p>
+      <h2>6. {h5}</h2><p>{rights}</p>
+      <h2>7. {h6}</h2><p>{changes}</p>
     </section>
-""".format(today=datetime.date.today().strftime("%d %B %Y"), legal=LEGAL,
-           street=STREET, city=CITY, country=COUNTRY, email=EMAIL, phone=PHONE,
-           phone_href=PHONE_HREF, cid=COMPANY_ID)
+""".format(l_upd=PT("pr_updated"), today=datetime.date.today().isoformat(),
+           h0=h[0], h1=h[1], h2=h[2], h3=h[3], h4=h[4], h5=h[5], h6=h[6],
+           who=PT("pr_who", legal=LEGAL), street=STREET, city=CITY,
+           country=COUNTRY, email=EMAIL, phone=PHONE, phone_href=PHONE_HREF,
+           l_cid=T("company_no"), cid=COMPANY_ID,
+           collect=PT("pr_collect"), third=PT("pr_third"), basis=PT("pr_basis"),
+           keep=PT("pr_keep"), rights=PT("pr_rights", email=EMAIL),
+           changes=PT("pr_changes"))
 
 
 # ============================================================
@@ -1494,100 +1398,94 @@ def org_ld():
 # ============================================================
 # BUILD
 # ============================================================
-PAGES = [
-    ("/", "%s — %s" % (NAME, TAGLINE),
-     "%s — ship repair and maintenance all over the world. Marine engine overhaul, "
-     "refrigeration systems, hull and piping works, and spare parts supply from "
-     "Klaipeda, Lithuania." % LEGAL, home, org_ld()),
-
-    ("/about/", "About us",
-     "%s was established in %s in Klaipeda, Lithuania. Marine refrigeration and engine "
-     "repair specialists, RINA and PRS certified." % (LEGAL, FOUNDED), about, ""),
-
-    ("/services/", "Services",
-     "Marine engine repair, refrigeration systems, hull and piping works and spare "
-     "parts supply — from a single contractor in Klaipeda, Lithuania.",
-     services_index, ""),
-
-    ("/completed-works/", "Completed works",
-     "Engine overhauls and refrigeration projects delivered by %s for fishing fleets, "
-     "shipowners and shore installations." % LEGAL, completed_works, ""),
-
-    ("/partners/", "Partners",
-     "Authorised BITZER partner and DANFOSS marine line representative. Clients "
-     "include Norebo, Sealord, Limarko Group, Ocean Whale Company and Baltreids.",
-     partners, ""),
-
-    ("/certificates/", "Certificates",
-     "RINA and PRS certification, and EUR 250,000 civil liability insurance with "
-     "Compensa Vienna Insurance Group.", certificates, ""),
-
-    ("/contacts/", "Contacts",
-     "%s, %s, %s. Phone %s, email %s. 24/7 service."
-     % (STREET, CITY, COUNTRY, PHONE, EMAIL), contacts, ""),
-
-    ("/privacy/", "Privacy policy",
-     "How %s handles personal data collected through this website." % LEGAL,
-     privacy, ""),
-]
-
-for path, title, desc, fn, extra in PAGES:
-    write(outfile(path), page(path, title, desc, fn(), head_extra=extra))
-
-for s in ORDERED:
-    p = "/services/%s/" % s["slug"]
-    write(outfile(p), page(p, s["title"], s["meta"], service_page(s)))
+def pages():
+    """The eight standard pages, in the language being built."""
+    return [
+        ("/", "%s — %s" % (NAME, T("tagline")), T("hero_lead", legal=LEGAL),
+         home, org_ld()),
+        ("/about/", PT("about_eyebrow"),
+         PT("about_meta", legal=LEGAL, founded=FOUNDED), about, ""),
+        ("/services/", T("svc_eyebrow"), PT("svc_meta"), services_index, ""),
+        ("/completed-works/", PT("cw_eyebrow"), PT("cw_meta", legal=LEGAL),
+         completed_works, ""),
+        ("/partners/", PT("p_eyebrow"), PT("p_meta"), partners, ""),
+        ("/certificates/", PT("c_eyebrow"), PT("c_meta"), certificates, ""),
+        ("/contacts/", PT("k_eyebrow"),
+         PT("k_meta", street=STREET, city=CITY, country=COUNTRY,
+            phone=PHONE, email=EMAIL), contacts, ""),
+        ("/privacy/", PT("pr_h1"), PT("pr_lead", legal=LEGAL), privacy, ""),
+    ]
 
 
-# ---------------- 404 ----------------
-# GitHub Pages serves /404.html for any unmatched path.
-NOTFOUND = """
+def notfound_body():
+    return """
     <section class="container notfound">
       <div>
         <p class="code">404</p>
-        <h1>Page not found</h1>
-        <p class="lead" style="margin: 20px auto 0">The page you asked for is not
-        here. It may have moved when the site was rebuilt.</p>
+        <h1>{h1}</h1>
+        <p class="lead" style="margin: 20px auto 0">{lead}</p>
         <div class="btn-row" style="justify-content: center">
-          <a class="btn btn-solid" href="%s">Go to the homepage</a>
-          <a class="btn btn-outline" href="%s">Contact us</a>
+          <a class="btn btn-solid" href="{home}">{b1}</a>
+          <a class="btn btn-outline" href="{contacts}">{b2}</a>
         </div>
       </div>
     </section>
-""" % (u("/"), u("/contacts/"))
-write("404.html", page("/404.html", "Page not found",
-                       "The page you asked for is not here.", NOTFOUND,
+""".format(h1=PT("nf_h1"), lead=PT("nf_lead"), home=u("/"),
+           contacts=u("/contacts/"), b1=PT("nf_home"), b2=PT("nf_contact"))
+
+
+# ---------------- write every language ----------------
+SITEMAP_ROWS = []
+
+for _lang in i18n.LANGS:
+    LANG = _lang
+    for path, title, desc, fn, extra in pages():
+        write(outfile(path), page(path, title, desc, fn(), head_extra=extra))
+        SITEMAP_ROWS.append((_lang, path))
+    for _s in services():
+        _p = "/services/%s/" % _s["slug"]
+        write(outfile(_p), page(_p, _s["title"], _s["meta"], service_page(_s)))
+        SITEMAP_ROWS.append((_lang, _p))
+
+# 404 is served by GitHub Pages for any unmatched path anywhere on the host, so
+# there is one, in English, at the root.
+LANG = "en"
+write("404.html", page("/404.html", PT("nf_h1"), PT("nf_lead"), notfound_body(),
                        noindex=True, active=""))
 
 
 # ---------------- sitemap ----------------
-# Generated from the same list that writes the HTML, so a renamed page can
-# never leave a dead URL behind in the sitemap.
-SITEMAP = [("/", "monthly", "1.0"),
-           ("/services/", "monthly", "0.9")] + \
-          [("/services/%s/" % s["slug"], "monthly", "0.8") for s in ORDERED] + \
-          [("/about/", "monthly", "0.8"),
-           ("/completed-works/", "monthly", "0.7"),
-           ("/partners/", "monthly", "0.7"),
-           ("/certificates/", "yearly", "0.6"),
-           ("/contacts/", "yearly", "0.7"),
-           ("/privacy/", "yearly", "0.2")]
+# Built from the same list that wrote the HTML, so a renamed page cannot leave a
+# dead URL behind, and every language is listed with its alternates.
+FREQ = {"/": ("monthly", "1.0"), "/services/": ("monthly", "0.9"),
+        "/about/": ("monthly", "0.8"), "/completed-works/": ("monthly", "0.7"),
+        "/partners/": ("monthly", "0.7"), "/certificates/": ("yearly", "0.6"),
+        "/contacts/": ("yearly", "0.7"), "/privacy/": ("yearly", "0.2")}
 
-urls = "\n".join(
-    "  <url>\n"
-    "    <loc>%s</loc>\n"
-    "    <lastmod>%s</lastmod>\n"
-    "    <changefreq>%s</changefreq>\n"
-    "    <priority>%s</priority>\n"
-    "  </url>" % (canonical(loc), LASTMOD, freq, pri)
-    for loc, freq, pri in SITEMAP)
-write("sitemap.xml",
-      '<?xml version="1.0" encoding="UTF-8"?>\n'
-      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-      + urls + "\n</urlset>\n")
 
+def sitemap_xml():
+    rows = []
+    for lang, path in SITEMAP_ROWS:
+        freq, pri = FREQ.get(path, ("monthly", "0.8"))
+        alts = "\n".join(
+            '    <xhtml:link rel="alternate" hreflang="%s" href="%s"/>'
+            % (i18n.LOCALE[lg][0], lang_url(lg, path)) for lg in i18n.LANGS)
+        rows.append(
+            "  <url>\n"
+            "    <loc>%s</loc>\n%s\n"
+            "    <lastmod>%s</lastmod>\n"
+            "    <changefreq>%s</changefreq>\n"
+            "    <priority>%s</priority>\n"
+            "  </url>" % (lang_url(lang, path), alts, LASTMOD, freq, pri))
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
+            '        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+            + "\n".join(rows) + "\n</urlset>\n")
+
+
+write("sitemap.xml", sitemap_xml())
 write("robots.txt",
-      "User-agent: *\nAllow: /\n\nSitemap: %s\n" % (ORIGIN + u("/sitemap.xml")))
+      "User-agent: *\nAllow: /\n\nSitemap: %s\n" % (ORIGIN + BASE + "/sitemap.xml"))
 
-print("\nBASE=%r ORIGIN=%r" % (BASE, ORIGIN))
+print("\nBASE=%r ORIGIN=%r  languages=%s" % (BASE, ORIGIN, ",".join(i18n.LANGS)))
 print("Set BASE='' and ORIGIN to the live domain, add CNAME, and rebuild to migrate.")

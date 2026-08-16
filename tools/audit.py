@@ -30,10 +30,17 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SERVE = os.path.dirname(ROOT)
 PREFIX = "/" + os.path.basename(ROOT)
 
-PATHS = ["/", "/about/", "/services/", "/services/ship-engine-repair/",
-         "/services/refrigeration-systems/", "/services/hull-and-piping/",
-         "/services/spare-parts/", "/completed-works/", "/partners/",
-         "/certificates/", "/contacts/", "/privacy/", "/404.html"]
+BASE_PATHS = ["/", "/about/", "/services/", "/services/ship-engine-repair/",
+              "/services/refrigeration-systems/", "/services/hull-and-piping/",
+              "/services/spare-parts/", "/completed-works/", "/partners/",
+              "/certificates/", "/contacts/", "/privacy/"]
+
+# Every page in every language. A translation that only half-renders is still a
+# broken page, so they all get the same structural and mobile checks.
+PATHS = []
+for _lang in ("", "/lt", "/ru"):
+    PATHS += [_lang + p for p in BASE_PATHS]
+PATHS.append("/404.html")
 
 WIDTHS = [360, 375, 390, 412, 430]
 
