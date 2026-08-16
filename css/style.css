@@ -881,14 +881,24 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
    detail: the shape and the detail inside it both go to white, so Ocean
    Whale, LZK and OWH each collapse into a featureless white disc. These
    are other companies' trademarks; recolouring them is not ours to do. */
+/* aspect-ratio sets the tile height, and `overflow: hidden` makes that
+   binding: without it a tall logo plus padding could exceed the ratio box and
+   stretch its whole grid row, which is what made the wall look like it was
+   drifting out of alignment on a phone. */
 .logo-wall li {
   background: var(--white);
   display: grid;
   place-items: center;
-  padding: 26px 24px;
+  padding: clamp(14px, 3.2vw, 26px) clamp(16px, 3.6vw, 24px);
   min-width: 0;
   aspect-ratio: 16 / 9;
+  overflow: hidden;
 }
+/* A plain, definite max-height. `min(46px, 100%)` looked safer but the
+   percentage is cyclic here — the row gets sized from the image's unclamped
+   width-constrained height (142px for a square logo), the tile clips to its
+   aspect box, and the logo ends up centred in the 142px row: 36px low and cut
+   off. The tile has room for 46px now that the anchor's padding is gone. */
 .logo-wall img {
   max-height: 46px;
   max-width: 100%;
@@ -1417,12 +1427,13 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 /* ============================================================
    CLIENT LOGO LINKS
    ============================================================ */
+/* no padding of its own — the tile already has it, and adding 4px here made
+   linked tiles 8px taller than unlinked ones */
 .logo-wall li > a {
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
-  padding: 4px;
   transition: transform 0.3s var(--ease);
 }
 .logo-wall li > a:hover { transform: scale(1.04); }
