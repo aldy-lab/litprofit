@@ -13,6 +13,7 @@ domain, and a half-generated site cannot switch between the two.
 The output is committed, so nothing has to run to serve the site.
 """
 import datetime
+import html as _html
 import io
 import json
 import os
@@ -87,6 +88,21 @@ def lockup():
     # second "LITPROFIT" would be read out twice by a screen reader.
     return ('<img class="brand-mark" src="%s" alt="" width="272" height="200">'
             '<span class="brand-word">%s</span>' % (u(LOGO_MARK), NAME))
+
+
+def attr(v):
+    """Escape a value going into an HTML attribute.
+
+    LEGAL is 'UAB "Litprofit"' — raw double quotes, which silently terminate a
+    content="..." attribute. Unescaped, the homepage shipped a meta description
+    four characters long ("UAB ") and five pages were affected. Anything
+    interpolated into an attribute goes through here."""
+    return _html.escape(str(v), quote=True)
+
+
+def text(v):
+    """Escape a value going into element text (no quote escaping needed)."""
+    return _html.escape(str(v), quote=False)
 
 
 # ============================================================
@@ -254,6 +270,28 @@ def pager(path):
            n="%02d" % (i + 1), total="%02d" % len(SHEETS))
 
 
+# Share card per page. Anything unmapped falls back to the home card rather
+# than to nothing — a summary_large_image declaration with no image renders as
+# a blank card on LinkedIn and WhatsApp, which is worse than not declaring one.
+OG_SLUGS = {
+    "/": "home",
+    "/about/": "about",
+    "/services/": "services",
+    "/services/refrigeration-systems/": "refrigeration-systems",
+    "/services/ship-engine-repair/": "ship-engine-repair",
+    "/services/hull-and-piping/": "hull-and-piping",
+    "/services/spare-parts/": "spare-parts",
+    "/completed-works/": "completed-works",
+    "/partners/": "partners",
+    "/certificates/": "certificates",
+    "/contacts/": "contacts",
+}
+
+
+def og_image(path):
+    return ORIGIN + u("/assets/og/%s.jpg" % OG_SLUGS.get(path, "home"))
+
+
 # ============================================================
 # PAGE SHELL
 # ============================================================
@@ -265,7 +303,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{full_title}</title>
+  <title>{full_title_text}</title>
   <meta name="description" content="{description}">
   <link rel="canonical" href="{canon}">
   <meta name="robots" content="{robots}">
@@ -276,7 +314,12 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
   <meta property="og:type" content="website">
   <meta property="og:url" content="{canon}">
   <meta property="og:locale" content="en">
+  <meta property="og:image" content="{og}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{full_title}">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{og}">
   <link rel="icon" href="{icon}">
   <link rel="preload" as="font" type="font/woff2" href="{font}" crossorigin>
   <link rel="stylesheet" href="{fonts_css}">
@@ -299,13 +342,14 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
   <script src="{js}"></script>
 </body>
 </html>
-""".format(full_title=full_title, description=description, canon=canonical(path),
+""".format(full_title=attr(full_title), full_title_text=text(full_title),
+           description=attr(description), canon=canonical(path),
            robots=robots, name=NAME, icon=u("/assets/brand/favicon.svg"),
            font=u("/assets/fonts/montserrat-latin.woff2"),
            fonts_css=u("/css/fonts.css"), style_css=u("/css/style.css"),
            js=u("/js/main.js"), head_extra=head_extra,
            header=header(active if active is not None else path), body=body,
-           pager=pager(path), footer=FOOTER)
+           pager=pager(path), footer=FOOTER, og=og_image(path))
 
 
 def write(path, html):

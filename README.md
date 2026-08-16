@@ -15,7 +15,15 @@ typography pages. Lithuanian and Russian are to follow.
 ```
 python3 tools/build.py     # regenerates every page, sitemap.xml, robots.txt
 python3 tools/audit.py     # device audit — must pass before committing
+python3 tools/make-og.py   # re-renders the share cards (only after a design change)
 ```
+
+Share cards are screenshotted from a real page in a real browser using the
+site's own stylesheet and self-hosted Montserrat, so a card cannot drift away
+from the site's typography. **Anything interpolated into an HTML attribute
+must go through `attr()`** — `LEGAL` is `UAB "Litprofit"`, whose raw double
+quotes silently terminate a `content="..."` attribute. Unescaped, the
+homepage shipped a meta description four characters long.
 
 The output is committed, so nothing runs to serve the site. Everything is
 generated, including `index.html`, which is what makes the base-path switch
