@@ -171,6 +171,41 @@ The dimension figures (4250 mm, 2100 mm) are plausible for a package of this
 type but are **illustrative, not a real machine's**. Swap them for a genuine
 unit's if the drawing is ever used as anything but decoration.
 
+## The hero drawing
+
+A stern trawler in side elevation, drawn to the same workshop conventions as
+the general arrangement further down: hairline geometry, a dash-dot waterline
+datum, frame lines, compartment labels (`RSW`, `FISH HOLD`, `ENGINE ROOM`), a
+length-overall dimension and a title block.
+
+It replaces the hero photograph, which was a stock welder that said nothing
+about this company. The vessel names the spaces they are actually paid to open
+up.
+
+Two things it inherited from earlier mistakes: the title block label is kept
+**short** because 31 monospace characters do not fit the 190px cell — exactly
+how the general arrangement's title block broke — and the drawing is held clear
+of the lead paragraph rather than centred, verified by comparing bounding
+boxes rather than by eye.
+
+The work light easter egg went with the photograph; there is no longer a
+photograph for it to reveal.
+
+## Careers
+
+`/careers/` in all three languages, in the nav and the pager.
+
+**`POSITIONS` is empty on purpose.** No real vacancies have been supplied, and
+inventing job adverts for a real company would put fictional roles into Google
+for Jobs under their name. With the list empty the page shows the
+open-application route instead, which is true. Add a dict to `POSITIONS` in
+`build.py` to open a role; `JobPosting` structured data is emitted only for
+genuinely open ones, so an empty list produces no markup at all rather than an
+invalid shell.
+
+The application form shares one handler with the enquiry form — a second copy
+of that logic would be a second place to fix it.
+
 ## Languages
 
 English at the root, Lithuanian under `/lt/`, Russian under `/ru/` — 12 pages

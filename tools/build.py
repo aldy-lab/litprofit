@@ -580,7 +580,6 @@ SERVICE_BLOCKS = {
 FEATURE_SLUG = i18n.ORDER[0]
 
 CLIENTS = [
-    ("Norebo", "logo-norebo.png", 400, 69, "https://norebo.com"),
     ("Sealord", "logo-sealord-paua.png", 140, 60, "https://sealord.com"),
     ("Limarko Group", "limarko-group.png", 400, 120, ""),
     ("Ocean Whale Company", "ocean-whale-company.png", 400, 135, ""),
@@ -652,6 +651,82 @@ def client_tile(c):
 
 
 # ============================================================
+# HERO — VESSEL PROFILE
+# A stern trawler in side elevation, drawn to the same workshop conventions
+# as the general arrangement further down the page: hairline geometry, a
+# dash-dot waterline, frame lines, compartment labels and a dimension line.
+#
+# It replaces the hero photograph. The photograph was a stock welder that
+# said nothing about this company; the vessel says exactly what they work on
+# and where — the machinery spaces are the parts they are paid to open up.
+# ============================================================
+def hero_drawing():
+    frames = "".join('<line x1="%d" y1="200" x2="%d" y2="298"/>' % (x, x)
+                     for x in range(140, 1060, 38))
+
+    # (x centre, label) — the spaces this company actually works in
+    rooms = [(300, "RSW"), (560, "FISH HOLD"), (800, "ENGINE ROOM"), (980, "FORE")]
+    labels = "".join(
+        '<text class="vp-room" x="%d" y="262" text-anchor="middle">%s</text>'
+        % (x, t) for x, t in rooms)
+    bulkheads = "".join('<line class="vp-bhd" x1="%d" y1="200" x2="%d" y2="298"/>'
+                        % (x, x) for x in (430, 690, 900))
+
+    return """      <svg class="hero-drawing" viewBox="0 0 1200 430" aria-hidden="true"
+           preserveAspectRatio="xMidYMid meet">
+        <g class="vp-thin">{frames}</g>
+
+        <!-- hull -->
+        <path class="vp-hull" d="M92 298 L92 200 L1004 200 L1108 176 L1096 268
+                                 Q1080 298 1040 298 Z"/>
+        <!-- deck line and keel -->
+        <line class="vp-hull" x1="92" y1="200" x2="1108" y2="176"/>
+
+        <!-- superstructure, bridge and funnel -->
+        <path class="vp-hull" d="M150 200 L150 118 L392 118 L392 200"/>
+        <path class="vp-hull" d="M196 118 L196 74 L338 74 L338 118"/>
+        <g class="vp-thin">
+          <line x1="210" y1="92" x2="324" y2="92"/>
+          <line x1="168" y1="158" x2="374" y2="158"/>
+        </g>
+        <path class="vp-hull" d="M244 74 L244 40 L296 40 L296 74"/>
+        <!-- mast -->
+        <line class="vp-hull" x1="410" y1="118" x2="410" y2="26"/>
+        <line class="vp-thin" x1="372" y1="48" x2="448" y2="48"/>
+
+        <!-- gantry aft, the giveaway that it is a trawler -->
+        <path class="vp-hull" d="M100 200 L100 132 L146 132"/>
+
+        {bulkheads}
+        {labels}
+
+        <!-- waterline: dash-dot, the drawing convention for a datum -->
+        <line class="vp-wl" x1="60" y1="268" x2="1150" y2="268"/>
+        <text class="vp-dim" x="64" y="258">WL</text>
+
+        <!-- length overall -->
+        <g class="vp-dim-g">
+          <line x1="92" y1="356" x2="1108" y2="356"/>
+          <line x1="92" y1="346" x2="92" y2="366"/>
+          <line x1="1108" y1="346" x2="1108" y2="366"/>
+          <path d="M100 352 L92 356 L100 360 Z"/>
+          <path d="M1100 352 L1108 356 L1100 360 Z"/>
+          <rect class="vp-dim-bg" x="536" y="344" width="128" height="24"/>
+          <text class="vp-dim" x="600" y="361" text-anchor="middle">LOA</text>
+        </g>
+
+        <!-- title block, as on the general arrangement -->
+        <g class="vp-tb">
+          <rect x="820" y="382" width="330" height="40"/>
+          <line x1="1000" y1="382" x2="1000" y2="422"/>
+          <text x="832" y="407">{tb}</text>
+          <text class="vp-tb-b" x="1012" y="407">LITPROFIT</text>
+        </g>
+      </svg>""".format(frames=frames, bulkheads=bulkheads, labels=labels,
+                       tb=i18n.VESSEL_TB[LANG])
+
+
+# ============================================================
 # HOME
 # ============================================================
 def home():
@@ -662,9 +737,7 @@ def home():
     return """
     <section class="hero">
       <div class="hero-media">
-        <img src="{hero_img}" alt="" width="800" height="533" fetchpriority="high">
-        <span class="hero-lamp" aria-hidden="true"
-              style="background-image:url({hero_img})"></span>
+{hero_drawing}
       </div>
       <div class="container hero-inner">
         <p class="eyebrow eyebrow-plain">{he} <span class="sep">//</span> {hs} {founded}</p>
@@ -799,6 +872,7 @@ def home():
       </div>
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
+                hero_drawing=hero_drawing(),
                 he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
                 hlead=T("hero_lead", legal=LEGAL), s1=T("step1"), s2=T("step2"),
                 s3=T("step3"), hsvc=T("hero_services"), tp=T("trust_partner"),
@@ -815,7 +889,6 @@ def home():
                 cards=cards, logos=logos, cycle=compressor_drawing(),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
-                hero_img=u("/assets/photos/hero-welding.webp"),
                 plant_img=u("/assets/photos/plant-room.webp"),
                 refrig=u("/services/refrigeration-systems/"),
                 book=BOOKING_URL or u("/contacts/"),
@@ -1140,7 +1213,7 @@ def completed_works():
       {tags2}
 
       <h2>{h3}</h2>
-      <p>Norebo, Sealord, Limarko Group, Ocean Whale Company, Baltreids &mdash;
+      <p>Sealord, Limarko Group, Ocean Whale Company, Baltreids &mdash;
       <a href="{partners}">{p_more}</a>.</p>
     </section>
 {cta}""".format(h1=PT("cw_engines"), p1=PT("cw_engines_p"), tags1=tags(i18n.ENGINES),
@@ -1363,6 +1436,150 @@ def privacy():
 
 
 # ============================================================
+# CAREERS
+#
+# POSITIONS is the only block to edit when a vacancy opens or closes. It is
+# EMPTY on purpose: no real vacancies have been supplied, and inventing job
+# adverts for a real company would put fictional roles into Google for Jobs
+# under their name. With the list empty the page shows the open-application
+# route instead, which is true.
+#
+# To open a role, add a dict with:
+#   id, title, count, location, contract, posted (YYYY-MM-DD),
+#   valid_through, employment_type, summary, needs (list)
+# per language key. Set open=False to retire it without deleting it.
+# ============================================================
+POSITIONS = []
+
+
+def positions_html():
+    live = [p for p in POSITIONS if p.get("open")]
+    C = i18n.CAR[LANG]
+    if not live:
+        return """      <div class="notice">
+        <p><strong>%s.</strong> %s</p>
+      </div>""" % (C["none_h"], C["none_p"])
+    out = []
+    for p in live:
+        d = p[LANG] if LANG in p else p["en"]
+        needs = "\n".join("          <li>%s</li>" % n for n in d["needs"])
+        out.append("""      <article class="position" id="{pid}">
+        <div class="position-head">
+          <h3>{title}</h3>
+          <p class="position-meta"><span>{count}</span><span>{location}</span><span>{contract}</span></p>
+        </div>
+        <p>{summary}</p>
+        <ul>
+{needs}
+        </ul>
+      </article>""".format(pid=p["id"], needs=needs, **d))
+    return "\n".join(out)
+
+
+def job_postings_ld():
+    """Google for Jobs. Emitted only for genuinely open roles — an empty
+    POSITIONS list produces no structured data at all, rather than an empty
+    shell that would be flagged as invalid."""
+    out = []
+    for p in POSITIONS:
+        if not p.get("open"):
+            continue
+        d = p.get(LANG, p["en"])
+        out.append(jsonld({
+            "@context": "https://schema.org",
+            "@type": "JobPosting",
+            "title": d["title"],
+            "description": "<p>%s</p><ul>%s</ul>" % (
+                d["summary"], "".join("<li>%s</li>" % n for n in d["needs"])),
+            "datePosted": p["posted"],
+            "validThrough": p["valid_through"] + "T23:59",
+            "employmentType": p["employment_type"],
+            "hiringOrganization": {"@type": "Organization", "name": LEGAL,
+                                   "sameAs": lang_url("en", "/")},
+            "jobLocation": [{"@type": "Place", "address": {
+                "@type": "PostalAddress", "streetAddress": STREET,
+                "addressLocality": "Klaipeda", "postalCode": "LT-94101",
+                "addressCountry": "LT"}}],
+            "directApply": True,
+        }))
+    return "".join(out)
+
+
+def careers():
+    C = i18n.CAR[LANG]
+    disc = "\n".join("        <li>%s</li>" % x for x in C["disc"])
+    matters = "\n".join("        <li>%s</li>" % x for x in C["matters"])
+    return page_head(C["nav"], C["h1"], C["lead"],
+                     [(T("home"), "/"), (C["nav"], None)],
+                     path="/careers/") + """
+    <section class="container prose">
+      <h2>{open_h2}</h2>
+{positions}
+
+      <h2>{disc_h2}</h2>
+      <p>{disc_p}</p>
+      <ul>
+{disc}
+      </ul>
+
+      <h2>{matters_h2}</h2>
+      <ul>
+{matters}
+      </ul>
+    </section>
+
+    <section class="section section-alt seam-top" id="apply">
+      <div class="container contact-grid">
+        <div class="reveal">
+          <h2>{apply_h2}</h2>
+          <p class="lead" style="font-size: var(--text-m); margin-top: 18px">{apply_p}</p>
+        </div>
+        <div class="reveal">
+          <form class="form" id="applyForm" novalidate>
+            <div class="field">
+              <label for="aName">{f_name}</label>
+              <input id="aName" name="name" type="text" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="aEmail">{f_email}</label>
+              <input id="aEmail" name="email" type="email" required autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="aPhone">{f_phone} <span class="opt">{f_opt}</span></label>
+              <input id="aPhone" name="phone" type="tel" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="aRole">{f_role}</label>
+              <input id="aRole" name="role" type="text" required placeholder="{f_open}">
+            </div>
+            <div class="field">
+              <label for="aExp">{f_exp}</label>
+              <textarea id="aExp" name="message" rows="6" required
+                        placeholder="{f_exp_ph}"></textarea>
+            </div>
+            <div class="field field-check">
+              <input id="aConsent" name="consent" type="checkbox" required>
+              <label for="aConsent">{consent}</label>
+            </div>
+            <div class="field">
+              <button type="submit" class="btn btn-solid">{f_send}</button>
+              <p class="form-note" id="applyNote" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+""".format(positions=positions_html(), disc=disc, matters=matters,
+           open_h2=C["open_h2"], disc_h2=C["disc_h2"], disc_p=C["disc_p"],
+           matters_h2=C["matters_h2"], apply_h2=C["apply_h2"], apply_p=C["apply_p"],
+           f_name=T("form_name"), f_email=T("form_email"), f_phone=T("form_phone"),
+           f_opt=T("form_optional"), f_role=C["f_role"], f_open=attr(C["f_open"]),
+           f_exp=C["f_exp"], f_exp_ph=attr(C["f_exp_ph"]), f_send=C["f_send"],
+           consent=C["consent"] % dict(legal=LEGAL,
+               privacy='<a href="%s">%s</a>' % (u("/privacy/"), T("form_privacy_link"))))
+
+
+# ============================================================
 # STRUCTURED DATA
 # ============================================================
 def org_ld():
@@ -1413,6 +1630,8 @@ def pages():
         ("/contacts/", PT("k_eyebrow"),
          PT("k_meta", street=STREET, city=CITY, country=COUNTRY,
             phone=PHONE, email=EMAIL), contacts, ""),
+        ("/careers/", i18n.CAR[LANG]["nav"],
+         i18n.CAR[LANG]["meta"] % dict(legal=LEGAL), careers, job_postings_ld()),
         ("/privacy/", PT("pr_h1"), PT("pr_lead", legal=LEGAL), privacy, ""),
     ]
 
@@ -1460,7 +1679,8 @@ write("404.html", page("/404.html", PT("nf_h1"), PT("nf_lead"), notfound_body(),
 FREQ = {"/": ("monthly", "1.0"), "/services/": ("monthly", "0.9"),
         "/about/": ("monthly", "0.8"), "/completed-works/": ("monthly", "0.7"),
         "/partners/": ("monthly", "0.7"), "/certificates/": ("yearly", "0.6"),
-        "/contacts/": ("yearly", "0.7"), "/privacy/": ("yearly", "0.2")}
+        "/contacts/": ("yearly", "0.7"), "/careers/": ("monthly", "0.6"),
+        "/privacy/": ("yearly", "0.2")}
 
 
 def sitemap_xml():

@@ -117,7 +117,7 @@
   var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var bar = doc.querySelector(".progress");
-  var heroImg = doc.querySelector(".hero-media img");
+  var heroImg = doc.querySelector(".hero-drawing");
 
 
   function scrollFxFrame() {
@@ -129,12 +129,12 @@
       bar.style.setProperty("--p", max > 0 ? (window.scrollY / max).toFixed(4) : "0");
     }
 
-    /* the hero photograph drifts at a fraction of the scroll rate, and only
-       while the hero is still on screen — past that it is wasted work */
+    /* the hero drawing drifts at a fraction of the scroll rate, and only while
+       the hero is still on screen — past that it is wasted work */
     if (heroImg && !calm) {
       var y = window.scrollY;
       if (y < d.clientHeight * 1.2) {
-        heroImg.style.transform = "translate3d(0," + (y * 0.16).toFixed(1) + "px,0) scale(1.06)";
+        heroImg.style.transform = "translate3d(0," + (y * 0.12).toFixed(1) + "px,0)";
       }
     }
   }
@@ -161,10 +161,20 @@
     else if (el.parentNode) el.parentNode.removeChild(el);
   });
 
-  /* ---------- enquiry form ---------- */
-  var form = doc.getElementById("enquiryForm");
-  if (form) {
-    var note = doc.getElementById("formNote");
+  /* ---------- forms ----------
+     Two forms, one behaviour: the enquiry form on /contacts/ and the
+     application form on /careers/. Both post to FORM_ENDPOINT when one is
+     configured, and otherwise hand a fully composed message to the visitor's
+     own mail client — so neither is ever a dead end. Written as a loop
+     because a second copy of this logic is a second place to fix it. */
+  [["enquiryForm", "formNote", "Enquiry from litprofit.com",
+    ["name", "company", "phone", "email"]],
+   ["applyForm", "applyNote", "Application via litprofit.com",
+    ["name", "email", "phone", "role"]]].forEach(function (cfg) {
+    var form = doc.getElementById(cfg[0]);
+    if (!form) return;
+    var note = doc.getElementById(cfg[1]);
+    var subject = cfg[2], fields = cfg[3];
 
     var say = function (msg, cls) {
       if (!note) return;
@@ -186,80 +196,32 @@
       var get = function (k) { return (data.get(k) || "").toString().trim(); };
 
       if (FORM_ENDPOINT) {
-        say("Sending…");
+        say("Sending\u2026");
         fetch(FORM_ENDPOINT, {
-          method: "POST",
-          body: data,
-          headers: { Accept: "application/json" }
+          method: "POST", body: data, headers: { Accept: "application/json" }
         }).then(function (res) {
           if (!res.ok) throw new Error("bad status " + res.status);
           form.reset();
-          say("Thank you — we will come back to you shortly.", "is-ok");
+          say("Thank you \u2014 we will come back to you shortly.", "is-ok");
         }).catch(function () {
-          say("Something went wrong. Please email " + CONTACT_EMAIL + " directly.", "is-error");
+          say("Something went wrong. Please email " + CONTACT_EMAIL + " directly.",
+              "is-error");
         });
         return;
       }
 
-      /* No endpoint configured: hand the enquiry to the visitor's mail
-         client, fully composed. */
-      var body = [
-        "Name: " + get("name"),
-        "Company: " + get("company"),
-        "Phone: " + get("phone"),
-        "Email: " + get("email"),
-        "",
-        get("message")
-      ].join("\n");
+      var lines = fields.map(function (f) {
+        return f.charAt(0).toUpperCase() + f.slice(1) + ": " + get(f);
+      });
+      lines.push("", get("message"));
 
       window.location.href = "mailto:" + CONTACT_EMAIL +
-        "?subject=" + encodeURIComponent("Enquiry from litprofit.com") +
-        "&body=" + encodeURIComponent(body);
+        "?subject=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(lines.join("\n"));
 
-      say("Your mail client is opening with the enquiry ready to send.", "is-ok");
+      say("Your mail client is opening with everything ready to send.", "is-ok");
     });
-  }
-
-
-  /* ---------- the general arrangement drawing ----------
-     Hover or focus a part and it lights up in the drawing, the rest fading back.
-     aria-expanded carries the open/closed state, so the control reports what
-     it does rather than only looking like it. */
-  var drawing = doc.getElementById("drawing");
-  if (drawing) {
-    var stages = all(".part", drawing);
-
-    var select = function (btn) {
-      stages.forEach(function (b) {
-        b.setAttribute("aria-expanded", b === btn ? "true" : "false");
-      });
-      if (btn) drawing.setAttribute("data-active", btn.getAttribute("data-prt"));
-      else drawing.removeAttribute("data-active");
-    };
-
-    stages.forEach(function (btn) {
-      btn.setAttribute("aria-expanded", "false");
-      on(btn, "mouseenter", function () { select(btn); });
-      on(btn, "focus", function () { select(btn); });
-      /* click keeps it open on touch, where there is no hover at all */
-      on(btn, "click", function () {
-        select(btn.getAttribute("aria-expanded") === "true" ? null : btn);
-      });
-    });
-
-    on(drawing, "mouseleave", function () {
-      /* do not yank the panel away from someone reading it via the keyboard */
-      if (!drawing.contains(doc.activeElement)) select(null);
-    });
-  }
-
-  /* ============================================================
-     HIDDEN — things that reward a second look.
-     None of it is announced, none of it is required, and none of it
-     changes what the page says. All of it is keyboard- and
-     reduced-motion-safe, and nothing here runs for a visitor who never
-     goes looking.
-     ============================================================ */
+  });
 
   /* ---------- 1. the mark, in the console ----------
      Drawn from the monogram's own geometry. Developers, competitors and
@@ -275,59 +237,11 @@
       "  ╱╱   ╱╱       Klaipeda, Lithuania // since 2010",
       " ╱╱   ╱╱",
       "                Site by ALDY",
-      "                Double-click the hero for a work light",
       "                Type FROST to ice the place over",
       ""
     ].join("\n");
     console.log("%c" + mark, "color:#8d90a6;font-family:monospace;line-height:1.35");
   } catch (e) { /* console is not guaranteed to exist */ }
-
-  /* ---------- 2. the work light ----------
-     Double-click the hero. The photograph sits at 30% under a heavy gradient;
-     a second copy at full strength is revealed inside a soft circle that
-     follows the pointer. Nothing announces it, and it costs nothing until it
-     is switched on. */
-  var hero = doc.querySelector(".hero");
-  if (hero && CSS && CSS.supports && (CSS.supports("mask-image", "radial-gradient(#000,#000)") ||
-                                      CSS.supports("-webkit-mask-image", "radial-gradient(#000,#000)"))) {
-    var lampOn = false, pending = null, lx = 0, ly = 0;
-
-    var place = function () {
-      pending = null;
-      hero.style.setProperty("--mx", lx + "px");
-      hero.style.setProperty("--my", ly + "px");
-    };
-
-    on(hero, "pointermove", function (e) {
-      if (!lampOn) return;
-      var r = hero.getBoundingClientRect();
-      lx = Math.round(e.clientX - r.left);
-      ly = Math.round(e.clientY - r.top);
-      /* one write per frame — pointermove fires far faster than the screen
-         repaints, and setting a custom property invalidates style each time */
-      if (!pending) pending = window.requestAnimationFrame(place);
-    });
-
-    on(hero, "dblclick", function (e) {
-      /* never swallow a double-click meant for a link or a button */
-      if (e.target.closest && e.target.closest("a, button")) return;
-      lampOn = !lampOn;
-      hero.classList.toggle("is-lamp", lampOn);
-      if (lampOn) {
-        var r = hero.getBoundingClientRect();
-        lx = Math.round(e.clientX - r.left);
-        ly = Math.round(e.clientY - r.top);
-        place();
-      }
-    });
-
-    /* moving the pointer off the hero puts the lamp away */
-    on(hero, "pointerleave", function () {
-      if (!lampOn) return;
-      lampOn = false;
-      hero.classList.remove("is-lamp");
-    });
-  }
 
   /* ---------- 3. frost ----------
      Type FROST. Ice ferns grow in from the four corners, crystals drift, the

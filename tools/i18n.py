@@ -28,15 +28,18 @@ LANG_NAME = {"en": "English", "lt": "Lietuvių", "ru": "Русский"}
 NAV = {
     "en": [("About", "/about/"), ("Services", "/services/"),
            ("Completed works", "/completed-works/"), ("Partners", "/partners/"),
-           ("Certificates", "/certificates/"), ("Contacts", "/contacts/")],
+           ("Certificates", "/certificates/"), ("Contacts", "/contacts/"),
+           ("Careers", "/careers/")],
     "lt": [("Apie mus", "/about/"), ("Paslaugos", "/services/"),
            ("Atlikti darbai", "/completed-works/"), ("Partneriai", "/partners/"),
-           ("Sertifikatai", "/certificates/"), ("Kontaktai", "/contacts/")],
+           ("Sertifikatai", "/certificates/"), ("Kontaktai", "/contacts/"),
+           ("Karjera", "/careers/")],
     "ru": [("О нас", "/about/"), ("Услуги", "/services/"),
            ("Выполненные работы", "/completed-works/"),
            ("Партнёры", "/partners/"),
            ("Сертификаты", "/certificates/"),
-           ("Контакты", "/contacts/")],
+           ("Контакты", "/contacts/"),
+           ("Вакансии", "/careers/")],
 }
 
 S = {}
@@ -330,8 +333,7 @@ SVC["en"] = {
                  "vessels and shore installations:"),
     "ship-engine-repair": dict(
         title="Ship equipment and engine repair",
-        short="Maintenance and overhaul of 4-stroke and 2-stroke diesel engines, "
-              "engine room machinery and deck equipment.",
+        short="Design and selection of equipment.",
         lead="Keeping a vessel's machinery inside its operating envelope — main "
              "engines, auxiliaries, and the deck equipment the crew depends on.",
         meta="Overhaul and repair of 4-stroke and 2-stroke marine diesel engines, "
@@ -429,8 +431,7 @@ SVC["lt"] = {
                  "ir remontas:"),
     "ship-engine-repair": dict(
         title="Laivų įrangos ir variklių remontas",
-        short="Įvairių tipų ir modelių 4-takčių ir 2-takčių dyzelinių variklių, taip pat "
-              "kitų mašinų skyriaus mechanizmų ir denio įrangos aptarnavimas bei remontas.",
+        short="Įrangos projektavimas ir parinkimas.",
         lead="Kad laivo mechanizmai veiktų optimaliai ir saugiai — pagrindiniai ir "
              "pagalbiniai varikliai bei denio įranga, kuria pasitiki įgula.",
         meta="4-takčių ir 2-takčių laivų dyzelinių variklių, mašinų skyriaus mechanizmų "
@@ -531,9 +532,7 @@ SVC["ru"] = {
                  "установок:"),
     "ship-engine-repair": dict(
         title="Ремонт судового оборудования и двигателей",
-        short="Ремонт и обслуживание 4-х тактных и 2-х тактных дизельных двигателей разных "
-              "типов и моделей, а также других механизмов машинного отделения и палубного "
-              "оборудования.",
+        short="Проектирование и подбор оборудования.",
         lead="Чтобы механизмы судна работали оптимально и безопасно — главные и "
              "вспомогательные двигатели и палубное оборудование, на которое полагается экипаж.",
         meta="Ремонт 4-х тактных и 2-х тактных судовых дизельных двигателей, механизмов "
@@ -684,7 +683,7 @@ P["en"] = dict(
     p_lead="Two authorised representations, and a client list built up over more than a "
            "decade.",
     p_meta="Authorised BITZER partner and DANFOSS marine line representative. Clients "
-           "include Norebo, Sealord, Limarko Group, Ocean Whale Company and Baltreids.",
+           "include Sealord, Limarko Group, Ocean Whale Company and Baltreids.",
     p_rep_h2="Manufacturers we represent",
     p_rep_lead="Two direct appointments — factory backing on parts, pricing and warranty.",
     p_clients_h2="Companies we have worked for",
@@ -794,7 +793,7 @@ P["lt"] = dict(
     p_eyebrow="Partneriai", p_h1="Gamintojai, kuriems atstovaujame, ir klientai, kuriems dirbame",
     p_lead="Du autorizuoti atstovavimai ir klientų sąrašas, sukauptas per daugiau nei dešimtmetį.",
     p_meta="Autorizuoti BITZER partneriai ir DANFOSS jūrinės linijos atstovai. Tarp klientų — "
-           "Norebo, Sealord, Limarko Group, Ocean Whale Company ir Baltreids.",
+           "Sealord, Limarko Group, Ocean Whale Company ir Baltreids.",
     p_rep_h2="Gamintojai, kuriems atstovaujame",
     p_rep_lead="Du tiesioginiai paskyrimai — gamyklos garantija dalims, kainoms ir įrangai.",
     p_clients_h2="Įmonės, kurioms dirbome",
@@ -904,7 +903,7 @@ P["ru"] = dict(
     p_eyebrow="Партнёры", p_h1="Производители, которых мы представляем, и клиенты, для которых работаем",
     p_lead="Два авторизованных представительства и список клиентов, накопленный более чем за десять лет.",
     p_meta="Авторизованный партнёр BITZER и представитель морской линии DANFOSS. Среди клиентов — "
-           "Norebo, Sealord, Limarko Group, Ocean Whale Company и Baltreids.",
+           "Sealord, Limarko Group, Ocean Whale Company и Baltreids.",
     p_rep_h2="Производители, которых мы представляем",
     p_rep_lead="Два прямых назначения — заводская поддержка по запчастям, ценам и гарантии.",
     p_clients_h2="Компании, для которых мы работали",
@@ -1016,3 +1015,111 @@ TB = {   # drawing title block
     "lt": ("Sraigtinis kompresorinis agregatas", "Šoninis vaizdas"),
     "ru": ("Винтовой компрессорный агрегат", "Вид сбоку"),
 }
+
+
+# ============================================================
+# CAREERS
+# ============================================================
+CAR = {
+ "en": dict(
+   nav="Careers", h1="Work at LITPROFIT",
+   lead="Marine refrigeration and engine work, out of Klaipeda and on vessels "
+        "wherever they happen to be.",
+   meta="Careers at %(legal)s — marine refrigeration engineers, ship mechanics, "
+        "pipe fitters and welders. Klaipeda, Lithuania.",
+   open_h2="Open positions",
+   none_h="No open positions right now",
+   none_p="We still read every open application, and we come back when a job "
+          "matches. Use the form below.",
+   disc_h2="What we recruit for",
+   disc_p="Even when nothing is advertised, we keep qualified people on file. "
+          "These are the trades our work is built from:",
+   disc=["Refrigeration engineers — compressors, automatic control systems, "
+         "commissioning",
+         "Marine mechanics — 4-stroke and 2-stroke diesel overhaul",
+         "Pipe fitters and welders — steel and stainless steel systems",
+         "Electrical and automation technicians",
+         "Service coordinators and project supervisors"],
+   matters_h2="What matters to us",
+   matters=["Documented qualifications for your trade.",
+            "Readiness to travel — vessels are not always in Klaipeda.",
+            "A serious approach to safety in machinery spaces and confined areas.",
+            "Working English; Lithuanian or Russian are useful additions."],
+   apply_h2="Send an application",
+   apply_p="Tell us your trade, your experience and when you could start. Attach "
+           "your CV and certificates to the email that opens when you submit — we "
+           "do not accept file uploads through this page.",
+   f_role="Trade or position", f_exp="Experience and availability",
+   f_exp_ph="Your trade, years of experience, certifications, and when you could start.",
+   f_send="Send application", f_open="Open application",
+   consent='I agree that %(legal)s may keep these details on file to consider me '
+           'for current and future positions, as described in the %(privacy)s.'),
+ "lt": dict(
+   nav="Karjera", h1="Darbas LITPROFIT",
+   lead="Laivų šaldymo ir variklių darbai Klaipėdoje ir laivuose, kad ir kur jie būtų.",
+   meta="Karjera %(legal)s — šaldymo inžinieriai, laivų mechanikai, vamzdynų "
+        "montuotojai ir suvirintojai. Klaipėda, Lietuva.",
+   open_h2="Laisvos darbo vietos",
+   none_h="Šiuo metu laisvų darbo vietų nėra",
+   none_p="Vis dėlto perskaitome kiekvieną atvirą kandidatūrą ir susisiekiame, kai "
+          "atsiranda tinkamas darbas. Užpildykite formą žemiau.",
+   disc_h2="Ko ieškome",
+   disc_p="Net kai skelbimų nėra, kvalifikuotus specialistus registruojame. Štai "
+          "sritys, iš kurių sudarytas mūsų darbas:",
+   disc=["Šaldymo inžinieriai — kompresoriai, automatinio valdymo sistemos, paleidimas",
+         "Laivų mechanikai — 4-takčių ir 2-takčių dyzelinių variklių remontas",
+         "Vamzdynų montuotojai ir suvirintojai — plieno ir nerūdijančio plieno sistemos",
+         "Elektros ir automatikos technikai",
+         "Serviso koordinatoriai ir projektų vadovai"],
+   matters_h2="Kas mums svarbu",
+   matters=["Dokumentais patvirtinta kvalifikacija.",
+            "Pasirengimas keliauti — laivai ne visada Klaipėdoje.",
+            "Rimtas požiūris į saugą mašinų skyriuose ir uždarose erdvėse.",
+            "Anglų kalba; lietuvių ar rusų — privalumas."],
+   apply_h2="Siųsti kandidatūrą",
+   apply_p="Nurodykite specialybę, patirtį ir kada galėtumėte pradėti. CV ir "
+           "sertifikatus prisekite prie el. laiško, kuris atsidarys paspaudus siųsti — "
+           "failų per šį puslapį nepriimame.",
+   f_role="Specialybė ar pareigos", f_exp="Patirtis ir galimybės",
+   f_exp_ph="Specialybė, patirtis metais, sertifikatai ir kada galėtumėte pradėti.",
+   f_send="Siųsti kandidatūrą", f_open="Atvira kandidatūra",
+   consent='Sutinku, kad %(legal)s saugotų šiuos duomenis vertindama mane esamoms ir '
+           'būsimoms pozicijoms, kaip nurodyta %(privacy)s.'),
+ "ru": dict(
+   nav="Вакансии", h1="Работа в LITPROFIT",
+   lead="Судовые холодильные и двигательные работы в Клайпеде и на судах, где бы "
+        "они ни находились.",
+   meta="Вакансии в %(legal)s — инженеры-холодильщики, судовые механики, "
+        "трубопроводчики и сварщики. Клайпеда, Литва.",
+   open_h2="Открытые вакансии",
+   none_h="Сейчас открытых вакансий нет",
+   none_p="Мы всё равно читаем каждую открытую заявку и связываемся, когда появляется "
+          "подходящая работа. Заполните форму ниже.",
+   disc_h2="Кого мы ищем",
+   disc_p="Даже когда вакансий нет, мы вносим квалифицированных специалистов в базу. "
+          "Вот направления, из которых состоит наша работа:",
+   disc=["Инженеры-холодильщики — компрессоры, системы автоматики, пусконаладка",
+         "Судовые механики — ремонт 4-х и 2-х тактных дизельных двигателей",
+         "Трубопроводчики и сварщики — системы из стали и нержавеющей стали",
+         "Электрики и специалисты по автоматике",
+         "Координаторы сервиса и руководители проектов"],
+   matters_h2="Что для нас важно",
+   matters=["Документально подтверждённая квалификация.",
+            "Готовность к командировкам — судно не всегда в Клайпеде.",
+            "Серьёзное отношение к безопасности в машинных отделениях и замкнутых пространствах.",
+            "Рабочий английский; литовский или русский — преимущество."],
+   apply_h2="Отправить заявку",
+   apply_p="Укажите специальность, опыт и когда могли бы приступить. Резюме и "
+           "сертификаты приложите к письму, которое откроется при отправке — загрузку "
+           "файлов через эту страницу мы не принимаем.",
+   f_role="Специальность или должность", f_exp="Опыт и возможности",
+   f_exp_ph="Специальность, стаж, сертификаты и когда могли бы приступить.",
+   f_send="Отправить заявку", f_open="Открытая заявка",
+   consent='Я соглашаюсь, что %(legal)s может хранить эти данные для рассмотрения моей '
+           'кандидатуры на текущие и будущие позиции, как описано в %(privacy)s.'),
+}
+
+# title block on the hero vessel drawing
+# Kept short on purpose: 31 monospace characters do not fit the 190px cell,
+# which is exactly how the general arrangement's title block broke.
+VESSEL_TB = {"en": "STERN TRAWLER", "lt": "TRALERIS", "ru": "ТРАУЛЕР"}

@@ -448,39 +448,6 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   opacity: 0.3;
   filter: saturate(0.55) contrast(1.05);
 }
-/* ---------- the work light ----------
-   Double-click the hero and you get a hand lamp: the photograph is held at
-   30% under a heavy gradient, and this layer is the SAME photograph at full
-   strength, revealed only inside a soft circle that follows the cursor. It is
-   the gesture of walking into a dark engine room with a torch, which is the
-   job. Quiet, on-brand, and it disturbs nothing when it is off. */
-.hero-lamp {
-  position: absolute;
-  inset: 0;
-  z-index: 2;                    /* above .hero-media::after, the dark wash */
-  background-position: center;
-  background-size: cover;
-  filter: saturate(1.2) brightness(1.12);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.45s var(--ease);
-  -webkit-mask-image: radial-gradient(circle 180px at var(--mx, 50%) var(--my, 45%),
-      #000 0%, rgba(0,0,0,0.72) 42%, transparent 70%);
-  mask-image: radial-gradient(circle 180px at var(--mx, 50%) var(--my, 45%),
-      #000 0%, rgba(0,0,0,0.72) 42%, transparent 70%);
-}
-.hero.is-lamp .hero-lamp { opacity: 1; }
-/* a warm rim, so it reads as a lamp rather than a hole cut in the artwork */
-.hero.is-lamp .hero-media::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background: radial-gradient(circle 210px at var(--mx, 50%) var(--my, 45%),
-      rgba(255, 236, 190, 0.10) 0%, transparent 62%);
-}
-
 .hero-media::after {
   content: "";
   position: absolute;
@@ -1544,7 +1511,7 @@ a.pg-cell:hover .pg-name { color: var(--accent); }
 }
 
 /* the hero photograph drifts; the transform is written by JS */
-.hero-media img { will-change: transform; }
+.hero-drawing { will-change: transform; }
 
 /* ============================================================
    STAGGER
@@ -1786,3 +1753,100 @@ html.is-frost::after {
   .nav-actions .langs { display: none; }
 }
 @media (min-width: 981px) { .nav-links .langs { display: none; } }
+
+/* ============================================================
+   CAREERS
+   ============================================================ */
+.notice {
+  padding: 26px 28px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-2);
+  margin-bottom: 8px;
+}
+.notice p { color: var(--muted); margin: 0; }
+.notice strong { color: var(--text); }
+
+.position {
+  padding: 28px 30px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent);
+  margin-bottom: 16px;
+}
+.position-head { margin-bottom: 14px; }
+.position h3 { margin-bottom: 10px; }
+.position-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: var(--text-s);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+
+/* ============================================================
+   HERO — VESSEL DRAWING
+   Replaces the hero photograph. Drawn to the same conventions as the
+   general arrangement further down: hairline geometry, a dash-dot
+   waterline datum, frame lines, compartment labels, a dimension line
+   and a title block.
+   ============================================================ */
+/* Held in the right-hand half, clear of the headline and the buttons, and
+   vertically centred rather than pinned to the bottom — pinned low it was
+   clipped by the hero's own overflow and collided with the lead paragraph. */
+.hero-drawing {
+  position: absolute;
+  right: -5%;
+  top: 52%;
+  transform: translateY(-50%);
+  width: 48%;
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+.vp-hull {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.58);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.vp-thin line { stroke: rgba(255, 255, 255, 0.16); stroke-width: 1; }
+.vp-bhd { stroke: rgba(255, 255, 255, 0.34); stroke-width: 1; }
+/* dash-dot: the convention for a datum, here the waterline */
+.vp-wl { stroke: rgba(158, 201, 255, 0.5); stroke-width: 1; stroke-dasharray: 24 5 3 5; }
+.vp-room, .vp-dim {
+  fill: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.vp-dim { fill: #9ec9ff; }
+.vp-dim-g line { stroke: rgba(158, 201, 255, 0.45); stroke-width: 1; }
+.vp-dim-g path { fill: rgba(158, 201, 255, 0.7); }
+.vp-dim-bg { fill: var(--navy-800); }
+.vp-tb rect, .vp-tb line { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1; }
+.vp-tb text {
+  fill: rgba(255, 255, 255, 0.55);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.vp-tb .vp-tb-b { fill: rgba(255, 255, 255, 0.85); font-weight: 700; }
+
+/* On a phone the drawing sits behind body text; hold it well back. */
+/* On a phone the hero is text-first and the drawing would sit under the
+   headline; hold it low and well back so it reads as ground, not content. */
+@media (max-width: 900px) {
+  .hero-drawing {
+    right: -20%;
+    top: auto;
+    bottom: 4%;
+    transform: none;
+    width: 128%;
+    opacity: 0.4;
+  }
+}

@@ -33,7 +33,7 @@ PREFIX = "/" + os.path.basename(ROOT)
 BASE_PATHS = ["/", "/about/", "/services/", "/services/ship-engine-repair/",
               "/services/refrigeration-systems/", "/services/hull-and-piping/",
               "/services/spare-parts/", "/completed-works/", "/partners/",
-              "/certificates/", "/contacts/", "/privacy/"]
+              "/certificates/", "/contacts/", "/careers/", "/privacy/"]
 
 # Every page in every language. A translation that only half-renders is still a
 # broken page, so they all get the same structural and mobile checks.
