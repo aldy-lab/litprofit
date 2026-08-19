@@ -218,13 +218,19 @@ highlighted word behind every time.
 
 `/careers/` in all three languages, in the nav and the pager.
 
-**`POSITIONS` is empty on purpose.** No real vacancies have been supplied, and
-inventing job adverts for a real company would put fictional roles into Google
-for Jobs under their name. With the list empty the page shows the
-open-application route instead, which is true. Add a dict to `POSITIONS` in
-`build.py` to open a role; `JobPosting` structured data is emitted only for
-genuinely open ones, so an empty list produces no markup at all rather than an
-invalid shell.
+`POSITIONS` in `build.py` holds one **sample** role — Refrigeration Service
+Engineer, in all three languages — so the layout can be reviewed.
+
+**It carries `sample=True`, and that one flag does two things:** it shows an
+`EXAMPLE` badge on the card, and it withholds the `JobPosting` structured data.
+Without the second part, a role that does not exist would be indexed by Google
+for Jobs under this company's name — a preview convenience turning into the
+client's problem. Verified: the careers page emits zero `JobPosting` blocks in
+all three languages.
+
+To publish a real vacancy: set `sample=False` (or drop the key) and check
+`posted` / `valid_through` are current — stale posts get demoted. To close one,
+set `open=False` rather than deleting it.
 
 The application form shares one handler with the enquiry form — a second copy
 of that logic would be a second place to fix it.

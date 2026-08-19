@@ -1937,3 +1937,13 @@ html.is-frost::after {
 .hero-drawing--lit .rp-room-c { fill: rgba(178, 214, 255, 0.95); }
 .hero-drawing--lit .rp-tag { fill: rgba(255, 255, 255, 0.72); }
 .rp-sym rect { fill: none; }
+
+/* A sample vacancy is marked on the page and withheld from JobPosting
+   structured data — one flag controls both. */
+.position-sample {
+  padding: 3px 9px;
+  border: 1px solid var(--line-2);
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}

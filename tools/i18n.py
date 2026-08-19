@@ -1051,6 +1051,7 @@ CAR = {
            "do not accept file uploads through this page.",
    f_role="Trade or position", f_exp="Experience and availability",
    f_exp_ph="Your trade, years of experience, certifications, and when you could start.",
+   sample="Example",
    f_send="Send application", f_open="Open application",
    consent='I agree that %(legal)s may keep these details on file to consider me '
            'for current and future positions, as described in the %(privacy)s.'),
@@ -1082,6 +1083,7 @@ CAR = {
            "failų per šį puslapį nepriimame.",
    f_role="Specialybė ar pareigos", f_exp="Patirtis ir galimybės",
    f_exp_ph="Specialybė, patirtis metais, sertifikatai ir kada galėtumėte pradėti.",
+   sample="Pavyzdys",
    f_send="Siųsti kandidatūrą", f_open="Atvira kandidatūra",
    consent='Sutinku, kad %(legal)s saugotų šiuos duomenis vertindama mane esamoms ir '
            'būsimoms pozicijoms, kaip nurodyta %(privacy)s.'),
@@ -1114,6 +1116,7 @@ CAR = {
            "файлов через эту страницу мы не принимаем.",
    f_role="Специальность или должность", f_exp="Опыт и возможности",
    f_exp_ph="Специальность, стаж, сертификаты и когда могли бы приступить.",
+   sample="Пример",
    f_send="Отправить заявку", f_open="Открытая заявка",
    consent='Я соглашаюсь, что %(legal)s может хранить эти данные для рассмотрения моей '
            'кандидатуры на текущие и будущие позиции, как описано в %(privacy)s.'),

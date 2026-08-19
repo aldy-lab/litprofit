@@ -1565,7 +1565,55 @@ def privacy():
 #   valid_through, employment_type, summary, needs (list)
 # per language key. Set open=False to retire it without deleting it.
 # ============================================================
-POSITIONS = []
+POSITIONS = [
+    dict(
+        id="refrigeration-service-engineer",
+        open=True,
+        # SAMPLE. Set sample=False once this is a real, approved vacancy — that
+        # single flag is what lets the JobPosting structured data be emitted and
+        # removes the EXAMPLE badge. Until then the role is visible on the page
+        # so the layout can be reviewed, but it is NOT published to Google for
+        # Jobs: a fictional role indexed under the company's name is the
+        # client's problem, not a preview artefact.
+        sample=True,
+        posted="2026-08-19",
+        valid_through="2026-12-31",
+        employment_type="FULL_TIME",
+        en=dict(title="Refrigeration Service Engineer",
+                count="1 position", location="Klaipeda + vessels", contract="Full time",
+                summary="Service, fault-finding and overhaul of marine and industrial "
+                        "refrigeration plant — compressors, controls and refrigerant "
+                        "piping — in the workshop, on board in Klaipeda, and on travel "
+                        "jobs where the vessel is.",
+                needs=["Experience with screw or reciprocating refrigeration compressors.",
+                       "Ability to fault-find on a running plant, not only to replace parts.",
+                       "Refrigerant handling certification, or readiness to obtain it.",
+                       "Readiness to travel at short notice.",
+                       "Working English; Lithuanian or Russian an advantage."]),
+        lt=dict(title="Šaldymo įrangos serviso inžinierius",
+                count="1 pozicija", location="Klaipėda + laivai", contract="Visa darbo diena",
+                summary="Laivų ir pramoninės šaldymo įrangos aptarnavimas, gedimų "
+                        "nustatymas ir remontas — kompresoriai, valdymo sistemos ir "
+                        "šaltnešio vamzdynai — dirbtuvėse, laivuose Klaipėdoje ir "
+                        "komandiruotėse ten, kur yra laivas.",
+                needs=["Patirtis su sraigtiniais arba stūmokliniais šaldymo kompresoriais.",
+                       "Gebėjimas nustatyti gedimus veikiančioje sistemoje, o ne tik keisti dalis.",
+                       "Šaltnešių tvarkymo pažymėjimas arba pasirengimas jį įgyti.",
+                       "Pasirengimas vykti į komandiruotes trumpu įspėjimu.",
+                       "Anglų kalba; lietuvių ar rusų — privalumas."]),
+        ru=dict(title="Инженер по сервису холодильного оборудования",
+                count="1 позиция", location="Клайпеда + суда", contract="Полная занятость",
+                summary="Обслуживание, поиск неисправностей и ремонт судового и "
+                        "промышленного холодильного оборудования — компрессоры, "
+                        "автоматика и трубопроводы хладагента — в мастерской, на судах "
+                        "в Клайпеде и в командировках там, где находится судно.",
+                needs=["Опыт работы с винтовыми или поршневыми холодильными компрессорами.",
+                       "Умение находить неисправности на работающей установке, а не только менять детали.",
+                       "Сертификат на обращение с хладагентами или готовность его получить.",
+                       "Готовность к командировкам в короткие сроки.",
+                       "Рабочий английский; литовский или русский — преимущество."]),
+    ),
+]
 
 
 def positions_html():
@@ -1579,16 +1627,19 @@ def positions_html():
     for p in live:
         d = p[LANG] if LANG in p else p["en"]
         needs = "\n".join("          <li>%s</li>" % n for n in d["needs"])
+        badge = ('<span class="position-sample">%s</span>' % i18n.CAR[LANG]["sample"]
+                 if p.get("sample") else "")
         out.append("""      <article class="position" id="{pid}">
         <div class="position-head">
           <h3>{title}</h3>
-          <p class="position-meta"><span>{count}</span><span>{location}</span><span>{contract}</span></p>
+          <p class="position-meta">{badge}<span>{count}</span><span>{location}</span><span>{contract}</span></p>
         </div>
         <p>{summary}</p>
         <ul>
 {needs}
         </ul>
-      </article>""".format(pid=p["id"], needs=needs, **d))
+      </article>""".format(pid=p["id"], needs=needs, badge=badge,
+                              **{k: v for k, v in d.items() if k != "needs"}))
     return "\n".join(out)
 
 
@@ -1599,6 +1650,11 @@ def job_postings_ld():
     out = []
     for p in POSITIONS:
         if not p.get("open"):
+            continue
+        # A sample role renders on the page but is never published as structured
+        # data. Google for Jobs would otherwise index a vacancy that does not
+        # exist, under this company's name.
+        if p.get("sample"):
             continue
         d = p.get(LANG, p["en"])
         out.append(jsonld({
