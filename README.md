@@ -173,20 +173,31 @@ unit's if the drawing is ever used as anything but decoration.
 
 ## The hero drawing
 
-A **ship refrigeration plant**, full-bleed behind the hero: screw compressor
-package, seawater-cooled condenser with its tube bundle, liquid receiver,
-expansion valve and the RSW evaporator coil, joined by discharge, liquid and
-suction lines. Drawn to the same workshop conventions as the general
-arrangement lower down — hairline geometry, dash-dot centre lines, gate-valve
-and gauge symbols, flow arrows, an HP/LP legend and a title block.
+A **marine provision refrigeration P&ID**, full-bleed behind the hero and drawn
+the way a chief engineer would expect to read one:
 
-It is the circuit the company is paid to keep running, so it sits behind the
-sentence that says so.
+- two compressor sets, each with accumulator, oil separator, sight glass and
+  suction/discharge gauges (`P1`–`P4`);
+- two seawater-cooled condensers with their tube bundles;
+- three refrigerated spaces at their working temperatures — chiller `+2 °C`,
+  freezer `-20 °C`, pre-storage `+17 °C` — each with a finned evaporator coil
+  and fan;
+- discharge, liquid and suction lines in three colours, carrying gate valves,
+  check valves, solenoids, filter driers, sight glasses and thermostatic
+  expansion valves;
+- a legend and a title block.
 
-`preserveAspectRatio="slice"` lets it crop rather than letterbox, so it fills
-any viewport shape. A diagonal mask fades it out under the headline: the
-drawing is ground, and ground that competes with the text is a failure however
-good it looks alone.
+Room names are translated; the tag letters are not, because `P1` and `TXV` are
+the same on any drawing in any yard.
+
+**Repetition is generated, not typed.** Two identical compressor sets, two
+condensers and three room coils come from one function each, so the drawing
+stays editable rather than being six hundred lines of hand-placed geometry.
+
+`preserveAspectRatio="meet"` — `slice` was tried first and cropped the freezer
+and pre-storage rooms straight off the canvas. A radial mask suppresses the
+drawing only where the headline actually sits, rather than down the whole left
+side, which is where the compressor sets live.
 
 ### The work light — double-click the hero
 

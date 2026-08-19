@@ -1125,3 +1125,8 @@ CAR = {
 VESSEL_TB = {"en": "SHIP REFRIGERATION PLANT",
              "lt": "LAIVO ŠALDYMO ĮRANGA",
              "ru": "СУДОВАЯ ХОЛОДИЛЬНАЯ УСТАНОВКА"}
+
+# the three refrigerated spaces on the hero P&ID
+ROOMS = {"en": ["CHILLER", "FREEZER", "PRE-STORAGE"],
+         "lt": ["ŠALDYTUVAS", "ŠALDIKLIS", "PARUOŠIMO PATALPA"],
+         "ru": ["ОХЛАЖДЕНИЕ", "МОРОЗИЛЬНАЯ", "ПРЕДВАРИТЕЛЬНАЯ"]}

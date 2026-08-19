@@ -651,133 +651,191 @@ def client_tile(c):
 
 
 # ============================================================
-# HERO — SHIP REFRIGERATION PLANT
-# The full vapour-compression circuit as a plant schematic: screw compressor
-# package, seawater-cooled condenser, liquid receiver, expansion valve and the
-# RSW evaporator coil, joined by discharge, liquid and suction lines.
+# HERO — MARINE PROVISION REFRIGERATION, P&ID
+# A full plant diagram in the style a chief engineer would recognise: two
+# compressor sets each with accumulator, oil separator and gauges, two
+# seawater-cooled condensers, and three refrigerated spaces at their working
+# temperatures, joined by discharge, liquid and suction lines carrying the
+# usual run of gate valves, check valves, solenoids, filter driers, sight
+# glasses and thermostatic expansion valves.
 #
-# Drawn full-bleed behind the hero, to the same workshop conventions as the
-# general arrangement lower down: hairline geometry, dash-dot centre lines,
-# valve and gauge symbols, flow arrows, a HP/LP legend and a title block.
-#
-# This is the circuit the company is paid to keep running, so it belongs
-# behind the sentence that says so.
+# Repetition is generated, not typed: two identical compressor sets and three
+# room coils come from one function each, so the drawing stays editable.
 # ============================================================
 def hero_drawing(lit=False):
-    # motor cooling fins and the condenser tube bundle are generated
-    fins = "".join('<line x1="%d" y1="516" x2="%d" y2="604"/>' % (x, x)
-                   for x in range(206, 322, 13))
-    tubes = "".join('<line x1="944" y1="%d" x2="1300" y2="%d"/>' % (y, y)
-                    for y in range(190, 266, 14))
-    coil_pts = []
-    for i in range(9):
-        x = 356 + i * 52
-        coil_pts.append("M%d 748 L%d 828" % (x, x))
-    coil = "".join('<path d="%s"/>' % c for c in coil_pts)
+    P = []          # geometry
+    add = P.append
 
-    def valve(x, y):
-        """Gate valve — two triangles meeting at the stem, the P&ID symbol."""
+    def gate(x, y, vert=False):
+        """Gate valve: two triangles meeting at the stem."""
+        if vert:
+            return ('<g class="rp-sym"><path d="M%d %d L%d %d L%d %d L%d %d Z"/>'
+                    '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                    % (x-8, y-10, x+8, y-10, x-8, y+10, x+8, y+10, x-14, y, x+14, y))
         return ('<g class="rp-sym"><path d="M%d %d L%d %d L%d %d L%d %d Z"/>'
                 '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
-                % (x - 11, y - 9, x - 11, y + 9, x + 11, y - 9, x + 11, y + 9,
-                   x, y - 9, x, y - 20))
+                % (x-10, y-8, x-10, y+8, x+10, y-8, x+10, y+8, x, y-8, x, y-17))
 
-    def gauge(x, y):
-        return ('<g class="rp-sym"><circle cx="%d" cy="%d" r="13"/>'
+    def check(x, y):
+        """Check valve: seat plus disc."""
+        return ('<g class="rp-sym"><path d="M%d %d L%d %d L%d %d Z"/>'
                 '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
-                % (x, y, x, y, x + 7, y - 8))
+                % (x-9, y-9, x-9, y+9, x+8, y, x+9, y-10, x+9, y+10))
 
-    labels = [(300, 690, "COMPRESSOR"), (620, 690, "OIL SEP"),
-              (1120, 320, "CONDENSER"), (1440, 600, "RECEIVER"),
-              (1214, 760, "EXPANSION"), (560, 872, "RSW EVAPORATOR")]
-    lab = "".join('<text class="rp-lbl" x="%d" y="%d" text-anchor="middle">%s</text>'
-                  % (x, y, t) for x, y, t in labels)
+    def solenoid(x, y):
+        return ('<g class="rp-sym"><rect x="%d" y="%d" width="18" height="14"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                '<rect x="%d" y="%d" width="12" height="9"/></g>'
+                % (x-9, y-7, x, y-7, x, y-20, x-6, y-29))
+
+    def txv(x, y):
+        """Thermostatic expansion valve: gate body with a bulb on a capillary."""
+        return ('<g class="rp-sym"><path d="M%d %d L%d %d L%d %d L%d %d Z"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                '<circle cx="%d" cy="%d" r="5"/></g>'
+                % (x-10, y-8, x-10, y+8, x+10, y-8, x+10, y+8,
+                   x, y-8, x, y-22, x, y-27))
+
+    def drier(x, y):
+        return ('<g class="rp-sym"><rect x="%d" y="%d" width="30" height="14"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                % (x-15, y-7, x-8, y-7, x+8, y+7))
+
+    def sight(x, y):
+        return ('<g class="rp-sym"><circle cx="%d" cy="%d" r="9"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                % (x, y, x-6, y, x+6, y))
+
+    def gauge(x, y, tag):
+        return ('<g class="rp-sym"><circle cx="%d" cy="%d" r="14"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                '<text class="rp-tag" x="%d" y="%d" text-anchor="middle">%s</text>'
+                % (x, y, x, y, x+8, y-9, x, y-22, tag))
+
+    # ---------- compressor set ----------
+    def comp_set(x, y, n):
+        g = []
+        # accumulator
+        g.append('<g class="rp-body"><rect x="%d" y="%d" width="52" height="104" rx="24"/></g>' % (x, y+34))
+        g.append('<g class="rp-thin"><rect x="%d" y="%d" width="20" height="52" rx="8"/></g>' % (x+16, y+58))
+        # compressor block and motor
+        g.append('<g class="rp-body"><rect x="%d" y="%d" width="126" height="86" rx="6"/>'
+                 '<circle cx="%d" cy="%d" r="26"/></g>' % (x+86, y+50, x+149, y+93))
+        g.append('<g class="rp-thin"><circle cx="%d" cy="%d" r="12"/>'
+                 '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                 % (x+149, y+93, x+86, y+72, x+212, y+72))
+        # oil separator with level
+        g.append('<g class="rp-body"><rect x="%d" y="%d" width="46" height="96" rx="6"/></g>' % (x+232, y+42))
+        g.append('<g class="rp-thin"><line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                 '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                 % (x+232, y+108, x+278, y+108, x+232, y+120, x+278, y+120))
+        g.append(gauge(x+110, y+18, "P%d" % (n * 2 - 1)))
+        g.append(gauge(x+178, y+18, "P%d" % (n * 2)))
+        g.append(sight(x+255, y+156))
+        g.append('<text class="rp-lbl" x="%d" y="%d">COMP #%d</text>' % (x+92, y+156, n))
+        g.append('<text class="rp-tag" x="%d" y="%d">ACC.%d</text>' % (x, y+156, n))
+        g.append('<text class="rp-tag" x="%d" y="%d">O/S%d</text>' % (x+232, y+156, n))
+        return "".join(g)
+
+    # ---------- seawater condenser ----------
+    def condenser(x, y, n):
+        tubes = "".join('<line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                        % (x+18, y+14+i*11, x+338, y+14+i*11) for i in range(5))
+        return ('<g class="rp-body"><rect x="%d" y="%d" width="356" height="76" rx="26"/>'
+                '<rect x="%d" y="%d" width="22" height="20"/>'
+                '<rect x="%d" y="%d" width="22" height="20"/></g>'
+                '<g class="rp-thin">%s</g>'
+                '<text class="rp-tag" x="%d" y="%d">SEA-WATER COOLED CONDENSER #%d</text>'
+                % (x, y, x+54, y-20, x+280, y+76, tubes, x, y+100, n))
+
+    # ---------- refrigerated space ----------
+    def room(x, y, w, h, name, temp):
+        g = ['<g class="rp-room"><rect x="%d" y="%d" width="%d" height="%d"/></g>' % (x, y, w, h)]
+        cx, cy = x + w / 2, y + 74
+        # evaporator: finned coil plus fan
+        g.append('<g class="rp-body"><rect x="%d" y="%d" width="132" height="40" rx="6"/></g>'
+                 % (cx-66, cy-20))
+        g.append('<g class="rp-thin">%s</g>' % "".join(
+            '<line x1="%d" y1="%d" x2="%d" y2="%d"/>' % (cx-58+i*13, cy-20, cx-58+i*13, cy+20)
+            for i in range(11)))
+        g.append('<g class="rp-sym"><circle cx="%d" cy="%d" r="15"/>'
+                 '<path d="M%d %d L%d %d M%d %d L%d %d"/></g>'
+                 % (cx+92, cy, cx+81, cy-11, cx+103, cy+11, cx+81, cy+11, cx+103, cy-11))
+        g.append('<text class="rp-room-t" x="%d" y="%d" text-anchor="middle">%s</text>'
+                 % (cx, y + h - 46, name))
+        g.append('<text class="rp-room-c" x="%d" y="%d" text-anchor="middle">%s</text>'
+                 % (cx, y + h - 14, temp))
+        return "".join(g)
+
+    # ================= assembly =================
+    add(comp_set(70, 96, 1))
+    add(comp_set(70, 470, 2))
+    add(condenser(70, 320, 1))
+    add(condenser(70, 694, 2))
+
+    add(room(760, 96, 340, 300, i18n.ROOMS[LANG][0], "+2 &#176;C"))
+    add(room(1150, 96, 380, 300, i18n.ROOMS[LANG][1], "&minus;20 &#176;C"))
+    add(room(1150, 470, 380, 300, i18n.ROOMS[LANG][2], "+17 &#176;C"))
+
+    # discharge: compressors -> condensers (high pressure)
+    add('<path class="rp-pipe rp-hp" d="M348 138 L420 138 L420 300 L248 300 L248 320"/>')
+    add('<path class="rp-pipe rp-hp" d="M348 512 L420 512 L420 674 L248 674 L248 694"/>')
+    # liquid line: condensers -> receiver header -> rooms
+    add('<path class="rp-pipe rp-lq" d="M426 358 L640 358 L640 620 L700 620"/>')
+    add('<path class="rp-pipe rp-lq" d="M426 732 L640 732"/>')
+    add('<path class="rp-pipe rp-lq" d="M700 620 L700 170 L790 170"/>')
+    add('<path class="rp-pipe rp-lq" d="M700 200 L1190 200"/>')
+    add('<path class="rp-pipe rp-lq" d="M700 574 L1190 574"/>')
+    # suction: rooms -> accumulators (low pressure)
+    add('<path class="rp-pipe rp-lp" d="M930 396 L930 440 L560 440 L560 200 L96 200"/>')
+    add('<path class="rp-pipe rp-lp" d="M1340 396 L1340 452 L590 452 L590 574"/>')
+    add('<path class="rp-pipe rp-lp" d="M1340 770 L1340 812 L560 812 L560 574 L96 574"/>')
+
+    # valves and fittings along the runs
+    add(check(420, 220)); add(check(420, 594))
+    add(gate(530, 358)); add(drier(590, 358)); add(sight(640, 400))
+    add(gate(530, 732))
+    for rx in (790, 1190, 1190):
+        pass
+    add(solenoid(838, 200)); add(txv(880, 200))
+    add(solenoid(1238, 200)); add(txv(1280, 200))
+    add(solenoid(1238, 574)); add(txv(1280, 574))
+    add(gate(300, 200, vert=True)); add(gate(300, 574, vert=True))
+
+    # flow arrows
+    add('<g class="rp-arr">'
+        '<path d="M414 250 L420 236 L426 250 Z"/>'
+        '<path d="M694 300 L700 286 L706 300 Z"/>'
+        '<path d="M986 194 L1000 200 L986 206 Z"/>'
+        '<path d="M700 434 L686 440 L700 446 Z"/>'
+        '<path d="M266 194 L252 200 L266 206 Z"/>'
+        '</g>')
+
+    # legend
+    add('<g class="rp-leg">'
+        '<line class="rp-pipe rp-hp" x1="70" y1="900" x2="128" y2="900"/>'
+        '<text x="138" y="905">DISCHARGE</text>'
+        '<line class="rp-pipe rp-lq" x1="300" y1="900" x2="358" y2="900"/>'
+        '<text x="368" y="905">LIQUID</text>'
+        '<line class="rp-pipe rp-lp" x1="500" y1="900" x2="558" y2="900"/>'
+        '<text x="568" y="905">SUCTION</text>'
+        '</g>')
+
+    # title block
+    add('<g class="rp-tb">'
+        '<rect x="1150" y="856" width="380" height="48"/>'
+        '<line x1="1150" y1="880" x2="1530" y2="880"/>'
+        '<line x1="1390" y1="856" x2="1390" y2="904"/>'
+        '<text x="1164" y="874">%s</text>'
+        '<text x="1164" y="898">R404A / R717</text>'
+        '<text class="rp-tb-b" x="1404" y="874">LITPROFIT</text>'
+        '<text x="1404" y="898">DWG 01</text>'
+        '</g>' % i18n.VESSEL_TB[LANG])
 
     cls = "hero-drawing hero-drawing--lit" if lit else "hero-drawing"
-    return """      <svg class="{cls}" viewBox="0 0 1600 940" aria-hidden="true"
-           preserveAspectRatio="xMidYMid slice">
-        <!-- ---------- lines ---------- -->
-        <!-- discharge: compressor -> oil separator -> condenser -->
-        <path class="rp-pipe rp-hp" d="M640 470 L640 224 L900 224"/>
-        <!-- condenser -> receiver -->
-        <path class="rp-pipe rp-hp" d="M1330 250 L1440 250 L1440 330"/>
-        <!-- liquid line: receiver -> expansion valve -->
-        <path class="rp-pipe rp-hp" d="M1440 560 L1440 700 L1246 700"/>
-        <!-- expansion -> evaporator (low pressure from here) -->
-        <path class="rp-pipe rp-lp" d="M1182 700 L900 700 L900 788 L816 788"/>
-        <!-- suction: evaporator -> compressor -->
-        <path class="rp-pipe rp-lp" d="M340 788 L240 788 L240 560 L180 560"/>
-
-        <!-- ---------- compressor package ---------- -->
-        <g class="rp-body">
-          <rect x="196" y="504" width="136" height="112" rx="8"/>
-          <rect x="352" y="498" width="176" height="124" rx="6"/>
-          <circle cx="374" cy="560" r="14"/>
-          <rect x="560" y="452" width="96" height="196" rx="34"/>
-          <rect x="176" y="648" width="504" height="12"/>
-        </g>
-        <g class="rp-thin">{fins}<circle cx="374" cy="560" r="6"/>
-          <line x1="560" y1="500" x2="656" y2="500"/>
-          <line x1="560" y1="600" x2="656" y2="600"/></g>
-        <line class="rp-cl" x1="180" y1="560" x2="548" y2="560"/>
-
-        <!-- ---------- condenser, seawater cooled ---------- -->
-        <g class="rp-body"><rect x="900" y="176" width="444" height="104" rx="30"/></g>
-        <g class="rp-thin">{tubes}</g>
-        <g class="rp-body">
-          <rect x="980" y="140" width="26" height="36"/>
-          <rect x="1240" y="280" width="26" height="36"/>
-        </g>
-        <text class="rp-note" x="1020" y="132">SW IN</text>
-        <text class="rp-note" x="1282" y="330">SW OUT</text>
-
-        <!-- ---------- receiver ---------- -->
-        <g class="rp-body"><rect x="1380" y="330" width="120" height="230" rx="30"/></g>
-        <g class="rp-thin"><rect x="1424" y="410" width="32" height="80" rx="2"/>
-          <line x1="1424" y1="452" x2="1456" y2="452"/></g>
-
-        <!-- ---------- evaporator / RSW coil ---------- -->
-        <g class="rp-body"><rect x="316" y="732" width="500" height="112" rx="4"/></g>
-        <g class="rp-thin">{coil}</g>
-
-        <!-- ---------- symbols ---------- -->
-        {valve_exp}{valve_liq}{valve_suc}
-        {gauge_d}{gauge_s}
-
-        <!-- ---------- flow arrows ---------- -->
-        <g class="rp-arr">
-          <path d="M634 350 L640 336 L646 350 Z"/>
-          <path d="M1434 452 L1440 438 L1446 452 Z"/>
-          <path d="M1046 706 L1060 700 L1046 694 Z"/>
-          <path d="M246 668 L240 654 L234 668 Z"/>
-        </g>
-
-        {lab}
-
-        <!-- ---------- legend ---------- -->
-        <g class="rp-leg">
-          <line class="rp-pipe rp-hp" x1="90" y1="120" x2="150" y2="120"/>
-          <text x="162" y="125">HIGH PRESSURE</text>
-          <line class="rp-pipe rp-lp" x1="90" y1="156" x2="150" y2="156"/>
-          <text x="162" y="161">LOW PRESSURE</text>
-        </g>
-
-        <!-- ---------- title block ---------- -->
-        <g class="rp-tb">
-          <rect x="1176" y="856" width="360" height="48"/>
-          <line x1="1176" y1="880" x2="1536" y2="880"/>
-          <line x1="1400" y1="856" x2="1400" y2="904"/>
-          <text x="1190" y="874">{tb}</text>
-          <text x="1190" y="898">R717 / R404A</text>
-          <text class="rp-tb-b" x="1414" y="874">LITPROFIT</text>
-          <text x="1414" y="898">DWG 01</text>
-        </g>
-      </svg>""".format(
-        cls=cls, fins=fins, tubes=tubes, coil=coil, lab=lab,
-        valve_exp=valve(1214, 700), valve_liq=valve(1440, 620),
-        valve_suc=valve(240, 700),
-        gauge_d=gauge(700, 300), gauge_s=gauge(300, 470),
-        tb=i18n.VESSEL_TB[LANG])
+    return ('      <svg class="%s" viewBox="0 0 1600 940" aria-hidden="true"\n'
+            '           preserveAspectRatio="xMidYMid meet">%s</svg>'
+            % (cls, "".join(P)))
 
 
 # ============================================================
