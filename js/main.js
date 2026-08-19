@@ -223,6 +223,43 @@
     });
   });
 
+  /* ---------- the general arrangement drawing ----------
+     Hover or focus a part and it lights up in the drawing while the rest of
+     the package fades back. Buttons rather than hover-only decoration, so it
+     works from the keyboard and under a finger; aria-expanded carries the
+     state, and the CSS opens the description off that same attribute.
+
+     NB: this was lost once, silently — a slice that replaced the form handler
+     ran from the form comment to the console signature and took this with it.
+     Nothing threw, the buttons simply stopped doing anything. */
+  var drawing = doc.getElementById("drawing");
+  if (drawing) {
+    var parts = all(".part", drawing);
+
+    var select = function (btn) {
+      parts.forEach(function (b) {
+        b.setAttribute("aria-expanded", b === btn ? "true" : "false");
+      });
+      if (btn) drawing.setAttribute("data-active", btn.getAttribute("data-prt"));
+      else drawing.removeAttribute("data-active");
+    };
+
+    parts.forEach(function (btn) {
+      btn.setAttribute("aria-expanded", "false");
+      on(btn, "mouseenter", function () { select(btn); });
+      on(btn, "focus", function () { select(btn); });
+      /* touch has no hover: a tap toggles, so the description is reachable */
+      on(btn, "click", function () {
+        select(btn.getAttribute("aria-expanded") === "true" ? null : btn);
+      });
+    });
+
+    /* leaving the block clears it, unless the keyboard is still inside */
+    on(drawing, "mouseleave", function () {
+      if (!drawing.contains(doc.activeElement)) select(null);
+    });
+  }
+
   /* ---------- 1. the mark, in the console ----------
      Drawn from the monogram's own geometry. Developers, competitors and
      the occasional curious client open devtools; this is who built it. */

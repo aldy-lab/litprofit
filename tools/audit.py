@@ -211,6 +211,44 @@ def main():
                     fail("%s @%d" % (p, w), "field under 16px (iOS zooms): %s" % s)
             ctx.close()
 
+        # ---------- the interactive pieces actually respond ----------
+        # These fail silently: the markup renders, nothing throws, the controls
+        # simply stop doing anything. The drawing's handler was lost once to an
+        # unrelated edit and no existing check noticed, so behaviour is asserted
+        # here rather than assumed.
+        ctx = browser.new_context(viewport={"width": 1440, "height": 980})
+        page = ctx.new_page()
+        page.goto(base + "/", wait_until="networkidle")
+        page.wait_for_timeout(300)
+
+        part = page.locator('.part[data-prt="screw"]')
+        if part.count() == 0:
+            fail("drawing", "no parts list on the general arrangement")
+        else:
+            part.hover()
+            page.wait_for_timeout(350)
+            if page.locator("#drawing").get_attribute("data-active") != "screw":
+                fail("drawing", "hovering a part does not light it in the drawing")
+            if part.get_attribute("aria-expanded") != "true":
+                fail("drawing", "hovering a part does not open its description")
+
+        # The work light. Back to the top first: hovering a part above scrolled
+        # the page to the drawing, and bounding_box() is in VIEWPORT
+        # coordinates — from down there the hero's box is off-screen and the
+        # click lands nowhere near it. This check reported a broken lamp for
+        # that reason alone.
+        page.evaluate("() => window.scrollTo(0, 0)")
+        page.wait_for_timeout(400)
+        hero = page.locator(".hero")
+        box = hero.bounding_box()
+        page.mouse.dblclick(box["x"] + box["width"] * 0.8, box["y"] + box["height"] * 0.4)
+        page.wait_for_timeout(400)
+        if not hero.evaluate("el => el.classList.contains('is-lamp')"):
+            fail("work light", "double-clicking the hero does not switch the lamp on")
+        if page.evaluate("() => String(getSelection())").strip():
+            fail("work light", "double-click leaves a text selection behind")
+        ctx.close()
+
         # ---------- the mobile menu actually works ----------
         ctx = browser.new_context(viewport={"width": 390, "height": 800},
                                   device_scale_factor=3, is_mobile=True, has_touch=True)
