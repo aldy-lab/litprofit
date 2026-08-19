@@ -173,23 +173,35 @@ unit's if the drawing is ever used as anything but decoration.
 
 ## The hero drawing
 
-A stern trawler in side elevation, drawn to the same workshop conventions as
-the general arrangement further down: hairline geometry, a dash-dot waterline
-datum, frame lines, compartment labels (`RSW`, `FISH HOLD`, `ENGINE ROOM`), a
-length-overall dimension and a title block.
+A **ship refrigeration plant**, full-bleed behind the hero: screw compressor
+package, seawater-cooled condenser with its tube bundle, liquid receiver,
+expansion valve and the RSW evaporator coil, joined by discharge, liquid and
+suction lines. Drawn to the same workshop conventions as the general
+arrangement lower down — hairline geometry, dash-dot centre lines, gate-valve
+and gauge symbols, flow arrows, an HP/LP legend and a title block.
 
-It replaces the hero photograph, which was a stock welder that said nothing
-about this company. The vessel names the spaces they are actually paid to open
-up.
+It is the circuit the company is paid to keep running, so it sits behind the
+sentence that says so.
 
-Two things it inherited from earlier mistakes: the title block label is kept
-**short** because 31 monospace characters do not fit the 190px cell — exactly
-how the general arrangement's title block broke — and the drawing is held clear
-of the lead paragraph rather than centred, verified by comparing bounding
-boxes rather than by eye.
+`preserveAspectRatio="slice"` lets it crop rather than letterbox, so it fills
+any viewport shape. A diagonal mask fades it out under the headline: the
+drawing is ground, and ground that competes with the text is a failure however
+good it looks alone.
 
-The work light easter egg went with the photograph; there is no longer a
-photograph for it to reveal.
+### The work light — double-click the hero
+
+The plant is held back so the headline keeps its contrast; the lamp reveals a
+circle of it at full strength under the cursor, the way a hand lamp works over
+a print on a bench. Moving the pointer off the hero puts it away.
+
+**It reveals a second, brighter copy of the drawing.** `backdrop-filter:
+brightness()` was tried first and is wrong on a dark ground — it amplifies the
+navy into a bright blue disc instead of picking out the linework, because there
+is almost no luminance in the lines to amplify. Caught on a screenshot.
+
+A double-click is also a word-select gesture, so the handler calls
+`preventDefault()` and clears the selection; without it the lamp left a
+highlighted word behind every time.
 
 ## Careers
 

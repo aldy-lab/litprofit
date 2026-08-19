@@ -1789,64 +1789,121 @@ html.is-frost::after {
 
 
 /* ============================================================
-   HERO — VESSEL DRAWING
-   Replaces the hero photograph. Drawn to the same conventions as the
-   general arrangement further down: hairline geometry, a dash-dot
-   waterline datum, frame lines, compartment labels, a dimension line
-   and a title block.
+   HERO — SHIP REFRIGERATION PLANT
+   Full-bleed behind the hero, not a panel beside it. `slice` on
+   preserveAspectRatio lets it crop rather than letterbox, so it fills
+   any viewport shape the way a drawing pinned to a wall would.
    ============================================================ */
-/* Held in the right-hand half, clear of the headline and the buttons, and
-   vertically centred rather than pinned to the bottom — pinned low it was
-   clipped by the hero's own overflow and collided with the lead paragraph. */
 .hero-drawing {
   position: absolute;
-  right: -5%;
-  top: 52%;
-  transform: translateY(-50%);
-  width: 48%;
-  height: auto;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: visible;
   pointer-events: none;
+  /* Fades out under the headline so the type keeps its contrast — the
+     drawing is ground, and ground that competes with the text is a
+     failure however good it looks on its own. */
+  mask-image: linear-gradient(100deg, transparent 4%, rgba(0,0,0,0.35) 34%, #000 64%);
+  -webkit-mask-image: linear-gradient(100deg, transparent 4%, rgba(0,0,0,0.35) 34%, #000 64%);
 }
-.vp-hull {
+
+.rp-body rect, .rp-body circle {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.58);
-  stroke-width: 1.5;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 1.6;
   stroke-linejoin: round;
 }
-.vp-thin line { stroke: rgba(255, 255, 255, 0.16); stroke-width: 1; }
-.vp-bhd { stroke: rgba(255, 255, 255, 0.34); stroke-width: 1; }
-/* dash-dot: the convention for a datum, here the waterline */
-.vp-wl { stroke: rgba(158, 201, 255, 0.5); stroke-width: 1; stroke-dasharray: 24 5 3 5; }
-.vp-room, .vp-dim {
-  fill: rgba(255, 255, 255, 0.5);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+.rp-thin line, .rp-thin circle, .rp-thin rect, .rp-thin path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1;
 }
-.vp-dim { fill: #9ec9ff; }
-.vp-dim-g line { stroke: rgba(158, 201, 255, 0.45); stroke-width: 1; }
-.vp-dim-g path { fill: rgba(158, 201, 255, 0.7); }
-.vp-dim-bg { fill: var(--navy-800); }
-.vp-tb rect, .vp-tb line { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1; }
-.vp-tb text {
-  fill: rgba(255, 255, 255, 0.55);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-.vp-tb .vp-tb-b { fill: rgba(255, 255, 255, 0.85); font-weight: 700; }
+.rp-pipe { fill: none; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+/* temperature coding, as on a real plant drawing */
+.rp-hp { stroke: rgba(255, 214, 180, 0.42); }
+.rp-lp { stroke: rgba(158, 201, 255, 0.46); }
+.rp-arr path { fill: rgba(255, 255, 255, 0.45); }
 
-/* On a phone the drawing sits behind body text; hold it well back. */
-/* On a phone the hero is text-first and the drawing would sit under the
-   headline; hold it low and well back so it reads as ground, not content. */
+.rp-sym path, .rp-sym line, .rp-sym circle {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.45);
+  stroke-width: 1.4;
+}
+/* dash-dot: the convention for an axis */
+.rp-cl { stroke: rgba(158, 201, 255, 0.4); stroke-width: 1; stroke-dasharray: 20 5 3 5; }
+
+.rp-lbl, .rp-note, .rp-leg text, .rp-tb text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.16em;
+}
+.rp-lbl { fill: rgba(255, 255, 255, 0.45); font-size: 13px; }
+.rp-note { fill: rgba(255, 255, 255, 0.3); font-size: 11px; }
+.rp-leg text { fill: rgba(255, 255, 255, 0.36); font-size: 11px; }
+.rp-tb rect, .rp-tb line { fill: none; stroke: rgba(255, 255, 255, 0.28); stroke-width: 1; }
+.rp-tb text { fill: rgba(255, 255, 255, 0.42); font-size: 10px; }
+.rp-tb .rp-tb-b { fill: rgba(255, 255, 255, 0.8); font-weight: 700; }
+
+/* ============================================================
+   THE WORK LIGHT  —  double-click the hero
+   The drawing is held back so the headline reads; the lamp brightens a
+   circle of it under the cursor, the way a hand lamp works over a print.
+
+   `backdrop-filter` brightens what is ALREADY painted behind the element,
+   so there is no second copy of the drawing in the DOM — the earlier
+   version needed a duplicate image, this one needs nothing.
+   ============================================================ */
+/* The lamp holds a SECOND, brighter copy of the same drawing, revealed only
+   inside the circle. `backdrop-filter: brightness()` was tried first and is
+   wrong here: on a dark navy ground it amplifies the background into a bright
+   blue disc rather than picking out the linework, because there is very little
+   luminance in the lines to amplify. Revealing brighter artwork is the thing
+   that actually reads as a lamp. */
+.hero-lamp {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s var(--ease);
+  background: radial-gradient(circle 190px at var(--mx, 50%) var(--my, 45%),
+      rgba(255, 238, 198, 0.07) 0%, transparent 68%);
+  mask-image: radial-gradient(circle 190px at var(--mx, 50%) var(--my, 45%),
+      #000 0%, rgba(0,0,0,0.7) 44%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle 190px at var(--mx, 50%) var(--my, 45%),
+      #000 0%, rgba(0,0,0,0.7) 44%, transparent 72%);
+}
+.hero.is-lamp .hero-lamp { opacity: 1; }
+
 @media (max-width: 900px) {
   .hero-drawing {
-    right: -20%;
-    top: auto;
-    bottom: 4%;
-    transform: none;
-    width: 128%;
-    opacity: 0.4;
+    mask-image: linear-gradient(180deg, transparent 8%, rgba(0,0,0,0.3) 46%, #000 88%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 8%, rgba(0,0,0,0.3) 46%, #000 88%);
   }
 }
+
+
+/* the lit copy: same geometry, stronger ink */
+.hero-drawing--lit { mask-image: none; -webkit-mask-image: none; }
+.hero-drawing--lit .rp-body rect,
+.hero-drawing--lit .rp-body circle { stroke: rgba(255, 255, 255, 0.95); }
+.hero-drawing--lit .rp-thin line,
+.hero-drawing--lit .rp-thin circle,
+.hero-drawing--lit .rp-thin rect,
+.hero-drawing--lit .rp-thin path { stroke: rgba(255, 255, 255, 0.5); }
+.hero-drawing--lit .rp-hp { stroke: rgba(255, 206, 158, 0.95); }
+.hero-drawing--lit .rp-lp { stroke: rgba(158, 201, 255, 0.95); }
+.hero-drawing--lit .rp-sym path,
+.hero-drawing--lit .rp-sym line,
+.hero-drawing--lit .rp-sym circle { stroke: rgba(255, 255, 255, 0.9); }
+.hero-drawing--lit .rp-arr path { fill: rgba(255, 255, 255, 0.9); }
+.hero-drawing--lit .rp-lbl { fill: rgba(255, 255, 255, 0.92); }
+.hero-drawing--lit .rp-note,
+.hero-drawing--lit .rp-leg text { fill: rgba(255, 255, 255, 0.75); }
+.hero-drawing--lit .rp-tb text { fill: rgba(255, 255, 255, 0.85); }
+.hero-drawing--lit .rp-tb rect,
+.hero-drawing--lit .rp-tb line { stroke: rgba(255, 255, 255, 0.6); }
+.hero-drawing--lit .rp-cl { stroke: rgba(158, 201, 255, 0.8); }
+
+/* a double-click is a word-select gesture; suppress it while the lamp is on */
+.hero.is-lamp { user-select: none; -webkit-user-select: none; }

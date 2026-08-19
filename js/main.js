@@ -237,11 +237,65 @@
       "  ╱╱   ╱╱       Klaipeda, Lithuania // since 2010",
       " ╱╱   ╱╱",
       "                Site by ALDY",
+      "                Double-click the hero for a work light",
       "                Type FROST to ice the place over",
       ""
     ].join("\n");
     console.log("%c" + mark, "color:#8d90a6;font-family:monospace;line-height:1.35");
   } catch (e) { /* console is not guaranteed to exist */ }
+
+  /* ---------- 2. the work light ----------
+     Double-click the hero. The plant drawing is held back so the headline
+     keeps its contrast; this brightens a circle of it under the cursor, the
+     way a hand lamp works over a print on a bench.
+
+     It reveals a second, brighter copy of the same drawing. brightness() on
+     the backdrop was tried first and is wrong on a dark ground: it amplifies
+     the navy into a blue disc instead of picking out the lines. */
+  var hero = doc.querySelector(".hero");
+  var supportsLamp = window.CSS && CSS.supports &&
+      (CSS.supports("mask-image", "radial-gradient(#000,#000)") ||
+       CSS.supports("-webkit-mask-image", "radial-gradient(#000,#000)"));
+
+  if (hero && supportsLamp) {
+    var lampOn = false, lampPending = null, lx = 0, ly = 0;
+
+    var place = function () {
+      lampPending = null;
+      hero.style.setProperty("--mx", lx + "px");
+      hero.style.setProperty("--my", ly + "px");
+    };
+
+    var track = function (e) {
+      var r = hero.getBoundingClientRect();
+      lx = Math.round(e.clientX - r.left);
+      ly = Math.round(e.clientY - r.top);
+      /* one write per frame — pointermove fires far faster than the screen
+         repaints, and each custom-property write invalidates style */
+      if (!lampPending) lampPending = window.requestAnimationFrame(place);
+    };
+
+    on(hero, "pointermove", function (e) { if (lampOn) track(e); });
+
+    on(hero, "dblclick", function (e) {
+      /* never swallow a double-click meant for a link or a button */
+      if (e.target.closest && e.target.closest("a, button")) return;
+      /* a double-click selects the word under the cursor; the lamp is not a
+         text gesture, so drop the selection it just made */
+      e.preventDefault();
+      if (window.getSelection) window.getSelection().removeAllRanges();
+      lampOn = !lampOn;
+      hero.classList.toggle("is-lamp", lampOn);
+      if (lampOn) track(e);
+    });
+
+    /* moving off the hero puts the lamp away */
+    on(hero, "pointerleave", function () {
+      if (!lampOn) return;
+      lampOn = false;
+      hero.classList.remove("is-lamp");
+    });
+  }
 
   /* ---------- 3. frost ----------
      Type FROST. Ice ferns grow in from the four corners, crystals drift, the

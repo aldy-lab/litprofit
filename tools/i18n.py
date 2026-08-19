@@ -1122,4 +1122,6 @@ CAR = {
 # title block on the hero vessel drawing
 # Kept short on purpose: 31 monospace characters do not fit the 190px cell,
 # which is exactly how the general arrangement's title block broke.
-VESSEL_TB = {"en": "STERN TRAWLER", "lt": "TRALERIS", "ru": "ТРАУЛЕР"}
+VESSEL_TB = {"en": "SHIP REFRIGERATION PLANT",
+             "lt": "LAIVO ŠALDYMO ĮRANGA",
+             "ru": "СУДОВАЯ ХОЛОДИЛЬНАЯ УСТАНОВКА"}

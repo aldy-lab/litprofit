@@ -651,79 +651,133 @@ def client_tile(c):
 
 
 # ============================================================
-# HERO — VESSEL PROFILE
-# A stern trawler in side elevation, drawn to the same workshop conventions
-# as the general arrangement further down the page: hairline geometry, a
-# dash-dot waterline, frame lines, compartment labels and a dimension line.
+# HERO — SHIP REFRIGERATION PLANT
+# The full vapour-compression circuit as a plant schematic: screw compressor
+# package, seawater-cooled condenser, liquid receiver, expansion valve and the
+# RSW evaporator coil, joined by discharge, liquid and suction lines.
 #
-# It replaces the hero photograph. The photograph was a stock welder that
-# said nothing about this company; the vessel says exactly what they work on
-# and where — the machinery spaces are the parts they are paid to open up.
+# Drawn full-bleed behind the hero, to the same workshop conventions as the
+# general arrangement lower down: hairline geometry, dash-dot centre lines,
+# valve and gauge symbols, flow arrows, a HP/LP legend and a title block.
+#
+# This is the circuit the company is paid to keep running, so it belongs
+# behind the sentence that says so.
 # ============================================================
-def hero_drawing():
-    frames = "".join('<line x1="%d" y1="200" x2="%d" y2="298"/>' % (x, x)
-                     for x in range(140, 1060, 38))
+def hero_drawing(lit=False):
+    # motor cooling fins and the condenser tube bundle are generated
+    fins = "".join('<line x1="%d" y1="516" x2="%d" y2="604"/>' % (x, x)
+                   for x in range(206, 322, 13))
+    tubes = "".join('<line x1="944" y1="%d" x2="1300" y2="%d"/>' % (y, y)
+                    for y in range(190, 266, 14))
+    coil_pts = []
+    for i in range(9):
+        x = 356 + i * 52
+        coil_pts.append("M%d 748 L%d 828" % (x, x))
+    coil = "".join('<path d="%s"/>' % c for c in coil_pts)
 
-    # (x centre, label) — the spaces this company actually works in
-    rooms = [(300, "RSW"), (560, "FISH HOLD"), (800, "ENGINE ROOM"), (980, "FORE")]
-    labels = "".join(
-        '<text class="vp-room" x="%d" y="262" text-anchor="middle">%s</text>'
-        % (x, t) for x, t in rooms)
-    bulkheads = "".join('<line class="vp-bhd" x1="%d" y1="200" x2="%d" y2="298"/>'
-                        % (x, x) for x in (430, 690, 900))
+    def valve(x, y):
+        """Gate valve — two triangles meeting at the stem, the P&ID symbol."""
+        return ('<g class="rp-sym"><path d="M%d %d L%d %d L%d %d L%d %d Z"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                % (x - 11, y - 9, x - 11, y + 9, x + 11, y - 9, x + 11, y + 9,
+                   x, y - 9, x, y - 20))
 
-    return """      <svg class="hero-drawing" viewBox="0 0 1200 430" aria-hidden="true"
-           preserveAspectRatio="xMidYMid meet">
-        <g class="vp-thin">{frames}</g>
+    def gauge(x, y):
+        return ('<g class="rp-sym"><circle cx="%d" cy="%d" r="13"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/></g>'
+                % (x, y, x, y, x + 7, y - 8))
 
-        <!-- hull -->
-        <path class="vp-hull" d="M92 298 L92 200 L1004 200 L1108 176 L1096 268
-                                 Q1080 298 1040 298 Z"/>
-        <!-- deck line and keel -->
-        <line class="vp-hull" x1="92" y1="200" x2="1108" y2="176"/>
+    labels = [(300, 690, "COMPRESSOR"), (620, 690, "OIL SEP"),
+              (1120, 320, "CONDENSER"), (1440, 600, "RECEIVER"),
+              (1214, 760, "EXPANSION"), (560, 872, "RSW EVAPORATOR")]
+    lab = "".join('<text class="rp-lbl" x="%d" y="%d" text-anchor="middle">%s</text>'
+                  % (x, y, t) for x, y, t in labels)
 
-        <!-- superstructure, bridge and funnel -->
-        <path class="vp-hull" d="M150 200 L150 118 L392 118 L392 200"/>
-        <path class="vp-hull" d="M196 118 L196 74 L338 74 L338 118"/>
-        <g class="vp-thin">
-          <line x1="210" y1="92" x2="324" y2="92"/>
-          <line x1="168" y1="158" x2="374" y2="158"/>
+    cls = "hero-drawing hero-drawing--lit" if lit else "hero-drawing"
+    return """      <svg class="{cls}" viewBox="0 0 1600 940" aria-hidden="true"
+           preserveAspectRatio="xMidYMid slice">
+        <!-- ---------- lines ---------- -->
+        <!-- discharge: compressor -> oil separator -> condenser -->
+        <path class="rp-pipe rp-hp" d="M640 470 L640 224 L900 224"/>
+        <!-- condenser -> receiver -->
+        <path class="rp-pipe rp-hp" d="M1330 250 L1440 250 L1440 330"/>
+        <!-- liquid line: receiver -> expansion valve -->
+        <path class="rp-pipe rp-hp" d="M1440 560 L1440 700 L1246 700"/>
+        <!-- expansion -> evaporator (low pressure from here) -->
+        <path class="rp-pipe rp-lp" d="M1182 700 L900 700 L900 788 L816 788"/>
+        <!-- suction: evaporator -> compressor -->
+        <path class="rp-pipe rp-lp" d="M340 788 L240 788 L240 560 L180 560"/>
+
+        <!-- ---------- compressor package ---------- -->
+        <g class="rp-body">
+          <rect x="196" y="504" width="136" height="112" rx="8"/>
+          <rect x="352" y="498" width="176" height="124" rx="6"/>
+          <circle cx="374" cy="560" r="14"/>
+          <rect x="560" y="452" width="96" height="196" rx="34"/>
+          <rect x="176" y="648" width="504" height="12"/>
         </g>
-        <path class="vp-hull" d="M244 74 L244 40 L296 40 L296 74"/>
-        <!-- mast -->
-        <line class="vp-hull" x1="410" y1="118" x2="410" y2="26"/>
-        <line class="vp-thin" x1="372" y1="48" x2="448" y2="48"/>
+        <g class="rp-thin">{fins}<circle cx="374" cy="560" r="6"/>
+          <line x1="560" y1="500" x2="656" y2="500"/>
+          <line x1="560" y1="600" x2="656" y2="600"/></g>
+        <line class="rp-cl" x1="180" y1="560" x2="548" y2="560"/>
 
-        <!-- gantry aft, the giveaway that it is a trawler -->
-        <path class="vp-hull" d="M100 200 L100 132 L146 132"/>
+        <!-- ---------- condenser, seawater cooled ---------- -->
+        <g class="rp-body"><rect x="900" y="176" width="444" height="104" rx="30"/></g>
+        <g class="rp-thin">{tubes}</g>
+        <g class="rp-body">
+          <rect x="980" y="140" width="26" height="36"/>
+          <rect x="1240" y="280" width="26" height="36"/>
+        </g>
+        <text class="rp-note" x="1020" y="132">SW IN</text>
+        <text class="rp-note" x="1282" y="330">SW OUT</text>
 
-        {bulkheads}
-        {labels}
+        <!-- ---------- receiver ---------- -->
+        <g class="rp-body"><rect x="1380" y="330" width="120" height="230" rx="30"/></g>
+        <g class="rp-thin"><rect x="1424" y="410" width="32" height="80" rx="2"/>
+          <line x1="1424" y1="452" x2="1456" y2="452"/></g>
 
-        <!-- waterline: dash-dot, the drawing convention for a datum -->
-        <line class="vp-wl" x1="60" y1="268" x2="1150" y2="268"/>
-        <text class="vp-dim" x="64" y="258">WL</text>
+        <!-- ---------- evaporator / RSW coil ---------- -->
+        <g class="rp-body"><rect x="316" y="732" width="500" height="112" rx="4"/></g>
+        <g class="rp-thin">{coil}</g>
 
-        <!-- length overall -->
-        <g class="vp-dim-g">
-          <line x1="92" y1="356" x2="1108" y2="356"/>
-          <line x1="92" y1="346" x2="92" y2="366"/>
-          <line x1="1108" y1="346" x2="1108" y2="366"/>
-          <path d="M100 352 L92 356 L100 360 Z"/>
-          <path d="M1100 352 L1108 356 L1100 360 Z"/>
-          <rect class="vp-dim-bg" x="536" y="344" width="128" height="24"/>
-          <text class="vp-dim" x="600" y="361" text-anchor="middle">LOA</text>
+        <!-- ---------- symbols ---------- -->
+        {valve_exp}{valve_liq}{valve_suc}
+        {gauge_d}{gauge_s}
+
+        <!-- ---------- flow arrows ---------- -->
+        <g class="rp-arr">
+          <path d="M634 350 L640 336 L646 350 Z"/>
+          <path d="M1434 452 L1440 438 L1446 452 Z"/>
+          <path d="M1046 706 L1060 700 L1046 694 Z"/>
+          <path d="M246 668 L240 654 L234 668 Z"/>
         </g>
 
-        <!-- title block, as on the general arrangement -->
-        <g class="vp-tb">
-          <rect x="820" y="382" width="330" height="40"/>
-          <line x1="1000" y1="382" x2="1000" y2="422"/>
-          <text x="832" y="407">{tb}</text>
-          <text class="vp-tb-b" x="1012" y="407">LITPROFIT</text>
+        {lab}
+
+        <!-- ---------- legend ---------- -->
+        <g class="rp-leg">
+          <line class="rp-pipe rp-hp" x1="90" y1="120" x2="150" y2="120"/>
+          <text x="162" y="125">HIGH PRESSURE</text>
+          <line class="rp-pipe rp-lp" x1="90" y1="156" x2="150" y2="156"/>
+          <text x="162" y="161">LOW PRESSURE</text>
         </g>
-      </svg>""".format(frames=frames, bulkheads=bulkheads, labels=labels,
-                       tb=i18n.VESSEL_TB[LANG])
+
+        <!-- ---------- title block ---------- -->
+        <g class="rp-tb">
+          <rect x="1176" y="856" width="360" height="48"/>
+          <line x1="1176" y1="880" x2="1536" y2="880"/>
+          <line x1="1400" y1="856" x2="1400" y2="904"/>
+          <text x="1190" y="874">{tb}</text>
+          <text x="1190" y="898">R717 / R404A</text>
+          <text class="rp-tb-b" x="1414" y="874">LITPROFIT</text>
+          <text x="1414" y="898">DWG 01</text>
+        </g>
+      </svg>""".format(
+        cls=cls, fins=fins, tubes=tubes, coil=coil, lab=lab,
+        valve_exp=valve(1214, 700), valve_liq=valve(1440, 620),
+        valve_suc=valve(240, 700),
+        gauge_d=gauge(700, 300), gauge_s=gauge(300, 470),
+        tb=i18n.VESSEL_TB[LANG])
 
 
 # ============================================================
@@ -738,6 +792,9 @@ def home():
     <section class="hero">
       <div class="hero-media">
 {hero_drawing}
+        <span class="hero-lamp" aria-hidden="true">
+{hero_drawing_lit}
+        </span>
       </div>
       <div class="container hero-inner">
         <p class="eyebrow eyebrow-plain">{he} <span class="sep">//</span> {hs} {founded}</p>
@@ -873,6 +930,7 @@ def home():
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
                 hero_drawing=hero_drawing(),
+                hero_drawing_lit=hero_drawing(lit=True),
                 he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
                 hlead=T("hero_lead", legal=LEGAL), s1=T("step1"), s2=T("step2"),
                 s3=T("step3"), hsvc=T("hero_services"), tp=T("trust_partner"),
