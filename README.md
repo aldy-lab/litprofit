@@ -223,6 +223,26 @@ logistics, a KPI dashboard against a target margin, CSV export, JSON
 backup/restore, and a print report. Trilingual, and all data stays in the
 browser's `localStorage` — nothing is transmitted anywhere.
 
+### Everything translates, including the categories
+
+The seeded rows used to be copied into the project **as text** when it was
+created, so a project started in English stayed English for ever — the tab read
+`KELIONĖS` above rows still saying "Flights".
+
+Rows now carry a **language-independent key** (`flights`, `freight`, `spares`)
+and the label is resolved at render time from the current language. Anything
+typed into a cell is stored on the row and wins from then on, so a real entry
+like "Klaipeda → Vigo" is never overwritten by a language switch. Rows added
+with **+ Add row** have no key, so they show exactly what was typed.
+
+This runs through the table, the CSV export and the print report alike —
+verified in all three languages, and confirmed that no English default survives
+in a Lithuanian or Russian export.
+
+**Projects created before this change keep their original text.** That is
+correct: once a category is in a project it is data, not a label. Start a new
+project to see the translated defaults.
+
 ### Light and dark
 
 Dark by default, matching the site; light exists because this is a spreadsheet
