@@ -42,7 +42,12 @@
      Montserrat is a STAND-IN. The wordmark on the guidelines is a
      heavier geometric sans; swap --font once the typography page
      names it (and once a web licence is confirmed). */
-  --font: "Montserrat", "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* "Montserrat Fallback" is a metric-matched stand-in defined in fonts.css —
+     it keeps the layout from reflowing when the webfont is blocked, which
+     Safari's Lockdown Mode and content blockers both do. Ordinary system
+     names follow it for anything that has neither. */
+  --font: "Montserrat", "Montserrat Fallback", system-ui, -apple-system,
+          "Segoe UI", Helvetica, Arial, sans-serif;
 
   --h1: clamp(40px, 6.6vw, 104px);
   --h2: clamp(29px, 4vw, 62px);

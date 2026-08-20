@@ -1876,8 +1876,12 @@ def sitemap_xml():
 
 
 write("sitemap.xml", sitemap_xml())
+# The calculator is private and encrypted; it is in no sitemap and no menu,
+# and crawlers are asked to leave it alone. Its contents are unreadable
+# without the passphrase either way — this just keeps it out of results.
 write("robots.txt",
-      "User-agent: *\nAllow: /\n\nSitemap: %s\n" % (ORIGIN + BASE + "/sitemap.xml"))
+      "User-agent: *\nAllow: /\nDisallow: %s/calculator/\n\nSitemap: %s\n"
+      % (BASE, ORIGIN + BASE + "/sitemap.xml"))
 
 print("\nBASE=%r ORIGIN=%r  languages=%s" % (BASE, ORIGIN, ",".join(i18n.LANGS)))
 print("Set BASE='' and ORIGIN to the live domain, add CNAME, and rebuild to migrate.")

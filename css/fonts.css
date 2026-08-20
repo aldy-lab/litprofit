@@ -35,3 +35,31 @@
   src: url("../assets/fonts/montserrat-cyrillic.woff2") format("woff2");
   unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
+
+/* ============================================================
+   METRIC-MATCHED FALLBACK
+   Webfonts do not always arrive: Safari's Lockdown Mode disables them
+   outright, content blockers can drop them, and a bad connection can
+   time them out. When that happens the page should still look like
+   itself rather than reflow into a different design.
+
+   The numbers are measured, not derived. At 700/100px the string
+   "Ship repair and maintenance all over the world" sets 2457px in
+   Montserrat. size-adjust was then swept against that target in the
+   browser — 110.8% gave 2298, 118% gave 2448, 125% gave 2593 — so
+   118.4% is the value that actually lands, rather than the 110.8% a
+   straight width ratio predicts. The overrides interact with the
+   adjust, which is why this had to be measured end to end.
+
+   Montserrat's own vertical metrics are 97% ascent / 25% descent, so
+   the line box matches too and nothing shifts vertically.
+   ============================================================ */
+@font-face {
+  font-family: "Montserrat Fallback";
+  src: local("Helvetica Neue"), local("Helvetica"), local("Arial"),
+       local("Liberation Sans"), local("Nimbus Sans");
+  size-adjust: 118.4%;
+  ascent-override: 97%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}

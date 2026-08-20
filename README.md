@@ -214,6 +214,52 @@ A double-click is also a word-select gesture, so the handler calls
 `preventDefault()` and clears the selection; without it the lamp left a
 highlighted word behind every time.
 
+## The project calculator (private)
+
+`/calculator/` — the project profitability workbook as a web app, restyled onto
+the site's own tokens. Nine sheets, every formula unchanged: labour with
+employer burden and daily allowance, subcontractors, travel, materials,
+logistics, a KPI dashboard against a target margin, CSV export, JSON
+backup/restore, and a print report. Trilingual, and all data stays in the
+browser's `localStorage` — nothing is transmitted anywhere.
+
+### It is encrypted, not hidden
+
+GitHub Pages has no server, so a JavaScript gate that compares a password and
+reveals a hidden `<div>` is theatre — View Source walks straight past it. The
+published page contains **only ciphertext**:
+
+| | |
+|---|---|
+| key | PBKDF2-HMAC-SHA256, 310,000 iterations, 16-byte random salt |
+| cipher | AES-256-GCM, 12-byte random IV |
+| integrity | GCM's auth tag — a wrong password fails rather than yielding garbage |
+
+Verified on the built file: zero occurrences of `computeDash`, `targetMargin`,
+`LS_KEY` or any UI string. The encryption runs in a headless browser through
+WebCrypto rather than in Python, so it is literally the same implementation
+that decrypts it and the two cannot drift.
+
+### Rebuilding it
+
+```
+CALC_PASSWORD='your passphrase' python3 tools/build-calc.py
+```
+
+**The passphrase is never stored in this repository.** It comes from the
+environment, because this repo is public and a committed password would
+protect nothing.
+
+⚠️ **`tools/calc/app.html` is gitignored.** `tools/` is served by GitHub Pages
+— `tools/build.py` returns 200 — and the repo is public, so committing the
+plaintext app would publish exactly what the ciphertext protects. **Keep a
+backup of that file:** without it the calculator can be decrypted in a browser
+but not rebuilt or edited.
+
+If the calculator's *source* also needs to be confidential, the repository
+itself has to be private. Encryption of the published page cannot fix a public
+repo.
+
 ## Careers
 
 `/careers/` in all three languages, in the nav and the pager.
