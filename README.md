@@ -223,17 +223,62 @@ logistics, a KPI dashboard against a target margin, CSV export, JSON
 backup/restore, and a print report. Trilingual, and all data stays in the
 browser's `localStorage` — nothing is transmitted anywhere.
 
+### Light and dark
+
+Dark by default, matching the site; light exists because this is a spreadsheet
+people stare at for an hour and print from, and the site's reading conditions
+are not those. The toggle sits in the header and follows the operating system
+until someone chooses for themselves, after which the choice is pinned. The
+white lockup is inverted on the light ground and the seam rivets flip dark.
+
+### Where the data lives
+
+**In the browser, in `localStorage`, under the key `litprofit_v1`.** Nothing is
+transmitted anywhere — there is no database and no server. Consequences worth
+knowing before anyone relies on it:
+
+- **Per browser, per device, per profile.** Two people do not see each other's
+  projects, and the same person sees different data on laptop and phone.
+- **Clearing site data deletes everything.** So does "clear cookies and site
+  data", some privacy extensions, and macOS Safari's 7-day eviction for sites
+  the user has not visited.
+- **Private/incognito windows lose it on close.**
+- **Roughly 5 MB.** Hundreds of projects, not thousands.
+
+**Backup JSON is the only backup that exists.** It should be part of the
+routine, not an afterthought — and Import restores it on any device, which is
+also how you move a project between people.
+
+If shared, multi-user data is ever needed, that is a real backend (Supabase,
+Firebase, a small Postgres) and a different piece of work. It cannot be
+retrofitted onto a static page.
+
 ### It is encrypted, not hidden
 
 GitHub Pages has no server, so a JavaScript gate that compares a password and
 reveals a hidden `<div>` is theatre — View Source walks straight past it. The
 published page contains **only ciphertext**:
 
+**The login is real, not a string comparison.** A username checked in
+JavaScript adds nothing — it is one more line to walk past. Both fields feed
+the key derivation, so a wrong username fails exactly as a wrong password does.
+Verified: right-user/wrong-password, wrong-user/right-password and a mismatched
+pair from two valid accounts are all rejected.
+
 | | |
 |---|---|
-| key | PBKDF2-HMAC-SHA256, 310,000 iterations, 16-byte random salt |
-| cipher | AES-256-GCM, 12-byte random IV |
-| integrity | GCM's auth tag — a wrong password fails rather than yielding garbage |
+| content key | 32 random bytes; the app is encrypted under it once |
+| per account | PBKDF2-HMAC-SHA256(username + NUL + password), 310,000 iterations, own 16-byte salt, wrapping the content key with AES-256-GCM |
+| payload | AES-256-GCM under the content key |
+| integrity | GCM's auth tag — wrong credentials fail rather than yielding garbage |
+
+Wrapping one content key per account means **revoking someone is a rebuild
+without their entry**, and changing one password does not re-encrypt the app or
+disturb anyone else.
+
+**Usernames are not stored.** Only the wrapped keys ship; the browser tries each
+in turn. The file does not disclose who has access. Verified: neither username
+nor password appears anywhere in the output.
 
 Verified on the built file: zero occurrences of `computeDash`, `targetMargin`,
 `LS_KEY` or any UI string. The encryption runs in a headless browser through
@@ -243,12 +288,12 @@ that decrypts it and the two cannot drift.
 ### Rebuilding it
 
 ```
-CALC_PASSWORD='your passphrase' python3 tools/build-calc.py
+CALC_USERS='[["alice","secret"],["bob","other"]]' python3 tools/build-calc.py
 ```
 
-**The passphrase is never stored in this repository.** It comes from the
-environment, because this repo is public and a committed password would
-protect nothing.
+**Credentials are never stored in this repository.** They come from the
+environment, because this repo is public and committed passwords would protect
+nothing.
 
 ⚠️ **`tools/calc/app.html` is gitignored.** `tools/` is served by GitHub Pages
 — `tools/build.py` returns 200 — and the repo is public, so committing the

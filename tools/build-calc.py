@@ -2,7 +2,7 @@
 """
 Builds the password-protected project calculator.
 
-    CALC_PASSWORD='...' python3 tools/build-calc.py
+    CALC_USERS='[["alice","secret"],["bob","other"]]' python3 tools/build-calc.py
 
 WHY ENCRYPTION AND NOT A LOGIN FORM
 -----------------------------------
@@ -15,10 +15,29 @@ So the calculator is encrypted instead. The published page contains only
 ciphertext plus the code to decrypt it. Without the passphrase there is
 genuinely nothing to read, not merely nothing displayed.
 
-  key         PBKDF2-HMAC-SHA256, 310,000 iterations, 16-byte random salt
-  cipher      AES-256-GCM, 12-byte random IV
-  integrity   GCM's own tag — a wrong password fails to authenticate rather
-              than yielding garbage
+HOW THE LOGIN WORKS
+-------------------
+A username field that is merely checked in JavaScript adds nothing — it is
+another string comparison to walk past. Here BOTH fields feed the key
+derivation, so a wrong username fails exactly as a wrong password does.
+
+The app is encrypted ONCE under a random 256-bit content key. That key is then
+wrapped separately for each user, under a key derived from their own username
+and password:
+
+  content key   32 random bytes, never derived from anything
+  per user      PBKDF2-HMAC-SHA256(username, NUL, password), 310,000 iters,
+                own 16-byte salt, wrapping the content key with AES-256-GCM
+  payload       AES-256-GCM under the content key
+  integrity     GCM's own tag — wrong credentials fail to authenticate rather
+                than yielding garbage
+
+That structure buys two things a single passphrase cannot: revoking one person
+means rebuilding without their entry, and changing one password does not
+re-encrypt the app or disturb anyone else.
+
+USERNAMES ARE NOT STORED. Only the wrapped keys are published, and the browser
+tries each in turn — so the file does not disclose who has access.
 
 THE PASSWORD IS NEVER STORED IN THIS REPOSITORY. It comes from the
 environment. The repository is public: a password committed here would be
@@ -48,21 +67,34 @@ BASE = "/litprofit"          # keep in step with tools/build.py
 OUT_DIR = os.path.join(ROOT, "calculator")
 ITERATIONS = 310000
 
-PASSWORD = os.environ.get("CALC_PASSWORD", "")
+USERS_RAW = os.environ.get("CALC_USERS", "")
 
-ENCRYPT_JS = """async ([plaintext, password, iterations]) => {
+ENCRYPT_JS = """async ([plaintext, users, iterations]) => {
   const enc = new TextEncoder();
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const base = await crypto.subtle.importKey(
-    'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-  const key = await crypto.subtle.deriveKey(
-    {name:'PBKDF2', salt, iterations, hash:'SHA-256'},
-    base, {name:'AES-GCM', length:256}, false, ['encrypt']);
-  const ct = await crypto.subtle.encrypt(
-    {name:'AES-GCM', iv}, key, enc.encode(plaintext));
   const b64 = b => btoa(String.fromCharCode(...new Uint8Array(b)));
-  return {salt: b64(salt), iv: b64(iv), data: b64(ct)};
+
+  // one random content key; the app is encrypted under it exactly once
+  const rawKey = crypto.getRandomValues(new Uint8Array(32));
+  const contentKey = await crypto.subtle.importKey(
+    'raw', rawKey, {name:'AES-GCM'}, false, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt(
+    {name:'AES-GCM', iv}, contentKey, enc.encode(plaintext));
+
+  // wrap that content key once per user
+  const entries = [];
+  for (const [user, pass] of users) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const wIv = crypto.getRandomValues(new Uint8Array(12));
+    const base = await crypto.subtle.importKey(
+      'raw', enc.encode(user + String.fromCharCode(10) + pass), 'PBKDF2', false, ['deriveKey']);
+    const kek = await crypto.subtle.deriveKey(
+      {name:'PBKDF2', salt, iterations, hash:'SHA-256'},
+      base, {name:'AES-GCM', length:256}, false, ['encrypt']);
+    const wrapped = await crypto.subtle.encrypt({name:'AES-GCM', iv:wIv}, kek, rawKey);
+    entries.push({salt:b64(salt), iv:b64(wIv), key:b64(wrapped)});
+  }
+  return {iv: b64(iv), data: b64(ct), users: entries};
 }"""
 
 GATE = """<!DOCTYPE html>
@@ -129,9 +161,12 @@ GATE = """<!DOCTYPE html>
   <div class="seam" aria-hidden="true"></div>
   <h1>Project Calculator</h1>
   <p class="sub">Restricted <span style="opacity:.5">//</span> internal use</p>
-  <label for="pw">Passphrase</label>
-  <input id="pw" type="password" autocomplete="current-password" autofocus>
-  <button id="go" type="submit">Unlock</button>
+  <label for="user">Username</label>
+  <input id="user" type="text" autocomplete="username" autocapitalize="none"
+         spellcheck="false" autofocus>
+  <label for="pw" style="margin-top:16px">Password</label>
+  <input id="pw" type="password" autocomplete="current-password">
+  <button id="go" type="submit">Sign in</button>
   <p class="note" id="note" role="status" aria-live="polite"></p>
 </form>
 <script>
@@ -141,6 +176,7 @@ var PAYLOAD = {payload};
 var ITER = {iterations};
 
 var f = document.getElementById('gate'),
+    user = document.getElementById('user'),
     pw = document.getElementById('pw'),
     go = document.getElementById('go'),
     note = document.getElementById('note');
@@ -153,19 +189,45 @@ function b2a(b64) {{
 
 f.addEventListener('submit', async function (e) {{
   e.preventDefault();
-  if (!pw.value) return;
+  if (!user.value || !pw.value) return;
   go.disabled = true;
   note.className = 'note';
-  note.textContent = 'Deriving key\\u2026';
+  note.textContent = 'Checking\\u2026';
+
+  var enc = new TextEncoder();
+  var raw = null;
+
+  /* Both fields feed the derivation, so a wrong username fails exactly as a
+     wrong password does. Usernames are not stored anywhere in this file — the
+     wrapped keys are simply tried in turn, and the one that authenticates is
+     the one that belongs to these credentials. */
+  var base = await crypto.subtle.importKey(
+    'raw', enc.encode(user.value + String.fromCharCode(10) + pw.value), 'PBKDF2', false, ['deriveKey']);
+
+  for (var i = 0; i < PAYLOAD.users.length; i++) {{
+    var u = PAYLOAD.users[i];
+    try {{
+      var kek = await crypto.subtle.deriveKey(
+        {{name:'PBKDF2', salt:b2a(u.salt), iterations:ITER, hash:'SHA-256'}},
+        base, {{name:'AES-GCM', length:256}}, false, ['decrypt']);
+      raw = await crypto.subtle.decrypt({{name:'AES-GCM', iv:b2a(u.iv)}}, kek, b2a(u.key));
+      break;                       /* GCM authenticated — these credentials fit */
+    }} catch (err) {{ /* not this entry; try the next */ }}
+  }}
+
+  if (!raw) {{
+    go.disabled = false;
+    note.className = 'note bad';
+    note.textContent = 'Wrong username or password.';
+    pw.select();
+    return;
+  }}
+
   try {{
-    var enc = new TextEncoder();
-    var base = await crypto.subtle.importKey(
-      'raw', enc.encode(pw.value), 'PBKDF2', false, ['deriveKey']);
-    var key = await crypto.subtle.deriveKey(
-      {{name:'PBKDF2', salt:b2a(PAYLOAD.salt), iterations:ITER, hash:'SHA-256'}},
-      base, {{name:'AES-GCM', length:256}}, false, ['decrypt']);
+    var contentKey = await crypto.subtle.importKey(
+      'raw', raw, {{name:'AES-GCM'}}, false, ['decrypt']);
     var plain = await crypto.subtle.decrypt(
-      {{name:'AES-GCM', iv:b2a(PAYLOAD.iv)}}, key, b2a(PAYLOAD.data));
+      {{name:'AES-GCM', iv:b2a(PAYLOAD.iv)}}, contentKey, b2a(PAYLOAD.data));
     var html = new TextDecoder().decode(plain);
     /* document.write, not innerHTML: scripts injected through innerHTML never
        execute, and the calculator is almost entirely script. */
@@ -175,8 +237,7 @@ f.addEventListener('submit', async function (e) {{
   }} catch (err) {{
     go.disabled = false;
     note.className = 'note bad';
-    note.textContent = 'Wrong passphrase.';
-    pw.select();
+    note.textContent = 'Could not open the payload.';
   }}
 }});
 </script>
@@ -195,11 +256,17 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
-    if not PASSWORD:
-        sys.exit("CALC_PASSWORD is not set.\n"
-                 "The passphrase is deliberately not stored in this repository —\n"
-                 "it is public, so a committed password would protect nothing.\n\n"
-                 "  CALC_PASSWORD='your passphrase' python3 tools/build-calc.py")
+    if not USERS_RAW:
+        sys.exit("CALC_USERS is not set.\n"
+                 "Credentials are deliberately not stored in this repository —\n"
+                 "it is public, so committed passwords would protect nothing.\n\n"
+                 "  CALC_USERS='[[\"alice\",\"secret\"],[\"bob\",\"other\"]]' \\\n"
+                 "      python3 tools/build-calc.py")
+    try:
+        users = json.loads(USERS_RAW)
+        assert users and all(len(u) == 2 and all(u) for u in users)
+    except Exception:
+        sys.exit("CALC_USERS must be JSON: [[\"username\",\"password\"], ...]")
 
     app = io.open(os.path.join(ROOT, "tools", "calc", "app.html"),
                   encoding="utf-8").read().replace("__BASE__", BASE)
@@ -216,7 +283,7 @@ def main():
             page = browser.new_page()
             # WebCrypto needs a secure context; 127.0.0.1 counts as one.
             page.goto("http://127.0.0.1:%d%s/" % (port, PREFIX))
-            payload = page.evaluate(ENCRYPT_JS, [app, PASSWORD, ITERATIONS])
+            payload = page.evaluate(ENCRYPT_JS, [app, users, ITERATIONS])
             browser.close()
     finally:
         httpd.shutdown()
@@ -229,9 +296,11 @@ def main():
 
     print("plaintext   %7d bytes" % len(app.encode("utf-8")))
     print("ciphertext  %7d bytes (base64)" % len(payload["data"]))
+    print("accounts    %7d  (usernames are NOT stored in the output)"
+          % len(payload["users"]))
     print("written     calculator/index.html  %d bytes" % len(out))
-    print("\nThe passphrase is not stored anywhere in this repo. Keep it safe —")
-    print("without it the published page cannot be decrypted, by anyone.")
+    print("\nCredentials are not stored anywhere in this repo. Keep them safe —")
+    print("without them the published page cannot be decrypted, by anyone.")
 
 
 if __name__ == "__main__":
