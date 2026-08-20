@@ -107,24 +107,27 @@ GATE = """<!DOCTYPE html>
 <link rel="icon" href="{base}/assets/brand/favicon.svg">
 <link rel="stylesheet" href="{base}/css/fonts.css">
 <style>
+  /* Light, to match the calculator's default — a dark sign-in screen handing
+     over to a light app flashes on unlock. */
   :root{{
-    --navy-900:#070824; --surface:#0c0e30;
-    --ink-1:#fff; --ink-2:#b0b3c4; --ink-3:#6b6e85;
-    --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.22);
-    --accent:#9ec9ff; --bad:#ff9a9a;
+    --page:#f6f7fb; --surface:#ffffff;
+    --ink-1:#0b0d2a; --ink-2:#4b4e66; --ink-3:#7d8095;
+    --line:rgba(11,13,42,.14); --line-2:rgba(11,13,42,.30);
+    --accent:#15196D; --bad:#c0392b;
     --font:"Montserrat","Montserrat Fallback",system-ui,-apple-system,sans-serif;
     --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
   }}
   *{{box-sizing:border-box}}
   body{{
     margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;
-    background:var(--navy-900);color:var(--ink-1);font-family:var(--font);
+    background:var(--page);color:var(--ink-1);font-family:var(--font);
   }}
   .gate{{width:100%;max-width:380px}}
-  .gate img{{height:26px;width:auto;display:block;margin-bottom:34px}}
+  /* the lockup is white outlined artwork; invert it on a light ground */
+  .gate img{{height:26px;width:auto;display:block;margin-bottom:34px;filter:invert(1)}}
   .seam{{
     height:26px;margin-bottom:26px;opacity:.3;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Crect x='9.9' y='9.9' width='7' height='7' rx='1.5' fill='%23000000' fill-opacity='0.55'/%3E%3Crect x='9' y='9' width='7' height='7' rx='1.5' fill='%23ffffff'/%3E%3C/svg%3E");
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Crect x='9.9' y='9.9' width='7' height='7' rx='1.5' fill='%23ffffff' fill-opacity='0.9'/%3E%3Crect x='9' y='9' width='7' height='7' rx='1.5' fill='%230b0d2a'/%3E%3C/svg%3E");
     background-size:26px 26px;background-repeat:repeat-x;
   }}
   h1{{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}}
@@ -145,7 +148,7 @@ GATE = """<!DOCTYPE html>
   button{{
     width:100%;margin-top:14px;padding:14px;font:inherit;font-size:11px;
     font-weight:600;letter-spacing:.16em;text-transform:uppercase;
-    background:#fff;color:var(--navy-900);border:0;border-radius:2px;cursor:pointer;
+    background:var(--ink-1);color:#fff;border:0;border-radius:2px;cursor:pointer;
   }}
   button:disabled{{opacity:.5;cursor:default}}
   .note{{

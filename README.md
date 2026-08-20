@@ -284,13 +284,23 @@ Russian rows under English headers for ever. Verified against a project built to
 match exactly that: the labels follow the interface again, a hand-written note
 in a description survives untouched, and every figure is unchanged.
 
-### Light and dark
+### Light by default
 
-Dark by default, matching the site; light exists because this is a spreadsheet
-people stare at for an hour and print from, and the site's reading conditions
-are not those. The toggle sits in the header and follows the operating system
-until someone chooses for themselves, after which the choice is pinned. The
-white lockup is inverted on the light ground and the seam rivets flip dark.
+**Light is the default, dark is opt-in and remembered.** The site is dark
+because it is a marketing page read for a minute; this is a spreadsheet stared
+at for an hour and printed from, and those are not the same reading conditions.
+
+The sign-in screen is light too. It was the brand navy, but a dark gate handing
+over to a light app flashes on unlock, and the tool should feel like one piece.
+The white lockup is inverted on both, and the seam rivets flip dark.
+
+Nothing follows the operating system any more — a fixed default is easier to
+support than one that depends on a setting nobody remembers changing. Verified
+that a fresh install comes up light even under a dark OS.
+
+Installs still holding the old `auto` value are migrated to light, since `auto`
+meant "never chose". **An explicit `dark` is a decision and survives** — checked
+both ways, along with dark persisting across a reload.
 
 ### Where the data lives
 
