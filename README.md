@@ -285,10 +285,23 @@ It is a sheet people fill in for an hour, so it behaves like one:
   column names pinned to the top and the totals to the bottom. Sticky resolves
   inside that box, not the page: an `overflow-x` container is a scroll container
   on *both* axes, so page-relative sticky would never have worked.
-- **A save signal.** `Saved` flashes in the header on every change, and a failed
-  write (full or blocked storage) says so instead of silently losing the entry.
-- **`Cmd/Ctrl+S` exports a backup**, not a copy of the page — the data is
-  already saved; a file is what anyone actually wants at that moment.
+- **An explicit Save.** Figures are held in memory until you press it. The
+  button is dead until there is something to save and lights up when there is,
+  and the header states `Unsaved changes` or `All changes saved` rather than
+  hinting. `Cmd/Ctrl+S` saves, which is what those keys mean everywhere else;
+  `Cmd/Ctrl+Shift+S` writes the backup file, a different intention.
+
+  **Preferences do not wait for it.** Language, theme, which project is open and
+  the portfolio filters are written the moment they change — nobody expects to
+  press Save after switching language. Only project figures queue.
+
+  Because unsaved work exists only in memory, three routes out of it are
+  guarded: closing the tab raises the browser's own warning, and switching
+  project — from the picker or by clicking a portfolio row — asks first, with
+  the picker put back if you decline. Importing a backup asks too, since it
+  replaces everything. Verified: declining a switch leaves both the project and
+  the edit exactly where they were.
+- **A failed write says so** instead of silently losing the entry.
 - **The storage notice** states plainly that this is browser-only and that
   Backup JSON is the only backup, dismissible once read.
 
