@@ -223,6 +223,28 @@ logistics, a KPI dashboard against a target margin, CSV export, JSON
 backup/restore, and a print report. Trilingual, and all data stays in the
 browser's `localStorage` — nothing is transmitted anywhere.
 
+### A duplicate key was hiding a column heading
+
+`set` declared `note` twice — once as the "Unit / Note" column heading and
+again as the footer sentence. JavaScript keeps the last one silently, so the
+Settings table printed a whole paragraph where a two-word heading belonged. The
+heading is `unit` now.
+
+A duplicate key in an object literal throws nothing and lints as valid, so it
+is worth re-running the scan after editing `T`:
+
+```
+python3 - <<'X'
+import io, re
+s = io.open("tools/calc/app.html", encoding="utf-8").read()
+blk = s[s.index("const T = {"):s.index("/* ================= seeded rows")]
+for m in re.finditer(r"(\w+):\{([^{}]*)\}", blk):
+    keys = re.findall(r"(?:^|,)\s*(\w+)\s*:", m.group(2))
+    dup = {k for k in keys if keys.count(k) > 1}
+    if dup: print("DUPLICATE", m.group(1), sorted(dup))
+X
+```
+
 ### Portfolio, and closing a project
 
 **Portfolio** is the first tab: every project side by side with revenue, cost,
