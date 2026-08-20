@@ -223,6 +223,39 @@ logistics, a KPI dashboard against a target margin, CSV export, JSON
 backup/restore, and a print report. Trilingual, and all data stays in the
 browser's `localStorage` — nothing is transmitted anywhere.
 
+### Made for data entry
+
+It is a sheet people fill in for an hour, so it behaves like one:
+
+- **Keyboard down a column.** `Enter` moves to the next row in the same column,
+  `Shift+Enter` back up, `↑`/`↓` likewise on number cells, `Esc` leaves the
+  field. Tab already crossed a row; nothing moved *down* one, which is how these
+  are actually filled in.
+- **Undo on delete.** A deleted row goes to a toast with **Undo** for nine
+  seconds and comes back with its figures. There is no server-side history to
+  fall back on, so a mis-click had been final.
+- **Duplicate a row**, keeping the label it was showing — a copy of "Freight"
+  reads "Freight" and stops following the language, because it is now the
+  user's row.
+- **Headings and totals stay put.** The grid scrolls inside its own box with the
+  column names pinned to the top and the totals to the bottom. Sticky resolves
+  inside that box, not the page: an `overflow-x` container is a scroll container
+  on *both* axes, so page-relative sticky would never have worked.
+- **A save signal.** `Saved` flashes in the header on every change, and a failed
+  write (full or blocked storage) says so instead of silently losing the entry.
+- **`Cmd/Ctrl+S` exports a backup**, not a copy of the page — the data is
+  already saved; a file is what anyone actually wants at that moment.
+- **The storage notice** states plainly that this is browser-only and that
+  Backup JSON is the only backup, dismissible once read.
+
+**On a phone** every one of the nine tabs is free of horizontal page overflow at
+360/390/430 — verified. The row's own name stays pinned while the columns scroll
+sideways, fields are 16px so iOS does not zoom on focus, and the toolbar scrolls
+away while the tabs stay pinned. Two things that took finding: the lockup's
+strapline is 257px of non-wrapping caps and alone pushed a 390px page to 436px;
+and `display: contents` is what frees the tabs to stick, since a sticky child
+only sticks within its parent's box and the wrapper's box ends with the header.
+
 ### Everything translates, including the categories
 
 The seeded rows used to be copied into the project **as text** when it was
