@@ -149,6 +149,57 @@
     scrollFxFrame();
   }
 
+  /* ---------- booking ----------
+     The button is a plain link to Calendly, so it works with JavaScript off,
+     with the script blocked, and in a new tab. On click we upgrade it to
+     Calendly's own popup — but the widget is fetched ONLY AT THAT MOMENT.
+
+     That ordering is the point. Embedding the widget on page load would send
+     every visitor's IP to Calendly whether or not they ever book, and this site
+     otherwise makes no third-party request at all. Loading it on the click
+     keeps that true for everyone who does not book, and the person who does has
+     chosen to. If the fetch fails for any reason, nothing is trapped: the
+     original link is followed instead. */
+  var CALENDLY_CSS = "https://assets.calendly.com/assets/external/widget.css";
+  var CALENDLY_JS = "https://assets.calendly.com/assets/external/widget.js";
+  var calendlyLoading = null;
+
+  function loadCalendly() {
+    if (window.Calendly) return Promise.resolve();
+    if (calendlyLoading) return calendlyLoading;
+    calendlyLoading = new Promise(function (resolve, reject) {
+      var css = doc.createElement("link");
+      css.rel = "stylesheet";
+      css.href = CALENDLY_CSS;
+      doc.head.appendChild(css);
+
+      var js = doc.createElement("script");
+      js.src = CALENDLY_JS;
+      js.async = true;
+      js.onload = resolve;
+      js.onerror = reject;
+      doc.head.appendChild(js);
+
+      /* a blocker can leave onerror unfired — do not hang on the click */
+      setTimeout(function () { window.Calendly ? resolve() : reject(); }, 6000);
+    });
+    return calendlyLoading;
+  }
+
+  all("[data-book]").forEach(function (a) {
+    on(a, "click", function (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;  /* let them open a tab */
+      if (calm) return;                       /* reduced motion: plain link, no overlay */
+      e.preventDefault();
+      var href = a.getAttribute("href");
+      loadCalendly().then(function () {
+        window.Calendly.initPopupWidget({ url: href });
+      }).catch(function () {
+        window.open(href, "_blank", "noopener");
+      });
+    });
+  });
+
   /* ---------- current year in the footer ---------- */
   all("[data-year]").forEach(function (el) {
     el.textContent = String(new Date().getFullYear());

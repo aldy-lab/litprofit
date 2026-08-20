@@ -58,7 +58,7 @@ LOGO_LOCKUP = "/assets/brand/logo-lockup.svg"
 # Header call-to-action. Set this to the company's Calendly link and the
 # button points at it; while it is empty the button falls back to the
 # contacts page, so nothing dead ever ships.
-BOOKING_URL = ""      # e.g. "https://calendly.com/litprofit/30min"
+BOOKING_URL = "https://calendly.com/rf-litprofit/30min"
 # The label is translated per language in tools/i18n.py ("book").
 # Only the URL is configured here.
 
@@ -221,7 +221,8 @@ def header(active, path="/"):
   </header>""".format(home=u("/"), logo=lockup(),
                       name=NAME, items=items,
                       book=BOOKING_URL or u("/contacts/"),
-                      book_attrs=' target="_blank" rel="noopener"' if BOOKING_URL else "",
+                      book_attrs=(' target="_blank" rel="noopener" data-book'
+                                  if BOOKING_URL else ""),
                       book_label=attr(T("book")), skip=T("skip"), menu=attr(T("menu")),
                       langs=lang_switch(path), langs_desktop=lang_switch(path))
 
@@ -1008,7 +1009,8 @@ def home():
                 plant_img=u("/assets/photos/plant-room.webp"),
                 refrig=u("/services/refrigeration-systems/"),
                 book=BOOKING_URL or u("/contacts/"),
-                book_attrs=' target="_blank" rel="noopener"' if BOOKING_URL else "",
+                book_attrs=(' target="_blank" rel="noopener" data-book'
+                            if BOOKING_URL else ""),
                 book_label=T("book"),
                 years=datetime.date.today().year - int(FOUNDED),
                 cta=cta(T("cta_h2"), T("cta_p")))

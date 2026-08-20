@@ -454,6 +454,33 @@ set `open=False` rather than deleting it.
 The application form shares one handler with the enquiry form — a second copy
 of that logic would be a second place to fix it.
 
+## Booking (Calendly)
+
+`BOOKING_URL` in `build.py` points at the company's Calendly. Every **Book a
+call** — header, mobile menu, hero — uses it.
+
+**The widget is fetched on the click, never on page load.** The button is a
+plain link that works with JavaScript off; clicking it upgrades to Calendly's
+own popup, loading `widget.js` and `widget.css` at that moment. If the fetch
+fails or a blocker eats it, the original link is followed instead, so the
+button is never a dead end.
+
+That ordering is the whole point. Embedding the widget normally would send
+every visitor's IP to Calendly whether or not they ever book, and this site
+otherwise makes **no third-party request at all**. Verified: browsing the
+homepage, contacts and both translations produces zero off-site requests; the
+first Calendly request appears only after the click.
+
+**The privacy policy was updated in all three languages** to name Calendly LLC
+and state exactly this — that nothing reaches them until you open the booking
+window, and that once you do they receive your IP and what you enter. Leaving
+the old "loads no third-party scripts" wording in place would have made the
+policy untrue.
+
+There is still **no cookie banner on this site**, because it sets no cookies
+and calls nobody until asked. Calendly shows its own consent notice inside its
+popup — that one is theirs, and only appears for people who open it.
+
 ## Languages
 
 English at the root, Lithuanian under `/lt/`, Russian under `/ru/` — 12 pages

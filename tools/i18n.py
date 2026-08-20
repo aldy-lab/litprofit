@@ -723,8 +723,14 @@ P["en"] = dict(
     pr_collect="This website has no user accounts, no analytics and sets no cookies of its "
                "own. Data reaches us through the enquiry form, through direct contact by "
                "email or phone, and through the hosting provider's server logs.",
-    pr_third="<strong>GitHub, Inc.</strong> — website hosting and request logs. This site "
-             "loads no third-party scripts, fonts, analytics or embeds.",
+    pr_third="<strong>GitHub, Inc.</strong> &mdash; website hosting and request logs. "
+             "<strong>Calendly LLC</strong> &mdash; appointment booking, but only if you use it: "
+             "the booking window is loaded from Calendly at the moment you click "
+             "&ldquo;Book a call&rdquo;, not when the page opens. Until then no request reaches "
+             "Calendly and it learns nothing about your visit. If you do open it, Calendly "
+             "receives your IP address and whatever you enter to book, under its own privacy "
+             "policy. Apart from that this site loads no third-party scripts, fonts, analytics "
+             "or embeds, and the typeface is served from our own domain.",
     pr_basis="<strong>Consent</strong> (GDPR Art. 6(1)(a)) for the enquiry form, which you "
              "may withdraw at any time, and <strong>legitimate interest</strong> "
              "(Art. 6(1)(f)) for responding to enquiries and keeping the site secure.",
@@ -833,8 +839,14 @@ P["lt"] = dict(
     pr_collect="Ši svetainė neturi naudotojų paskyrų, nenaudoja analitikos ir nenustato savo "
                "slapukų. Duomenis gauname per užklausos formą, tiesiogiai susisiekus el. paštu "
                "ar telefonu, taip pat iš prieglobos paslaugų teikėjo serverio žurnalų.",
-    pr_third="<strong>GitHub, Inc.</strong> — svetainės prieglobą ir užklausų žurnalai. Svetainė "
-             "neįkelia jokių trečiųjų šalių skriptų, šriftų, analitikos ar įskiepių.",
+    pr_third="<strong>GitHub, Inc.</strong> &mdash; svetainės prieglobą ir užklausų žurnalai. "
+             "<strong>Calendly LLC</strong> &mdash; susitikimų registracija, bet tik jeigu ja "
+             "pasinaudojate: registracijos langas iš Calendly įkeliamas tik tada, kai paspaudžiate "
+             "&bdquo;Susitarti dėl pokalbio&ldquo;, o ne atidarius puslapį. Iki tol į Calendly "
+             "neišsiunčiama jokia užklausa ir apie Jūsų apsilankymą jai nieko nežinoma. Jei "
+             "langą atidarote, Calendly gauna Jūsų IP adresą ir registracijai įvestus duomenis "
+             "pagal savo privatumo politiką. Daugiau jokių trečiųjų šalių skriptų, šriftų, "
+             "analitikos ar įskiepių svetainė neįkelia, o šriftas pateikiamas iš mūsų domeno.",
     pr_basis="<strong>Sutikimas</strong> (BDAR 6 str. 1 d. a p.) dėl užklausos formos, kurį "
              "galite bet kada atšaukti, ir <strong>teisėtas interesas</strong> "
              "(6 str. 1 d. f p.) atsakant į užklausas bei užtikrinant svetainės saugumą.",
@@ -942,8 +954,15 @@ P["ru"] = dict(
     pr_collect="На этом сайте нет учётных записей, не используется аналитика и не устанавливаются "
                "собственные файлы cookie. Данные поступают к нам через форму запроса, при прямом "
                "обращении по электронной почте или телефону, а также из журналов сервера хостинг-провайдера.",
-    pr_third="<strong>GitHub, Inc.</strong> — хостинг сайта и журналы запросов. Сайт не загружает "
-             "никаких сторонних скриптов, шрифтов, аналитики или встраиваемых элементов.",
+    pr_third="<strong>GitHub, Inc.</strong> &mdash; хостинг сайта и журналы запросов. "
+             "<strong>Calendly LLC</strong> &mdash; запись на встречу, но только если вы ею "
+             "воспользуетесь: окно записи загружается из Calendly в момент нажатия "
+             "&laquo;Заказать звонок&raquo;, а не при открытии страницы. До этого в Calendly не "
+             "уходит ни одного запроса и о вашем посещении ей ничего не известно. Если вы "
+             "откроете окно, Calendly получит ваш IP-адрес и данные, введённые для записи, "
+             "согласно своей политике конфиденциальности. Кроме этого сайт не загружает никаких "
+             "сторонних скриптов, шрифтов, аналитики или встраиваемых элементов, а шрифт "
+             "отдаётся с нашего домена.",
     pr_basis="<strong>Согласие</strong> (GDPR ст. 6(1)(a)) для формы запроса, которое вы можете "
              "отозвать в любой момент, и <strong>законный интерес</strong> (ст. 6(1)(f)) для ответа "
              "на запросы и обеспечения безопасности сайта.",
