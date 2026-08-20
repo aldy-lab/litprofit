@@ -223,6 +223,28 @@ logistics, a KPI dashboard against a target margin, CSV export, JSON
 backup/restore, and a print report. Trilingual, and all data stays in the
 browser's `localStorage` — nothing is transmitted anywhere.
 
+### Portfolio, and closing a project
+
+**Portfolio** is the first tab: every project side by side with revenue, cost,
+profit, margin and a target chip. Clicking a row opens it. Sort by any column.
+
+- **The company total uses a revenue-weighted margin**, not an average of the
+  project margins — a €2k job at 90% must not drag the company figure around.
+- **Filter by client** (which also matches vessel and project ID) **and by
+  period.** The period filter is an **overlap** test, not "started within":
+  asking what ran during February returns the job that began in January and
+  finished in March, which is the question anyone is actually asking.
+- **Export portfolio** writes one row per project plus the company line, so the
+  whole book goes to an accountant as one file. Both exports carry a UTF-8 BOM
+  and CRLF endings so Excel opens them correctly — verified at byte level.
+
+**Closing a project** makes it read-only, so a finished job cannot be edited by
+accident. That is enforced in the markup — the inputs are genuinely `disabled`,
+not merely greyed — so they cannot be typed into, pasted into or reached by the
+keyboard navigation, and the add/duplicate/delete controls are gone. A banner
+says so and offers Reopen. Closed projects still export, print and total
+normally; they are frozen, not archived.
+
 ### Made for data entry
 
 It is a sheet people fill in for an hour, so it behaves like one:
@@ -248,7 +270,7 @@ It is a sheet people fill in for an hour, so it behaves like one:
 - **The storage notice** states plainly that this is browser-only and that
   Backup JSON is the only backup, dismissible once read.
 
-**On a phone** every one of the nine tabs is free of horizontal page overflow at
+**On a phone** every one of the ten tabs is free of horizontal page overflow at
 360/390/430 — verified. The row's own name stays pinned while the columns scroll
 sideways, fields are 16px so iOS does not zoom on focus, and the toolbar scrolls
 away while the tabs stay pinned. Two things that took finding: the lockup's
