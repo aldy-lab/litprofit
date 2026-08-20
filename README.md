@@ -239,9 +239,17 @@ This runs through the table, the CSV export and the print report alike —
 verified in all three languages, and confirmed that no English default survives
 in a Lithuanian or Russian export.
 
-**Projects created before this change keep their original text.** That is
-correct: once a category is in a project it is data, not a label. Start a new
-project to see the translated defaults.
+**Existing projects are migrated automatically**, once, on load — and imported
+backups too, since a backup can predate the change. Each seeded row is matched
+against the defaults of *every* language; an exact hit means the text was a
+default rather than something a person typed, so the row gets its key back and
+the matching fields are cleared so they resolve. A field the user actually
+changed does not match, so it is left alone.
+
+That was needed because a project started while the interface was Russian kept
+Russian rows under English headers for ever. Verified against a project built to
+match exactly that: the labels follow the interface again, a hand-written note
+in a description survives untouched, and every figure is unchanged.
 
 ### Light and dark
 
