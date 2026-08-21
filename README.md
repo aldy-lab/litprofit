@@ -309,6 +309,15 @@ It is a sheet people fill in for an hour, so it behaves like one:
 
   Verified: a keystroke inside the debounce window survives a `pagehide`, and
   survives a reload with the Save button gone from the DOM.
+- **The data sheets get a wider column than the reading views.** `main` was
+  capped at 1400px for everything. Labor is 1514px of columns, so it was
+  clipped by 194px at *every* screen size — Plan Total, Actual Total and
+  Difference, the three numbers the sheet exists to produce, were unreachable
+  on a 1920px monitor, and macOS overlay scrollbars meant nothing on screen
+  said so. Sheets go to 1760px (`main[data-view="sheet"]`); dashboard, project
+  card and settings stay at 1400px, where a measure that wide is already
+  generous. Where it still cannot fit — Labor below about 1600px — the table
+  keeps a permanently visible thin scrollbar rather than a silent clip.
 - **A failed write says so** instead of silently losing the entry.
 - **One menu instead of nine buttons.** The toolbar carried Save, New,
   Duplicate, Close, Delete, Export CSV, Backup JSON, Import, Print, language
