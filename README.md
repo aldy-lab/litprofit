@@ -285,23 +285,56 @@ It is a sheet people fill in for an hour, so it behaves like one:
   column names pinned to the top and the totals to the bottom. Sticky resolves
   inside that box, not the page: an `overflow-x` container is a scroll container
   on *both* axes, so page-relative sticky would never have worked.
-- **An explicit Save.** Figures are held in memory until you press it. The
-  button is dead until there is something to save and lights up when there is,
-  and the header states `Unsaved changes` or `All changes saved` rather than
-  hinting. `Cmd/Ctrl+S` saves, which is what those keys mean everywhere else;
-  `Cmd/Ctrl+Shift+S` writes the backup file, a different intention.
+- **Autosave.** Typing schedules a write 700 ms after the last keystroke, so a
+  row of figures becomes one write rather than thirty. Anything structural —
+  new project, delete, close, language, theme — writes immediately, because
+  those are not things to leave sitting in a timer.
 
-  **Preferences do not wait for it.** Language, theme, which project is open and
-  the portfolio filters are written the moment they change — nobody expects to
-  press Save after switching language. Only project figures queue.
+  Every path writes the **whole** state object, which is what makes the
+  debounce safe: a structural save also carries whatever keystroke is still
+  pending.
 
-  Because unsaved work exists only in memory, three routes out of it are
-  guarded: closing the tab raises the browser's own warning, and switching
-  project — from the picker or by clicking a portfolio row — asks first, with
-  the picker put back if you decline. Importing a backup asks too, since it
-  replaces everything. Verified: declining a switch leaves both the project and
-  the edit exactly where they were.
+  The toolbar reports it and nothing else does: a pulsing dot on `Saving`, then
+  `Saved 14:32`, green for 1.4 s and grey after. Amber only if a write actually
+  failed. `Cmd/Ctrl+S` writes now — muscle memory in something that looks like
+  a spreadsheet, and it stops the browser offering to save the page to disk.
+  `Cmd/Ctrl+Shift+S` still writes the backup file, a different intention.
+
+  **The ways out are covered**, since nothing should depend on the debounce
+  finishing: `beforeunload`, `pagehide` (iOS does not fire `beforeunload`
+  reliably) and `visibilitychange` all flush first. `localStorage` is
+  synchronous, so this is a real write, not a request for one — which is why
+  there is no longer a "you have unsaved changes" dialog. There is nothing to
+  lose, and that dialog was never something the user could act on.
+
+  Verified: a keystroke inside the debounce window survives a `pagehide`, and
+  survives a reload with the Save button gone from the DOM.
 - **A failed write says so** instead of silently losing the entry.
+- **One menu instead of nine buttons.** The toolbar carried Save, New,
+  Duplicate, Close, Delete, Export CSV, Backup JSON, Import, Print, language
+  and theme — twelve controls that wrapped onto two rows at 1440px and gave
+  `Delete` exactly the same weight as `Duplicate`.
+
+  It is five now: the project picker, the save status, **Print report**, a `⋯`
+  menu and the two icon toggles. Print stays outside because it is what the
+  tool is *for*; everything else is an occasional command and should take a
+  deliberate step to reach. Inside, the items are grouped **Project** / **Data**
+  with `Delete` alone below a rule, in red.
+
+  Click-away and `Escape` both close it, `Escape` returns focus to the button,
+  and `↑`/`↓` walk the items — the headings and rules are not stops. Measured:
+  one row at every width from 700px to 1440px, and the panel stays on screen
+  down to 390px, where it is right-anchored to a button that sits mid-screen
+  and used to hang 50px off the left edge.
+
+  ⚠️ **`header.app` must not have a `backdrop-filter`.** It had
+  `blur(12px)` behind `--surface-1`, which is `#ffffff` and `#0c0e30` — both
+  fully opaque, so the blur could never be seen. It was not free: it made the
+  header a *backdrop root*, and the rivet seam and the page behind it were
+  composited back over the part of the open menu that overflows the header.
+  Measured `#bdbcc4` seam dots inside the menu with it, flat `#ffffff` without.
+  Same family as the `filter` on `<body>` that broke `position: fixed` on the
+  site. The header carries `position: relative; z-index: 2` instead.
 - **The storage notice** states plainly that this is browser-only and that
   Backup JSON is the only backup, dismissible once read.
 
