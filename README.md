@@ -454,6 +454,27 @@ set `open=False` rather than deleting it.
 The application form shares one handler with the enquiry form — a second copy
 of that logic would be a second place to fix it.
 
+## The client rail
+
+The clients section is a row of cards that scrolls sideways: logo on a white
+plate, company name, and a sector line. Arrows on pointer devices, swipe on
+touch, and the arrows **disable at each end** rather than sitting there doing
+nothing.
+
+It replaced a five-column grid, which had hard-coded five because ten logos
+divide evenly by five. Removing one client left a ragged half-empty row — the
+exact failure a fixed grid invites. A rail does not care how many there are.
+
+**BITZER and DANFOSS stay in their own section above.** They are manufacturers
+we represent, not customers; merging them into the client list would misstate
+both relationships.
+
+⚠️ **Six of the nine sector lines are blank on purpose.** Only Sealord, Seafish
+Trade and Santavilte say what they do on their own sites. A descriptive line
+under someone else's logo is a claim about their business, so the rest stay
+empty until the client confirms them. Fill in the last field of `CLIENTS` in
+`build.py` and add the key to `SECTORS` in `i18n.py`.
+
 ## Booking (Calendly)
 
 `BOOKING_URL` in `build.py` points at the company's Calendly. Every **Book a

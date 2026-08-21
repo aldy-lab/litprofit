@@ -106,6 +106,7 @@ S["en"] = dict(
              "installation and commissioning — on fishing vessels and shore "
              "installations alike.",
     clients_eyebrow="Clients", clients_h2="Who we work with",
+    rail_prev="Previous clients", rail_next="More clients",
 
     cta_h2="24/7 service",
     cta_p="We are ready to provide prompt and competent assistance — tell us the "
@@ -184,6 +185,7 @@ S["lt"] = dict(
              "projektiniai dokumentai, įrangos montavimas ir paleidimas — tiek "
              "žvejybiniuose laivuose, tiek kranto įrenginiuose.",
     clients_eyebrow="Klientai", clients_h2="Su kuo dirbame",
+    rail_prev="Ankstesni klientai", rail_next="Daugiau klientų",
 
     cta_h2="24/7 servisas",
     cta_p="Visada pasirengę suteikti operatyvią ir kompetentingą pagalbą — "
@@ -260,6 +262,7 @@ S["ru"] = dict(
              "согласованная с классификационными обществами, монтаж и пусконаладка — "
              "как на рыболовных судах, так и на береговых установках.",
     clients_eyebrow="Клиенты", clients_h2="С кем мы работаем",
+    rail_prev="Предыдущие клиенты", rail_next="Ещё клиенты",
 
     cta_h2="Сервис 24/7",
     cta_p="Мы всегда готовы оказать оперативную и компетентную помощь — "
@@ -1152,3 +1155,14 @@ VESSEL_TB = {"en": "SHIP REFRIGERATION PLANT",
 ROOMS = {"en": ["CHILLER", "FREEZER", "PRE-STORAGE"],
          "lt": ["ŠALDYTUVAS", "ŠALDIKLIS", "PARUOŠIMO PATALPA"],
          "ru": ["ОХЛАЖДЕНИЕ", "МОРОЗИЛЬНАЯ", "ПРЕДВАРИТЕЛЬНАЯ"]}
+
+# Sector lines under a client's logo. Only filled where the company's own site
+# states it — six of the nine are deliberately absent until the client confirms.
+SECTORS = {
+ "en": {"seafood": "Seafood group", "frozenfish": "Frozen fish supplier",
+        "engineering": "Engineering partner"},
+ "lt": {"seafood": "Žuvininkystės grupė", "frozenfish": "Šaldytos žuvies tiekėjas",
+        "engineering": "Inžinerijos partneris"},
+ "ru": {"seafood": "Рыбопромысловая группа", "frozenfish": "Поставщик мороженой рыбы",
+        "engineering": "Инженерный партнёр"},
+}

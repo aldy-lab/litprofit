@@ -833,53 +833,89 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 .cornered::after { bottom: 6px; }
 
 /* ============================================================
-   LOGO WALL (clients)
-   ============================================================ */
-/* Fixed column counts, not auto-fill: there are ten logos, and ten divides
-   evenly by 5 and by 2 only. auto-fill picked 8 across and left a ragged
-   half-empty row. Revisit these numbers if the client list changes length. */
-.logo-wall {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-}
-@media (max-width: 780px) { .logo-wall { grid-template-columns: repeat(2, 1fr); } }
+   CLIENT RAIL
+   A row of cards that scrolls sideways instead of a fixed grid. The old wall
+   hard-coded five columns because ten logos divide evenly by five — remove one
+   client and it left a ragged half-empty row, which is exactly what happened.
+   A rail does not care how many there are.
 
-/* White tiles, logos unaltered.
-   The obvious alternative — knocking the logos out to white with
-   `brightness(0) invert(1)` — destroys any mark that carries knockout
-   detail: the shape and the detail inside it both go to white, so Ocean
-   Whale, LZK and OWH each collapse into a featureless white disc. These
-   are other companies' trademarks; recolouring them is not ours to do. */
-/* aspect-ratio sets the tile height, and `overflow: hidden` makes that
-   binding: without it a tall logo plus padding could exceed the ratio box and
-   stretch its whole grid row, which is what made the wall look like it was
-   drifting out of alignment on a phone. */
-.logo-wall li {
-  background: var(--white);
+   BITZER and DANFOSS keep their own section above: they are manufacturers we
+   represent, not customers, and merging the two would misstate both.
+   ============================================================ */
+.client-rail-wrap { position: relative; }
+.client-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+.client-rail::-webkit-scrollbar { height: 6px; }
+.client-rail::-webkit-scrollbar-thumb { background: var(--line-2); }
+.cc { flex: 0 0 232px; scroll-snap-align: start; min-width: 0; }
+.cc > a, .cc-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 18px 18px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  position: relative;
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease),
+              transform 0.3s var(--ease);
+}
+.cc > a:hover { border-color: var(--line-2); background: var(--panel-2); transform: translateY(-3px); }
+.cc > a:focus-visible { outline-offset: 2px; }
+
+/* Other companies' trademarks, in their own colours — a white plate rather
+   than recolouring artwork that is not ours to alter. */
+.cc-plate {
   display: grid;
   place-items: center;
-  padding: clamp(14px, 3.2vw, 26px) clamp(16px, 3.6vw, 24px);
-  min-width: 0;
+  background: var(--white);
+  border-radius: 2px;
+  padding: 16px 14px;
+  margin-bottom: 16px;
   aspect-ratio: 16 / 9;
-  overflow: hidden;
 }
-/* A plain, definite max-height. `min(46px, 100%)` looked safer but the
-   percentage is cyclic here — the row gets sized from the image's unclamped
-   width-constrained height (142px for a square logo), the tile clips to its
-   aspect box, and the logo ends up centred in the 142px row: 36px low and cut
-   off. The tile has room for 46px now that the anchor's padding is gone. */
-.logo-wall img {
-  max-height: 46px;
-  max-width: 100%;
-  width: auto;
-  filter: grayscale(1);
-  opacity: 0.82;
+.cc-plate img {
+  max-height: 46px; max-width: 100%; width: auto;
+  filter: grayscale(1); opacity: 0.82;
   transition: opacity 0.3s var(--ease), filter 0.3s var(--ease);
 }
-.logo-wall li:hover img { opacity: 1; filter: none; }
+.cc > a:hover .cc-plate img { opacity: 1; filter: none; }
+.cc-name { font-size: var(--text-l); font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; }
+.cc-desc {
+  margin-top: 5px; font-size: var(--text-s); color: var(--muted-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.04em;
+}
+.cc-go {
+  position: absolute; top: 14px; right: 15px;
+  font-size: 13px; color: var(--muted-2); transition: color 0.3s var(--ease);
+}
+.cc > a:hover .cc-go { color: var(--white); }
+
+/* Arrows disable at each end rather than sitting there doing nothing, and are
+   absent on touch, where swiping is the obvious gesture. */
+.rail-btn {
+  position: absolute; top: 84px;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  background: rgba(7, 8, 36, 0.92);
+  border: 1px solid var(--line-2);
+  border-radius: 2px; color: var(--text); font-size: 16px; cursor: pointer; z-index: 2;
+  transition: background 0.25s var(--ease), opacity 0.25s var(--ease);
+}
+.rail-btn:hover { background: var(--brand); }
+.rail-prev { left: -16px; }
+.rail-next { right: -16px; }
+.rail-btn[disabled] { opacity: 0; pointer-events: none; }
+@media (hover: none) { .rail-btn { display: none; } }
+@media (max-width: 620px) { .cc { flex: 0 0 200px; } }
 
 /* ============================================================
    DOCUMENT LIST (certificates)
@@ -1395,23 +1431,6 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 .part[aria-expanded="true"] .part-text { grid-template-rows: 1fr; opacity: 1; margin-top: 6px; }
 
 @media (max-width: 900px) { .drawing { grid-template-columns: 1fr; } }
-
-/* ============================================================
-   CLIENT LOGO LINKS
-   ============================================================ */
-/* no padding of its own — the tile already has it, and adding 4px here made
-   linked tiles 8px taller than unlinked ones */
-.logo-wall li > a {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.3s var(--ease);
-}
-.logo-wall li > a:hover { transform: scale(1.04); }
-.logo-wall li > a:focus-visible { outline-offset: -4px; }
-/* a linked tile should say so; an unlinked one should not pretend */
-.logo-wall li:has(> a) { cursor: pointer; }
 
 /* ============================================================
    THE ALDY CREDIT

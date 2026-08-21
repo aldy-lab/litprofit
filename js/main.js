@@ -200,6 +200,35 @@
     });
   });
 
+  /* ---------- client rail ----------
+     Arrows scroll by one card. They disable at each end rather than sitting
+     there doing nothing, which is the only honest state for a control that
+     cannot act. Touch devices get no arrows at all — swiping is the gesture. */
+  var rail = doc.getElementById("clientRail");
+  if (rail) {
+    var railBtns = all(".rail-btn");
+
+    var syncRail = function () {
+      var max = rail.scrollWidth - rail.clientWidth - 1;
+      railBtns.forEach(function (b) {
+        var back = b.getAttribute("data-rail") === "-1";
+        b.disabled = back ? rail.scrollLeft <= 0 : rail.scrollLeft >= max;
+      });
+    };
+
+    railBtns.forEach(function (b) {
+      on(b, "click", function () {
+        var card = rail.querySelector(".cc");
+        var step = card ? card.getBoundingClientRect().width + 14 : 240;
+        rail.scrollBy({ left: step * (+b.getAttribute("data-rail")), behavior: "smooth" });
+      });
+    });
+
+    on(rail, "scroll", syncRail, { passive: true });
+    on(window, "resize", syncRail);
+    syncRail();
+  }
+
   /* ---------- current year in the footer ---------- */
   all("[data-year]").forEach(function (el) {
     el.textContent = String(new Date().getFullYear());

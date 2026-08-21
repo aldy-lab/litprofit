@@ -580,16 +580,20 @@ SERVICE_BLOCKS = {
 
 FEATURE_SLUG = i18n.ORDER[0]
 
+# (name, file, intrinsic w, intrinsic h, url, sector key)
+# The sector is a claim about someone else's business, so it is only filled in
+# where their own site says it. Six are blank until the client confirms them —
+# an invented line under a customer's logo is their problem, not ours.
 CLIENTS = [
-    ("Sealord", "logo-sealord-paua.png", 140, 60, "https://sealord.com"),
-    ("Limarko Group", "limarko-group.png", 400, 120, ""),
-    ("Ocean Whale Company", "ocean-whale-company.png", 400, 135, ""),
-    ("Baltreids", "logo-baltreids.png", 66, 82, ""),
-    ("Alliance Marine", "logo-alliance-marine.png", 248, 155, ""),
-    ("Seafish Trade", "logo-seafish-trade.png", 282, 179, "https://seafishtrade.com"),
-    ("Santavilte", "santavilte.png", 400, 89, "https://santavilte.lt"),
-    ("LZK", "logo-lzk.png", 208, 208, ""),
-    ("OWH", "logo-owh.png", 246, 161, ""),
+    ("Sealord", "logo-sealord-paua.png", 140, 60, "https://sealord.com", "seafood"),
+    ("Limarko Group", "limarko-group.png", 400, 120, "", ""),
+    ("Ocean Whale Company", "ocean-whale-company.png", 400, 135, "", ""),
+    ("Baltreids", "logo-baltreids.png", 66, 82, "", ""),
+    ("Alliance Marine", "logo-alliance-marine.png", 248, 155, "", ""),
+    ("Seafish Trade", "logo-seafish-trade.png", 282, 179, "https://seafishtrade.com", "frozenfish"),
+    ("Santavilte", "santavilte.png", 400, 89, "https://santavilte.lt", "engineering"),
+    ("LZK", "logo-lzk.png", 208, 208, "", ""),
+    ("OWH", "logo-owh.png", 246, 161, "", ""),
 ]
 
 CERTIFICATES = [
@@ -640,15 +644,22 @@ def service_cards(level="h3"):
 
 
 def client_tile(c):
-    """A client logo. Linked where the company's own site was verified,
-    plain where it was not — the alt text names it either way."""
-    name, f, w, h, url = c
+    """One client card. Linked where the company's own site was verified.
+
+    The logo sits on a white plate inside the card: these are other companies'
+    trademarks, in their own colours, and recolouring them to fit our palette
+    is not ours to do."""
+    name, f, w, h, url, sector = c
     img = ('<img src="%s" alt="%s" width="%d" height="%d" loading="lazy">'
            % (u("/assets/clients/" + f), name, w, h))
+    desc = i18n.SECTORS[LANG].get(sector, "") if sector else ""
+    body = ('<span class="cc-plate">%s</span>'
+            '<span class="cc-name">%s</span>'
+            '<span class="cc-desc">%s</span>' % (img, name, desc or "&nbsp;"))
     if url:
-        return ('          <li><a href="%s" target="_blank" rel="noopener noreferrer">'
-                '%s</a></li>' % (url, img))
-    return "          <li>%s</li>" % img
+        return ('          <li class="cc"><a href="%s" target="_blank" rel="noopener noreferrer">'
+                '%s<span class="cc-go">&#8599;</span></a></li>' % (url, body))
+    return '          <li class="cc"><span class="cc-inner">%s</span></li>' % body
 
 
 # ============================================================
@@ -982,13 +993,20 @@ def home():
           <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{cl_e}</p>
           <h2>{cl_h}</h2>
         </div>
-        <ul class="logo-wall reveal">
+        <div class="client-rail-wrap reveal">
+          <ul class="client-rail" id="clientRail">
 {logos}
-        </ul>
+          </ul>
+          <button class="rail-btn rail-prev" type="button" aria-label="{rail_prev}"
+                  data-rail="-1">&#8592;</button>
+          <button class="rail-btn rail-next" type="button" aria-label="{rail_next}"
+                  data-rail="1">&#8594;</button>
+        </div>
       </div>
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
                 hero_drawing=hero_drawing(),
+                rail_prev=attr(T("rail_prev")), rail_next=attr(T("rail_next")),
                 hero_drawing_lit=hero_drawing(lit=True),
                 he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
                 hlead=T("hero_lead", legal=LEGAL), s1=T("step1"), s2=T("step2"),
@@ -1374,12 +1392,19 @@ def partners():
           <h2>{cl_h}</h2>
           <p class="lead">{cl_l}</p>
         </div>
-        <ul class="logo-wall reveal">
+        <div class="client-rail-wrap reveal">
+          <ul class="client-rail" id="clientRail">
 {logos}
-        </ul>
+          </ul>
+          <button class="rail-btn rail-prev" type="button" aria-label="{rail_prev}"
+                  data-rail="-1">&#8592;</button>
+          <button class="rail-btn rail-next" type="button" aria-label="{rail_next}"
+                  data-rail="1">&#8594;</button>
+        </div>
       </div>
     </section>
-{cta}""".format(logos=logos, rep_e=T("rep_eyebrow"), rep_h=PT("p_rep_h2"),
+{cta}""".format(logos=logos, rail_prev=attr(T("rail_prev")),
+                rail_next=attr(T("rail_next")), rep_e=T("rep_eyebrow"), rep_h=PT("p_rep_h2"),
                 rep_l=PT("p_rep_lead"), tp=T("trust_partner"), tr=T("trust_rep"),
                 rep_b=T("rep_bitzer"), rep_d=T("rep_danfoss"),
                 cl_e=T("clients_eyebrow"), cl_h=PT("p_clients_h2"),
