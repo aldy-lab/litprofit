@@ -871,25 +871,34 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 .cc > a:hover { border-color: var(--line-2); background: var(--panel-2); transform: translateY(-3px); }
 .cc > a:focus-visible { outline-offset: 2px; }
 
-/* Other companies' trademarks, at full strength on a white plate.
-   These were greyscaled and dimmed, which threw away real artwork: Santavilte
-   is #0090f0 and #f00000, Seafish Trade purple and orange, Sealord navy. A
-   filter was flattening all of it to match our palette — and recolouring
-   somebody else's mark is not ours to do in either direction. */
+/* Client logos sit directly on the card. */
 .cc-plate {
   display: grid;
   place-items: center;
-  background: var(--white);
-  border-radius: 2px;
-  padding: 20px 18px;
+  padding: 8px 4px;
   margin-bottom: 18px;
   aspect-ratio: 16 / 9;
 }
+/* Knocked out to white, straight on the card — no plate.
+   The plate was there because five of the nine logos are dark navy or black
+   and measured 1.0-1.7:1 against this ground: invisible. Knocking them out
+   solves that by making every mark the same white, which is also the usual
+   convention for a client wall on a dark page.
+
+   The cost is any mark carrying knockout DETAIL: shape and detail both go to
+   white together. Ocean Whale's whale collapses into a plain disc, and
+   Baltreids is only 66px wide at source so its wordmark goes mushy. Both need
+   a proper reverse logo from the client — see the README. The other seven
+   come through intact, globe lines and anchor and all. */
 .cc-plate img {
-  max-height: 72px;
+  max-height: 76px;
   max-width: 100%;
   width: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.82;
+  transition: opacity 0.3s var(--ease);
 }
+.cc > a:hover .cc-plate img { opacity: 1; }
 .cc-name { font-size: var(--h4); font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; }
 .cc-desc {
   margin-top: 7px; font-size: var(--text-s); color: var(--muted-2);

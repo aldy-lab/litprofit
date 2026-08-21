@@ -456,16 +456,50 @@ of that logic would be a second place to fix it.
 
 ## The client rail
 
-The clients section is a row of cards that scrolls sideways: logo on a white
-plate at full colour, company name, and a sector line.
-
-**The logos were greyscaled and dimmed, and that was throwing away real
-artwork.** Sampling the files settles it: Santavilte is `#0090f0` and
-`#f00000`, Seafish Trade purple and orange, Sealord navy, Limarko an orange
-flag. A filter was flattening all of it to suit our palette — and recolouring
-someone else's trademark is not ours to do in either direction. Arrows on pointer devices, swipe on
+The clients section is a row of cards that scrolls sideways: logo knocked out
+to white, company name, and a sector line. Arrows on pointer devices, swipe on
 touch, and the arrows **disable at each end** rather than sitting there doing
 nothing.
+
+### Why the logos are white and not full colour
+
+They went through three states, and the reasoning matters if anyone is tempted
+to change it back.
+
+Greyscaled and dimmed was wrong: it threw away real artwork. Sampling the files
+settles that — Santavilte is `#0090f0` and `#f00000`, Seafish Trade purple and
+orange, Sealord navy, Limarko an orange flag.
+
+Full colour on a **white plate** showed the artwork honestly, but put nine
+bright rectangles across a dark page.
+
+Full colour with **no plate** is what the design asked for and it does not
+work, because these are print logos drawn for white paper. Measured against the
+card ground, five of the nine fall below 2:1 — LZK `1.0`, limarko `1.2`,
+seafish `1.3`, alliance-marine `1.4`, sealord `1.7` — with baltreids `2.4` and
+OWH `2.1` weak, and only ocean-whale `3.7` and santavilte `4.6` passing. Most
+of the wall would simply be invisible.
+
+So: **knocked out to white**, which is the usual convention for a client wall
+on a dark ground and treats every mark identically rather than recolouring
+some and not others.
+
+The cost of a knockout is any mark carrying detail *inside* it. `brightness(0)
+invert(1)` pushes shape and detail to white together. Seven of the nine survive
+because their detail is transparent gaps that were never painted — OWH's globe
+lines, LZK's anchor, Seafish's sphere all come through.
+
+⚠️ **Two logos need better files from the client.**
+
+- **Ocean Whale Company** ships with a solid white disc baked in behind the
+  whale, so a CSS filter cannot tell plate from ink and the mark flattens into
+  a blank circle. `tools/make-reverse-logo.py` strips the plate in the pixels
+  and writes `ocean-whale-company-rev.png`, which is what the build uses. That
+  is a repair, not a substitute for a real reverse logo — ask for one.
+- **Baltreids** is only `66x82` in the source. At the 76px display height it is
+  fine on a 1x screen and mushy on a retina one; the wordmark under the mark is
+  not legible. No filter fixes resolution. **Ask for a file at 300px or wider.**
+  Do not crop the wordmark off to hide it — that is altering their trademark.
 
 It replaced a five-column grid, which had hard-coded five because ten logos
 divide evenly by five. Removing one client left a ragged half-empty row — the
