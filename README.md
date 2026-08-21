@@ -318,6 +318,65 @@ It is a sheet people fill in for an hour, so it behaves like one:
   card and settings stay at 1400px, where a measure that wide is already
   generous. Where it still cannot fit — Labor below about 1600px — the table
   keeps a permanently visible thin scrollbar rather than a silent clip.
+- **Autocomplete from your own history.** Every text column marked `ac` in
+  `sheetConfigs`, plus client / vessel / PM on the project card, is fed back as
+  a `datalist` built from what has already been typed **across all projects** —
+  that is the point, since the value of the list is that it remembers the last
+  job. Same crew, same three subcontractors, same yard, job after job, and all
+  of it was being retyped in full.
+
+  Opt-in per column deliberately: invoice numbers are unique by definition and
+  free-text notes are not worth suggesting, so neither carries the flag.
+  Most-used first, then alphabetical, capped at 40, so the common answer is the
+  first one offered. Measured at 1.9 ms to build across 40 projects.
+- **Undo across every edit, not just row deletion.** `Ctrl/Cmd+Z`, with
+  `Ctrl/Cmd+Shift+Z` and `Ctrl/Cmd+Y` for redo. Before this, undo covered
+  exactly one action — deleting a row, for nine seconds. Typing over a good
+  figure destroyed it with no history and no server copy to fall back on.
+
+  **Whole-state snapshots, not inverse operations.** Every view already renders
+  from `state`, so restoring is an assignment plus a `render()`; there is no
+  second code path that can drift out of step with the first.
+
+  Three things make it behave the way people expect:
+  - **One field is one step.** `pushUndo(group)` coalesces a run of edits to the
+    same field and `focusout` ends the run, so `Ctrl+Z` takes back the number
+    that was typed, not one keystroke of it. The snapshot is taken on the first
+    keystroke only, which is also why typing stays at 1.4 ms.
+  - **Language and theme are preferences, not work.** They are carried across a
+    restore, so undoing a figure cannot also throw back a theme somebody
+    switched in between.
+  - **Nothing that changes nothing takes a step.** Export and backup never
+    snapshot; a confirm that gets declined pops the one it took. Importing a
+    backup *does* snapshot, so replacing everything is reversible.
+
+  ⚠️ **Depth is capped by bytes as well as count** — `UNDO_MAX` 80 steps,
+  `UNDO_BYTES` 8 MB, size wins. A snapshot is the whole state and 40 projects
+  measured 654 KB, so a plain 80-step cap would have parked **52 MB** of
+  history in memory. Verified: a small portfolio keeps all 80 steps, a 661 KB
+  one keeps 12 and stays under 8 MB. The stack is memory-only and a reload
+  clears it.
+- **The margin never leaves the screen.** A strip under the tabs, inside
+  `.chrome` so it travels with the header, showing plan and actual margin,
+  target, plan and actual profit, and the same verdict chip the portfolio uses.
+  It repaints on every keystroke, so the number moves as the job is built
+  instead of only when someone opens the dashboard.
+
+  **It shows plan *and* actual, and that is not cosmetic.** Actual alone meant a
+  job being planned — where every actual column is empty by definition — read
+  `0 %` and `BELOW TARGET` in red for the whole of the phase where the strip is
+  most useful. Where nothing has been entered it prints an em dash rather than
+  a zero, and with nothing entered at all there is no verdict chip: an
+  untouched project should look untouched, not catastrophic. The chip follows
+  whichever figure is real and is labelled `PLAN` or `ACTUAL` so it can never
+  be read as the other.
+
+  Labels join with `·` rather than a space — `PLAN · MARGIN` reads as two tags
+  in Lithuanian and Russian, where a two-noun phrase would not agree. Hidden on
+  the portfolio (every project at once) and the dashboard (which says all of
+  this in full), and on a phone all but the two margins stand down. Repainting
+  toggles `hidden`, so it calls `measureChrome()` — `--chrome-h` is what keeps
+  the sticky table header sitting directly beneath the chrome.
 - **A failed write says so** instead of silently losing the entry.
 - **One menu instead of nine buttons.** The toolbar carried Save, New,
   Duplicate, Close, Delete, Export CSV, Backup JSON, Import, Print, language
