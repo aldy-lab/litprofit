@@ -855,12 +855,12 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 }
 .client-rail::-webkit-scrollbar { height: 6px; }
 .client-rail::-webkit-scrollbar-thumb { background: var(--line-2); }
-.cc { flex: 0 0 232px; scroll-snap-align: start; min-width: 0; }
+.cc { flex: 0 0 300px; scroll-snap-align: start; min-width: 0; }
 .cc > a, .cc-inner {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 18px 18px 20px;
+  padding: 22px 22px 24px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 2px;
@@ -871,26 +871,28 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 .cc > a:hover { border-color: var(--line-2); background: var(--panel-2); transform: translateY(-3px); }
 .cc > a:focus-visible { outline-offset: 2px; }
 
-/* Other companies' trademarks, in their own colours — a white plate rather
-   than recolouring artwork that is not ours to alter. */
+/* Other companies' trademarks, at full strength on a white plate.
+   These were greyscaled and dimmed, which threw away real artwork: Santavilte
+   is #0090f0 and #f00000, Seafish Trade purple and orange, Sealord navy. A
+   filter was flattening all of it to match our palette — and recolouring
+   somebody else's mark is not ours to do in either direction. */
 .cc-plate {
   display: grid;
   place-items: center;
   background: var(--white);
   border-radius: 2px;
-  padding: 16px 14px;
-  margin-bottom: 16px;
+  padding: 20px 18px;
+  margin-bottom: 18px;
   aspect-ratio: 16 / 9;
 }
 .cc-plate img {
-  max-height: 46px; max-width: 100%; width: auto;
-  filter: grayscale(1); opacity: 0.82;
-  transition: opacity 0.3s var(--ease), filter 0.3s var(--ease);
+  max-height: 72px;
+  max-width: 100%;
+  width: auto;
 }
-.cc > a:hover .cc-plate img { opacity: 1; filter: none; }
-.cc-name { font-size: var(--text-l); font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; }
+.cc-name { font-size: var(--h4); font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; }
 .cc-desc {
-  margin-top: 5px; font-size: var(--text-s); color: var(--muted-2);
+  margin-top: 7px; font-size: var(--text-s); color: var(--muted-2);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.04em;
 }
 .cc-go {
@@ -902,7 +904,7 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 /* Arrows disable at each end rather than sitting there doing nothing, and are
    absent on touch, where swiping is the obvious gesture. */
 .rail-btn {
-  position: absolute; top: 84px;
+  position: absolute; top: 96px;
   width: 44px; height: 44px;
   display: grid; place-items: center;
   background: rgba(7, 8, 36, 0.92);
@@ -915,7 +917,7 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 .rail-next { right: -16px; }
 .rail-btn[disabled] { opacity: 0; pointer-events: none; }
 @media (hover: none) { .rail-btn { display: none; } }
-@media (max-width: 620px) { .cc { flex: 0 0 200px; } }
+@media (max-width: 620px) { .cc { flex: 0 0 250px; } }
 
 /* ============================================================
    DOCUMENT LIST (certificates)

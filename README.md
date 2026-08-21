@@ -457,7 +457,13 @@ of that logic would be a second place to fix it.
 ## The client rail
 
 The clients section is a row of cards that scrolls sideways: logo on a white
-plate, company name, and a sector line. Arrows on pointer devices, swipe on
+plate at full colour, company name, and a sector line.
+
+**The logos were greyscaled and dimmed, and that was throwing away real
+artwork.** Sampling the files settles it: Santavilte is `#0090f0` and
+`#f00000`, Seafish Trade purple and orange, Sealord navy, Limarko an orange
+flag. A filter was flattening all of it to suit our palette — and recolouring
+someone else's trademark is not ours to do in either direction. Arrows on pointer devices, swipe on
 touch, and the arrows **disable at each end** rather than sitting there doing
 nothing.
 
