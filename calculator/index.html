@@ -1539,6 +1539,15 @@ function chartWaterfall(steps, pal, opt){
   return svgOpen(W, H, o.title) + out + '</svg>';
 }
 
+/* When was this job last touched, by ANYONE. `modified` is written by
+   whichever browser did the editing, so on a shared database it says nothing
+   about a colleague's work -- a project someone else saved an hour ago read as
+   never edited. The server's own stamp wins where there is one. */
+function lastEdited(p){
+  if(p.updatedAt){ const t = Date.parse(p.updatedAt); if(!isNaN(t)) return t; }
+  return p.modified || 0;
+}
+
 /* ---- company level ---- */
 
 /* margin per job against the target line: the one picture that says which
@@ -1999,7 +2008,7 @@ function viewPortfolio(){
     site: r=>r.p.card.site||'', start: r=>r.p.card.start||'',
     rev: r=>r.d.revActual, cost: r=>r.d.costActual,
     profit: r=>r.d.profitActual, margin: r=>r.d.marginActual,
-    modified: r=>r.p.modified||0
+    modified: r=>lastEdited(r.p)
   };
   const get = KEY[f.sort] || KEY.projectId;
   rows = rows.slice().sort((a,b)=>{
@@ -2028,7 +2037,7 @@ function viewPortfolio(){
       <td class="num"><b>${pct(d.marginActual)}</b></td>
       <td><span class="pf-chip ${on?'ok':'bad'}">${on?dd.onTarget:dd.belowTarget}</span></td>
       <td class="muted" style="font-family:var(--mono);font-size:11px">${
-        p.modified ? new Date(p.modified).toLocaleDateString(LOCALES[state.lang]) : t.never}</td>
+        lastEdited(p) ? new Date(lastEdited(p)).toLocaleDateString(LOCALES[state.lang]) : t.never}</td>
     </tr>`;
   }).join('') : `<tr><td colspan="10" style="padding:26px;text-align:center" class="muted">${t.pfNone}</td></tr>`;
 
