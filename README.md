@@ -719,6 +719,47 @@ copy's `updated_by` is usually the person reading the message — their own last
 save — so trusting it named the wrong colleague in the one message where that
 matters most.
 
+### A closed project is closed in the database, not just on screen
+
+Closing a job disabled the inputs in the browser and stopped there. A `PATCH`
+straight at the REST endpoint rewrote it anyway — verified before the fix by
+renaming a closed project to `HACKED` through the API. For a tool whose point
+is that a finished job cannot be changed by accident, the rule has to live
+where the data does, so `guard_locked_project` refuses it.
+
+Reopening is still allowed — that is the way back in. The guard only refuses a
+write that leaves the project closed, and it reads `new.data` rather than
+`new.locked`, because the column is filled in by `sync_project_columns` and
+`BEFORE` triggers fire in name order: `projects_guard` runs first, while
+`new.locked` still holds the old value.
+
+### Undo, refresh, and sessions that end
+
+Three things were local-only and had to learn about the server:
+
+- **Undo did not reach it.** The figure came back on screen while the database
+  kept the newer one, and the snapshot carried an **old `rev`** — so the next
+  ordinary save collided with the user's own undo and blamed a colleague for
+  it. `cloudReconcile()` now runs after undo and redo: it re-reads the server's
+  revisions, re-creates a project that undo brought back, removes one that undo
+  took away, and rewrites the rest. `rev` belongs to the row, never to the
+  undo stack.
+- **Nothing ever re-read the server**, so a shared tool showed each person a
+  private snapshot from whenever they opened the tab. It pulls when the tab
+  comes back to the front, and on demand from **Refresh from server** in the
+  menu — never while edits are in flight, which would throw away what is being
+  typed. Verified: a half-typed field survives a refresh.
+- **An expired session went quiet.** It showed `Not saved to server` and let
+  someone keep typing into a tab that could no longer write anything. It now
+  returns to the sign-in screen and says why.
+
+  ⚠️ And **signing back in used to discard the queued work** — the pull replaced
+  `state.projects` wholesale and took it with it. Anything queued goes up
+  *before* the pull now, through the normal revision check, so a genuine clash
+  still surfaces as a conflict rather than being resolved behind anyone's back.
+  Verified: text typed after the session died survives re-authentication and
+  reaches the database.
+
 ### What is kept where
 
 | | |

@@ -649,6 +649,7 @@ en: {
     resetSent:'Check your inbox for a reset link.',
     sessionEnded:'Your session has ended. Please sign in again.',
     signOut:'Sign out',
+    refresh:'Refresh from server',
     offline:'Not saved to server',
     someone:'Someone else',
     conflictTitle:'This project changed while you had it open',
@@ -705,6 +706,7 @@ lt: {
     resetSent:'Patikrinkite paštą — išsiuntėme atkūrimo nuorodą.',
     sessionEnded:'Sesija baigėsi. Prisijunkite iš naujo.',
     signOut:'Atsijungti',
+    refresh:'Atnaujinti iš serverio',
     offline:'Neišsaugota serveryje',
     someone:'Kitas naudotojas',
     conflictTitle:'Projektas pasikeitė, kol jį buvote atsidarę',
@@ -761,6 +763,7 @@ ru: {
     resetSent:'Проверьте почту — мы отправили ссылку для восстановления.',
     sessionEnded:'Сессия завершена. Войдите снова.',
     signOut:'Выйти',
+    refresh:'Обновить с сервера',
     offline:'Не сохранено на сервере',
     someone:'Другой пользователь',
     conflictTitle:'Проект изменился, пока он был у вас открыт',
@@ -1167,7 +1170,7 @@ function focusMark(){
   return null;
 }
 
-function timeTravel(from, to){
+async function timeTravel(from, to){
   if(!from.length) return;
   const mark = focusMark();
   to.push(snapshot());
@@ -1179,9 +1182,15 @@ function timeTravel(from, to){
   saveState();
   render();
   if(mark){ const el = document.querySelector(mark); if(el){ el.focus(); if(el.select) el.select(); } }
+
+  /* Undo rewrote the local copy and the server knew nothing about it: the
+     figure came back on screen while the database kept the newer one. Worse,
+     the snapshot carried an OLD rev, so the next ordinary save collided with
+     the user's own undo and blamed a colleague for it. */
+  if(CLOUD.on) await cloudReconcile();
 }
-function undo(){ timeTravel(undoStack, redoStack); }
-function redo(){ timeTravel(redoStack, undoStack); }
+async function undo(){ await timeTravel(undoStack, redoStack); }
+async function redo(){ await timeTravel(redoStack, undoStack); }
 
 window.addEventListener('keydown', e=>{
   if(!(e.metaKey || e.ctrlKey) || e.altKey) return;
@@ -1458,7 +1467,7 @@ function menuItems(t, locked){
     item('import', t.importJson + '\u2026'),   /* the ellipsis says a file dialog follows */
     '<div class="menu-sep"></div>',
     item('del', t.delProj, 'danger'),
-    CLOUD.on ? '<div class="menu-sep"></div>' + item('signout', t.cloud.signOut) : ''
+    CLOUD.on ? '<div class="menu-sep"></div>' + item('refresh', t.cloud.refresh) + item('signout', t.cloud.signOut) : ''
   ].join('');
 }
 
@@ -2041,6 +2050,10 @@ const MENU_ACTS = {
     if(!state.projects.length) state.projects.push(newProject(state.lang, 1));
     state.currentId = state.projects[0].id;
   },
+  async refresh(){
+    await cloudRefresh();
+    return 'noop';               /* it just re-read; nothing local to save */
+  },
   async signout(){
     await CLOUD.signOut();
     location.reload();
@@ -2059,7 +2072,8 @@ $('#projMenu').addEventListener('click', async e=>{
      truncating the stack afterwards would misbehave at the 80-entry cap,
      where a push silently drops the oldest entry first. */
   const act = b.dataset.act;
-  const changes = !(act === 'csv' || act === 'json' || act === 'import' || act === 'signout');
+  const changes = !(act === 'csv' || act === 'json' || act === 'import'
+                    || act === 'signout' || act === 'refresh');
   if(changes) pushUndo(null);
   lastDeleted = null;
   const r = await MENU_ACTS[act]();
@@ -2485,10 +2499,13 @@ async function pushPending(){
       try {
         row = await CLOUD.update(p.id, p.rev, cloudPayload(p));
       } catch(e){
-        /* the network, not the data: keep it queued and say so */
         pendingPush.add(id);
         cloudErr = e.message;
         paintSaveState('error');
+        /* A refresh token that has expired is not a network problem, and
+           leaving it as "not saved to server" would let somebody type for an
+           hour into a tab that can no longer write a thing. */
+        if(!CLOUD.signedIn()){ pushing = false; showSignIn(tr().cloud.sessionEnded); return; }
         break;
       }
       if(!row){
@@ -2530,6 +2547,69 @@ $('#cfMine').addEventListener('click', async ()=>{
   const p = conflictProject; if(!p) return;
   const row = await CLOUD.update(p.id, p.rev, cloudPayload(p), true);   /* force */
   if(row){ adopt(p, row); persist(); render(); }
+});
+
+/* ---------- put the server back in step with local ----------
+   Used after undo and redo, which can move in any direction: a project may
+   need creating again (undo of a delete), removing (undo of a create) or
+   rewriting. Reading the server's revisions first is what keeps rev owned by
+   the database rather than by the undo stack. */
+async function cloudReconcile(){
+  if(!CLOUD.on) return;
+  try {
+    const rows = await CLOUD.pull();
+    const onServer = {};
+    rows.forEach(r=> onServer[r.id] = r);
+
+    for(const r of rows){
+      if(!state.projects.some(p=>p.id===r.id)) await CLOUD.remove(r.id);
+    }
+    for(const p of state.projects){
+      const r = onServer[p.id];
+      if(!r){
+        const was = p.id;
+        adopt(p, await CLOUD.insert(cloudPayload(p)));
+        if(state.currentId === was) state.currentId = p.id;
+        continue;
+      }
+      p.rev = r.rev;                       /* rev belongs to the row, not the history */
+      if(JSON.stringify(r.data) !== JSON.stringify(cloudPayload(p))){
+        const row = await CLOUD.update(p.id, p.rev, cloudPayload(p));
+        if(row) adopt(p, row); else showConflict(p, r.updated_by);
+      }
+    }
+    pendingPush.clear();
+    cloudErr = null;
+    persist();
+  } catch(e){ cloudErr = e.message; }
+  render();
+  paintSaveState(cloudErr ? 'error' : null);
+}
+
+/* ---------- see what everyone else has done ----------
+   Nothing re-read the server after the first load, so a shared tool showed
+   every person a private snapshot from whenever they happened to open the
+   tab. Pulled when the tab comes back to the front, and on demand from the
+   menu. Never while there are edits in flight -- that would throw away what
+   is being typed. */
+async function cloudRefresh(){
+  if(!CLOUD.on || !CLOUD.signedIn()) return;
+  try {
+    await cloudPull();
+    cloudErr = null;
+    render();
+    paintSaveState();
+  } catch(e){
+    if(!CLOUD.signedIn()){ showSignIn(tr().cloud.sessionEnded); return; }
+    cloudErr = e.message;
+    paintSaveState('error');
+  }
+}
+
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) return;
+  if(dirty || pendingPush.size || autoTimer) return;
+  cloudRefresh();
 });
 
 /* ---------- load ---------- */
@@ -2602,6 +2682,13 @@ $('#siForgot').addEventListener('click', async ()=>{
 async function bootCloud(){
   if(!CLOUD.signedIn()){ showSignIn(); return; }
   try {
+    /* Anything still queued goes up BEFORE the pull, or the pull replaces
+       state.projects wholesale and takes it with it. That is the path where a
+       session expires mid-edit: the user is told the work is safe, signs back
+       in, and it is silently gone. Sending it first puts it through the normal
+       revision check, so a genuine clash still surfaces as a conflict rather
+       than being resolved behind their back. */
+    if(pendingPush.size) await pushPending();
     await cloudPull();
     cloudErr = null;
   } catch(e){

@@ -129,6 +129,35 @@ create trigger projects_sync
   before insert or update on public.projects
   for each row execute function public.sync_project_columns();
 
+-- ---------- a closed project is closed ----------
+-- Closing a job made it read-only in the browser and nowhere else: the app
+-- disabled the inputs, and a PATCH straight to the API rewrote it anyway.
+-- Verified before this existed -- a closed project was renamed to "HACKED"
+-- through the REST endpoint. For a tool whose point is that a finished job
+-- cannot be changed by accident, the rule has to live where the data does.
+--
+-- Reopening is still allowed, because that is the way back in: the guard only
+-- refuses a write that leaves the project closed. It reads `new.data`, not
+-- `new.locked`, because the column is filled in by sync_project_columns and
+-- BEFORE triggers fire in name order -- projects_guard runs first, while
+-- new.locked still holds the old value.
+create or replace function public.guard_locked_project()
+returns trigger
+language plpgsql
+as $$
+begin
+  if old.locked and coalesce((new.data->>'locked')::boolean, false) then
+    raise exception 'Project % is closed. Reopen it before editing.', old.project_id
+      using errcode = 'check_violation';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists projects_guard on public.projects;
+create trigger projects_guard
+  before update on public.projects
+  for each row execute function public.guard_locked_project();
+
 -- ---------- history ----------
 -- Every saved revision is kept. This is what lets the tool be
 -- called a source of truth rather than a spreadsheet: you can say
