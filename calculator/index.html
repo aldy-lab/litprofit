@@ -88,6 +88,9 @@ button.primary{background:var(--ink-1);border-color:var(--ink-1);color:var(--pag
 button.ghost{border-color:transparent;color:var(--ink-2)}
 button.ghost:hover{color:var(--ink-1)}
 button.danger:hover{border-color:var(--critical);color:var(--critical);background:rgba(255,154,154,.10)}
+/* Stated, because a class rule that sets display beats the UA's [hidden] and
+   the overlays already taught that lesson once. */
+button[hidden]{display:none}
 /* square, so the two icon buttons read as a pair rather than as odd short words */
 button.icon{padding:0;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;flex:none}
 button.icon svg{width:16px;height:16px;display:block;fill:currentColor}
@@ -786,6 +789,8 @@ en: {
     resetSent:'Check your inbox for a reset link.',
     sessionEnded:'Your session has ended. Please sign in again.',
     signOut:'Sign out',
+    noProjects:'No projects yet. A manager needs to create one.',
+    needsSchema:'The database needs updating — run db/schema.sql in the Supabase SQL editor.',
     refresh:'Refresh from server',
     offline:'Not saved to server',
     awaiting:'Waiting for your answer',
@@ -853,6 +858,8 @@ lt: {
     resetSent:'Patikrinkite paštą — išsiuntėme atkūrimo nuorodą.',
     sessionEnded:'Sesija baigėsi. Prisijunkite iš naujo.',
     signOut:'Atsijungti',
+    noProjects:'Projektų dar nėra. Juos sukuria vadovas.',
+    needsSchema:'Reikia atnaujinti duomenų bazę — paleiskite db/schema.sql Supabase SQL redaktoriuje.',
     refresh:'Atnaujinti iš serverio',
     offline:'Neišsaugota serveryje',
     awaiting:'Laukiama jūsų sprendimo',
@@ -920,6 +927,8 @@ ru: {
     resetSent:'Проверьте почту — мы отправили ссылку для восстановления.',
     sessionEnded:'Сессия завершена. Войдите снова.',
     signOut:'Выйти',
+    noProjects:'Проектов пока нет. Их создаёт руководитель.',
+    needsSchema:'Нужно обновить базу данных — выполните db/schema.sql в SQL-редакторе Supabase.',
     refresh:'Обновить с сервера',
     offline:'Не сохранено на сервере',
     awaiting:'Ожидает вашего решения',
@@ -1117,7 +1126,10 @@ const CLOUD = (function(){
     return r.status === 204 ? null : r.json();
   }
 
-  const COLS = 'id,data,rev,updated_at,updated_by';
+  /* projects_v, never public.projects: the table is revoked from the app, and
+     the view hands back a row with the money keys already removed for anyone
+     who is not a manager. `money` says which kind of row this is. */
+  const COLS = 'id,data,rev,updated_at,updated_by,money';
 
   return {
     on: on,
@@ -1146,39 +1158,36 @@ const CLOUD = (function(){
     },
 
     async pull(){
-      return await rest('projects?select=' + COLS + '&order=project_id.asc') || [];
+      return await rest('projects_v?select=' + COLS + '&order=project_id.asc') || [];
     },
 
     async one(id){
-      const rows = await rest('projects?select=' + COLS + '&id=eq.' + encodeURIComponent(id));
+      const rows = await rest('projects_v?select=' + COLS + '&id=eq.' + encodeURIComponent(id));
       return rows && rows[0];
     },
 
     async insert(data){
-      const rows = await rest('projects', {
+      const rows = await rest('rpc/create_project', {
         method: 'POST',
-        headers: { Prefer: 'return=representation' },
-        body: JSON.stringify({ data: data })
+        body: JSON.stringify({ p_data: data })
       });
       return rows && rows[0];
     },
 
-    /* The rev filter is the whole safety net: if somebody else saved since we
-       read this project, no row matches and PostgREST returns [] rather than
-       overwriting their work. */
+    /* The revision check lives inside save_project now, and so does the rule
+       about which keys a caller may actually change: a staff member can post
+       any revenue figure they like and the function takes the stored one. An
+       empty result still means somebody saved first. */
     async update(id, rev, data, force){
-      const q = 'projects?id=eq.' + encodeURIComponent(id) +
-                (force ? '' : '&rev=eq.' + encodeURIComponent(rev));
-      const rows = await rest(q, {
-        method: 'PATCH',
-        headers: { Prefer: 'return=representation' },
-        body: JSON.stringify({ data: data })
+      const rows = await rest('rpc/save_project', {
+        method: 'POST',
+        body: JSON.stringify({ p_id: id, p_rev: force ? null : rev, p_data: data })
       });
       return (rows && rows[0]) || null;      /* null === somebody got there first */
     },
 
     async remove(id){
-      await rest('projects?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+      await rest('rpc/delete_project', { method: 'POST', body: JSON.stringify({ p_id: id }) });
     }
   };
 })();
@@ -1253,7 +1262,11 @@ function paintSaveState(kind){
   if(!tag) return;
   clearTimeout(flashTimer);
   tag.classList.remove('warn','flash','busy');
-  if(kind === 'waiting'){
+  if(kind === 'error' && cloudErr === t.cloud.needsSchema){
+    tag.textContent = t.cloud.needsSchema;
+    tag.title = '';
+    tag.classList.add('warn');
+  } else if(kind === 'waiting'){
     tag.textContent = t.cloud.awaiting;
     tag.title = '';
     tag.classList.add('warn');
@@ -1698,7 +1711,17 @@ function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'
 function diffCls(v){ return v>0.005 ? 'pos' : (v<-0.005 ? 'neg' : ''); }
 
 /* ================= sheet configs (generic table engine) ================= */
+/* What the client is charged is revenue, wherever it happens to be typed --
+   the rebill columns are marked `money` and the server strips them from a
+   staff member's copy, so rendering them would print empty cells beside a
+   heading that asks a question they cannot answer. */
 function sheetConfigs(){
+  const raw = sheetConfigsAll();
+  if(canMoney()) return raw;
+  Object.keys(raw).forEach(k=>{ raw[k] = Object.assign({}, raw[k], { cols: raw[k].cols.filter(c=>!c.money) }); });
+  return raw;
+}
+function sheetConfigsAll(){
   const c = tr().cols, s = proj().settings;
   return {
     revenue: { key:'revenue', cols:[
@@ -1757,8 +1780,8 @@ function sheetConfigs(){
       {k:'_plan',t:'calc',l:c.planTotal,f:F.qtyPlan,sum:true},
       {k:'actual',t:'num',l:c.actTotal,sum:true},
       {k:'_diff',t:'calc',l:c.diff,f:F.qtyDiff,sum:true,cls:v=>diffCls(-v)},
-      {k:'rebill',t:'sel',l:c.rebill,opts:'bool'},
-      {k:'rebillAmt',t:'num',l:c.rebillAmt,sum:true}
+      {k:'rebill',t:'sel',l:c.rebill,opts:'bool',money:1},
+      {k:'rebillAmt',t:'num',l:c.rebillAmt,sum:true,money:1}
     ]},
     logistics: { key:'logistics', cols:[
       {k:'cat',t:'text',l:c.category,w:'12%',ac:1},
@@ -1766,8 +1789,8 @@ function sheetConfigs(){
       {k:'plan',t:'num',l:c.planCost,sum:true},
       {k:'actual',t:'num',l:c.actCost,sum:true},
       {k:'_diff',t:'calc',l:c.diff,f:F.simpleDiff,sum:true,cls:v=>diffCls(-v)},
-      {k:'recoverable',t:'sel',l:c.recoverable,opts:'bool'},
-      {k:'rebill',t:'num',l:c.clientRebill,sum:true},
+      {k:'recoverable',t:'sel',l:c.recoverable,opts:'bool',money:1},
+      {k:'rebill',t:'num',l:c.clientRebill,sum:true,money:1},
       {k:'notes',t:'text',l:c.notes,w:'13%'}
     ]}
   };
@@ -1829,9 +1852,22 @@ function datalists(ids){
   }).join('');
 }
 
+/* ================= what this person may see =================
+   The server has already decided: a redacted row arrives with money=false and
+   simply has no revenue in it. This flag only stops the interface offering
+   things that would be empty -- it is not the permission, it is the manners.
+   With no database configured everyone is the owner of their own browser. */
+var CAN_MONEY = true;
+function canMoney(){ return !CLOUD.on || CAN_MONEY; }
+
 /* ================= rendering ================= */
 const $ = sel => document.querySelector(sel);
-const TABS = ['portfolio','dashboard','card','revenue','labor','subs','travel','materials','logistics','settings'];
+const ALL_TABS = ['portfolio','dashboard','card','revenue','labor','subs','travel','materials','logistics','settings'];
+/* Portfolio and Dashboard are the company's position, Revenue is the company's
+   income, and Settings holds the target margin. None of them is an employee's
+   business, and all four would be blank or misleading with the figures gone. */
+const COST_TABS = ['card','labor','subs','travel','materials','logistics'];
+function tabList(){ return canMoney() ? ALL_TABS : COST_TABS; }
 
 function renderChrome(){
   const t = tr();
@@ -1840,6 +1876,7 @@ function renderChrome(){
   const lk = !!(proj() && proj().locked);
   document.documentElement.classList.toggle('is-locked', lk);
   /* the button prints what is on screen: the portfolio is the company */
+  $('#btnPrint').hidden = !canMoney();
   $('#btnPrint').textContent = state.tab === 'portfolio' ? t.printCompany : t.printProject;
   $('#langSel').value = state.lang;
 
@@ -1854,7 +1891,11 @@ function renderChrome(){
   $('#projMenu').innerHTML = menuItems(t, lk);
   const sel = $('#projectSel');
   sel.innerHTML = state.projects.map(p=>`<option value="${p.id}"${p.id===state.currentId?' selected':''}>${esc(p.card.projectId)}${p.card.client?' — '+esc(p.card.client):''}</option>`).join('');
-  $('#tabs').innerHTML = TABS.map(k=>`<button data-tab="${k}" class="${state.tab===k?'active':''}">${t.tabs[k]}</button>`).join('');
+  /* A tab that is gone cannot stay selected -- a staff member whose last
+     session ended on the dashboard would open to a blank main. */
+  const tabs = tabList();
+  if(tabs.indexOf(state.tab) === -1) state.tab = tabs[0];
+  $('#tabs').innerHTML = tabs.map(k=>`<button data-tab="${k}" class="${state.tab===k?'active':''}">${t.tabs[k]}</button>`).join('');
 }
 
 /* Ordered by how often it is reached for, and separated so the destructive
@@ -1862,6 +1903,19 @@ function renderChrome(){
 function menuItems(t, locked){
   const item = (act, label, cls) =>
     `<button role="menuitem" data-act="${act}"${cls?' class="'+cls+'"':''}>${esc(label)}</button>`;
+
+  /* Creating, duplicating, closing and deleting a job are a manager's, and the
+     server refuses them anyway. Both reports and both exports carry revenue,
+     so for staff they would be a button that produces a document with the
+     interesting half missing. */
+  if(!canMoney()){
+    return [
+      `<div class="menu-head">${esc(t.grpData)}</div>`,
+      item('refresh', t.cloud.refresh),
+      item('signout', t.cloud.signOut)
+    ].join('');
+  }
+
   return [
     `<div class="menu-head">${esc(t.grpProject)}</div>`,
     item('new', t.newProj),
@@ -1893,7 +1947,8 @@ function paintPulse(){
   const el = $('#pulse');
   if(!el) return;
   const p = proj();
-  const hide = !p || PULSE_OFF[state.tab];
+  /* every figure on this strip is a margin or a profit */
+  const hide = !p || !canMoney() || PULSE_OFF[state.tab];
   if(el.hidden !== hide){ el.hidden = hide; measureChrome(); }
   if(hide) return;
 
@@ -1938,6 +1993,15 @@ function paintPulse(){
 function render(){
   renderChrome();
   const m = $('#main');
+  /* Nothing to show and nothing this person may do about it. Every view below
+     dereferences proj(), so without this the page throws rather than saying so. */
+  if(!proj()){
+    m.innerHTML = `<div class="card"><h2 class="sheet">${esc(tr().pfTitle)}</h2>
+      <p class="muted">${esc(tr().cloud.noProjects)}</p></div>`;
+    m.dataset.view = 'page';
+    paintPulse(); measureChrome();
+    return;
+  }
   if(state.tab==='portfolio') m.innerHTML = viewPortfolio();
   else if(state.tab==='dashboard') m.innerHTML = viewDashboard();
   else if(state.tab==='card') m.innerHTML = viewCard();
@@ -2019,9 +2083,9 @@ function viewCard(){
       <label>${t.card.end}</label>${date('end',c.end)}
       <label>${t.card.days}</label><span class="ro" data-calc="projDays">${days??'—'}</span>
       <label>${t.card.currency}</label><span class="ro">${esc(proj().settings.currency)}</span>
-      <label>${t.card.contract}</label>${num('contract',c.contract)}
+      ${canMoney() ? `<label>${t.card.contract}</label>${num('contract',c.contract)}
       <label>${t.card.advance}</label>${num('advance',c.advance)}
-      <label>${t.card.terms}</label>${num('terms',c.terms)}
+      <label>${t.card.terms}</label>${num('terms',c.terms)}` : ''}
     </div></div>${datalists(AC_CARD.map(k=>'card-'+k))}`;
 }
 
@@ -2197,6 +2261,7 @@ function portfolioTotals(rows){
 /* Portfolio CSV: one row per project plus the company line, so the whole book
    goes to an accountant in a single file rather than one export per job. */
 function exportPortfolioCsv(){
+  if(!canMoney()) return;
   const t = tr(), dd = t.dash, rows = pfRows();
   const q = v => `"${String(v??'').replace(/\u00a0/g,' ').replace(/"/g,'""')}"`;
   const num = v => (v===null||v===undefined||isNaN(v)) ? '' : String(Math.round(v*100)/100).replace('.',',');
@@ -2739,6 +2804,7 @@ function recalcSheet(key, tb){
 
 /* ================= CSV export ================= */
 function exportCsv(){
+  if(!canMoney()) return;
   const t = tr(), p = proj(), d = computeDash(p), dd = t.dash;
   const q = v => `"${String(v??'').replace(/\u00a0/g,' ').replace(/"/g,'""')}"`;
   const num = v => (v===null||v===undefined||isNaN(v)) ? '' : String(Math.round(v*100)/100).replace('.',','); // EU decimal comma
@@ -2875,6 +2941,7 @@ function printChart(d){
 }
 
 function printProjectReport(){
+  if(!canMoney()) return;
   const t = tr(), p = proj(), d = computeDash(p), dd = t.dash, c = p.card;
   const x = computeExtra(p), cats = costCats(t, d);
   const days = projectDays(c), cur = p.settings.currency;
@@ -3003,6 +3070,7 @@ function reportFoot(t){
    currency, with the two pictures a director actually asks for -- which jobs
    are carrying the year, and which clients the revenue comes from. */
 function printCompanyReport(){
+  if(!canMoney()) return;
   const t = tr(), dd = t.dash, dash = '&mdash;';
   const m = v => fmt(v);
   /* the same filtered, sorted list the portfolio is showing, so the paper and
@@ -3095,6 +3163,7 @@ function cloudPayload(p){
 function adopt(p, row){
   p.id = row.id; p.rev = row.rev;
   p.updatedAt = row.updated_at; p.updatedBy = row.updated_by;
+  if(row.money !== undefined) CAN_MONEY = !!row.money;
 }
 
 function pushSoon(delay){
@@ -3291,7 +3360,7 @@ async function cloudPull(){
     adopt(p, r);
     return p;
   });
-  if(!state.projects.length){
+  if(!state.projects.length && canMoney()){
     const seed = newProject(state.lang, 1);
     const row = await CLOUD.insert(cloudPayload(seed));
     adopt(seed, row);
@@ -3366,7 +3435,12 @@ async function bootCloud(){
     /* An expired refresh token is a login problem; anything else is the
        network, and the cached copy is still worth showing. */
     if(!CLOUD.signedIn()){ showSignIn(tr().cloud.sessionEnded); return; }
-    cloudErr = e.message;
+    /* Except one: the roles release reads projects_v and save_project, which
+       do not exist until db/schema.sql is run again. Saying "not saved to
+       server" for that would send somebody hunting a network fault that is
+       not there. */
+    cloudErr = /projects_v|save_project|does not exist|schema cache/i.test(e.message)
+      ? tr().cloud.needsSchema : e.message;
   }
   render();
   paintSaveState(cloudErr ? 'error' : null);

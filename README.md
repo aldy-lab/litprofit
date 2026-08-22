@@ -953,6 +953,78 @@ page the reader had just signed into, and the portfolio lead said *"Every
 project in this browser"*. The notice is suppressed whenever `CLOUD.on`; the
 lead is reworded.
 
+## Who sees what
+
+Three roles, in `profiles.role`:
+
+| | |
+|---|---|
+| `admin` | you — everything, and the only role that can change a role |
+| `manager` | the director — everything: portfolio, company and project revenue |
+| `staff` | everyone else — **costs only** |
+
+A staff member sees the six cost sheets and the project card. No revenue sheet,
+no contract value or advance, no target margin, no rebill columns, no margin
+strip, no dashboard, no portfolio, no reports, no exports. They can say what a
+job cost. They can never say what it earned.
+
+### It is enforced in the database, not the browser
+
+⚠️ **A hidden tab is a tab, not a permission.** Every signed-in user can call
+the REST API with their own token, so anything that only disappears in
+JavaScript is still one `curl` away — the same lesson as the closed-project
+lock, which was read-only on screen and rewritable through a `PATCH` until the
+rule moved into a trigger.
+
+So `public.projects` is **revoked from the app entirely**. Everything goes
+through:
+
+- **`projects_v`** — a view that returns `strip_money(data)` to anyone who is
+  not a manager. Not `security_invoker`, so it runs as its owner and a staff
+  member needs no privilege on the table behind it. The redaction is not
+  something they can go around. It also returns a `money` boolean, which is how
+  the interface knows what to offer.
+- **`save_project(id, rev, data)`** — a staff member posts the whole document,
+  as the app always has, and what they send for the money keys is *ignored*:
+  those are read back off the stored row. An employee inventing a revenue
+  array changes nothing and does not need to be told so. The revision check
+  and the closed-project guard live here too.
+- **`create_project` / `delete_project`** — manager and above.
+
+**Revenue is not only the revenue sheet.** `strip_money` also removes the
+contract value, the advance, the target margin, and the per-row rebill amounts
+in Materials and Logistics — what the client is charged is revenue wherever it
+happens to be typed. Leave any one of them behind and the rest is guessable.
+
+Verified against PostgreSQL: a staff member's row comes back with **no
+`revenue` key at all**, no contract, no advance, no target, no rebill fields —
+while `labor[0].actual` is intact. They cannot `SELECT` or `UPDATE`
+`public.projects`. Posting `contract: 999999`, an invented revenue sheet,
+`targetMargin: 0.99` and rebills of 777777 changed **none** of them, while
+their genuine labour edit landed and the manager saw it.
+
+⚠️ **`auth.uid()` is null in the SQL editor**, and three functions have to
+allow for it — the role guard, `create_project` and `delete_project`.
+Otherwise there is no way to appoint the first admin or seed the first
+project: the guard locks the door with nobody inside.
+
+⚠️ **An empty database plus a member who may not create one is a real state.**
+`cloudPull` used to seed a project when it found none, which staff are not
+allowed to do, and every view then dereferenced an undefined `proj()`. It says
+so instead.
+
+### Setting the roles
+
+Everyone starts as `staff`. In the Supabase SQL editor:
+
+```sql
+update public.profiles set role = 'admin'   where email = 'you@aldystudio.com';
+update public.profiles set role = 'manager' where email = 'rf@litprofit.com';
+```
+
+After that an admin can change roles through the API; nobody else can, and
+nobody can promote themselves.
+
 ### What is kept where
 
 | | |
