@@ -56,6 +56,10 @@ S["en"] = dict(
     company_no="Company No.", vat="VAT code", lang_label="Language",
 
     hero_eyebrow="Klaipeda, Lithuania", hero_since="since",
+    # The street keeps its Lithuanian form in every language: that is what the
+    # register holds and what the post office reads. Only the country and city
+    # take the reader's language.
+    addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lithuania",
     hero_h1="Ship repair and maintenance all over the world",
     hero_lead='%(legal)s overhauls marine engines, refrigeration plant and piping '
               'systems for fishing fleets, shipowners and shore installations — '
@@ -136,6 +140,7 @@ S["lt"] = dict(
     company_no="Įmonės kodas", vat="PVM mokėtojo kodas", lang_label="Kalba",
 
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
+    addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lietuva",
     hero_h1="Laivų remontas ir aptarnavimas visame pasaulyje",
     hero_lead='%(legal)s remontuoja laivų variklius, šaldymo įrangą ir '
               'vamzdynų sistemas žvejybos laivynams, laivų savininkams ir kranto '
@@ -216,6 +221,7 @@ S["ru"] = dict(
     company_no="Код предприятия", vat="Код плательщика НДС", lang_label="Язык",
 
     hero_eyebrow="Клайпеда, Литва", hero_since="с",
+    addr_street="Svajonės g. 30", addr_city="LT-94101 Клайпеда", addr_country="Литва",
     hero_h1="Ремонт и обслуживание судов в любой точке земного шара",
     hero_lead='%(legal)s ремонтирует судовые двигатели, холодильное '
               'оборудование и трубопроводные системы для рыболовных флотов, '

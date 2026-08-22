@@ -41,8 +41,17 @@ TAGLINE = "Ship Repair and Maintenance All Over the World"
 PHONE = "+370 670 20 357"
 PHONE_HREF = "+37067020357"
 EMAIL = "info@litprofit.com"
-STREET = "Svajones str. 30"
-CITY = "LT-94101 Klaipeda"
+# The postal address lives in i18n.py now, one entry per language: a Lithuanian
+# company writing its own street as "Svajones str." on its Lithuanian page --
+# English abbreviation, no diacritics -- reads careless to exactly the people it
+# is meant to convince. STREET/CITY/COUNTRY remain for the machine-readable
+# JSON-LD and the OG cards, which are language-neutral and take the register's
+# own spelling.
+#
+# The number is 30, not 3. The client's own site says 30 in English and 3 in
+# Lithuanian and Russian; the register settles it -- see the README.
+STREET = "Svajonės g. 30"
+CITY = "LT-94101 Klaipėda"
 COUNTRY = "Lithuania"
 COMPANY_ID = "302568798"
 VAT = "LT100005766815"
@@ -64,7 +73,7 @@ BOOKING_URL = "https://calendly.com/rf-litprofit/30min"
 
 # The studio credit in the footer. Leave ALDY_URL empty and the credit is
 # rendered as plain text plus the mark, with no dead link.
-ALDY_URL = ""         # e.g. "https://aldy.studio"
+ALDY_URL = "https://aldystudio.com"
 
 LASTMOD = datetime.date.today().isoformat()
 
@@ -283,7 +292,8 @@ FOOTER_TPL = """  <footer class="site-footer">
 def footer():
     return FOOTER_TPL.format(
     logo=lockup(), name=NAME, tagline=T("tagline"),
-    street=STREET, city=CITY, country=COUNTRY, phone=PHONE, phone_href=PHONE_HREF,
+    street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
+    phone=PHONE, phone_href=PHONE_HREF,
     email=EMAIL, legal=LEGAL, cid=COMPANY_ID, vat=VAT, founded=FOUNDED,
     privacy=u("/privacy/"), made=aldy_credit(),
     f_address=T("f_address"), f_contacts=T("f_contacts"), f_details=T("f_details"),
@@ -1270,7 +1280,7 @@ def about():
                 c_more=PT("c_eyebrow").lower(), h_rep=T("rep_eyebrow"),
                 rep_l=T("rep_lead"), partners=u("/partners/"),
                 p_more=PT("p_eyebrow").lower(), h_details=PT("a_details"),
-                legal=LEGAL, street=STREET, city=CITY, country=COUNTRY,
+                legal=LEGAL, street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
                 l_cid=T("company_no"), cid=COMPANY_ID, l_vat=T("vat"), vat=VAT,
                 cta=cta(T("cta_h2"), T("cta_p")))
 
@@ -1525,7 +1535,7 @@ def contacts():
         </div>
       </div>
     </section>
-""".format(l_addr=T("f_address"), legal=LEGAL, street=STREET, city=CITY,
+""".format(l_addr=T("f_address"), legal=LEGAL, street=T("addr_street"), city=T("addr_city"),
            country=COUNTRY, l_phone=T("form_phone"), phone=PHONE,
            phone_href=PHONE_HREF, l_email=T("form_email"), email=EMAIL,
            l_details=T("f_details"), l_cid=T("company_no"), cid=COMPANY_ID,
@@ -1573,7 +1583,7 @@ def privacy():
     </section>
 """.format(l_upd=PT("pr_updated"), today=datetime.date.today().isoformat(),
            h0=h[0], h1=h[1], h2=h[2], h3=h[3], h4=h[4], h5=h[5], h6=h[6],
-           who=PT("pr_who", legal=LEGAL), street=STREET, city=CITY,
+           who=PT("pr_who", legal=LEGAL), street=T("addr_street"), city=T("addr_city"),
            country=COUNTRY, email=EMAIL, phone=PHONE, phone_href=PHONE_HREF,
            l_cid=T("company_no"), cid=COMPANY_ID,
            collect=PT("pr_collect"), third=PT("pr_third"), basis=PT("pr_basis"),
@@ -1830,7 +1840,7 @@ def pages():
         ("/partners/", PT("p_eyebrow"), PT("p_meta"), partners, ""),
         ("/certificates/", PT("c_eyebrow"), PT("c_meta"), certificates, ""),
         ("/contacts/", PT("k_eyebrow"),
-         PT("k_meta", street=STREET, city=CITY, country=COUNTRY,
+         PT("k_meta", street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
             phone=PHONE, email=EMAIL), contacts, ""),
         ("/careers/", i18n.CAR[LANG]["nav"],
          i18n.CAR[LANG]["meta"] % dict(legal=LEGAL), careers, job_postings_ld()),

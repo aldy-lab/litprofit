@@ -640,7 +640,7 @@ en: {
     travel:{flights:['Flights','Air tickets'],hotel:['Hotel','Accommodation'],car:['Car Rental','Rental car'],taxi:['Taxi / Transfer','Local transport'],ferry:['Ferry / Train','Other transport'],visa:['Visa / Permits','Visas / work permits'],insurance:['Insurance','Travel / project insurance']},
     materials:{spares:['Spare Parts','Spare parts'],consumables:['Consumables','Oil, refrigerant, filters, etc.'],tools:['Tools','New / replacement tools'],rental:['Tool Rental','Rented tools / equipment'],ppe:['PPE','Safety equipment']},
     logistics:{freight:['Freight','Shipment of tools / equipment'],customs:['Customs','Customs duties / broker'],port:['Port Charges','Port / terminal fees'],storage:['Storage','Storage / demurrage'],crane:['Crane / Forklift','Lifting / handling'],local:['Local Purchases','Emergency local purchases'],surveyor:['Surveyor','Independent surveyor / inspection'],comms:['Communication','SIM / phone / internet'],bank:['Bank / FX Fees','Bank charges / exchange'],force:['Force Majeure','Unexpected project costs'],other:['Other','Other project cost']}},
-  printTitle:'Project Profitability Report',generated:'Generated',
+  printTitle:'Project Profitability Report',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lithuania',generated:'Generated',
   puMargin:'Margin',cloud:{
     signInSub:'Project Profitability Calculator',
     importAdds:'Add {n} project(s) from this backup to the shared database? Existing projects are kept — nothing is replaced.',
@@ -698,7 +698,7 @@ lt: {
     travel:{flights:['Skrydžiai','Lėktuvų bilietai'],hotel:['Viešbutis','Apgyvendinimas'],car:['Automobilio nuoma','Nuomojamas automobilis'],taxi:['Taksi / pervežimas','Vietinis transportas'],ferry:['Keltas / traukinys','Kitas transportas'],visa:['Vizos / leidimai','Vizos / darbo leidimai'],insurance:['Draudimas','Kelionių / projekto draudimas']},
     materials:{spares:['Atsarginės dalys','Atsarginės dalys'],consumables:['Eksploatacinės medžiagos','Alyva, šaltnešis, filtrai ir kt.'],tools:['Įrankiai','Nauji / keičiami įrankiai'],rental:['Įrankių nuoma','Nuomojami įrankiai / įranga'],ppe:['Apsaugos priemonės','Saugos priemonės']},
     logistics:{freight:['Krovinių gabenimas','Įrankių / įrangos siuntimas'],customs:['Muitinė','Muitai / brokeris'],port:['Uosto mokesčiai','Uosto / terminalo mokesčiai'],storage:['Sandėliavimas','Sandėliavimas / prastova'],crane:['Kranas / krautuvas','Kėlimas / krova'],local:['Vietiniai pirkimai','Skubūs vietiniai pirkimai'],surveyor:['Inspektorius','Nepriklausomas inspektorius / patikra'],comms:['Ryšiai','SIM / telefonas / internetas'],bank:['Banko mokesčiai','Banko / valiutos keitimo mokesčiai'],force:['Force majeure','Nenumatytos projekto išlaidos'],other:['Kita','Kitos projekto sąnaudos']}},
-  printTitle:'Projekto pelningumo ataskaita',generated:'Sugeneruota',
+  printTitle:'Projekto pelningumo ataskaita',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lietuva',generated:'Sugeneruota',
   puMargin:'Marža',cloud:{
     signInSub:'Projektų pelningumo skaičiuoklė',
     importAdds:'Įkelti {n} projektą (-us) iš šios kopijos į bendrą duomenų bazę? Esami projektai išliks — niekas nebus pakeista.',
@@ -756,7 +756,7 @@ ru: {
     travel:{flights:['Авиабилеты','Авиабилеты'],hotel:['Гостиница','Проживание'],car:['Аренда авто','Арендованный автомобиль'],taxi:['Такси / трансфер','Местный транспорт'],ferry:['Паром / поезд','Прочий транспорт'],visa:['Визы / разрешения','Визы / разрешения на работу'],insurance:['Страховка','Страхование поездки / проекта']},
     materials:{spares:['Запчасти','Запасные части'],consumables:['Расходники','Масло, хладагент, фильтры и т.д.'],tools:['Инструменты','Новые / заменяемые инструменты'],rental:['Аренда инструмента','Арендованные инструменты / оборудование'],ppe:['СИЗ','Средства защиты']},
     logistics:{freight:['Фрахт','Отправка инструмента / оборудования'],customs:['Таможня','Пошлины / брокер'],port:['Портовые сборы','Порт / терминал'],storage:['Хранение','Хранение / простой'],crane:['Кран / погрузчик','Подъём / перемещение'],local:['Местные закупки','Срочные местные закупки'],surveyor:['Сюрвейер','Независимый сюрвейер / инспекция'],comms:['Связь','SIM / телефон / интернет'],bank:['Банк / комиссии','Банковские / валютные комиссии'],force:['Форс-мажор','Непредвиденные расходы проекта'],other:['Прочее','Прочие расходы проекта']}},
-  printTitle:'Отчёт о рентабельности проекта',generated:'Сформировано',
+  printTitle:'Отчёт о рентабельности проекта',addr:'Svajonės g. 30, LT-94101 Клайпеда, Литва',generated:'Сформировано',
   puMargin:'Маржа',cloud:{
     signInSub:'Калькулятор рентабельности проектов',
     importAdds:'Добавить {n} проект(ов) из этой копии в общую базу данных? Существующие проекты сохранятся — ничего не будет заменено.',
@@ -2511,7 +2511,7 @@ $('#btnPrint').addEventListener('click', ()=>{
     ${detail ? `<div class="rp-page"></div>${detail}` : ''}
 
     <div class="rp-foot">
-      <div><b>UAB "Litprofit"</b><br>Svajones str. 30, LT-94101 Klaipeda, Lithuania<br>
+      <div><b>UAB "Litprofit"</b><br>${esc(t.addr)}<br>
         info@litprofit.com &nbsp;//&nbsp; +370 670 20 357</div>
       <div style="text-align:right">${esc(t.generated)}:<br>
         ${new Date().toLocaleString(LOCALES[state.lang])}</div>

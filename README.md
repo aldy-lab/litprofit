@@ -926,8 +926,23 @@ each, plus one shared 404.
 ⚠️ **The privacy policy is a legal text.** The Lithuanian and Russian are
 translations for convenience; have all three reviewed before launch.
 
-⚠️ **The address is inconsistent on the client's own site** and needs
-confirming — see below.
+**The address is settled.** It was inconsistent on the client's own site —
+English said *Svajones str. 30*, Lithuanian and Russian said *3*, all with the
+same postcode. The register decides it: **Svajonės g. 30, LT-94101 Klaipėda**,
+company 302568798. The site had the right number and the wrong spelling.
+
+⚠️ **The client's own litprofit.com still says 3 on its Lithuanian and Russian
+pages** and should be corrected there too.
+
+**The address is now per language** (`addr_street` / `addr_city` /
+`addr_country` in `i18n.py`). The street keeps its Lithuanian form everywhere —
+that is what the register holds and what the post office reads — while the city
+and country take the reader's language. A Lithuanian company writing its own
+street as *Svajones str.*, English abbreviation and no diacritics, on its
+Lithuanian page reads careless to exactly the people it is meant to convince.
+
+`STREET`/`CITY`/`COUNTRY` in `build.py` stay as neutral constants for the
+JSON-LD and the OG cards, which are not addressed to a reader.
 
 ## Navigation and page furniture
 
