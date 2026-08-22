@@ -22,3 +22,8 @@ node_modules/
 # Keep a backup of this file somewhere safe: without it the calculator cannot
 # be rebuilt or edited, only decrypted in a browser.
 tools/calc/app.html
+
+# Python bytecode. These were committed by accident back in the trilingual
+# work and rebuilt on every run, so every build showed a spurious diff.
+__pycache__/
+*.pyc
