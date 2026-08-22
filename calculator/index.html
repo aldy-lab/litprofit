@@ -258,6 +258,8 @@ html.is-locked .card table.grid input:disabled{opacity:1}
   font-weight:700;letter-spacing:.1em;white-space:nowrap;border:1px solid currentColor
 }
 .pf-chip.ok{color:var(--good-text)} .pf-chip.bad{color:var(--critical)}
+/* the unit the total is in, never left to be guessed */
+.pf-cur{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-3);font-weight:400}
 #pfTable tbody tr:hover td{background:var(--accent-soft)}
 
 /* ---------- save tag ----------
@@ -1716,10 +1718,7 @@ function viewPortfolio(){
     return c * f.dir;
   });
 
-  const sum = fn => rows.reduce((a,r)=>a+fn(r), 0);
-  const rev = sum(r=>r.d.revActual), cost = sum(r=>r.d.costActual);
-  const profit = rev - cost;
-  const weighted = rev ? profit/rev : 0;
+  const totals = portfolioTotals(rows);
 
   const th = (key, label, num) =>
     `<th class="${num?'num':''} pf-sort${f.sort===key?' on':''}" data-sort="${key}">${esc(label)}${
@@ -1766,14 +1765,39 @@ function viewPortfolio(){
         <th>${esc(dd.control)}</th>${th('modified', t.modified)}
       </tr></thead>
       <tbody>${body}</tbody>
-      <tfoot><tr class="totals">
-        <td>${t.pfTotal}</td><td></td><td></td><td></td>
-        <td class="num">${fmt(rev)}</td><td class="num">${fmt(cost)}</td>
-        <td class="num">${fmt(profit)}</td><td class="num">${pct(weighted)}</td>
-        <td class="muted" style="font-weight:400">${t.weighted}</td><td></td>
-      </tr></tfoot>
+      <tfoot>${totals.map(g=>`<tr class="totals">
+        <td>${esc(t.pfTotal)} <span class="pf-cur">${esc(g.currency)}</span></td>
+        <td></td><td></td><td></td>
+        <td class="num">${fmt(g.rev)}</td><td class="num">${fmt(g.cost)}</td>
+        <td class="num">${fmt(g.profit)}</td><td class="num">${pct(g.margin)}</td>
+        <td class="muted" style="font-weight:400">${esc(t.weighted)}</td><td></td>
+      </tr>`).join('')}</tfoot>
     </table></div>
   </div>`;
+}
+
+/* Totals are grouped by CURRENCY, and that is a correctness fix rather than a
+   presentation one. Two jobs of 100 000 -- one in EUR, one in USD -- produced
+   a "Company total" of 200 000 of nothing at all, unlabelled, in the one view
+   meant to be read as the company's position.
+
+   Converting them would need a rate and the date it was taken, which is a
+   decision for whoever signs the accounts, not something to guess at. So each
+   currency is totalled on its own line: with a single currency this reads
+   exactly as it did, plus the unit; with more than one it says so instead of
+   inventing a number. The screen and the CSV share this, so they cannot drift
+   apart into two different answers. */
+function portfolioTotals(rows){
+  const by = new Map();
+  rows.forEach(r=>{
+    const cur = ((r.p.settings && r.p.settings.currency) || '').trim() || '—';
+    const g = by.get(cur) || { currency: cur, rev: 0, cost: 0 };
+    g.rev += r.d.revActual; g.cost += r.d.costActual;
+    by.set(cur, g);
+  });
+  return [...by.values()]
+    .sort((a, b) => a.currency.localeCompare(b.currency))
+    .map(g => Object.assign(g, { profit: g.rev - g.cost, margin: g.rev ? (g.rev - g.cost) / g.rev : 0 }));
 }
 
 /* Portfolio CSV: one row per project plus the company line, so the whole book
@@ -1798,11 +1822,12 @@ function exportPortfolioCsv(){
             q(d.marginActual>=d.target ? dd.onTarget : dd.belowTarget),
             q(p.locked ? t.locked : '')].join(';'));
   });
-  const rev = rows.reduce((a,r)=>a+r.d.revActual,0);
-  const cost = rows.reduce((a,r)=>a+r.d.costActual,0);
   L.push('');
-  L.push([q(t.pfTotal), '', '', '', '', '', '', num(rev), num(cost), num(rev-cost),
-          q(pct(rev ? (rev-cost)/rev : 0)), '', q(t.weighted), ''].join(';'));
+  portfolioTotals(rows).forEach(g=>{
+    L.push([q(t.pfTotal + ' ' + g.currency), '', '', '', '', '', q(g.currency),
+            num(g.rev), num(g.cost), num(g.profit),
+            q(pct(g.margin)), '', q(t.weighted), ''].join(';'));
+  });
   download('LITPROFIT_portfolio.csv', '\ufeff'+L.join('\r\n'), 'text/csv;charset=utf-8');
 }
 
@@ -2492,6 +2517,10 @@ $('#btnPrint').addEventListener('click', ()=>{
    language or theme never touches the network. */
 var PEOPLE = {};
 var pushTimer = null, pushing = false, cloudErr = null;
+/* A push asked for while one is in flight, and how long to wait before trying
+   again after a failure. */
+var pushAgain = false, pushBackoff = 0;
+const PUSH_RETRY_MIN = 2000, PUSH_RETRY_MAX = 30000;
 
 /* rev, updated_at and updated_by belong to the columns, not to the document */
 function cloudPayload(p){
@@ -2506,26 +2535,49 @@ function adopt(p, row){
   p.updatedAt = row.updated_at; p.updatedBy = row.updated_by;
 }
 
-function pushSoon(){
+function pushSoon(delay){
   clearTimeout(pushTimer);
-  pushTimer = setTimeout(pushPending, 400);
+  pushTimer = setTimeout(pushPending, delay === undefined ? 400 : delay);
 }
 
 async function pushPending(){
-  if(!CLOUD.on || pushing || !pendingPush.size) return;
+  if(!CLOUD.on || !pendingPush.size) return;
+  /* Asked for while one is already in flight: note it and run again at the
+     end. Returning silently left the newest edits sitting unsent until
+     somebody happened to type something else. */
+  if(pushing){ pushAgain = true; return; }
   pushing = true;
   const ids = [...pendingPush];
   pendingPush.clear();
+  let failed = false;
   try {
-    for(const id of ids){
+    for(let i = 0; i < ids.length; i++){
+      const id = ids[i];
       const p = state.projects.find(x=>x.id === id);
       if(!p) continue;
       let row;
       try {
+        /* `rev` is only ever set by adopt(), so a project without one has
+           never reached the server -- created while the connection was down,
+           or by a cloudCreate that threw. Updating it would match no row and
+           be reported as a conflict with a colleague who does not exist. */
+        if(!p.rev){
+          const was = p.id;
+          row = await CLOUD.insert(cloudPayload(p));
+          adopt(p, row);
+          if(state.currentId === was) state.currentId = p.id;
+          cloudErr = null;
+          continue;
+        }
         row = await CLOUD.update(p.id, p.rev, cloudPayload(p));
       } catch(e){
-        pendingPush.add(id);
+        /* Put back EVERYTHING still owed, not only the one that failed. The
+           queue was emptied up front, so breaking out with the rest held in a
+           local array dropped them: three projects edited, one write refused,
+           and two of the three were gone with nothing said. */
+        for(let j = i; j < ids.length; j++) pendingPush.add(ids[j]);
         cloudErr = e.message;
+        failed = true;
         paintSaveState('error');
         /* A refresh token that has expired is not a network problem, and
            leaving it as "not saved to server" would let somebody type for an
@@ -2541,19 +2593,38 @@ async function pushPending(){
         let holder = null;
         try { const cur = await CLOUD.one(p.id); holder = cur && cur.updated_by; } catch(e){}
         showConflict(p, holder);
-        continue;
+        /* One question at a time. Anything still owed goes back on the queue
+           and waits, or a second conflict would replace the first dialog and
+           the answer would be applied to the wrong project. */
+        for(let j = i + 1; j < ids.length; j++) pendingPush.add(ids[j]);
+        break;
       }
       adopt(p, row);
       cloudErr = null;
     }
     persist();
-  } finally { pushing = false; }
+  } finally {
+    pushing = false;
+    if(failed){
+      /* Keep trying. A tab stays open for hours and the network comes back;
+         waiting for the next keystroke to retry meant the last edits of the
+         day never went anywhere. */
+      pushBackoff = Math.min(pushBackoff ? pushBackoff * 2 : PUSH_RETRY_MIN, PUSH_RETRY_MAX);
+      pushSoon(pushBackoff);
+    } else {
+      pushBackoff = 0;
+      /* Say so when it comes back. The amber warning stayed up after a
+         successful retry, so a queue that had drained still read as broken. */
+      if(!pendingPush.size && !cloudErr){ savedAt = new Date(); paintSaveState('saved'); }
+      if(pushAgain){ pushAgain = false; pushSoon(0); }
+    }
+  }
 }
 
 /* ---------- someone else got there first ---------- */
 var conflictProject = null;
 function showConflict(p, holder){
-  conflictProject = p;
+  conflictProject = p.id;
   const t = tr(), who = (holder && PEOPLE[holder]) || t.cloud.someone;
   $('#cfTitle').textContent = t.cloud.conflictTitle;
   $('#cfBody').textContent  = t.cloud.conflictBody
@@ -2569,7 +2640,8 @@ $('#cfTheirs').addEventListener('click', async ()=>{
 });
 $('#cfMine').addEventListener('click', async ()=>{
   $('#conflict').hidden = true;
-  const p = conflictProject; if(!p) return;
+  /* looked up fresh: any render since could have replaced the object */
+  const p = state.projects.find(x=>x.id === conflictProject); if(!p) return;
   const row = await CLOUD.update(p.id, p.rev, cloudPayload(p), true);   /* force */
   if(row){ adopt(p, row); persist(); render(); }
 });
@@ -2619,6 +2691,10 @@ async function cloudReconcile(){
    is being typed. */
 async function cloudRefresh(){
   if(!CLOUD.on || !CLOUD.signedIn()) return;
+  /* Somebody is mid-decision about which version to keep. Replacing
+     state.projects underneath them would leave the dialog answering for a
+     project object that is no longer in the list. */
+  if(!$('#conflict').hidden) return;
   try {
     await cloudPull();
     cloudErr = null;

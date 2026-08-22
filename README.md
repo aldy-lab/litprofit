@@ -790,6 +790,55 @@ And through the real page: sign in, edit reaching the database, a second writer
 raising the conflict dialog naming the right account, and *load their version*
 resolving it.
 
+### The push queue
+
+Edits are queued per project and drained in the background. Three things it
+had to learn, each of which lost work:
+
+- **A failed write dropped everything behind it.** The queue is emptied up
+  front, so breaking out of the loop with the rest held only in a local array
+  discarded them. Reproduced: three projects edited, one write refused, and
+  **two of the three were gone with nothing said**. Everything still owed goes
+  back on the queue now.
+- **Nothing retried.** A failure waited for the next keystroke, so the last
+  edits before someone walked away never went anywhere. It retries on its own,
+  backing off 2s → 30s. Verified: three refused writes, then the edit lands at
+  about 26 seconds with nobody touching the tab.
+- **A push asked for during another was dropped.** `if(pushing) return` left
+  the newest edits sitting unsent. It runs again at the end instead.
+
+Two smaller ones alongside: a project with no `rev` has never reached the
+server — created while the connection was down, or by a `cloudCreate` that
+threw — so it is **inserted** rather than updated, which would have matched no
+row and been reported as a conflict with a colleague who does not exist. And a
+background refresh is held off while the conflict dialog is open, since
+replacing `state.projects` underneath it left the dialog answering for a
+project no longer in the list.
+
+⚠️ **The amber warning has to be cleared as well as raised.** It stayed up
+after a successful retry, so a queue that had drained still read as broken.
+
+### Portfolio totals are per currency
+
+Two jobs of 100 000, one in EUR and one in USD, produced a **Company total of
+200 000** — of nothing at all, unlabelled, in the one view meant to be read as
+the company's position.
+
+Converting them needs a rate and the date it was taken, which is a decision for
+whoever signs the accounts rather than something to guess at. So each currency
+is totalled on its own line: with one currency it reads as it always did, plus
+the unit; with more than one it says so instead of inventing a number. The
+screen and the CSV share `portfolioTotals()`, so they cannot drift into two
+different answers.
+
+### Not a bug: commas in number fields
+
+Worth recording, because it looked like one. `type="number"` read with
+`+el.value` seemed certain to blank a figure typed as `1250,50` on a Lithuanian
+or Russian keyboard. Measured in Chrome at `en-GB`, `lt-LT` and `ru-RU`: the
+comma is accepted and normalised, and the model stores `1250.5` every time.
+Nothing to fix.
+
 ### What is kept where
 
 | | |
