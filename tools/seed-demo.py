@@ -60,6 +60,9 @@ def api(url, key, token, method, path, body=None):
     if out.returncode:
         sys.exit("Could not reach the database:\n" + out.stderr.strip())
     text, _, code = out.stdout.rpartition("\n")
+    if code == "403" and "manager" in text:
+        sys.exit("That account is staff. Creating and deleting projects needs a\n"
+                 "manager or admin -- set the role in profiles, or use another login.")
     if not code.isdigit() or int(code) >= 400:
         sys.exit("%s %s failed (HTTP %s):\n%s" % (method, path, code, text[:300]))
     return json.loads(text) if text.strip() else []
@@ -69,7 +72,8 @@ def sign_in(url, key):
     email, password = os.environ.get("CALC_EMAIL"), os.environ.get("CALC_PASSWORD")
     if not (email and password):
         sys.exit("CALC_EMAIL and CALC_PASSWORD must be set.\n"
-                 "Use an account from Authentication -> Users in the Supabase dashboard.")
+                 "Use a MANAGER or ADMIN account -- creating and deleting a\n"
+                 "project is refused for staff, by the database, not by this script.")
     out = api(url, key, None, "POST", "/auth/v1/token?grant_type=password",
               {"email": email, "password": password})
     if "access_token" not in out:
@@ -216,14 +220,17 @@ def main():
     token = sign_in(url, key)
     remove = "--remove" in sys.argv
 
+    # projects_v and the RPCs, because public.projects is revoked from the
+    # app -- and creating or deleting a project now needs manager or admin.
     existing = api(url, key, token, "GET",
-                   "/rest/v1/projects?select=id,project_id&project_id=like.DEMO-*")
+                   "/rest/v1/projects_v?select=id,project_id&project_id=like.DEMO-*")
     if remove:
         if not existing:
             print("No DEMO- projects to remove.")
             return
         for row in existing:
-            api(url, key, token, "DELETE", "/rest/v1/projects?id=eq." + row["id"])
+            api(url, key, token, "POST", "/rest/v1/rpc/delete_project",
+                {"p_id": row["id"]})
             print("removed  %s" % row["project_id"])
         print("\n%d demo project(s) removed. Real jobs are untouched." % len(existing))
         return
@@ -236,7 +243,7 @@ def main():
         return
 
     for p in DEMOS:
-        row = api(url, key, token, "POST", "/rest/v1/projects", {"data": p})[0]
+        api(url, key, token, "POST", "/rest/v1/rpc/create_project", {"p_data": p})
         d = summarise(p)
         print("added    %-8s %-22s %s%s  margin %5.1f%%  %s"
               % (p["card"]["projectId"], p["card"]["client"],

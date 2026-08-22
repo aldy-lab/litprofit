@@ -1025,6 +1025,11 @@ update public.profiles set role = 'manager' where email = 'rf@litprofit.com';
 After that an admin can change roles through the API; nobody else can, and
 nobody can promote themselves.
 
+`tools/seed-demo.py` needs one of those two accounts now: it reads `projects_v`
+and calls `create_project` / `delete_project`, all of which refuse a staff
+login. It says which problem it has rather than reporting a permission error
+about a table nobody mentioned.
+
 ### What is kept where
 
 | | |
