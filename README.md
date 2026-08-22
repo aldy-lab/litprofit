@@ -665,19 +665,28 @@ rather than shipping a broken one.
    project, so leaving sign-ups open would let anyone who finds the page create
    an account and read the company's margins. Add people by hand under
    *Authentication → Users*.
-4. **Copy the Project URL and the `anon` key** from *Project Settings → API*.
-   Take the **anon / publishable** key, never the `service_role` key — that one
-   bypasses row level security entirely. The build refuses it if you paste it
-   by mistake.
+4. **Copy the Project URL and the publishable key** from *Project Settings →
+   API Keys*. The URL is `https://<project-ref>.supabase.co`, where the ref is
+   the string in the dashboard address.
+
+   Take the **publishable** key (`sb_publishable_…`). Never a secret key —
+   `sb_secret_…` or the legacy `service_role` JWT — because those bypass row
+   level security entirely. The build refuses both if one is pasted by mistake.
+
+   The older `anon` JWT still works and Supabase deprecates it at the end of
+   2026, so use the publishable key on anything set up now.
 5. **Build and publish:**
 
    ```sh
    CALC_SUPABASE_URL="https://xxxx.supabase.co" \
-   CALC_SUPABASE_ANON_KEY="eyJhbGci..." \
+   CALC_SUPABASE_KEY="sb_publishable_..." \
        python3 tools/build-calc.py
    ```
 
-**The anon key is meant to be public.** It names the project; it grants
+   `CALC_SUPABASE_ANON_KEY` is still read as a fallback, because that is what
+   the key was called when this was written.
+
+**The publishable key is meant to be public.** It names the project; it grants
 nothing. Row level security decides who reads what, and a request carrying only
 this key reads nothing at all — verified: anonymous is blocked on all four of
 read projects, read history, read profiles, and insert.

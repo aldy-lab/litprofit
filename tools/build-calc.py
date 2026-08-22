@@ -71,8 +71,11 @@ USERS_RAW = os.environ.get("CALC_USERS", "")
 
 # Set these two and the calculator keeps its projects in Postgres instead of
 # in one browser, and Supabase Auth becomes the login. See db/schema.sql.
+# CALC_SUPABASE_ANON_KEY is still read, because that is what the key was
+# called when this was written and shells outlive naming decisions.
 SUPA_URL = os.environ.get("CALC_SUPABASE_URL", "").strip()
-SUPA_KEY = os.environ.get("CALC_SUPABASE_ANON_KEY", "").strip()
+SUPA_KEY = (os.environ.get("CALC_SUPABASE_KEY")
+            or os.environ.get("CALC_SUPABASE_ANON_KEY", "")).strip()
 
 ENCRYPT_JS = """async ([plaintext, users, iterations]) => {
   const enc = new TextEncoder();
@@ -291,11 +294,15 @@ def build_cloud():
         sys.exit("CALC_SUPABASE_URL must be the https project URL.")
     if len(SUPA_KEY) < 20:
         sys.exit("CALC_SUPABASE_ANON_KEY does not look like a key.")
-    # The anon key is public by design -- it names the project, it grants
-    # nothing. Anything else here would be a real secret and must not ship.
-    if "service_role" in SUPA_KEY:
-        sys.exit("That is the SERVICE ROLE key. It bypasses row level security "
-                 "and must never be published. Use the anon/publishable key.")
+    # The publishable key is public by design -- it names the project, it
+    # grants nothing. Anything else here is a real secret and must not ship.
+    # Two formats are current: the newer sb_publishable_ / sb_secret_ pair, and
+    # the legacy anon / service_role JWTs, which Supabase deprecates at the end
+    # of 2026. Both dangerous halves are refused.
+    if "service_role" in SUPA_KEY or SUPA_KEY.startswith("sb_secret_"):
+        sys.exit("That is a SECRET key (service_role / sb_secret_). It bypasses\n"
+                 "row level security and must never be published. Use the\n"
+                 "publishable key (sb_publishable_...) instead.")
 
     app = read_app()
     os.makedirs(OUT_DIR, exist_ok=True)
