@@ -913,6 +913,46 @@ should not carry U+00A0); and the status chips are outlined rather than
 filled, because a portfolio of twenty jobs is twenty solid blocks of ink
 otherwise.
 
+### On a phone, a sheet is a stack of cards
+
+Labor is thirteen columns. On a 390px screen the grid hid **1188px of itself**:
+three columns visible and every figure somewhere off to the right. Scrolling
+sideways through a form is not data entry.
+
+Each row becomes a card and each cell puts its column name beside its own
+value, from a `data-label` the renderer writes. **The markup does not change** —
+it is still a table, still one row per row, so the desktop layout, the totals
+and the up/down keyboard navigation are exactly as they were.
+
+Measured across ten tabs: every table now hides **0px**, and there is no page
+overflow at 320, 360, 390, 430 or 820px.
+
+- **Scoped to `table[data-sheet]` and `#pfTable`.** The dashboard's KPI table
+  and the settings table are four narrow columns that already fit; turning
+  those into cards made a reading table twice as tall for nothing.
+- **The portfolio needed labels first.** Stacked without them it read
+  `53,170 / 40,348.8 / 12,821.2` with no way to tell revenue from profit.
+- **Its own breakpoint, 860px, not the phone one.** This is about how many
+  columns fit, not about phones — an iPad in portrait is 820px and was still
+  being handed the thirteen-column table.
+- ⚠️ **`tfoot` cannot be `display:revert`.** Reverting it to a table row inside
+  a `display:block` table builds an anonymous table box that ignores the width
+  and lands on top of the cards above it. The totals are cards too.
+- ⚠️ **`.dash-grid > * { min-width: 0 }`.** A grid child is `min-width:auto`,
+  which is min-*content*, so a chart card refused to go narrower than its
+  widest label and pushed the page sideways by 66px at 360px.
+
+The header collapses from three rows to two: **Print report is hidden**,
+because both reports are in the menu and the button is the widest thing there.
+Hover highlights are behind `@media (hover:hover)` — on a touch screen the
+highlight sticks to whatever was tapped last and reads as a selection.
+
+⚠️ **Two strings stopped being true when the database went in** and were still
+on screen: the storage notice said *"There is no server and no account"* on a
+page the reader had just signed into, and the portfolio lead said *"Every
+project in this browser"*. The notice is suppressed whenever `CLOUD.on`; the
+lead is reworded.
+
 ### What is kept where
 
 | | |

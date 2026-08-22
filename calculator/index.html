@@ -260,7 +260,7 @@ html.is-locked .card table.grid input:disabled{opacity:1}
 .pf-chip.ok{color:var(--good-text)} .pf-chip.bad{color:var(--critical)}
 /* the unit the total is in, never left to be guessed */
 .pf-cur{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-3);font-weight:400}
-#pfTable tbody tr:hover td{background:var(--accent-soft)}
+@media (hover:hover){ #pfTable tbody tr:hover td{background:var(--accent-soft)} }
 
 /* ---------- save tag ----------
    Saving is automatic, so this is a receipt rather than an instruction. It
@@ -357,18 +357,97 @@ html.is-locked .card table.grid input:disabled{opacity:1}
 .notice-bar button{margin-left:auto;flex:none;padding:5px 10px;font-size:10px}
 
 /* ---------- narrow screens ---------- */
+@media (max-width:860px){
+  /* ---------- a sheet is a stack of cards, not a table ----------
+     Labor is thirteen columns: on a 390px screen the grid hid 1188px of
+     itself, so three columns were visible and every figure was somewhere off
+     to the right. Sideways scrolling through a form is not data entry.
+
+     Each row becomes a card and each cell puts its column name beside its own
+     value, from the data-label the renderer writes. The markup is untouched --
+     it is still a table, still one row per row, and the desktop layout and the
+     keyboard navigation are exactly as they were. */
+  /* Scoped on purpose. The dashboard's KPI table and the settings table are
+     four narrow columns that already fit, and turning THEM into cards made a
+     reading table twice as tall for nothing. */
+  .tablewrap{overflow:visible;max-height:none;border:0}
+  table[data-sheet],table[data-sheet] tbody,table[data-sheet] tfoot,
+  table[data-sheet] tr,table[data-sheet] td,
+  #pfTable,#pfTable tbody,#pfTable tr,#pfTable td{
+    display:block;width:auto
+  }
+  table[data-sheet] thead,#pfTable thead{display:none}
+  table[data-sheet] tr,#pfTable tbody tr{
+    border:1px solid var(--grid);border-radius:2px;padding:4px 12px 10px;
+    margin-bottom:10px;background:var(--surface-1)
+  }
+  table[data-sheet] td,#pfTable td{
+    display:flex;align-items:center;gap:12px;
+    padding:5px 0;border:0;border-bottom:1px solid var(--grid);text-align:left
+  }
+  table[data-sheet] td:last-child,#pfTable td:last-child{border-bottom:0}
+  table[data-sheet] td::before,#pfTable td::before{
+    content:attr(data-label);flex:0 0 42%;
+    font-family:var(--mono);font-size:9.5px;line-height:1.4;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-3)
+  }
+  table[data-sheet] td.num,#pfTable td.num{text-align:right;justify-content:space-between}
+  table[data-sheet] td input,table[data-sheet] td select{flex:1 1 auto;min-width:0;width:100%}
+  table[data-sheet] td.calc{justify-content:space-between;font-weight:600;padding:7px 0}
+  /* an empty cell with only a label is noise */
+  table[data-sheet] td:empty,#pfTable td:empty,table[data-sheet] td.rowacts:empty{display:none}
+  table[data-sheet] td.rowacts{justify-content:flex-end;padding-top:8px}
+  table[data-sheet] td.rowacts::before{content:none}
+  /* the totals row is a summary card, and it stays legible */
+  table[data-sheet] tfoot tr{background:var(--surface-2);border-color:var(--baseline)}
+  table[data-sheet] tfoot td::before{color:var(--ink-2)}
+  /* the per-currency totals are cards as well: one per currency */
+  #pfTable tfoot,#pfTable tfoot tr,#pfTable tfoot td{display:block}
+  #pfTable tfoot td{
+    display:flex;align-items:center;gap:12px;padding:5px 0;
+    border:0;border-bottom:1px solid var(--grid)
+  }
+  #pfTable tfoot tr{
+    background:var(--surface-2);border:1px solid var(--baseline);
+    border-radius:2px;padding:4px 12px 10px;margin-bottom:10px
+  }
+  #pfTable tfoot td::before{
+    content:attr(data-label);flex:0 0 42%;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-2)
+  }
+  #pfTable tfoot td.num{justify-content:space-between;text-align:right}
+  #pfTable tfoot td:empty{display:none}
+  #pfTable td.pf-id{
+    border-bottom:1px solid var(--baseline);padding-bottom:8px;margin-bottom:2px;font-size:15px
+  }
+  #pfTable td.pf-id::before{content:none}
+  table[data-sheet] input[type=text]{min-width:0}
+}
+
 @media (max-width:760px){
   main{padding:14px}
   .card{padding:13px}
-  /* keep the row's own name in view while scrolling sideways through columns */
-  table.grid td:first-child,table.grid th:first-child{
-    position:sticky;left:0;z-index:2;background:var(--surface-1)
-  }
-  table.grid thead th:first-child{z-index:4}
-  table.grid input[type=text]{min-width:132px}
   /* 16px or iOS Safari zooms the page when a field takes focus */
   table.grid input,.kv input{font-size:16px}
+
   header.app{gap:8px;padding:10px 14px}
+  /* both reports are in the menu, and the button is the widest thing here */
+  #btnPrint{display:none}
+  #projectSel{flex:1 1 150px;min-width:0}
+  .brand img{height:20px}
+  .savetag{font-size:9px;letter-spacing:.1em}
+  /* PLAN and ACTUAL already label the two figures; the chip does not need to
+     say ACTUAL a third time */
+  .pulse .pu-basis i{display:none}
+  /* two across, or five headline numbers become five full-width screens */
+  /* `main .tiles` beats the bare `.tiles` further down the file, which would
+     otherwise win on source order and leave five full-width screens. */
+  main .tiles{grid-template-columns:1fr 1fr}
+  /* Five tiles in two columns leave a sixth cell of bare grid colour. The odd
+     one out takes the full width instead of sitting beside a hole. */
+  .tiles .tile:last-child:nth-child(odd){grid-column:1 / -1}
+  .tile .val.hero{font-size:clamp(26px,8vw,34px)}
   nav.tabs{padding:0 14px}
   .brand{min-width:0}
   /* The toolbar wraps to four rows on a phone and, pinned, ate half the
@@ -411,7 +490,7 @@ table.grid input[type=number]{text-align:right;min-width:80px}
 table.grid input[type=number]::-webkit-outer-spin-button,
 table.grid input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 table.grid input[type=number]{-moz-appearance:textfield;appearance:textfield}
-table.grid tr:hover td{background:var(--accent-soft)}
+@media (hover:hover){ table.grid tr:hover td{background:var(--accent-soft)} }
 table.grid tr.totals td{
   font-weight:700;border-top:1px solid var(--baseline);border-bottom:none;
   padding:10px 6px;font-variant-numeric:tabular-nums;font-family:var(--mono)
@@ -459,6 +538,10 @@ tr:hover .rowbtn{opacity:1}
 .meter{height:8px;background:var(--grid);overflow:hidden;margin-top:10px}
 .meter>i{display:block;height:100%}
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+/* A grid child is min-width:auto, which is min-CONTENT -- so a card refused to
+   go narrower than its widest chart label and pushed the page sideways at
+   360px. The charts are all width:100% and shrink happily once allowed to. */
+.dash-grid > *{min-width:0}
 /* One wide bar in a half-width box left a card of empty ground beside a tall
    neighbour -- the grid stretches rows to match, so the short chart paid for
    the tall one. It takes the full width and the row ends with it. */
@@ -713,7 +796,7 @@ en: {
   },
   saving:'Saving',savedAt:'Saved {t}',menuLabel:'Project actions',grpProject:'Project',grpData:'Data',
   closeProj:'Close project',reopenProj:'Reopen',locked:'Closed',lockedNote:'This project is closed. Figures are read-only so a finished job cannot be changed by accident. Reopen it to edit.',pfCsv:'Export portfolio',filters:'Filter',fClient:'Client',fFrom:'Active from',fTo:'Active to',clearF:'Clear',showing:'Showing',of:'of',sortBy:'Sort',confirmClose:'Close this project? Its figures become read-only until you reopen it.',
-  portfolio:'Portfolio',pfTitle:'All projects',openProj:'Open',pfLead:'Every project in this browser, side by side. Click a row to open it.',pfNone:'No projects yet.',modified:'Last edited',never:'—',pfTotal:'Company total',weighted:'Weighted margin',nProjects:'projects',
+  portfolio:'Portfolio',pfTitle:'All projects',openProj:'Open',pfLead:'Every project, side by side. Click a row to open it.',pfNone:'No projects yet.',modified:'Last edited',never:'—',pfTotal:'Company total',weighted:'Weighted margin',nProjects:'projects',
   undo:'Undo',rowDeleted:'Row deleted.',dupRow:'Duplicate row',delRow:'Delete row',gotIt:'Got it',saveFailed:'Could not save — browser storage is full or blocked.',notice1:'This data lives in this browser only.',notice2:'There is no server and no account: another device, another browser, or clearing site data will not have it. Use Backup JSON regularly — it is the only backup that exists, and Import restores it anywhere.'
 },
 lt: {
@@ -780,7 +863,7 @@ lt: {
   },
   saving:'Išsaugoma',savedAt:'Išsaugota {t}',menuLabel:'Projekto veiksmai',grpProject:'Projektas',grpData:'Duomenys',
   closeProj:'Uždaryti projektą',reopenProj:'Atidaryti iš naujo',locked:'Uždarytas',lockedNote:'Projektas uždarytas. Duomenys tik skaitymui, kad baigto darbo nebūtų galima netyčia pakeisti. Norėdami redaguoti, atidarykite iš naujo.',pfCsv:'Eksportuoti portfelį',filters:'Filtras',fClient:'Klientas',fFrom:'Aktyvus nuo',fTo:'Aktyvus iki',clearF:'Išvalyti',showing:'Rodoma',of:'iš',sortBy:'Rikiuoti',confirmClose:'Uždaryti šį projektą? Duomenys taps tik skaitymui, kol neatidarysite iš naujo.',
-  portfolio:'Portfelis',pfTitle:'Visi projektai',openProj:'Atidaryti',pfLead:'Visi šioje naršyklėje esantys projektai vienoje vietoje. Spustelėkite eilutę, kad atidarytumėte.',pfNone:'Projektų dar nėra.',modified:'Redaguota',never:'—',pfTotal:'Įmonės iš viso',weighted:'Svertinė marža',nProjects:'projektai',
+  portfolio:'Portfelis',pfTitle:'Visi projektai',openProj:'Atidaryti',pfLead:'Visi projektai vienoje vietoje. Spustelėkite eilutę, kad atidarytumėte.',pfNone:'Projektų dar nėra.',modified:'Redaguota',never:'—',pfTotal:'Įmonės iš viso',weighted:'Svertinė marža',nProjects:'projektai',
   undo:'Atšaukti',rowDeleted:'Eilutė ištrinta.',dupRow:'Kopijuoti eilutę',delRow:'Ištrinti eilutę',gotIt:'Supratau',saveFailed:'Nepavyko išsaugoti — naršyklės atmintis pilna arba užblokuota.',notice1:'Šie duomenys saugomi tik šioje naršyklėje.',notice2:'Nėra nei serverio, nei paskyros: kitame įrenginyje, kitoje naršyklėje ar išvalius svetainės duomenis jų nebus. Reguliariai naudokite „Atsarginė kopija“ — tai vienintelė kopija, o „Importuoti“ ją atkuria bet kur.'
 },
 ru: {
@@ -847,7 +930,7 @@ ru: {
   },
   saving:'Сохранение',savedAt:'Сохранено {t}',menuLabel:'Действия с проектом',grpProject:'Проект',grpData:'Данные',
   closeProj:'Закрыть проект',reopenProj:'Открыть снова',locked:'Закрыт',lockedNote:'Проект закрыт. Данные доступны только для чтения, чтобы завершённую работу нельзя было изменить случайно. Чтобы редактировать, откройте снова.',pfCsv:'Экспорт портфеля',filters:'Фильтр',fClient:'Клиент',fFrom:'Активен с',fTo:'Активен по',clearF:'Очистить',showing:'Показано',of:'из',sortBy:'Сортировка',confirmClose:'Закрыть этот проект? Данные станут доступны только для чтения.',
-  portfolio:'Портфель',pfTitle:'Все проекты',openProj:'Открыть',pfLead:'Все проекты этого браузера рядом. Нажмите на строку, чтобы открыть.',pfNone:'Проектов пока нет.',modified:'Изменён',never:'—',pfTotal:'Итого по компании',weighted:'Взвешенная маржа',nProjects:'проектов',
+  portfolio:'Портфель',pfTitle:'Все проекты',openProj:'Открыть',pfLead:'Все проекты рядом. Нажмите на строку, чтобы открыть.',pfNone:'Проектов пока нет.',modified:'Изменён',never:'—',pfTotal:'Итого по компании',weighted:'Взвешенная маржа',nProjects:'проектов',
   undo:'Отменить',rowDeleted:'Строка удалена.',dupRow:'Дублировать строку',delRow:'Удалить строку',gotIt:'Понятно',saveFailed:'Не удалось сохранить — память браузера заполнена или заблокирована.',notice1:'Эти данные хранятся только в этом браузере.',notice2:'Нет ни сервера, ни учётной записи: на другом устройстве, в другом браузере или после очистки данных сайта их не будет. Регулярно используйте «Резервная копия» — это единственная копия, а «Импорт» восстановит её где угодно.'
 }
 };
@@ -1879,27 +1962,34 @@ function viewSheet(key){
     status: Object.entries(t.statuses).map(([v,l])=>({v,l})),
     bool: [{v:'0',l:t.no},{v:'1',l:t.yes}]
   };
-  let head = cfg.cols.map(col=>`<th class="${col.t==='num'||col.t==='calc'?'num':''}">${esc(col.l)}</th>`).join('') + '<th></th>';
+  let head = cfg.cols.map(col=>
+    `<th class="${col.t==='num'||col.t==='calc'?'num':''}"${col.w?` style="width:${col.w}"`:''}>${esc(col.l)}</th>`
+  ).join('') + '<th></th>';
   let body = rows.map((r,i)=>{
+    /* Every cell carries its own column name. On a phone the heading row is
+       1200px to the left of the value it belongs to, so the card layout puts
+       the label beside the field instead -- and it has to come from somewhere
+       the CSS can reach. */
     let tds = cfg.cols.map(col=>{
-      if(col.t==='text') return `<td style="${col.w?'width:'+col.w:''}"><input type="text"${ro}${col.ac?` list="dl-${key}-${col.k}"`:''} data-r="${i}" data-k="${col.k}" value="${esc(cellVal(key, r, col.k))}"></td>`;
-      if(col.t==='num') return `<td class="num"><input type="number"${ro} step="any" data-r="${i}" data-k="${col.k}" value="${r[col.k]??''}"></td>`;
+      const L = ` data-label="${esc(col.l)}"`;
+      if(col.t==='text') return `<td${L}><input type="text"${ro}${col.ac?` list="dl-${key}-${col.k}"`:''} data-r="${i}" data-k="${col.k}" value="${esc(cellVal(key, r, col.k))}"></td>`;
+      if(col.t==='num') return `<td class="num"${L}><input type="number"${ro} step="any" data-r="${i}" data-k="${col.k}" value="${r[col.k]??''}"></td>`;
       if(col.t==='sel'){
         const cur = col.opts==='bool' ? (r[col.k]?'1':'0') : r[col.k];
-        return `<td><select${ro} data-r="${i}" data-k="${col.k}" data-opts="${col.opts}">${opts[col.opts].map(o=>`<option value="${o.v}"${o.v===cur?' selected':''}>${esc(o.l)}</option>`).join('')}</select></td>`;
+        return `<td${L}><select${ro} data-r="${i}" data-k="${col.k}" data-opts="${col.opts}">${opts[col.opts].map(o=>`<option value="${o.v}"${o.v===cur?' selected':''}>${esc(o.l)}</option>`).join('')}</select></td>`;
       }
       const v = col.f(r, proj().settings);
       const cls = col.cls ? col.cls(v) : '';
-      return `<td class="calc num ${cls}" data-calc="${key}-${i}-${col.k}">${col.fmt?col.fmt(v):fmt(v)}</td>`;
+      return `<td class="calc num ${cls}"${L} data-calc="${key}-${i}-${col.k}">${col.fmt?col.fmt(v):fmt(v)}</td>`;
     }).join('');
-    return `<tr>${tds}<td style="white-space:nowrap">`+ (ro ? '' :
+    return `<tr>${tds}<td class="rowacts" style="white-space:nowrap">`+ (ro ? '' :
       `<button class="rowbtn" data-dup="${i}" title="${esc(t.dupRow)}">⧉</button>`+
       `<button class="rowbtn" data-del="${i}" title="${esc(t.delRow)}">×</button>`) + `</td></tr>`;
   }).join('');
   let totals = cfg.cols.map(col=>{
     if(!col.sum) return '<td></td>';
     const v = rows.reduce((a,r)=> a + (col.t==='calc' ? col.f(r,proj().settings) : N(r[col.k])), 0);
-    return `<td class="num" data-total="${key}-${col.k}">${fmt(v)}</td>`;
+    return `<td class="num" data-label="${esc(col.l)}" data-total="${key}-${col.k}">${fmt(v)}</td>`;
   }).join('');
   return `${lockBar()}${noticeBar()}<div class="card">
     <h2 class="sheet">${t.tabs[key]} <span class="muted" style="font-weight:400">// ${esc(proj().card.projectId)}</span></h2>
@@ -2026,17 +2116,20 @@ function viewPortfolio(){
   const body = rows.length ? rows.map(({p,d})=>{
     const days = projectDays(p.card);
     const on = d.marginActual >= d.target;
+    /* data-label on every cell: stacked into a card on a phone, three bare
+       numbers in a column say nothing about which is revenue and which is
+       profit. The project number carries none -- it is the card's heading. */
     return `<tr data-open="${p.id}" style="cursor:pointer">
-      <td><b>${esc(p.card.projectId)||'—'}</b>${p.locked?` <span class="pf-chip lock">${t.locked}</span>`:''}</td>
-      <td>${esc(p.card.client)||'—'}</td>
-      <td>${esc(p.card.site)||'—'}</td>
-      <td class="muted">${p.card.start||'—'}${days?` · ${days} ${dd.daysN}`:''}</td>
-      <td class="num">${fmt(d.revActual)}</td>
-      <td class="num">${fmt(d.costActual)}</td>
-      <td class="num calc ${d.profitActual>=0?'pos':'neg'}">${fmt(d.profitActual)}</td>
-      <td class="num"><b>${pct(d.marginActual)}</b></td>
-      <td><span class="pf-chip ${on?'ok':'bad'}">${on?dd.onTarget:dd.belowTarget}</span></td>
-      <td class="muted" style="font-family:var(--mono);font-size:11px">${
+      <td class="pf-id"><b>${esc(p.card.projectId)||'—'}</b>${p.locked?` <span class="pf-chip lock">${t.locked}</span>`:''}</td>
+      <td data-label="${esc(dd.client)}">${esc(p.card.client)||'—'}</td>
+      <td data-label="${esc(dd.site)}">${esc(p.card.site)||'—'}</td>
+      <td class="muted" data-label="${esc(t.card.start)}">${p.card.start||'—'}${days?` · ${days} ${dd.daysN}`:''}</td>
+      <td class="num" data-label="${esc(dd.totalRevenue)}">${fmt(d.revActual)}</td>
+      <td class="num" data-label="${esc(dd.totalCost)}">${fmt(d.costActual)}</td>
+      <td class="num calc ${d.profitActual>=0?'pos':'neg'}" data-label="${esc(dd.grossProfit)}">${fmt(d.profitActual)}</td>
+      <td class="num" data-label="${esc(dd.margin)}"><b>${pct(d.marginActual)}</b></td>
+      <td data-label="${esc(dd.control)}"><span class="pf-chip ${on?'ok':'bad'}">${on?dd.onTarget:dd.belowTarget}</span></td>
+      <td class="muted" data-label="${esc(t.modified)}" style="font-family:var(--mono);font-size:11px">${
         lastEdited(p) ? new Date(lastEdited(p)).toLocaleDateString(LOCALES[state.lang]) : t.never}</td>
     </tr>`;
   }).join('') : `<tr><td colspan="10" style="padding:26px;text-align:center" class="muted">${t.pfNone}</td></tr>`;
@@ -2065,10 +2158,12 @@ function viewPortfolio(){
       </tr></thead>
       <tbody>${body}</tbody>
       <tfoot>${totals.map(g=>`<tr class="totals">
-        <td>${esc(t.pfTotal)} <span class="pf-cur">${esc(g.currency)}</span></td>
+        <td class="pf-id">${esc(t.pfTotal)} <span class="pf-cur">${esc(g.currency)}</span></td>
         <td></td><td></td><td></td>
-        <td class="num">${fmt(g.rev)}</td><td class="num">${fmt(g.cost)}</td>
-        <td class="num">${fmt(g.profit)}</td><td class="num">${pct(g.margin)}</td>
+        <td class="num" data-label="${esc(dd.totalRevenue)}">${fmt(g.rev)}</td>
+        <td class="num" data-label="${esc(dd.totalCost)}">${fmt(g.cost)}</td>
+        <td class="num" data-label="${esc(dd.grossProfit)}">${fmt(g.profit)}</td>
+        <td class="num" data-label="${esc(dd.margin)}">${pct(g.margin)}</td>
         <td class="muted" style="font-weight:400">${esc(t.weighted)}</td><td></td>
       </tr>`).join('')}</tfoot>
     </table></div>
@@ -2362,7 +2457,11 @@ function lockBar(){
 }
 
 function noticeBar(){
-  if(state.noticeSeen) return '';
+  /* The warning was written when the figures really did live in one browser.
+     With a database configured it says "there is no server and no account" on
+     a page the reader signed into a moment ago -- which is not a stale note,
+     it is the tool telling them something untrue about where their work is. */
+  if(CLOUD.on || state.noticeSeen) return '';
   const t = tr();
   return `<div class="notice-bar"><div><b>${t.notice1}</b> ${t.notice2}</div>
     <button id="btnNoticeOk">${t.gotIt}</button></div>`;
