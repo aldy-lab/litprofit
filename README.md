@@ -642,6 +642,100 @@ under someone else's logo is a claim about their business, so the rest stay
 empty until the client confirms them. Fill in the last field of `CLIENTS` in
 `build.py` and add the key to `SECTORS` in `i18n.py`.
 
+## The calculator database
+
+Until now the figures lived in one browser's `localStorage` and nowhere else:
+another device, another browser, or clearing site data and they were gone.
+They can live in Postgres instead, shared by the whole team.
+
+**It is optional and it is off by default.** With `CALC_SUPABASE_URL` unset,
+every line of the cloud code is inert and the calculator behaves exactly as it
+always has. Same rule as the booking link: an unset value removes the feature
+rather than shipping a broken one.
+
+### Setting it up
+
+1. **Create a Supabase project** in the **EU (Frankfurt)** region. Keeping the
+   data in the EU is what keeps the GDPR story a short one.
+2. **Run `db/schema.sql`** in the SQL editor. It is idempotent — safe to run
+   again after an edit.
+3. ⚠️ **Turn public sign-ups OFF.** *Authentication → Sign In / Providers →
+   Email → disable "Allow new users to sign up".* This matters more than
+   anything else on the list: every signed-in user can read and write every
+   project, so leaving sign-ups open would let anyone who finds the page create
+   an account and read the company's margins. Add people by hand under
+   *Authentication → Users*.
+4. **Copy the Project URL and the `anon` key** from *Project Settings → API*.
+   Take the **anon / publishable** key, never the `service_role` key — that one
+   bypasses row level security entirely. The build refuses it if you paste it
+   by mistake.
+5. **Build and publish:**
+
+   ```sh
+   CALC_SUPABASE_URL="https://xxxx.supabase.co" \
+   CALC_SUPABASE_ANON_KEY="eyJhbGci..." \
+       python3 tools/build-calc.py
+   ```
+
+**The anon key is meant to be public.** It names the project; it grants
+nothing. Row level security decides who reads what, and a request carrying only
+this key reads nothing at all — verified: anonymous is blocked on all four of
+read projects, read history, read profiles, and insert.
+
+### One login, not two
+
+The passphrase gate exists because a static host has no server to check a
+password against, so the page was encrypted instead. A database changes that:
+Supabase Auth is a real login, checked somewhere the visitor does not control,
+and it brings per-person accounts, password reset, and removing one person
+without re-encrypting for everybody.
+
+Keeping both would mean typing two passwords to reach one tool, and the weaker
+would set the pace. So **when the database is configured, `build-calc.py`
+ships the page as plain HTML** and the gate moves to the login form. It stays
+`noindex, nofollow` and unlinked, but hiding it was never what protected it —
+the figures are not in the file at all now.
+
+### Two people, one job
+
+Everybody can edit everything, so two people can open the same project. Each
+save states the revision it read; the update matches on that revision and bumps
+it. **A stale save matches no row**, so instead of quietly overwriting a
+colleague the app stops and asks: *load their version* or *keep mine and
+overwrite theirs*. It never picks for you — whichever way it goes, somebody's
+figures are discarded.
+
+Who holds the row is read back **from the server** at that moment. The local
+copy's `updated_by` is usually the person reading the message — their own last
+save — so trusting it named the wrong colleague in the one message where that
+matters most.
+
+### What is kept where
+
+| | |
+|---|---|
+| Projects, figures, history | Postgres — the record |
+| Language, theme, open tab, filters | `localStorage` — per person, per browser |
+
+`localStorage` still holds a copy of the projects. That is what makes a reload
+instant and what keeps the figures readable if the network drops. The server is
+the record; the browser copy is a convenience.
+
+Every revision is kept, trimmed to the last 50 per project, with who changed it
+and when. The app is granted `SELECT` on that table and nothing else, so the
+audit trail is append-only from the outside.
+
+### Cost, honestly
+
+Build and test on the **Free** plan: 500 MB, and £0. Two things make it wrong
+for the live tool — it **pauses after a week of inactivity**, and it has **no
+automatic backups**. Move to **Pro (~$25/month)** at handover, which removes
+both. It is a plan change, not a migration: same code, same database.
+
+⚠️ **Storage.** 40 projects measured 654 KB, and history multiplies that. 500 MB
+is a long way off at this scale, but it is not unlimited — worth a look once
+there are hundreds of jobs.
+
 ## Booking (Calendly)
 
 `BOOKING_URL` in `build.py` points at the company's Calendly. Every **Book a

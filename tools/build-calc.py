@@ -69,9 +69,25 @@ ITERATIONS = 310000
 
 USERS_RAW = os.environ.get("CALC_USERS", "")
 
+# Set these two and the calculator keeps its projects in Postgres instead of
+# in one browser, and Supabase Auth becomes the login. See db/schema.sql.
+SUPA_URL = os.environ.get("CALC_SUPABASE_URL", "").strip()
+SUPA_KEY = os.environ.get("CALC_SUPABASE_ANON_KEY", "").strip()
+
 ENCRYPT_JS = """async ([plaintext, users, iterations]) => {
   const enc = new TextEncoder();
-  const b64 = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+  /* Chunked on purpose. String.fromCharCode(...bytes) spreads every byte
+     into an argument list, and the engine's argument limit is well under the
+     size of this app -- it worked until the file grew, then failed with
+     "Maximum call stack size exceeded" rather than anything about size. */
+  const b64 = b => {
+    const a = new Uint8Array(b);
+    let out = '';
+    for(let i = 0; i < a.length; i += 0x8000){
+      out += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000));
+    }
+    return btoa(out);
+  };
 
   // one random content key; the app is encrypted under it exactly once
   const rawKey = crypto.getRandomValues(new Uint8Array(32));
@@ -257,7 +273,63 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass
 
 
+def read_app():
+    app = io.open(os.path.join(ROOT, "tools", "calc", "app.html"),
+                  encoding="utf-8").read()
+    return (app.replace("__BASE__", BASE)
+               .replace("__SUPABASE_URL__", SUPA_URL)
+               .replace("__SUPABASE_ANON_KEY__", SUPA_KEY))
+
+
+def build_cloud():
+    """Database mode: the app itself is the page, Supabase Auth is the gate."""
+    # https in production. Loopback is allowed because that is how this gets
+    # tested against a local stand-in, and a browser treats 127.0.0.1 as a
+    # secure context for the same reason.
+    local = SUPA_URL.startswith(("http://127.0.0.1", "http://localhost"))
+    if not SUPA_URL.startswith("https://") and not local:
+        sys.exit("CALC_SUPABASE_URL must be the https project URL.")
+    if len(SUPA_KEY) < 20:
+        sys.exit("CALC_SUPABASE_ANON_KEY does not look like a key.")
+    # The anon key is public by design -- it names the project, it grants
+    # nothing. Anything else here would be a real secret and must not ship.
+    if "service_role" in SUPA_KEY:
+        sys.exit("That is the SERVICE ROLE key. It bypasses row level security "
+                 "and must never be published. Use the anon/publishable key.")
+
+    app = read_app()
+    os.makedirs(OUT_DIR, exist_ok=True)
+    dest = os.path.join(OUT_DIR, "index.html")
+    io.open(dest, "w", encoding="utf-8").write(app)
+
+    print("mode        database (Supabase Auth is the login)")
+    print("project     %s" % SUPA_URL)
+    print("written     calculator/index.html  %d bytes" % len(app.encode("utf-8")))
+    print()
+    print("The page is plain HTML now: the figures are not in it. They live")
+    print("behind row level security, and the anon key above grants nothing")
+    print("on its own. Accounts are managed in the Supabase dashboard.")
+    return
+
+
 def main():
+    # ONE LOGIN, NEVER TWO.
+    #
+    # The encryption below exists because a static host has no server to check
+    # a password against. A database changes that: Supabase Auth is a real
+    # login, checked somewhere the visitor does not control, and it brings
+    # per-person accounts, password reset and revoking one person without
+    # re-encrypting for everybody.
+    #
+    # Keeping both would mean the team types two passwords to reach one tool,
+    # and the weaker of the two would set the pace. So when the database is
+    # configured the page ships as plain HTML and the gate moves to the login
+    # form. It stays noindex, nofollow and unlinked; hiding it was never what
+    # protected it, and now the figures are not in the file at all -- they are
+    # behind row level security on the server.
+    if SUPA_URL and SUPA_KEY:
+        return build_cloud()
+
     if not USERS_RAW:
         sys.exit("CALC_USERS is not set.\n"
                  "Credentials are deliberately not stored in this repository —\n"
@@ -270,8 +342,7 @@ def main():
     except Exception:
         sys.exit("CALC_USERS must be JSON: [[\"username\",\"password\"], ...]")
 
-    app = io.open(os.path.join(ROOT, "tools", "calc", "app.html"),
-                  encoding="utf-8").read().replace("__BASE__", BASE)
+    app = read_app()
 
     port = free_port()
     handler = functools.partial(Quiet, directory=SERVE)
