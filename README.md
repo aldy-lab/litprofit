@@ -691,6 +691,23 @@ nothing. Row level security decides who reads what, and a request carrying only
 this key reads nothing at all — verified: anonymous is blocked on all four of
 read projects, read history, read profiles, and insert.
 
+### It is linked from the footer now
+
+`CALCULATOR_URL` in `build.py`, rendered next to the privacy policy in all
+three languages. Blank it and the link is not rendered at all, so it can come
+back off the site without leaving a dead entry behind.
+
+`/calculator/` is in `SHARED`, and it has to be: it is built once by
+`build-calc.py` and switches language at runtime from its own picker, so
+`u()` was handing the Lithuanian and Russian footers `/lt/calculator/` and
+`/ru/calculator/` — **two pages that do not exist**. Caught by reading the
+built HTML rather than the diff.
+
+It carries `rel="nofollow"` alongside the page's own `noindex`. Linking it
+publicly makes it findable, which is the point of asking for it: what keeps the
+figures safe is the sign-in and row level security, never the fact that nobody
+had the address.
+
 ### One login, not two
 
 The passphrase gate exists because a static host has no server to check a

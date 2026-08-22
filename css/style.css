@@ -1184,7 +1184,14 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 }
 .footer-bottom a { padding-block: 6px; }
 .footer-bottom a:hover { color: var(--white); }
-.footer-bottom .spacer { margin-left: auto; }
+/* Two links live here now, so the span needs its own gap -- the row's gap is
+   between the spans, not inside one. */
+.footer-bottom .spacer {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+}
 
 /* ============================================================
    REVEAL

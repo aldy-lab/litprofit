@@ -102,7 +102,12 @@ def lang_prefix(lang=None):
 
 # Paths that are the same file whatever the language. Everything else is a page
 # and gets the language prefix, so no call site has to know the difference.
-SHARED = ("/assets/", "/css/", "/js/", "/sitemap.xml", "/robots.txt", "/404.html")
+#
+# /calculator/ is built once by tools/build-calc.py and translates itself at
+# runtime from its own language picker -- there is no /lt/calculator/ to point
+# at, and the footer link went straight to one until this line existed.
+SHARED = ("/assets/", "/css/", "/js/", "/sitemap.xml", "/robots.txt", "/404.html",
+          "/calculator/")
 
 
 def u(path):
@@ -236,6 +241,25 @@ def header(active, path="/"):
                       langs=lang_switch(path), langs_desktop=lang_switch(path))
 
 
+# The staff calculator. Followed the same rule as the booking link: blank and
+# the link is not rendered at all, so it can be taken back off the site without
+# leaving a dead entry in the footer.
+#
+# rel="nofollow" alongside the page's own noindex. Linking it publicly makes it
+# findable, which is the point of asking for it -- what keeps the figures safe
+# is the sign-in and row level security, never the fact that nobody had the
+# address.
+CALCULATOR_URL = "/calculator/"
+
+
+def calc_link():
+    if not CALCULATOR_URL:
+        return ""
+    href = u(CALCULATOR_URL) if CALCULATOR_URL.startswith("/") else CALCULATOR_URL
+    return ('<a href="%s" rel="nofollow" class="foot-calc">%s</a>'
+            % (attr(href), text(T("f_calc"))))
+
+
 def aldy_credit():
     mark = ('<img src="%s" alt="" width="709" height="709">'
             % u("/assets/brand/aldy.svg"))
@@ -282,7 +306,7 @@ FOOTER_TPL = """  <footer class="site-footer">
 
       <div class="footer-bottom">
         <span>&copy; {founded}&ndash;<span data-year>2026</span> {legal}</span>
-        <span class="spacer"><a href="{privacy}">{l_privacy}</a></span>
+        <span class="spacer"><a href="{privacy}">{l_privacy}</a>{calc}</span>
         <span class="made">{made}</span>
       </div>
     </div>
@@ -295,7 +319,7 @@ def footer():
     street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
     phone=PHONE, phone_href=PHONE_HREF,
     email=EMAIL, legal=LEGAL, cid=COMPANY_ID, vat=VAT, founded=FOUNDED,
-    privacy=u("/privacy/"), made=aldy_credit(),
+    privacy=u("/privacy/"), calc=calc_link(), made=aldy_credit(),
     f_address=T("f_address"), f_contacts=T("f_contacts"), f_details=T("f_details"),
     f_site=T("f_site"), l_privacy=T("f_privacy"), l_cid=T("company_no"), l_vat=T("vat"),
     navlinks="\n".join('            <li><a href="%s">%s</a></li>' % (u(h), l)

@@ -53,6 +53,7 @@ S["en"] = dict(
     home="Home", sheets="Sheets", prev="Previous", next="Next",
     f_address="Address", f_contacts="Contacts", f_details="Company details",
     f_site="Site", f_privacy="Privacy policy", f_made="Made by",
+    f_calc="Calculator",
     company_no="Company No.", vat="VAT code", lang_label="Language",
 
     hero_eyebrow="Klaipeda, Lithuania", hero_since="since",
@@ -137,6 +138,7 @@ S["lt"] = dict(
     home="Pradžia", sheets="Puslapiai", prev="Ankstesnis", next="Kitas",
     f_address="Adresas", f_contacts="Kontaktai", f_details="Rekvizitai",
     f_site="Svetainė", f_privacy="Privatumo politika", f_made="Sukūrė",
+    f_calc="Skaičiuoklė",
     company_no="Įmonės kodas", vat="PVM mokėtojo kodas", lang_label="Kalba",
 
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
@@ -218,6 +220,7 @@ S["ru"] = dict(
     home="Главная", sheets="Страницы", prev="Назад", next="Далее",
     f_address="Адрес", f_contacts="Контакты", f_details="Реквизиты",
     f_site="Сайт", f_privacy="Политика конфиденциальности", f_made="Сайт сделан",
+    f_calc="Калькулятор",
     company_no="Код предприятия", vat="Код плательщика НДС", lang_label="Язык",
 
     hero_eyebrow="Клайпеда, Литва", hero_since="с",
