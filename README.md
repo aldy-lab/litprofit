@@ -815,8 +815,12 @@ background refresh is held off while the conflict dialog is open, since
 replacing `state.projects` underneath it left the dialog answering for a
 project no longer in the list.
 
-⚠️ **The amber warning has to be cleared as well as raised.** It stayed up
-after a successful retry, so a queue that had drained still read as broken.
+⚠️ **The amber warning has to be cleared as well as raised** — and clearing it
+is not the same as saying "Saved". It stayed up after a successful retry, so a
+drained queue read as broken; fixing that then put a green `Saved 17:47` beside
+a dialog asking which version of the figures to throw away, which is the most
+contradictory pair of things the screen can show at once. A conflict paints
+**Waiting for your answer** instead, and only resolving it says Saved.
 
 ### Portfolio totals are per currency
 

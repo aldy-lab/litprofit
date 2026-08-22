@@ -653,6 +653,7 @@ en: {
     signOut:'Sign out',
     refresh:'Refresh from server',
     offline:'Not saved to server',
+    awaiting:'Waiting for your answer',
     someone:'Someone else',
     conflictTitle:'This project changed while you had it open',
     conflictBody:'{who} saved {project} after you opened it. Loading their version discards the figures you just entered; keeping yours overwrites theirs. Whichever you choose, the other set is lost — so check with them if you are not sure.',
@@ -710,6 +711,7 @@ lt: {
     signOut:'Atsijungti',
     refresh:'Atnaujinti iš serverio',
     offline:'Neišsaugota serveryje',
+    awaiting:'Laukiama jūsų sprendimo',
     someone:'Kitas naudotojas',
     conflictTitle:'Projektas pasikeitė, kol jį buvote atsidarę',
     conflictBody:'{who} išsaugojo {project} po to, kai jį atidarėte. Įkėlus jų versiją, ką tik įvesti duomenys bus prarasti; palikus savo — bus perrašyti jų duomenys. Kad ir ką pasirinktumėte, viena duomenų versija dings, todėl, jei nesate tikri, pasitarkite.',
@@ -767,6 +769,7 @@ ru: {
     signOut:'Выйти',
     refresh:'Обновить с сервера',
     offline:'Не сохранено на сервере',
+    awaiting:'Ожидает вашего решения',
     someone:'Другой пользователь',
     conflictTitle:'Проект изменился, пока он был у вас открыт',
     conflictBody:'{who} сохранил {project} после того, как вы его открыли. Если загрузить их версию, только что введённые данные пропадут; если оставить свою — будут перезаписаны их данные. В любом случае одна версия будет потеряна, поэтому, если не уверены, согласуйте с коллегой.',
@@ -1097,7 +1100,11 @@ function paintSaveState(kind){
   if(!tag) return;
   clearTimeout(flashTimer);
   tag.classList.remove('warn','flash','busy');
-  if(kind === 'error'){
+  if(kind === 'waiting'){
+    tag.textContent = t.cloud.awaiting;
+    tag.title = '';
+    tag.classList.add('warn');
+  } else if(kind === 'error'){
     tag.textContent = cloudErr ? t.cloud.offline : t.saveFailed;
     tag.title = cloudErr || '';
     tag.classList.add('warn');
@@ -2549,7 +2556,7 @@ async function pushPending(){
   pushing = true;
   const ids = [...pendingPush];
   pendingPush.clear();
-  let failed = false;
+  let failed = false, conflicted = false;
   try {
     for(let i = 0; i < ids.length; i++){
       const id = ids[i];
@@ -2597,6 +2604,7 @@ async function pushPending(){
            and waits, or a second conflict would replace the first dialog and
            the answer would be applied to the wrong project. */
         for(let j = i + 1; j < ids.length; j++) pendingPush.add(ids[j]);
+        conflicted = true;
         break;
       }
       adopt(p, row);
@@ -2611,6 +2619,12 @@ async function pushPending(){
          day never went anywhere. */
       pushBackoff = Math.min(pushBackoff ? pushBackoff * 2 : PUSH_RETRY_MIN, PUSH_RETRY_MAX);
       pushSoon(pushBackoff);
+    } else if(conflicted){
+      /* The dialog is asking which version to keep, so this work is NOT saved.
+         Repainting "Saved" here put a green receipt beside a question about
+         losing figures -- the two most contradictory things on the screen. */
+      pushBackoff = 0;
+      paintSaveState('waiting');
     } else {
       pushBackoff = 0;
       /* Say so when it comes back. The amber warning stayed up after a
