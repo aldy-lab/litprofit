@@ -566,6 +566,13 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .partner-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  /* Three named bands the cards share, so the role label, the logo and the
+     body text each start on the same line across both cards. The official
+     roles are long enough to wrap at two lines in Lithuanian and Russian --
+     and only ever in ONE of the two cards -- which left the boxes uneven and
+     the logos below them out of step. Reserving two lines everywhere would
+     have bought that alignment with dead space at full width. */
+  grid-template-rows: auto auto 1fr;
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
@@ -574,10 +581,16 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   min-width: 0;
   background: var(--bg-2);
   padding: clamp(30px, 3.6vw, 52px);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
   gap: 16px;
   transition: background 0.35s var(--ease);
+}
+/* Subgrid is the enhancement, not the layout: without it the cards fall back
+   to a flex column exactly as before, merely unaligned. */
+@supports not (grid-template-rows: subgrid) {
+  .partner { display: flex; flex-direction: column; }
 }
 .partner:hover { background: var(--navy-700); }
 /* NB: these two are scoped `.partner .x` on purpose. Written as bare
@@ -615,6 +628,8 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .partner .partner-role {
   display: inline-flex;
   align-self: flex-start;
+  /* the box hugs its text; the ROW is what both cards share */
+  justify-self: start;
   align-items: center;
   gap: 8px;
   padding: 7px 14px;

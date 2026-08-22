@@ -610,6 +610,32 @@ exact failure a fixed grid invites. A rail does not care how many there are.
 we represent, not customers; merging them into the client list would misstate
 both relationships.
 
+Their roles are the client's own official wording, given 2026-08-22, and live
+in `i18n.py` as `role_bitzer` (*Authorised marine service partner*) and
+`role_danfoss` (*Marine refrigeration partner*). The keys were `trust_partner`
+and `trust_rep`; they were renamed because each now belongs to one named
+partner rather than being a generic label somebody might reuse. Each string is
+rendered **twice** — the hero trust line and the partner card — on the
+homepage and on `/partners`, in all three languages. Change it in one place.
+
+⚠️ These are claims about a manufacturer relationship, in six places per
+language. If either agreement is ever reworded, this is the string to bring
+back into line.
+
+**The partner cards share a row grid.** The official roles are long enough to
+wrap onto two lines in Lithuanian and Russian, and in Lithuanian only *one* of
+the two wraps — which left the boxes uneven and, worse, the logos beneath them
+out of step by the height of a line. `.partner-grid` declares
+`grid-template-rows: auto auto 1fr` and each `.partner` is `grid-row: span 3`
+with `grid-template-rows: subgrid`, so role, logo and body text each start on a
+line both cards share. The label box still hugs its own text — that part is
+meant to differ. Reserving two lines everywhere would have bought the same
+alignment with dead space at full width.
+
+Behind `@supports not (grid-template-rows: subgrid)` the cards fall back to the
+flex column they were before: unaligned, never broken. Measured at 1440, 1100
+and 900px in all three languages: logo tops and body-text tops both spread 0px.
+
 ⚠️ **Six of the nine sector lines are blank on purpose.** Only Sealord, Seafish
 Trade and Santavilte say what they do on their own sites. A descriptive line
 under someone else's logo is a claim about their business, so the rest stay

@@ -62,7 +62,8 @@ S["en"] = dict(
               'wherever the vessel happens to be.',
     step1="We consult", step2="We organise", step3="We ensure",
     hero_services="Our services",
-    trust_partner="Authorised partner", trust_rep="Marine line representative",
+    role_bitzer="Authorised marine service partner",
+    role_danfoss="Marine refrigeration partner",
     trust_cert="Certified",
 
     rep_eyebrow="Representation", rep_h2="We represent BITZER and DANFOSS",
@@ -141,7 +142,8 @@ S["lt"] = dict(
               'įrenginiams — kad ir kur būtų laivas.',
     step1="Konsultuojame", step2="Organizuojame", step3="Užtikriname",
     hero_services="Mūsų paslaugos",
-    trust_partner="Autorizuoti partneriai", trust_rep="Jūrinės linijos atstovai",
+    role_bitzer="Autorizuoti jūrinio serviso partneriai",
+    role_danfoss="Jūrinio šaldymo partneriai",
     trust_cert="Sertifikuota",
 
     rep_eyebrow="Atstovavimas", rep_h2="Atstovaujame BITZER ir DANFOSS",
@@ -220,7 +222,8 @@ S["ru"] = dict(
               'судовладельцев и береговых установок — где бы ни находилось судно.',
     step1="Консультируем", step2="Организовываем", step3="Обеспечиваем",
     hero_services="Наши услуги",
-    trust_partner="Авторизованный партнёр", trust_rep="Представитель морской линии",
+    role_bitzer="Авторизованный партнёр по морскому сервису",
+    role_danfoss="Партнёр по морскому холодоснабжению",
     trust_cert="Сертифицировано",
 
     rep_eyebrow="Представительство", rep_h2="Мы представляем BITZER и DANFOSS",
