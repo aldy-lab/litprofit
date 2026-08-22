@@ -760,6 +760,36 @@ Three things were local-only and had to learn about the server:
   Verified: text typed after the session died survives re-authentication and
   reaches the database.
 
+### A project from the database may be short of a field
+
+Once the figures live somewhere other than this browser they can arrive
+incomplete: hand-edited in the Supabase dashboard, written by a partial API
+call, or restored from a backup that predates a sheet. A missing sheet array
+crashed `computeDash` on `.reduce` of undefined and left the page half-drawn —
+tabs across the top, no figures underneath, and only the console saying why.
+
+`normaliseProject()` squares every project up on the way in, which is cheaper
+than defending each of the places that assume the full shape. It fills gaps and
+never overwrites: whatever the row does carry is kept exactly as it is.
+
+### Verified against the live project, not only a replica
+
+The whole thing was built against a local PostgreSQL behind a stand-in for the
+Supabase endpoints. That stand-in was mine, so these were then re-checked
+against real PostgREST on the live project — and it behaved identically:
+
+| | |
+|---|---|
+| Stale save (`rev` mismatch) | `[]` with **HTTP 200** — which is what the conflict path reads |
+| Edit a closed project | **HTTP 400**, `Project ZZ-TEST is closed. Reopen it before editing.`, row unchanged |
+| Reopen a closed project | allowed |
+| App writing history | **HTTP 403**, row-level security — the audit trail is append-only |
+| Anonymous, holding the published key | refused on projects, history and profiles |
+
+And through the real page: sign in, edit reaching the database, a second writer
+raising the conflict dialog naming the right account, and *load their version*
+resolving it.
+
 ### What is kept where
 
 | | |

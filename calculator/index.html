@@ -814,6 +814,31 @@ function cellVal(sheet, row, colKey){
    hit means the text was a default rather than something a person typed, so the
    row gets its key back and the matching fields are cleared so they resolve.
    A field the user actually changed does not match, so it is left alone. */
+/* A project can arrive short of a field now that the data lives somewhere
+   other than this browser: hand-edited in the Supabase dashboard, written by a
+   partial API call, or restored from a backup that predates a sheet. A missing
+   sheet array crashed computeDash on `.reduce` of undefined and left the page
+   half-drawn -- tabs, no figures -- with only the console saying why.
+
+   Squaring every project up on the way in is cheaper than defending each of
+   the places that assume the full shape. It fills gaps and never overwrites:
+   whatever the row does carry is kept exactly as it is. */
+const SHEET_KEYS = ['revenue','labor','subs','travel','materials','logistics'];
+function normaliseProject(p){
+  if(!p || typeof p !== 'object') p = {};
+  const blank = newProject(state.lang, 1);
+  if(!p.card || typeof p.card !== 'object') p.card = {};
+  Object.keys(blank.card).forEach(k=>{ if(!(k in p.card)) p.card[k] = blank.card[k]; });
+  p.settings = Object.assign(defaultSettings(), p.settings || {});
+  SHEET_KEYS.forEach(k=>{ if(!Array.isArray(p[k])) p[k] = []; });
+  if(typeof p.locked !== 'boolean') p.locked = false;
+  return p;
+}
+function normaliseProjects(){
+  if(!Array.isArray(state.projects)) state.projects = [];
+  state.projects = state.projects.map(normaliseProject);
+}
+
 function migrateDefaults(){
   if(state.v >= 2) return;
   Object.keys(DEF_FIELDS).forEach(sheet=>{
@@ -2628,6 +2653,7 @@ async function cloudPull(){
     state.projects = [seed];
   }
   if(!state.projects.some(p=>p.id === state.currentId)) state.currentId = state.projects[0].id;
+  normaliseProjects();
   migrateDefaults();
   persist();
 }
@@ -2702,6 +2728,7 @@ async function bootCloud(){
 }
 
 /* ================= init ================= */
+normaliseProjects();
 migrateDefaults();
 migrateTheme();
 applyTheme();
