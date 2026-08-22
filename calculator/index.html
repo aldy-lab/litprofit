@@ -443,11 +443,27 @@ tr:hover .rowbtn{opacity:1}
 .tile .val.hero{font-size:38px}
 .tile .delta{font-size:11px;margin-top:6px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.06em}
 .tile .delta.up{color:var(--good-text)} .tile .delta.down{color:var(--critical)}
+/* the second row carries five smaller figures, not five more headlines */
+.tiles-sm .val.sm{font-size:clamp(17px,2vw,22px)}
+.chart-note{
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--ink-3);
+  margin:-6px 0 12px
+}
+.chart-empty{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-3);
+  padding:22px 0;margin:0;text-align:center
+}
+.legend-wrap{flex-wrap:wrap;gap:6px 16px;margin-top:10px}
+.legend-wrap b{color:var(--ink-1);font-variant-numeric:tabular-nums;font-weight:600}
 .status-chip{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;padding:4px 11px;border:1px solid var(--border);letter-spacing:.12em;font-family:var(--mono)}
 .meter{height:8px;background:var(--grid);overflow:hidden;margin-top:10px}
 .meter>i{display:block;height:100%}
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:1000px){.dash-grid{grid-template-columns:1fr}}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+/* One wide bar in a half-width box left a card of empty ground beside a tall
+   neighbour -- the grid stretches rows to match, so the short chart paid for
+   the tall one. It takes the full width and the row ends with it. */
+.dash-grid .span-2{grid-column:1 / -1}
+@media(max-width:1000px){.dash-grid{grid-template-columns:1fr}.dash-grid .span-2{grid-column:auto}}
 .legend{display:flex;gap:18px;font-size:11px;color:var(--ink-2);margin:2px 0 12px;font-family:var(--mono);letter-spacing:.1em}
 .legend i{display:inline-block;width:10px;height:10px;margin-right:7px;vertical-align:-1px}
 .tooltip{position:fixed;pointer-events:none;background:var(--surface-2);border:1px solid var(--baseline);
@@ -464,6 +480,13 @@ svg text{font-family:var(--mono)}
 
 #print-area{display:none}
 @page{ size:A4; margin:13mm 12mm 15mm; }
+/* The detail sheets go sideways. Labor alone is thirteen columns and measured
+   898px inside a 794px portrait page -- the last four, including Plan Total
+   and Actual Total, were being cut off the edge of the paper with nothing to
+   say they had gone. A named landscape page keeps every column. Where a
+   browser ignores `page:`, the rule below shrinks them to fit instead, so the
+   worst case is small type rather than missing figures. */
+@page detail{ size:A4 landscape; margin:12mm; }
 @media print{
   /* the app itself is not the document */
   .chrome,body>header,nav.tabs,.pulse,.seam,main,.tooltip,.toast,.signin,.conflict{display:none !important}
@@ -473,7 +496,7 @@ svg text{font-family:var(--mono)}
   /* Backgrounds are off by default in print. These blocks carry the brand and
      the verdict, so they are forced on — everything still reads if a printer
      ignores it, because none of them rely on colour alone. */
-  .rp-band,.rp-kpi b,.rp-chip,.rp-tot td,#print-area thead th{
+  .rp-band,.rp-kpi b,.rp-tot td,#print-area thead th{
     -webkit-print-color-adjust:exact;print-color-adjust:exact
   }
 
@@ -502,6 +525,23 @@ svg text{font-family:var(--mono)}
 
   /* the four figures anyone actually opens the report for */
   .rp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-bottom:6mm}
+  .rp-kpis-sm .rp-kpi b{font-size:11pt}
+  /* a chart must not be split across a page break, and two side by side keep
+     the report to a readable number of sheets */
+  .rp-chart{break-inside:avoid;page-break-inside:avoid;margin-bottom:5mm}
+  .rp-chart .legend{
+    display:flex;flex-wrap:wrap;gap:1mm 4mm;font-family:var(--mono);
+    font-size:7pt;letter-spacing:.08em;color:#6b6e85;margin-top:1.5mm;list-style:none;padding:0
+  }
+  .rp-chart .legend span{display:inline-flex;align-items:center;gap:1.5mm}
+  .rp-chart .legend i{width:2.4mm;height:2.4mm;display:inline-block}
+  .rp-chart .legend b{color:#2b2d42;font-weight:600}
+  .rp-chart .chart-empty{color:#6b6e85;padding:6mm 0}
+  .rp-two{display:grid;grid-template-columns:1fr 1fr;gap:6mm;break-inside:avoid}
+  .rp-two h3{margin-top:0}
+  .rp-landscape{page:detail}
+  .rp-landscape table{font-size:6.6pt}
+  .rp-landscape th,.rp-landscape td{padding:1mm 1.2mm}
   .rp-kpi{border:.3mm solid #d3d5e0;padding:4mm}
   .rp-kpi span{
     display:block;font-family:var(--mono);font-size:6.8pt;letter-spacing:.15em;
@@ -509,11 +549,14 @@ svg text{font-family:var(--mono)}
   }
   .rp-kpi b{font-size:16pt;font-weight:700;letter-spacing:-.02em;display:block}
   .rp-kpi i{font-style:normal;font-family:var(--mono);font-size:7.4pt;color:#6b6e85;display:block;margin-top:1.5mm}
+  /* Outlined, not filled. A portfolio of twenty jobs is twenty solid blocks
+     of ink otherwise, and the page stops being readable as a table. */
   .rp-chip{
-    display:inline-block;padding:1.4mm 3mm;font-family:var(--mono);font-size:7.4pt;
-    font-weight:700;letter-spacing:.12em;color:#fff
+    display:inline-block;padding:1.1mm 2.4mm;font-family:var(--mono);font-size:7.2pt;
+    font-weight:700;letter-spacing:.1em;white-space:nowrap;
+    border:.35mm solid currentColor;color:#6b6e85
   }
-  .rp-good{background:#1b7a4b} .rp-bad{background:#c0392b}
+  .rp-good{color:#1b7a4b} .rp-bad{color:#c0392b}
 
   #print-area h3{
     font-size:8.4pt;font-family:var(--mono);letter-spacing:.2em;text-transform:uppercase;
@@ -632,6 +675,12 @@ en: {
     totalRevenue:'Total Revenue',laborCost:'Labor Cost',directCost:'Direct Project Cost',adminOh:'Admin Overhead',contingency:'Contingency',totalCost:'Total Project Cost',grossProfit:'Gross Profit',margin:'Profit Margin',
     control:'Margin control',target:'Target margin',actualMargin:'Actual margin',deviation:'Deviation',
     onTarget:'ON TARGET',belowTarget:'BELOW TARGET',
+    waterfallTitle:'From revenue to profit',
+    varianceTitle:'Over and under budget',varianceNote:'Actual less plan, largest first. Red is over.',
+    compositionTitle:'Where the cost went',noData:'Nothing entered yet.',
+    contract:'Contract value',advance:'Advance',invoiced:'Invoiced',paid:'Paid',
+    outstanding:'Outstanding',ofContract:'of contract',labourHours:'Labour hours',
+    crew:'crew',travelDays:'travel days',costPerHour:'Cost per hour',rebill:'Rebillable',
     chartTitle:'Cost breakdown — plan vs actual',revVsCost:'Revenue & cost — plan vs actual',
     revenue:'Revenue',cost:'Total cost',profit:'Profit',
     vsPlan:'vs plan',project:'Project',client:'Client',site:'Vessel / Site',period:'Period',daysN:'days',pm:'Project Manager'},
@@ -640,6 +689,9 @@ en: {
     travel:{flights:['Flights','Air tickets'],hotel:['Hotel','Accommodation'],car:['Car Rental','Rental car'],taxi:['Taxi / Transfer','Local transport'],ferry:['Ferry / Train','Other transport'],visa:['Visa / Permits','Visas / work permits'],insurance:['Insurance','Travel / project insurance']},
     materials:{spares:['Spare Parts','Spare parts'],consumables:['Consumables','Oil, refrigerant, filters, etc.'],tools:['Tools','New / replacement tools'],rental:['Tool Rental','Rented tools / equipment'],ppe:['PPE','Safety equipment']},
     logistics:{freight:['Freight','Shipment of tools / equipment'],customs:['Customs','Customs duties / broker'],port:['Port Charges','Port / terminal fees'],storage:['Storage','Storage / demurrage'],crane:['Crane / Forklift','Lifting / handling'],local:['Local Purchases','Emergency local purchases'],surveyor:['Surveyor','Independent surveyor / inspection'],comms:['Communication','SIM / phone / internet'],bank:['Bank / FX Fees','Bank charges / exchange'],force:['Force Majeure','Unexpected project costs'],other:['Other','Other project cost']}},
+  companyTitle:'Company Profitability Report',projectsN:'projects',openN:'open',
+  marginByProject:'Margin by project',revenueByClient:'Revenue by client',
+  printProject:'Project report',printCompany:'Company report',
   printTitle:'Project Profitability Report',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lithuania',generated:'Generated',
   puMargin:'Margin',cloud:{
     signInSub:'Project Profitability Calculator',
@@ -690,6 +742,12 @@ lt: {
     totalRevenue:'Iš viso pajamų',laborCost:'Darbo sąnaudos',directCost:'Tiesioginės projekto sąnaudos',adminOh:'Administracinės išlaidos',contingency:'Nenumatytos išlaidos',totalCost:'Iš viso projekto sąnaudų',grossProfit:'Bendrasis pelnas',margin:'Pelno marža',
     control:'Maržos kontrolė',target:'Tikslinė marža',actualMargin:'Faktinė marža',deviation:'Nuokrypis',
     onTarget:'TIKSLAS PASIEKTAS',belowTarget:'ŽEMIAU TIKSLO',
+    waterfallTitle:'Nuo pajamų iki pelno',
+    varianceTitle:'Viršyta ir sutaupyta',varianceNote:'Faktas minus planas, didžiausi viršuje. Raudona — viršyta.',
+    compositionTitle:'Kur išleista',noData:'Kol kas nieko neįvesta.',
+    contract:'Sutarties vertė',advance:'Avansas',invoiced:'Išrašyta',paid:'Apmokėta',
+    outstanding:'Neapmokėta',ofContract:'nuo sutarties',labourHours:'Darbo valandos',
+    crew:'darbuotojai',travelDays:'komandiruočių d.',costPerHour:'Kaina už valandą',rebill:'Perrašoma klientui',
     chartTitle:'Sąnaudų struktūra — planas ir faktas',revVsCost:'Pajamos ir sąnaudos — planas ir faktas',
     revenue:'Pajamos',cost:'Visos sąnaudos',profit:'Pelnas',
     vsPlan:'nuo plano',project:'Projektas',client:'Klientas',site:'Laivas / objektas',period:'Laikotarpis',daysN:'d.',pm:'Projekto vadovas'},
@@ -698,6 +756,9 @@ lt: {
     travel:{flights:['Skrydžiai','Lėktuvų bilietai'],hotel:['Viešbutis','Apgyvendinimas'],car:['Automobilio nuoma','Nuomojamas automobilis'],taxi:['Taksi / pervežimas','Vietinis transportas'],ferry:['Keltas / traukinys','Kitas transportas'],visa:['Vizos / leidimai','Vizos / darbo leidimai'],insurance:['Draudimas','Kelionių / projekto draudimas']},
     materials:{spares:['Atsarginės dalys','Atsarginės dalys'],consumables:['Eksploatacinės medžiagos','Alyva, šaltnešis, filtrai ir kt.'],tools:['Įrankiai','Nauji / keičiami įrankiai'],rental:['Įrankių nuoma','Nuomojami įrankiai / įranga'],ppe:['Apsaugos priemonės','Saugos priemonės']},
     logistics:{freight:['Krovinių gabenimas','Įrankių / įrangos siuntimas'],customs:['Muitinė','Muitai / brokeris'],port:['Uosto mokesčiai','Uosto / terminalo mokesčiai'],storage:['Sandėliavimas','Sandėliavimas / prastova'],crane:['Kranas / krautuvas','Kėlimas / krova'],local:['Vietiniai pirkimai','Skubūs vietiniai pirkimai'],surveyor:['Inspektorius','Nepriklausomas inspektorius / patikra'],comms:['Ryšiai','SIM / telefonas / internetas'],bank:['Banko mokesčiai','Banko / valiutos keitimo mokesčiai'],force:['Force majeure','Nenumatytos projekto išlaidos'],other:['Kita','Kitos projekto sąnaudos']}},
+  companyTitle:'Įmonės pelningumo ataskaita',projectsN:'projektai',openN:'atviri',
+  marginByProject:'Marža pagal projektą',revenueByClient:'Pajamos pagal klientą',
+  printProject:'Projekto ataskaita',printCompany:'Įmonės ataskaita',
   printTitle:'Projekto pelningumo ataskaita',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lietuva',generated:'Sugeneruota',
   puMargin:'Marža',cloud:{
     signInSub:'Projektų pelningumo skaičiuoklė',
@@ -748,6 +809,12 @@ ru: {
     totalRevenue:'Выручка итого',laborCost:'Затраты на труд',directCost:'Прямые затраты проекта',adminOh:'Административные накладные',contingency:'Резерв',totalCost:'Затраты проекта итого',grossProfit:'Валовая прибыль',margin:'Маржа прибыли',
     control:'Контроль маржи',target:'Целевая маржа',actualMargin:'Фактическая маржа',deviation:'Отклонение',
     onTarget:'ЦЕЛЬ ДОСТИГНУТА',belowTarget:'НИЖЕ ЦЕЛИ',
+    waterfallTitle:'От выручки к прибыли',
+    varianceTitle:'Перерасход и экономия',varianceNote:'Факт минус план, крупнейшие сверху. Красный — перерасход.',
+    compositionTitle:'Куда ушли деньги',noData:'Пока ничего не введено.',
+    contract:'Сумма контракта',advance:'Аванс',invoiced:'Выставлено',paid:'Оплачено',
+    outstanding:'Не оплачено',ofContract:'от контракта',labourHours:'Часы работ',
+    crew:'человек',travelDays:'дней команд.',costPerHour:'Стоимость часа',rebill:'Перевыставляется',
     chartTitle:'Структура затрат — план и факт',revVsCost:'Выручка и затраты — план и факт',
     revenue:'Выручка',cost:'Все затраты',profit:'Прибыль',
     vsPlan:'к плану',project:'Проект',client:'Клиент',site:'Судно / объект',period:'Период',daysN:'дн.',pm:'Руководитель проекта'},
@@ -756,6 +823,9 @@ ru: {
     travel:{flights:['Авиабилеты','Авиабилеты'],hotel:['Гостиница','Проживание'],car:['Аренда авто','Арендованный автомобиль'],taxi:['Такси / трансфер','Местный транспорт'],ferry:['Паром / поезд','Прочий транспорт'],visa:['Визы / разрешения','Визы / разрешения на работу'],insurance:['Страховка','Страхование поездки / проекта']},
     materials:{spares:['Запчасти','Запасные части'],consumables:['Расходники','Масло, хладагент, фильтры и т.д.'],tools:['Инструменты','Новые / заменяемые инструменты'],rental:['Аренда инструмента','Арендованные инструменты / оборудование'],ppe:['СИЗ','Средства защиты']},
     logistics:{freight:['Фрахт','Отправка инструмента / оборудования'],customs:['Таможня','Пошлины / брокер'],port:['Портовые сборы','Порт / терминал'],storage:['Хранение','Хранение / простой'],crane:['Кран / погрузчик','Подъём / перемещение'],local:['Местные закупки','Срочные местные закупки'],surveyor:['Сюрвейер','Независимый сюрвейер / инспекция'],comms:['Связь','SIM / телефон / интернет'],bank:['Банк / комиссии','Банковские / валютные комиссии'],force:['Форс-мажор','Непредвиденные расходы проекта'],other:['Прочее','Прочие расходы проекта']}},
+  companyTitle:'Отчёт о рентабельности компании',projectsN:'проектов',openN:'открытых',
+  marginByProject:'Маржа по проектам',revenueByClient:'Выручка по клиентам',
+  printProject:'Отчёт по проекту',printCompany:'Отчёт по компании',
   printTitle:'Отчёт о рентабельности проекта',addr:'Svajonės g. 30, LT-94101 Клайпеда, Литва',generated:'Сформировано',
   puMargin:'Маржа',cloud:{
     signInSub:'Калькулятор рентабельности проектов',
@@ -1314,6 +1384,212 @@ function computeDash(p){
     target:N(s.targetMargin), onTarget: marginActual >= N(s.targetMargin) };       // H7 =IF(H5>=H4,...)
 }
 
+/* ================= extra metrics =================
+   computeDash() is a faithful copy of the workbook's Dashboard sheet and stays
+   that way -- anything the spreadsheet did not calculate goes here instead, so
+   the two can be checked against each other line by line forever. */
+function computeExtra(p){
+  const sum = (arr, fn) => arr.reduce((a, r) => a + fn(r), 0);
+  const d = computeDash(p);
+  const invoiced = sum(p.revenue, r => (r.status === 'invoiced' || r.paid) ? N(r.actual) : 0);
+  const paid     = sum(p.revenue, r => r.paid ? N(r.actual) : 0);
+  const hours    = sum(p.labor, r => N(r.hours));
+  const crew     = p.labor.filter(r => String(r.name || '').trim() || N(r.hours)).length;
+  const rebill   = sum(p.materials, r => N(r.rebillAmt)) + sum(p.logistics, r => N(r.rebill));
+  return {
+    invoiced, paid,
+    outstanding: d.revActual - paid,
+    hours, crew, rebill,
+    travelDays: sum(p.labor, r => N(r.travelDays)),
+    contract: N(p.card.contract),
+    advance: N(p.card.advance),
+    /* what an hour of this job actually cost, all in */
+    costPerHour: hours ? d.costActual / hours : 0,
+    /* how much of the contract has been billed at all */
+    billedShare: N(p.card.contract) ? invoiced / N(p.card.contract) : 0
+  };
+}
+
+/* ================= charts =================
+   One set of drawing functions, taking the palette as an argument. The screen
+   and the printed report used to have their own copy of the bar chart with the
+   colours written in twice, which is two things to keep in step and one of
+   them only ever seen on paper. */
+const PAL_SCREEN = { plan:'var(--series-1)', actual:'var(--series-2)', grid:'var(--grid)',
+  axis:'var(--baseline)', ink:'var(--ink-2)', faint:'var(--ink-3)',
+  good:'var(--good-text)', bad:'var(--critical)',
+  seq:['var(--series-1)','var(--series-2)','var(--good)','var(--warning)','var(--critical)','var(--ink-3)'] };
+const PAL_PRINT = { plan:'#3452c4', actual:'#c9722c', grid:'#e3e5ee',
+  axis:'#b9bcca', ink:'#2b2d42', faint:'#6b6e85',
+  good:'#1b7a4b', bad:'#c0392b',
+  seq:['#3452c4','#c9722c','#1b7a4b','#b7791f','#c0392b','#6b6e85'] };
+
+function svgOpen(w, h, title){
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="${esc(title||'')}">`;
+}
+function niceMax(v){ return v <= 0 ? 1 : v; }
+
+/* plan against actual, one pair per category */
+function chartGrouped(cats, pal, opt){
+  const o = opt || {}, title = o.title || '';
+  const max = niceMax(Math.max(0, ...cats.flatMap(c => [c.p, c.a])));
+  const W = 560, labelW = o.labelW || 155, chartW = W - labelW - 60;
+  const barH = 13, gap = 3, groupH = barH * 2 + gap + 14;
+  const H = cats.length * groupH + 30;
+  const step = niceStep(max / 4);
+  let g = '';
+  for(let v = 0; v <= max * 1.02; v += step){
+    const x = labelW + (v / max) * chartW;
+    g += `<line x1="${x}" y1="4" x2="${x}" y2="${H-24}" stroke="${pal.grid}" stroke-width="1"/>`
+       + `<text x="${x}" y="${H-8}" font-size="9.5" fill="${pal.faint}" text-anchor="middle">${fmt(v,0)}</text>`;
+  }
+  let bars = '';
+  cats.forEach((c, i) => {
+    const y = i * groupH + 6;
+    const wp = Math.max(0, (c.p / max) * chartW), wa = Math.max(0, (c.a / max) * chartW);
+    bars += `<text x="${labelW-12}" y="${y+barH+gap/2+4}" font-size="10.5" fill="${pal.ink}" text-anchor="end">${esc(c.l)}</text>`
+         +  `<rect x="${labelW}" y="${y}" width="${wp}" height="${barH}" fill="${pal.plan}"/>`
+         +  `<rect x="${labelW}" y="${y+barH+gap}" width="${wa}" height="${barH}" fill="${pal.actual}"/>`;
+    if(o.hit) bars += `<rect class="bar-hit" x="${labelW}" y="${y-2}" width="${chartW}" height="${barH*2+gap+4}" data-tip="${esc(c.l)}|${fmt(c.p)}|${fmt(c.a)}"/>`;
+  });
+  return svgOpen(W, H, title) + g
+    + `<line x1="${labelW}" y1="4" x2="${labelW}" y2="${H-24}" stroke="${pal.axis}" stroke-width="1"/>`
+    + bars + '</svg>';
+}
+
+/* where the money went: one bar, each cost as its share of the whole */
+function chartComposition(parts, pal, opt){
+  const o = opt || {};
+  const live = parts.filter(x => x.v > 0);
+  const total = live.reduce((a, x) => a + x.v, 0);
+  const W = 560, H = 46;
+  if(!total) return `<p class="chart-empty">${esc(o.empty || '')}</p>`;
+  let x = 0, bar = '', key = '';
+  live.forEach((s, i) => {
+    const w = (s.v / total) * W, col = pal.seq[i % pal.seq.length];
+    bar += `<rect x="${x.toFixed(1)}" y="0" width="${Math.max(0.5, w).toFixed(1)}" height="26" fill="${col}"/>`;
+    /* only label a slice wide enough to hold the number */
+    if(w > 46) bar += `<text x="${(x + w/2).toFixed(1)}" y="17" font-size="9.5" fill="#fff" text-anchor="middle" font-weight="600">${pct(s.v/total)}</text>`;
+    key += `<span><i style="background:${col}"></i>${esc(s.l)} <b>${fmt(s.v)}</b></span>`;
+    x += w;
+  });
+  return svgOpen(W, H - 20, o.title) + bar + '</svg>'
+       + `<div class="legend legend-wrap">${key}</div>`;
+}
+
+/* what blew the budget: actual minus plan, worst first, either side of zero */
+function chartVariance(cats, pal, opt){
+  const o = opt || {};
+  const live = cats.map(c => ({ l: c.l, v: c.a - c.p })).filter(c => Math.abs(c.v) > 0.005);
+  if(!live.length) return `<p class="chart-empty">${esc(o.empty || '')}</p>`;
+  live.sort((a, b) => Math.abs(b.v) - Math.abs(a.v));
+  const max = niceMax(Math.max(...live.map(c => Math.abs(c.v))));
+  const W = 560, labelW = 150, half = (W - labelW - 70) / 2, zero = labelW + half;
+  const rowH = 22, H = live.length * rowH + 22;
+  let bars = `<line x1="${zero}" y1="2" x2="${zero}" y2="${H-18}" stroke="${pal.axis}" stroke-width="1"/>`;
+  live.forEach((c, i) => {
+    const y = i * rowH + 4, w = (Math.abs(c.v) / max) * half;
+    /* over budget is bad for a COST, so the sign is read that way round */
+    const over = c.v > 0, col = over ? pal.bad : pal.good;
+    /* The longest bar reaches the axis, and a figure written outside it then
+       runs straight into the category name. Past about three quarters of the
+       track the number goes inside the bar instead, in white. */
+    const inside = w > half * 0.72;
+    const tx = over ? (inside ? zero + w - 6 : zero + w + 6)
+                    : (inside ? zero - w + 6 : zero - w - 6);
+    const anchor = over ? (inside ? 'end' : 'start') : (inside ? 'start' : 'end');
+    bars += `<text x="${labelW-12}" y="${y+13}" font-size="10.5" fill="${pal.ink}" text-anchor="end">${esc(c.l)}</text>`
+         +  `<rect x="${over ? zero : zero - w}" y="${y}" width="${Math.max(0.5, w)}" height="15" fill="${col}"/>`
+         +  `<text x="${tx.toFixed(1)}" y="${y+12}" font-size="9.5" fill="${inside ? '#fff' : col}" text-anchor="${anchor}" ${inside?'font-weight="600"':''}>${over?'+':''}${fmt(c.v,0)}</text>`;
+  });
+  return svgOpen(W, H, o.title) + bars + '</svg>';
+}
+
+/* revenue, then every cost taken off it, then what is left */
+function chartWaterfall(steps, pal, opt){
+  const o = opt || {};
+  const W = 560, H = 190, padL = 8, padB = 42, padT = 10;
+  let run = 0;
+  const pts = steps.map(s => {
+    const from = run;
+    run += s.v;
+    return { l: s.l, from, to: run, v: s.v, total: s.total };
+  });
+  const hi = niceMax(Math.max(...pts.map(p => Math.max(p.from, p.to)), 0));
+  const lo = Math.min(0, ...pts.map(p => Math.min(p.from, p.to)));
+  const span = niceMax(hi - lo);
+  const plotH = H - padB - padT;
+  const yOf = v => padT + (hi - v) / span * plotH;
+  const bw = (W - padL * 2) / pts.length * 0.62, gapw = (W - padL * 2) / pts.length;
+  let out = `<line x1="${padL}" y1="${yOf(0)}" x2="${W-padL}" y2="${yOf(0)}" stroke="${pal.axis}" stroke-width="1"/>`;
+  pts.forEach((s, i) => {
+    const x = padL + i * gapw + (gapw - bw) / 2;
+    const y1 = yOf(Math.max(s.from, s.to)), y2 = yOf(Math.min(s.from, s.to));
+    const col = s.total ? (s.to >= 0 ? pal.plan : pal.bad) : (s.v < 0 ? pal.actual : pal.good);
+    out += `<rect x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1.5, y2-y1).toFixed(1)}" fill="${col}"/>`
+        +  `<text x="${(x+bw/2).toFixed(1)}" y="${(y1-4).toFixed(1)}" font-size="9" fill="${pal.ink}" text-anchor="middle">${fmt(s.total ? s.to : s.v, 0)}</text>`;
+    /* two short lines rather than one long one, or the labels collide */
+    String(s.l).split(' ').reduce((yy, word, wi, arr) => {
+      if(wi > 1) return yy;
+      const text = wi === 1 && arr.length > 2 ? arr.slice(1).join(' ') : word;
+      out += `<text x="${(x+bw/2).toFixed(1)}" y="${H-padB+14+wi*11}" font-size="9" fill="${pal.faint}" text-anchor="middle">${esc(text)}</text>`;
+      return yy;
+    }, 0);
+  });
+  return svgOpen(W, H, o.title) + out + '</svg>';
+}
+
+/* ---- company level ---- */
+
+/* margin per job against the target line: the one picture that says which
+   jobs are carrying the year and which are being carried */
+function chartProjectMargins(rows, pal, opt){
+  const o = opt || {};
+  if(!rows.length) return `<p class="chart-empty">${esc(o.empty || '')}</p>`;
+  const list = rows.slice().sort((a, b) => b.d.marginActual - a.d.marginActual);
+  const W = 560, labelW = 150, chartW = W - labelW - 70;
+  const rowH = 20, H = list.length * rowH + 26;
+  const vals = list.flatMap(r => [r.d.marginActual, r.d.target]);
+  const hi = niceMax(Math.max(0.01, ...vals)), lo = Math.min(0, ...vals);
+  const span = niceMax(hi - lo), zero = labelW + (0 - lo) / span * chartW;
+  let out = `<line x1="${zero}" y1="2" x2="${zero}" y2="${H-20}" stroke="${pal.axis}" stroke-width="1"/>`;
+  list.forEach((r, i) => {
+    const y = i * rowH + 4, m = r.d.marginActual;
+    const x = labelW + (Math.min(m, 0) - lo) / span * chartW;
+    const w = Math.abs(m) / span * chartW;
+    const col = m >= r.d.target ? pal.good : pal.bad;
+    const tx = labelW + (r.d.target - lo) / span * chartW;
+    out += `<text x="${labelW-10}" y="${y+12}" font-size="10" fill="${pal.ink}" text-anchor="end">${esc(r.p.card.projectId || '—')}</text>`
+        +  `<rect x="${x.toFixed(1)}" y="${y}" width="${Math.max(0.5, w).toFixed(1)}" height="13" fill="${col}"/>`
+        +  `<line x1="${tx.toFixed(1)}" y1="${y-1}" x2="${tx.toFixed(1)}" y2="${y+14}" stroke="${pal.faint}" stroke-width="1" stroke-dasharray="2 2"/>`
+        +  `<text x="${(x+w+7).toFixed(1)}" y="${y+11}" font-size="9" fill="${col}">${pct(m)}</text>`;
+  });
+  return svgOpen(W, H, o.title) + out + '</svg>';
+}
+
+/* which clients the revenue actually comes from */
+function chartByClient(rows, pal, opt){
+  const o = opt || {}, by = new Map();
+  rows.forEach(r => {
+    const k = String(r.p.card.client || '').trim() || (o.unnamed || '—');
+    by.set(k, (by.get(k) || 0) + r.d.revActual);
+  });
+  const list = [...by.entries()].map(([l, v]) => ({ l, v }))
+    .filter(x => x.v > 0).sort((a, b) => b.v - a.v).slice(0, 8);
+  if(!list.length) return `<p class="chart-empty">${esc(o.empty || '')}</p>`;
+  const max = niceMax(list[0].v);
+  const W = 560, labelW = 150, chartW = W - labelW - 80;
+  const rowH = 20, H = list.length * rowH + 12;
+  let out = '';
+  list.forEach((c, i) => {
+    const y = i * rowH + 4, w = (c.v / max) * chartW;
+    out += `<text x="${labelW-10}" y="${y+12}" font-size="10" fill="${pal.ink}" text-anchor="end">${esc(c.l)}</text>`
+        +  `<rect x="${labelW}" y="${y}" width="${Math.max(0.5, w).toFixed(1)}" height="13" fill="${pal.plan}"/>`
+        +  `<text x="${(labelW+w+7).toFixed(1)}" y="${y+11}" font-size="9" fill="${pal.faint}">${fmt(c.v,0)}</text>`;
+  });
+  return svgOpen(W, H, o.title) + out + '</svg>';
+}
+
 /* ================= formatting ================= */
 const LOCALES = {en:'en-GB', lt:'lt-LT', ru:'ru-RU'};
 function fmt(n, dec=2){
@@ -1321,7 +1597,11 @@ function fmt(n, dec=2){
   return new Intl.NumberFormat(LOCALES[state.lang]||'en-GB',{minimumFractionDigits:0,maximumFractionDigits:dec}).format(n);
 }
 function money(n){ return n===null||isNaN(n) ? '' : fmt(n)+' '+(proj().settings.currency||''); }
-function pct(n){ return fmt(n*100,1)+' %'; }
+/* A non-breaking space, because "8.5 %" split across two lines wherever a
+   percentage sat at the end of a line -- the % landing alone under the number
+   in the report's summary cards. The two CSV exports put a plain space back,
+   since a spreadsheet cell should not carry U+00A0. */
+function pct(n){ return fmt(n*100,1)+'\u00a0%'; }
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function diffCls(v){ return v>0.005 ? 'pos' : (v<-0.005 ? 'neg' : ''); }
 
@@ -1467,7 +1747,8 @@ function renderChrome(){
   document.querySelector('[data-i18n=appSub]').textContent = t.appSub;
   const lk = !!(proj() && proj().locked);
   document.documentElement.classList.toggle('is-locked', lk);
-  $('#btnPrint').textContent = t.print;
+  /* the button prints what is on screen: the portfolio is the company */
+  $('#btnPrint').textContent = state.tab === 'portfolio' ? t.printCompany : t.printProject;
   $('#langSel').value = state.lang;
 
   const dark = currentTheme()==='dark';
@@ -1496,6 +1777,8 @@ function menuItems(t, locked){
     item('lock', locked ? t.reopenProj : t.closeProj),
     '<div class="menu-sep"></div>',
     `<div class="menu-head">${esc(t.grpData)}</div>`,
+    item('printProject', t.printProject),
+    item('printCompany', t.printCompany),
     item('csv', t.csv),
     item('json', t.json),
     item('import', t.importJson + '\u2026'),   /* the ellipsis says a file dialog follows */
@@ -1811,7 +2094,7 @@ function portfolioTotals(rows){
    goes to an accountant in a single file rather than one export per job. */
 function exportPortfolioCsv(){
   const t = tr(), dd = t.dash, rows = pfRows();
-  const q = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  const q = v => `"${String(v??'').replace(/\u00a0/g,' ').replace(/"/g,'""')}"`;
   const num = v => (v===null||v===undefined||isNaN(v)) ? '' : String(Math.round(v*100)/100).replace('.',',');
   const L = [];
   L.push([q('LITPROFIT'), q(t.pfTitle)].join(';'));
@@ -1839,8 +2122,35 @@ function exportPortfolioCsv(){
 }
 
 /* ---- dashboard ---- */
+/* The cost categories, named once. Four charts and two reports draw these,
+   and they must all agree on what "cost" is made of. */
+function costCats(t, d){
+  return [
+    { l: t.dash.laborCost, p: d.laborPlan,  a: d.laborActual  },
+    { l: t.tabs.subs,      p: d.subsPlan,   a: d.subsActual   },
+    { l: t.tabs.travel,    p: d.travelPlan, a: d.travelActual },
+    { l: t.tabs.materials, p: d.matPlan,    a: d.matActual    },
+    { l: t.tabs.logistics, p: d.logPlan,    a: d.logActual    },
+    { l: t.dash.adminOh,   p: d.adminPlan,  a: d.adminActual  }
+  ];
+}
+/* revenue, every cost taken off it, and what survives */
+function waterfallSteps(t, d){
+  return [
+    { l: t.dash.revenue, v: d.revActual, total: true },
+    { l: t.dash.laborCost, v: -d.laborActual },
+    { l: t.tabs.subs, v: -d.subsActual },
+    { l: t.tabs.travel, v: -d.travelActual },
+    { l: t.tabs.materials, v: -d.matActual },
+    { l: t.tabs.logistics, v: -d.logActual },
+    { l: t.dash.adminOh, v: -d.adminActual },
+    { l: t.dash.profit, v: 0, total: true }
+  ];
+}
+
 function viewDashboard(){
   const t = tr(), d = computeDash(proj()), c = proj().card, days = projectDays(c);
+  const x = computeExtra(proj());
   const dd = t.dash;
   const deltaRev = d.revPlan ? (d.revActual-d.revPlan)/d.revPlan : null;
   const kpiRow = (label, plan, actual, isPct, strong) => {
@@ -1879,7 +2189,41 @@ function viewDashboard(){
       <div class="meter"><i style="width:${(marginFill*100).toFixed(1)}%;background:${statusColor}"></i></div>
       <div class="delta">${dd.deviation}: ${pct(d.marginActual-d.target)}</div></div>
   </div>
+
+  <!-- Invoice number, Paid?, Advance and Payment terms were typed in and read
+       by nothing at all. This row is where they finally count for something. -->
+  <div class="tiles tiles-sm">
+    <div class="tile"><div class="lbl">${dd.contract}</div>
+      <div class="val sm">${x.contract?fmt(x.contract):'—'}</div>
+      <div class="delta">${dd.advance}: ${x.advance?fmt(x.advance):'—'}</div></div>
+    <div class="tile"><div class="lbl">${dd.invoiced}</div>
+      <div class="val sm">${fmt(x.invoiced)}</div>
+      <div class="delta">${x.contract?pct(x.billedShare)+' '+esc(dd.ofContract):'&nbsp;'}</div></div>
+    <div class="tile"><div class="lbl">${dd.paid}</div>
+      <div class="val sm" style="color:var(--good-text)">${fmt(x.paid)}</div>
+      <div class="delta">${dd.outstanding}: ${fmt(x.outstanding)}</div></div>
+    <div class="tile"><div class="lbl">${dd.labourHours}</div>
+      <div class="val sm">${fmt(x.hours,1)}</div>
+      <div class="delta">${x.crew} ${esc(dd.crew)}${x.travelDays?' &middot; '+fmt(x.travelDays,0)+' '+esc(dd.travelDays):''}</div></div>
+    <div class="tile"><div class="lbl">${dd.costPerHour}</div>
+      <div class="val sm">${x.hours?fmt(x.costPerHour):'—'}</div>
+      <div class="delta">${dd.rebill}: ${fmt(x.rebill)}</div></div>
+  </div>
+
   <div class="dash-grid">
+    <div class="card">
+      <h2 class="sheet">${dd.waterfallTitle}</h2>
+      <div id="chartWaterfall"></div>
+    </div>
+    <div class="card">
+      <h2 class="sheet">${dd.varianceTitle}</h2>
+      <p class="chart-note">${esc(dd.varianceNote)}</p>
+      <div id="chartVariance"></div>
+    </div>
+    <div class="card span-2">
+      <h2 class="sheet">${dd.compositionTitle}</h2>
+      <div id="chartComposition"></div>
+    </div>
     <div class="card">
       <h2 class="sheet">${dd.chartTitle}</h2>
       <div class="legend"><span><i style="background:var(--series-1)"></i>${dd.plan}</span><span><i style="background:var(--series-2)"></i>${dd.actual}</span></div>
@@ -1911,15 +2255,14 @@ function viewDashboard(){
 
 /* ---- grouped bar chart (SVG) ---- */
 function wireChart(){
-  const t = tr(), d = computeDash(proj());
-  const cats = [
-    {l:tr().dash.laborCost, p:d.laborPlan, a:d.laborActual},
-    {l:t.tabs.subs, p:d.subsPlan, a:d.subsActual},
-    {l:t.tabs.travel, p:d.travelPlan, a:d.travelActual},
-    {l:t.tabs.materials, p:d.matPlan, a:d.matActual},
-    {l:t.tabs.logistics, p:d.logPlan, a:d.logActual},
-    {l:tr().dash.adminOh, p:d.adminPlan, a:d.adminActual}
-  ];
+  const t = tr(), d = computeDash(proj()), P = PAL_SCREEN;
+  const cats = costCats(t, d);
+  const put = (id, html) => { const el = $('#' + id); if(el) el.innerHTML = html; };
+  put('chartWaterfall', chartWaterfall(waterfallSteps(t, d), P, {title: t.dash.waterfallTitle}));
+  put('chartVariance', chartVariance(cats, P, {title: t.dash.varianceTitle, empty: t.dash.noData}));
+  put('chartComposition', chartComposition(
+        cats.map(c => ({ l: c.l, v: c.a })), P,
+        {title: t.dash.compositionTitle, empty: t.dash.noData}));
   const max = Math.max(1, ...cats.flatMap(c=>[c.p,c.a]));
   const W = 560, labelW = 155, chartW = W - labelW - 60;
   const barH = 13, gap = 3, groupPad = 14, groupH = barH*2 + gap + groupPad;
@@ -1941,10 +2284,10 @@ function wireChart(){
     bars += `<rect class="bar-hit" x="${labelW}" y="${y-2}" width="${chartW}" height="${barH*2+gap+4}"
       data-tip="${esc(c.l)}|${fmt(c.p)}|${fmt(c.a)}"/>`;
   });
-  $('#chartCosts').innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(tr().dash.chartTitle)}">
+  put('chartCosts', `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(tr().dash.chartTitle)}">
     ${gridLines}
     <line x1="${labelW}" y1="4" x2="${labelW}" y2="${H-24}" stroke="var(--baseline)" stroke-width="1"/>
-    ${bars}</svg>`;
+    ${bars}</svg>`);
   const tip = $('#tooltip');
   document.querySelectorAll('.bar-hit').forEach(el=>{
     el.addEventListener('mousemove', e=>{
@@ -2116,6 +2459,8 @@ const MENU_ACTS = {
     location.reload();
     return 'noop';
   },
+  printProject(){ printProjectReport(); return 'noop'; },
+  printCompany(){ printCompanyReport(); return 'noop'; },
   /* these three change no state, so they neither save nor re-render */
   csv(){ exportCsv(); return 'noop'; },
   json(){ exportJson(); return 'noop'; },
@@ -2130,7 +2475,8 @@ $('#projMenu').addEventListener('click', async e=>{
      where a push silently drops the oldest entry first. */
   const act = b.dataset.act;
   const changes = !(act === 'csv' || act === 'json' || act === 'import'
-                    || act === 'signout' || act === 'refresh');
+                    || act === 'signout' || act === 'refresh'
+                    || act === 'printProject' || act === 'printCompany');
   if(changes) pushUndo(null);
   lastDeleted = null;
   const r = await MENU_ACTS[act]();
@@ -2286,7 +2632,7 @@ function recalcSheet(key, tb){
 /* ================= CSV export ================= */
 function exportCsv(){
   const t = tr(), p = proj(), d = computeDash(p), dd = t.dash;
-  const q = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  const q = v => `"${String(v??'').replace(/\u00a0/g,' ').replace(/"/g,'""')}"`;
   const num = v => (v===null||v===undefined||isNaN(v)) ? '' : String(Math.round(v*100)/100).replace('.',','); // EU decimal comma
   const L = [];
   const row = arr => L.push(arr.map(q).join(';'));
@@ -2420,8 +2766,9 @@ function printChart(d){
     `<span style="color:#c9722c">&#9632;</span> ${esc(t.dash.actual)}</div></div>`;
 }
 
-$('#btnPrint').addEventListener('click', ()=>{
+function printProjectReport(){
   const t = tr(), p = proj(), d = computeDash(p), dd = t.dash, c = p.card;
+  const x = computeExtra(p), cats = costCats(t, d);
   const days = projectDays(c), cur = p.settings.currency;
   const m = v => fmt(v);
   const dash = '&mdash;';
@@ -2488,6 +2835,23 @@ $('#btnPrint').addEventListener('click', ()=>{
         ` &nbsp;${esc(dd.target)} ${pct(d.target)}`)}
     </div>
 
+    <div class="rp-kpis rp-kpis-sm">
+      ${kpi(dd.contract, x.contract?m(x.contract):dash, `${esc(dd.advance)}: ${x.advance?m(x.advance):dash}`)}
+      ${kpi(dd.invoiced, m(x.invoiced), x.contract?`${pct(x.billedShare)} ${esc(dd.ofContract)}`:'&nbsp;')}
+      ${kpi(dd.paid, m(x.paid), `${esc(dd.outstanding)}: ${m(x.outstanding)}`)}
+      ${kpi(dd.labourHours, fmt(x.hours,1), `${x.crew} ${esc(dd.crew)} &middot; ${esc(dd.costPerHour)} ${x.hours?m(x.costPerHour):dash}`)}
+    </div>
+
+    <h3>${esc(dd.waterfallTitle)}</h3>
+    <div class="rp-chart">${chartWaterfall(waterfallSteps(t, d), PAL_PRINT, {title:dd.waterfallTitle})}</div>
+
+    <div class="rp-two">
+      <div><h3>${esc(dd.varianceTitle)}</h3>
+        <div class="rp-chart">${chartVariance(cats, PAL_PRINT, {title:dd.varianceTitle, empty:dd.noData})}</div></div>
+      <div><h3>${esc(dd.compositionTitle)}</h3>
+        <div class="rp-chart">${chartComposition(cats.map(cc=>({l:cc.l,v:cc.a})), PAL_PRINT, {title:dd.compositionTitle, empty:dd.noData})}</div></div>
+    </div>
+
     <h3>${esc(dd.chartTitle)}</h3>
     ${printChart(d)}
 
@@ -2508,15 +2872,98 @@ $('#btnPrint').addEventListener('click', ()=>{
       ${row(dd.margin,d.marginPlan,d.marginActual,true,'rp-tot')}
     </tbody></table>
 
-    ${detail ? `<div class="rp-page"></div>${detail}` : ''}
+    ${detail
+      /* The footer travels INSIDE the landscape run. Left outside it, the page
+         flipped back to portrait for two lines of address and spent a whole
+         extra sheet on them. */
+      ? `<div class="rp-page"></div><div class="rp-landscape">${detail}${reportFoot(t)}</div>`
+      : reportFoot(t)}`;
+  window.print();
+}
 
-    <div class="rp-foot">
+function reportFoot(t){
+  return `<div class="rp-foot">
       <div><b>UAB "Litprofit"</b><br>${esc(t.addr)}<br>
         info@litprofit.com &nbsp;//&nbsp; +370 670 20 357</div>
       <div style="text-align:right">${esc(t.generated)}:<br>
         ${new Date().toLocaleString(LOCALES[state.lang])}</div>
     </div>`;
+}
+
+/* ---------- the company report ----------
+   The same figures the portfolio shows, on paper: every job, totalled by
+   currency, with the two pictures a director actually asks for -- which jobs
+   are carrying the year, and which clients the revenue comes from. */
+function printCompanyReport(){
+  const t = tr(), dd = t.dash, dash = '&mdash;';
+  const m = v => fmt(v);
+  /* the same filtered, sorted list the portfolio is showing, so the paper and
+     the screen can never disagree about which jobs are in scope */
+  const rows = pfRows();
+  const totals = portfolioTotals(rows);
+  const open = rows.filter(r => !r.p.locked).length;
+  const onT  = rows.filter(r => r.d.marginActual >= r.d.target).length;
+
+  const kpi = (label, big, note) =>
+    `<div class="rp-kpi"><span>${esc(label)}</span><b>${big}</b><i>${note||'&nbsp;'}</i></div>`;
+
+  const totalCards = totals.map(g => kpi(
+    `${esc(dd.totalRevenue)} ${esc(g.currency)}`, m(g.rev),
+    `${esc(dd.grossProfit)}: ${m(g.profit)} &nbsp; ${pct(g.margin)}`)).join('');
+
+  const body = rows.map(({p, d}) => `<tr>
+      <td>${esc(p.card.projectId)||dash}${p.locked?' <span class="rp-chip">'+esc(t.locked)+'</span>':''}</td>
+      <td>${esc(p.card.client)||dash}</td>
+      <td>${esc(p.card.site)||dash}</td>
+      <td>${esc(p.settings.currency||'')}</td>
+      <td class="num">${m(d.revActual)}</td>
+      <td class="num">${m(d.costActual)}</td>
+      <td class="num">${m(d.profitActual)}</td>
+      <td class="num">${pct(d.marginActual)}</td>
+      <td><span class="rp-chip ${d.marginActual>=d.target?'rp-good':'rp-bad'}">${d.marginActual>=d.target?dd.onTarget:dd.belowTarget}</span></td>
+    </tr>`).join('');
+
+  const foot = totals.map(g => `<tr class="rp-tot">
+      <td>${esc(t.pfTotal)}</td><td></td><td></td><td>${esc(g.currency)}</td>
+      <td class="num">${m(g.rev)}</td><td class="num">${m(g.cost)}</td>
+      <td class="num">${m(g.profit)}</td><td class="num">${pct(g.margin)}</td><td></td>
+    </tr>`).join('');
+
+  $('#print-area').innerHTML = `
+    <div class="rp-band">
+      <div><img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT">
+        <h1>${esc(t.companyTitle)}</h1>
+        <p class="rp-sub">${esc(t.pfTotal)} // ${rows.length} ${esc(t.projectsN)}</p></div>
+      <div class="rp-id"><b>${rows.length}</b>${open} ${esc(t.openN)} &middot; ${onT} ${esc(dd.onTarget)}</div>
+    </div>
+
+    <div class="rp-kpis">${totalCards || kpi(dd.totalRevenue, dash, '&nbsp;')}</div>
+
+    <h3>${esc(t.marginByProject)}</h3>
+    <div class="rp-chart">${chartProjectMargins(rows, PAL_PRINT, {title:t.marginByProject, empty:dd.noData})}</div>
+
+    <h3>${esc(t.revenueByClient)}</h3>
+    <div class="rp-chart">${chartByClient(rows, PAL_PRINT, {title:t.revenueByClient, empty:dd.noData, unnamed:dash})}</div>
+
+    <div class="rp-page"></div>
+    <h3>${esc(t.tabs.portfolio)}</h3>
+    <table><thead><tr>
+      <th>${esc(t.card.projectId)}</th><th>${esc(dd.client)}</th><th>${esc(dd.site)}</th>
+      <th>${esc(t.card.currency)}</th>
+      <th class="num">${esc(dd.totalRevenue)}</th><th class="num">${esc(dd.totalCost)}</th>
+      <th class="num">${esc(dd.grossProfit)}</th><th class="num">${esc(dd.margin)}</th>
+      <th>${esc(dd.control)}</th></tr></thead>
+      <tbody>${body || `<tr><td colspan="9">${esc(t.pfNone)}</td></tr>`}${foot}</tbody></table>
+
+    ${reportFoot(t)}`;
   window.print();
+}
+
+/* The button prints what you are looking at: the portfolio is the company,
+   anything else is the job in front of you. Both sit in the menu as well, so
+   neither is ever only reachable by being on the right tab. */
+$('#btnPrint').addEventListener('click', ()=>{
+  if(state.tab === 'portfolio') printCompanyReport(); else printProjectReport();
 });
 
 /* ================= sync =================

@@ -843,6 +843,59 @@ or Russian keyboard. Measured in Chrome at `en-GB`, `lt-LT` and `ru-RU`: the
 comma is accepted and normalised, and the model stores `1250.5` every time.
 Nothing to fix.
 
+### The dashboard, and two reports
+
+The dashboard used to be one chart and a table. It now carries four pictures,
+each answering a different question, and a second row of tiles built from
+figures that were being typed in and read by nothing at all — `Invoice No.`,
+`Paid?`, `Advance` and `Payment terms`.
+
+| Chart | The question it answers |
+|---|---|
+| From revenue to profit | where the money went, in one waterfall |
+| Over and under budget | which line blew it, largest first, red is over |
+| Where the cost went | each category's share of the whole |
+| Cost breakdown, plan vs actual | the paired bars, as before |
+
+**One set of drawing functions, taking the palette as an argument.** The screen
+and the printed report each had their own copy of the bar chart with the
+colours written in twice — two things to keep in step, one of them only ever
+seen on paper.
+
+`computeDash()` stays a faithful copy of the workbook's Dashboard sheet, so the
+two can be checked line by line forever. Anything the spreadsheet never
+calculated lives in `computeExtra()` instead.
+
+**Two reports.** The button prints what you are looking at — the portfolio is
+the company, anything else is the job in front of you — and both sit in the
+menu as well, so neither is only reachable by being on the right tab.
+
+- **Project report**, 5 pages: summary, the four charts, the KPI table, then
+  every sheet in detail.
+- **Company report**, 2 pages: totals per currency, margin by project against
+  the target line, revenue by client, and the whole portfolio as a table. It
+  uses `pfRows()`, the same filtered and sorted list the portfolio is showing,
+  so paper and screen cannot disagree about which jobs are in scope.
+
+⚠️ **The detail sheets print landscape.** Labor is thirteen columns and measured
+**898px inside a 794px portrait page** — Plan Total and Actual Total were being
+cut off the edge of the paper with nothing to say they had gone. A named
+`@page detail{ size:A4 landscape }` keeps every column; where a browser ignores
+`page:`, a smaller type size fits them instead, so the worst case is small
+print rather than missing figures. Verified in the generated PDF: pages come
+out `P P P L L`, and every detail table measures exactly 0px of overflow.
+
+The footer travels **inside** the landscape run. Left outside it the page
+flipped back to portrait for two lines of address and spent a whole extra
+sheet on them.
+
+Two smaller things the printing turned up: `pct()` now uses a non-breaking
+space, because "8.5 %" was splitting across two lines with the `%` landing
+alone underneath (the CSV exports put a plain space back — a spreadsheet cell
+should not carry U+00A0); and the status chips are outlined rather than
+filled, because a portfolio of twenty jobs is twenty solid blocks of ink
+otherwise.
+
 ### What is kept where
 
 | | |
