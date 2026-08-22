@@ -61,6 +61,8 @@ S["en"] = dict(
     # register holds and what the post office reads. Only the country and city
     # take the reader's language.
     addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lithuania",
+    # The frost easter egg, annotated on the drawing the way a note is.
+    frost_hint="type", frost_hint_a11y="Hidden feature: type the word FROST to frost the page over.",
     hero_h1="Ship repair and maintenance all over the world",
     hero_lead='%(legal)s overhauls marine engines, refrigeration plant and piping '
               'systems for fishing fleets, shipowners and shore installations — '
@@ -143,6 +145,7 @@ S["lt"] = dict(
 
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lietuva",
+    frost_hint="įveskite", frost_hint_a11y="Paslėpta funkcija: įveskite žodį FROST ir puslapį apšerkšnys.",
     hero_h1="Laivų remontas ir aptarnavimas visame pasaulyje",
     hero_lead='%(legal)s remontuoja laivų variklius, šaldymo įrangą ir '
               'vamzdynų sistemas žvejybos laivynams, laivų savininkams ir kranto '
@@ -225,6 +228,7 @@ S["ru"] = dict(
 
     hero_eyebrow="Клайпеда, Литва", hero_since="с",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Клайпеда", addr_country="Литва",
+    frost_hint="введите", frost_hint_a11y="Скрытая функция: введите слово FROST, и страницу затянет инеем.",
     hero_h1="Ремонт и обслуживание судов в любой точке земного шара",
     hero_lead='%(legal)s ремонтирует судовые двигатели, холодильное '
               'оборудование и трубопроводные системы для рыболовных флотов, '

@@ -1056,6 +1056,31 @@ both. It is a plan change, not a migration: same code, same database.
 is a long way off at this scale, but it is not unlimited — worth a look once
 there are hundreds of jobs.
 
+## The frost note
+
+The frost easter egg is a typed sequence, so it was findable only by reading
+the console signature. There is a hint on the hero now — a drawing annotation
+at bottom-left, a leader line and a label, mirroring the scroll rule at
+bottom-right and set at the drawing's own weight and colour.
+
+The brief was that the hidden things stay invisible until sought. This is
+sought by looking **at** the drawing: it rests at `opacity: 0.34`, which reads
+as one of the plant's own annotations rather than as interface, and lifts to
+`0.75` while the pointer is anywhere in the hero.
+
+- **It stands down on touch** (`@media (hover: none)`). There is nothing to
+  type on, so the label would be clutter with no payoff.
+- **It disappears while the page is iced** — there is nothing left to hint at.
+- The word `FROST` is the literal trigger in every language; only the verb
+  around it translates (`type` / `įveskite` / `введите`).
+- The full sentence is repeated for screen readers in `.visually-hidden`,
+  because a leader line and two words are not self-explanatory read aloud.
+
+⚠️ **`.hero:hover .frost-note` is (0,3,0) and `html.is-frost .frost-note` is
+only (0,2,1)** — so the hover rule won and the note stayed lit through the whole
+effect. Both selectors are stated. Verified across all four states: resting
+0.34, pointer on hero 0.75, iced 0, thawed 0.75.
+
 ## Booking (Calendly)
 
 `BOOKING_URL` in `build.py` points at the company's Calendly. Every **Book a
