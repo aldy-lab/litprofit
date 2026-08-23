@@ -1393,6 +1393,45 @@ def service_page(s):
 # ============================================================
 # COMPLETED WORKS
 # ============================================================
+# The workshop photographs. Unlike .page-media, which holds a picture back to
+# 72% and desaturates it so text can sit on top, these are shown at full
+# strength: they are the evidence, not the texture behind something else.
+SHOTS = [
+    ("workshop-overhaul", 1320, 877, "shot_overhaul", "wide"),
+    ("workshop-rotors",   1254, 786, "shot_rotors",   ""),
+    ("workshop-bench",    1320, 968, "shot_bench",    ""),
+    ("workshop-valves",   1313, 444, "shot_valves",   "wide"),
+]
+
+
+def shots(num="02"):
+    figs = []
+    for i, (name, w, h, key, mod) in enumerate(SHOTS, 1):
+        caption = PT(key)
+        figs.append(
+            '''          <figure class="shot{mod}">
+            <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy" decoding="async">
+            <figcaption><span class="shot-n">{n:02d}</span>{cap}</figcaption>
+          </figure>'''.format(
+                mod=(" shot--" + mod) if mod else "",
+                img=u("/assets/photos/%s.webp" % name),
+                alt=attr(caption), w=w, h=h, n=i, cap=text(caption)))
+    return """
+    <section class="section shots-band seam-top seam-bottom">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
+          <h2>{h2}</h2>
+          <p class="lead">{lead}</p>
+        </div>
+        <div class="shots reveal">
+{figs}
+        </div>
+      </div>
+    </section>""".format(num=num, e=PT("shots_eyebrow"), h2=PT("shots_h2"),
+                         lead=PT("shots_lead"), figs="\n".join(figs))
+
+
 def completed_works():
     return page_head(PT("cw_eyebrow"), PT("cw_h1"), PT("cw_lead", founded=FOUNDED),
                      [(T("home"), "/"), (PT("cw_eyebrow"), None)],
@@ -1414,10 +1453,12 @@ def completed_works():
       <p>Sealord, Limarko Group, Ocean Whale Company, Baltreids &mdash;
       <a href="{partners}">{p_more}</a>.</p>
     </section>
+{gallery}
 {cta}""".format(h1=PT("cw_engines"), p1=PT("cw_engines_p"), tags1=tags(i18n.ENGINES),
                 h2=PT("cw_refrig"), p2=PT("cw_refrig_p"), tags2=tags(i18n.SYSTEMS),
                 h3=PT("cw_who"), partners=u("/partners/"),
                 p_more=PT("p_clients_h2").lower(),
+                gallery=shots("03"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
 

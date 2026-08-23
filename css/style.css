@@ -1308,6 +1308,65 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
 }
 
 /* ============================================================
+   WORKSHOP SHOTS
+   The opposite of .page-media. That one holds a photograph back
+   to 72% and desaturates it so a headline can sit on top; these
+   are the evidence a ship repair company is actually asked for,
+   so they are shown at full strength and given room.
+   ============================================================ */
+.shots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(14px, 1.6vw, 22px);
+}
+.shot {
+  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--navy-800);
+}
+/* the wide ones carry the whole row: the bench layout and the valve range are
+   both panoramas, and halving them throws away what makes them worth showing */
+.shot--wide { grid-column: 1 / -1; }
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* The two that share a row are 1.60 and 1.36, so one image finished 69px
+   above the other and their captions started at different heights -- the grid
+   stretched the boxes to match and left a gap under the shorter picture. A
+   common 3:2 crop costs each of them very little and lines the row up. */
+.shots > .shot:not(.shot--wide) img {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+/* No margin-top:auto here. With the images the same height the captions
+   already start on the same line; pushing them to the bottom of the box only
+   dropped the shorter one 21px below its neighbour. */
+.shot figcaption {
+  display: flex;
+  gap: 12px;
+  padding: 16px clamp(14px, 1.6vw, 20px) 18px;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-s);
+  line-height: 1.6;
+  color: var(--muted);
+}
+.shot-n {
+  flex: none;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  color: var(--grey-400);
+  padding-top: 2px;
+}
+@media (max-width: 760px) {
+  .shots { grid-template-columns: 1fr; }
+  .shot--wide { grid-column: auto; }
+}
+
+/* ============================================================
    REVEAL
    Scoped to .js — set by an inline script in <head>. Without that guard,
    opacity:0 is the DEFAULT state, so if the script fails, is blocked, or

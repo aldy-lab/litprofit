@@ -686,6 +686,19 @@ P["en"] = dict(
              "parts supply — from a single contractor in Klaipeda, Lithuania.",
 
     cw_eyebrow="Completed works", cw_h1="Where the work has been done",
+    # Photographs of the client's own workshop. The captions describe what is
+    # visible in the frame and nothing beyond it -- a caption that claims a
+    # process is a claim about the company, and those come from the client.
+    shots_eyebrow="In the workshop", shots_h2="What an overhaul looks like",
+    shots_lead="Klaipeda, on the bench. Machines come in whole, leave the same way, "
+               "and everything in between is measured.",
+    shot_overhaul="A screw compressor stripped for overhaul \u2014 casing, rotor set, "
+                  "bearing housings, seals and valves laid out for inspection.",
+    shot_rotors="The rotor set beside its casing bore. Clearances are measured "
+                "against the maker\u2019s limits before anything goes back together.",
+    shot_bench="Compressor housing, rotors and bearing pedestals on the bench.",
+    shot_valves="Stop, solenoid and regulating valves \u2014 the common sizes are held "
+                "in Klaipeda so a job does not wait on a supplier.",
     cw_lead="Two strands run through everything the company has delivered since "
             "%(founded)s: engines, and refrigeration.",
     cw_meta="Engine overhauls and refrigeration projects delivered by %(legal)s for "
@@ -802,6 +815,16 @@ P["lt"] = dict(
              "atsarginių dalių tiekimas — iš vieno rangovo Klaipėdoje.",
 
     cw_eyebrow="Atlikti darbai", cw_h1="Kur darbai buvo atlikti",
+    shots_eyebrow="Dirbtuvėse", shots_h2="Kaip atrodo kapitalinis remontas",
+    shots_lead="Klaipėda, ant stalo. Mašinos atkeliauja surinktos, tokios ir išvyksta, "
+               "o viskas, kas tarp to \u2014 išmatuota.",
+    shot_overhaul="Sraigtinis kompresorius, išardytas kapitaliniam remontui \u2014 korpusas, "
+                  "rotoriai, guolių korpusai, sandarikliai ir vožtuvai, paruošti apžiūrai.",
+    shot_rotors="Rotoriai šalia korpuso angos. Tarpai matuojami pagal gamintojo "
+                "leistinas ribas prieš surenkant atgal.",
+    shot_bench="Kompresoriaus korpusas, rotoriai ir guolių atramos ant stalo.",
+    shot_valves="Uždaromieji, elektromagnetiniai ir reguliuojamieji vožtuvai \u2014 "
+                "dažniausi dydžiai laikomi Klaipėdoje, kad darbas nelauktų tiekėjo.",
     cw_lead="Dvi kryptys eina per viską, ką įmonė nuveikė nuo %(founded)s metų: varikliai "
             "ir šaldymas.",
     cw_meta="Variklių kapitalinis remontas ir šaldymo projektai, kuriuos %(legal)s atliko "
@@ -919,6 +942,16 @@ P["ru"] = dict(
              "работы, поставка запасных частей — от одного подрядчика в Клайпеде.",
 
     cw_eyebrow="Выполненные работы", cw_h1="Где выполнялись работы",
+    shots_eyebrow="В мастерской", shots_h2="Как выглядит капитальный ремонт",
+    shots_lead="Клайпеда, на верстаке. Машины приходят собранными, такими и уходят, "
+               "а всё, что между \u2014 измерено.",
+    shot_overhaul="Винтовой компрессор, разобранный для капитального ремонта \u2014 корпус, "
+                  "роторы, корпуса подшипников, уплотнения и клапаны, выложенные для осмотра.",
+    shot_rotors="Роторы рядом с расточкой корпуса. Зазоры измеряются по допускам "
+                "изготовителя, прежде чем что-либо собирать обратно.",
+    shot_bench="Корпус компрессора, роторы и опоры подшипников на верстаке.",
+    shot_valves="Запорные, электромагнитные и регулирующие клапаны \u2014 ходовые "
+                "размеры хранятся в Клайпеде, чтобы работа не ждала поставщика.",
     cw_lead="Две линии проходят через всё, что компания сделала с %(founded)s года: двигатели "
             "и холод.",
     cw_meta="Капитальный ремонт двигателей и холодильные проекты, выполненные %(legal)s для "
