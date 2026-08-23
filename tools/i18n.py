@@ -355,7 +355,8 @@ SVC["en"] = {
                  "vessels and shore installations:"),
     "ship-engine-repair": dict(
         title="Ship equipment and engine repair",
-        short="Design and selection of equipment.",
+        short="Overhaul of 2-stroke and 4-stroke diesel engines, engine room "
+              "machinery and deck equipment.",
         lead="Keeping a vessel's machinery inside its operating envelope — main "
              "engines, auxiliaries, and the deck equipment the crew depends on.",
         meta="Overhaul and repair of 4-stroke and 2-stroke marine diesel engines, "
@@ -453,7 +454,8 @@ SVC["lt"] = {
                  "ir remontas:"),
     "ship-engine-repair": dict(
         title="Laivų įrangos ir variklių remontas",
-        short="Įrangos projektavimas ir parinkimas.",
+        short="2-takčių ir 4-takčių dyzelinių variklių, mašinų skyriaus mechanizmų "
+              "ir denio įrangos remontas.",
         lead="Kad laivo mechanizmai veiktų optimaliai ir saugiai — pagrindiniai ir "
              "pagalbiniai varikliai bei denio įranga, kuria pasitiki įgula.",
         meta="4-takčių ir 2-takčių laivų dyzelinių variklių, mašinų skyriaus mechanizmų "
@@ -554,7 +556,8 @@ SVC["ru"] = {
                  "установок:"),
     "ship-engine-repair": dict(
         title="Ремонт судового оборудования и двигателей",
-        short="Проектирование и подбор оборудования.",
+        short="Ремонт 2-х тактных и 4-х тактных дизельных двигателей, механизмов "
+              "машинного отделения и палубного оборудования.",
         lead="Чтобы механизмы судна работали оптимально и безопасно — главные и "
              "вспомогательные двигатели и палубное оборудование, на которое полагается экипаж.",
         meta="Ремонт 4-х тактных и 2-х тактных судовых дизельных двигателей, механизмов "

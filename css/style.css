@@ -97,7 +97,7 @@
 
   /* The monogram as a data URI, so the watermark does not depend on BASE and
      cannot 404. White-filled; dialled down by whatever uses it. */
-  --mark-img: url("data:image/svg+xml,<svg width="272" height="200" viewBox="0 0 272 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LITPROFIT"> <path d="M0.577201 199.507C0.258422 199.507 0 199.249 0 198.93V24.7151C0 24.3963 0.258416 24.1379 0.577195 24.1379H130.854L141.971 0.332973C142.066 0.12983 142.269 0 142.494 0H196.616C197.034 0 197.314 0.430806 197.143 0.812608L186.724 24.1379H222.381C249.863 24.1379 267.882 53.0312 255.904 77.8935L232.232 127.028C225.681 140.625 211.974 149.261 196.945 149.261H156.752C156.33 149.261 156.051 148.824 156.228 148.441L178.728 99.8421C178.822 99.638 179.027 99.5074 179.252 99.5074H186.22C190.975 99.5074 195.263 96.6287 197.085 92.213L203.994 75.4642C207.205 67.6793 201.513 59.1133 193.129 59.1133H86.6278C86.4013 59.1133 86.1957 59.2457 86.1022 59.452L22.6978 199.169C22.6042 199.375 22.3987 199.507 22.1722 199.507H0.577201Z" fill="#ffffff"/> <path d="M159.339 79.4005C159.51 79.0185 159.231 78.5866 158.812 78.5866H104.698C104.471 78.5866 104.265 78.7203 104.172 78.928L50.353 199.187C50.1821 199.569 50.4615 200 50.8799 200H271.423C271.742 200 272 199.742 272 199.423V125.208C272 124.889 271.742 124.631 271.423 124.631H258.186C257.946 124.631 257.729 124.785 257.644 125.009C242.906 163.617 215.566 174.384 193.095 174.384H117.534C117.115 174.384 116.836 173.952 117.007 173.57L159.339 79.4005Z" fill="#ffffff"/> </svg>");
+  --mark-img: url("data:image/svg+xml,%3Csvg width='272' height='200' viewBox='0 0 272 200' fill='none' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='LITPROFIT'%3E %3Cpath d='M0.577201 199.507C0.258422 199.507 0 199.249 0 198.93V24.7151C0 24.3963 0.258416 24.1379 0.577195 24.1379H130.854L141.971 0.332973C142.066 0.12983 142.269 0 142.494 0H196.616C197.034 0 197.314 0.430806 197.143 0.812608L186.724 24.1379H222.381C249.863 24.1379 267.882 53.0312 255.904 77.8935L232.232 127.028C225.681 140.625 211.974 149.261 196.945 149.261H156.752C156.33 149.261 156.051 148.824 156.228 148.441L178.728 99.8421C178.822 99.638 179.027 99.5074 179.252 99.5074H186.22C190.975 99.5074 195.263 96.6287 197.085 92.213L203.994 75.4642C207.205 67.6793 201.513 59.1133 193.129 59.1133H86.6278C86.4013 59.1133 86.1957 59.2457 86.1022 59.452L22.6978 199.169C22.6042 199.375 22.3987 199.507 22.1722 199.507H0.577201Z' fill='%23ffffff'/%3E %3Cpath d='M159.339 79.4005C159.51 79.0185 159.231 78.5866 158.812 78.5866H104.698C104.471 78.5866 104.265 78.7203 104.172 78.928L50.353 199.187C50.1821 199.569 50.4615 200 50.8799 200H271.423C271.742 200 272 199.742 272 199.423V125.208C272 124.889 271.742 124.631 271.423 124.631H258.186C257.946 124.631 257.729 124.785 257.644 125.009C242.906 163.617 215.566 174.384 193.095 174.384H117.534C117.115 174.384 116.836 173.952 117.007 173.57L159.339 79.4005Z' fill='%23ffffff'/%3E %3C/svg%3E");
 }
 
 /* ============================================================
@@ -278,6 +278,31 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .section-head h2 { max-width: 20ch; }
 .section-head .lead { max-width: 54ch; }
 .section-head h2 { margin-bottom: 22px; }
+
+/* Stacked, every section head measured 720px inside a 1440px container -- the
+   right half of the page was empty under the heading four times over on the
+   home page alone, which reads as unfinished rather than as air. Set the
+   heading and its lead side by side and the head spans the measure it is
+   sitting in. Bottom-aligned so the lead's last line sits on the heading's
+   baseline; the eyebrow keeps its own full-width row above both. */
+@media (min-width: 900px) {
+  .section-head:has(.lead) {
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+    column-gap: clamp(40px, 6vw, 96px);
+    align-items: end;
+  }
+  .section-head:has(.lead) > .eyebrow { grid-column: 1 / -1; }
+  .section-head:has(.lead) > h2 { grid-column: 1; margin-bottom: 0; }
+  .section-head:has(.lead) > .lead {
+    grid-column: 2;
+    max-width: 46ch;
+    /* the heading sits on a much larger body, so its descender line is well
+       below the lead's -- nudge the lead down to meet it */
+    margin-bottom: 0.28em;
+  }
+}
 
 /* ============================================================
    BUTTONS
@@ -1096,6 +1121,22 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
 }
 
 .prose { max-width: 74ch; padding-bottom: clamp(50px, 7vw, 100px); }
+
+/* .prose sits on the same element as .container on 27 pages. .container
+   centres itself with margin-inline:auto, so the narrower of the two
+   max-widths -- 74ch -- was what got centred: the text column floated in the
+   middle of the viewport, starting at x=385 while the banner above it, the
+   breadcrumb and every section head began at x=58. Nothing lined up with
+   anything. Keep the container at full width and hold the reading measure on
+   its children instead, so the prose stands on the page's left edge. */
+.container.prose { max-width: var(--container); }
+/* ch resolves against each element's own font-size, so a bare 74ch let the
+   headings run to the full container while the paragraphs under them stopped
+   at 784px. Headings get their own measure, the way .section-head already
+   splits h2 from .lead. */
+.container.prose > * { max-width: 74ch; }
+.container.prose > h2 { max-width: 24ch; }
+.container.prose > h3 { max-width: 32ch; }
 .prose h2 { font-size: var(--h3); margin-top: 58px; margin-bottom: 18px; }
 .prose h3 { font-size: var(--h4); margin-top: 38px; margin-bottom: 12px; }
 .prose > *:first-child { margin-top: 0; }
@@ -1164,7 +1205,10 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   aspect-ratio: 272 / 200;
   transform: translateY(-50%);
   background: var(--mark-img) right center / contain no-repeat;
-  opacity: 0.17;
+  /* 0.17 was chosen while the declaration was invalid and the mark was not
+     painting at all -- once it rendered it read as a watermark rather than as
+     the second-look detail it is meant to be. */
+  opacity: 0.1;
   pointer-events: none;
 }
 .cta > * { position: relative; z-index: 1; }
@@ -2132,8 +2176,8 @@ html.is-frost::after {
   /* Suppressed only where the headline actually sits, not down the whole
      left-hand side — the compressor sets live there, and a diagonal fade hid
      the densest part of the drawing. */
-  mask-image: radial-gradient(56% 46% at 25% 40%, transparent 16%, rgba(0,0,0,0.55) 56%, #000 84%);
-  -webkit-mask-image: radial-gradient(56% 46% at 25% 40%, transparent 16%, rgba(0,0,0,0.55) 56%, #000 84%);
+  mask-image: radial-gradient(60% 78% at 24% 52%, transparent 24%, rgba(0,0,0,0.5) 62%, #000 90%);
+  -webkit-mask-image: radial-gradient(60% 78% at 24% 52%, transparent 24%, rgba(0,0,0,0.5) 62%, #000 90%);
 }
 
 .rp-body rect, .rp-body circle {
@@ -2205,9 +2249,18 @@ html.is-frost::after {
 
 @media (max-width: 900px) {
   .hero-drawing {
-    mask-image: radial-gradient(90% 34% at 40% 26%, transparent 14%, rgba(0,0,0,0.4) 54%, #000 84%);
-    -webkit-mask-image: radial-gradient(90% 34% at 40% 26%, transparent 14%, rgba(0,0,0,0.4) 54%, #000 84%);
+    /* The 34%-tall hole cleared the headline and nothing else. On a phone the
+       copy is not a left-hand column -- it runs the full width from the
+       eyebrow down to the step row, so the accumulators and their labels were
+       running straight through "WE CONSULT / WE ORGANISE". Clear the whole
+       block of type, and drop the ink as well: at this size the drawing can
+       only be texture, never something anyone reads. */
+    mask-image: radial-gradient(126% 64% at 42% 42%, transparent 26%, rgba(0,0,0,0.45) 66%, #000 92%);
+    -webkit-mask-image: radial-gradient(126% 64% at 42% 42%, transparent 26%, rgba(0,0,0,0.45) 66%, #000 92%);
   }
+  /* The lamp's brighter copy carries .hero-drawing too, and dimming that is
+     the one thing the work light must not do. */
+  .hero-drawing:not(.hero-drawing--lit) { opacity: 0.55; }
 }
 
 
