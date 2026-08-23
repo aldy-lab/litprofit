@@ -97,6 +97,18 @@
 
   /* The monogram as a data URI, so the watermark does not depend on BASE and
      cannot 404. White-filled; dialled down by whatever uses it. */
+  /* Liquid glass, colourless on purpose. The tint is white -> 70% grey at 6%
+     in both themes: hue in the tint fights the hue arriving through the panel
+     and the surface goes muddy. Every colour in these surfaces comes from
+     what is behind them, which on this site means the hero's indigo glow or
+     the frost gradient -- never from a pastel mesh laid down to feed them. */
+  --glass-tint-top: rgba(255, 255, 255, 0.06);
+  --glass-tint-bottom: rgba(179, 179, 179, 0.06);
+  --glass-rim-top: rgba(255, 255, 255, 0.5);
+  --glass-rim-hairline: rgba(255, 255, 255, 0.1);
+  --glass-rim-bottom: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
   --mark-img: url("data:image/svg+xml,%3Csvg width='272' height='200' viewBox='0 0 272 200' fill='none' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='LITPROFIT'%3E %3Cpath d='M0.577201 199.507C0.258422 199.507 0 199.249 0 198.93V24.7151C0 24.3963 0.258416 24.1379 0.577195 24.1379H130.854L141.971 0.332973C142.066 0.12983 142.269 0 142.494 0H196.616C197.034 0 197.314 0.430806 197.143 0.812608L186.724 24.1379H222.381C249.863 24.1379 267.882 53.0312 255.904 77.8935L232.232 127.028C225.681 140.625 211.974 149.261 196.945 149.261H156.752C156.33 149.261 156.051 148.824 156.228 148.441L178.728 99.8421C178.822 99.638 179.027 99.5074 179.252 99.5074H186.22C190.975 99.5074 195.263 96.6287 197.085 92.213L203.994 75.4642C207.205 67.6793 201.513 59.1133 193.129 59.1133H86.6278C86.4013 59.1133 86.1957 59.2457 86.1022 59.452L22.6978 199.169C22.6042 199.375 22.3987 199.507 22.1722 199.507H0.577201Z' fill='%23ffffff'/%3E %3Cpath d='M159.339 79.4005C159.51 79.0185 159.231 78.5866 158.812 78.5866H104.698C104.471 78.5866 104.265 78.7203 104.172 78.928L50.353 199.187C50.1821 199.569 50.4615 200 50.8799 200H271.423C271.742 200 272 199.742 272 199.423V125.208C272 124.889 271.742 124.631 271.423 124.631H258.186C257.946 124.631 257.729 124.785 257.644 125.009C242.906 163.617 215.566 174.384 193.095 174.384H117.534C117.115 174.384 116.836 173.952 117.007 173.57L159.339 79.4005Z' fill='%23ffffff'/%3E %3C/svg%3E");
 }
 
@@ -1547,6 +1559,26 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
    RESPONSIVE
    ============================================================ */
 @media (max-width: 980px) {
+  /* The panel below is a CHILD of .site-header, and .site-header carries a
+     backdrop-filter, which makes it a backdrop root: a descendant's own
+     backdrop-filter then samples the root's output instead of the page. The
+     panel extends well below the header, where that output is empty, so the
+     blur silently did nothing and the hero headline came through the menu at
+     full contrast, straight across the labels. Nothing errors -- it just
+     looks broken.
+
+     So the header stops being a backdrop root, but only while the menu is
+     actually open: :has() reaches the parent from the state class on the
+     child. Dropping the filter site-wide left the header translucent WITHOUT
+     blur, which is worse than either -- page text scrolled past the logo
+     perfectly sharp. With the filter gone it has to be opaque, which is also
+     the honest arrangement: a solid bar with a frosted sheet under it. */
+  .site-header:has(.nav-links.is-open) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--navy-900);
+  }
+
   .nav-links {
     position: fixed;
     inset: var(--nav-h) 0 auto 0;
@@ -1555,8 +1587,16 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
     gap: 0;
     margin: 0;
     padding: 12px var(--pad) 28px;
-    background: var(--navy-900);
-    border-bottom: 1px solid var(--line);
+    /* Menu tier: this panel floats over whatever the reader was looking at --
+       usually the hero and its indigo glow, or a workshop photograph. Opaque
+       navy threw all of that away. 55% surface behind blur(22px) is the
+       recipe's answer to "a dropdown covers arbitrary content and the text on
+       it still has to be readable" -- do not thin it back toward clear. */
+    background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 var(--glass-rim-top);
     transform: translateY(-12px);
     opacity: 0;
     pointer-events: none;
@@ -2047,10 +2087,23 @@ html.is-frost::after {
   display: grid;
   gap: 2px;
   padding: 14px 20px 12px;
-  background: rgba(7, 8, 36, 0.86);
+  /* The one place on this site where glass is the subject rather than a
+     finish: this panel only exists while the page is frozen over, and the
+     frost overlay behind it is a real blue gradient -- which is exactly the
+     backdrop the effect needs and cannot fake. It read as a blurred
+     rectangle, which is where most glassmorphism stops. The rim is what makes
+     it glass: a colourless tint over the tint it already has, plus three
+     inset highlights that catch the edge the way a polished bevel does. */
+  background:
+    linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom)),
+    rgba(7, 8, 36, 0.78);
   border: 1px solid rgba(178, 214, 255, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-top),
+    inset 0 0 0 1px var(--glass-rim-hairline),
+    inset 0 -1px 0 var(--glass-rim-bottom);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   color: #dff0ff;
   pointer-events: none;
@@ -2112,7 +2165,14 @@ html.is-frost::after {
   font-size: var(--text-s);
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--muted-2);
+  /* --muted-2 measured 3.92:1 on solid navy -- already under the 4.5:1 an
+     interactive control needs, before any glass existed. Putting a
+     translucent panel behind it took it to 1.94:1, and no amount of thickening
+     the glass recovered it: at 88% surface it still only reached 3.45, because
+     the colour was the problem, not the panel. --muted is what the nav links
+     beside it already use, and the current language stays distinct on white
+     plus a border. */
+  color: var(--muted);
   border: 1px solid transparent;
   border-radius: 2px;
   transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
