@@ -684,6 +684,22 @@ svg text{font-family:var(--mono)}
    narrow is still a mouse. The desktop density is deliberate -- this is a
    sheet, and a mouse wants rows close together -- so none of it changes there.
    ============================================================ */
+/* ============================================================
+   PRESS FEEDBACK
+   There was not one :active rule in this file. Hundreds of buttons -- every
+   row's duplicate and delete, every tab, every toolbar action -- took a press
+   and gave nothing back. On the sheets that matters twice over: the row
+   buttons sit in a dense grid of near-identical controls, so "did I hit the
+   right one" is a real question, and on a phone there is no hover state to
+   answer it.
+
+   140ms sits in the 100-160ms press band. scale(0.97) composites, needs no
+   new colour, and is the control itself moving under the finger.
+   ============================================================ */
+button:active{transform:scale(.97);transition:transform .14s var(--ease)}
+.rowbtn:active{transform:scale(.9)}
+@media (prefers-reduced-motion:reduce){button:active,.rowbtn:active{transform:none}}
+
 @media (pointer: coarse){
   /* iOS Safari zooms the page in when a focused field is smaller than 16px,
      and it does not zoom back out afterwards. The portfolio search box and
@@ -1954,7 +1970,17 @@ function renderChrome(){
      way to tell where you were. Bring the active tab into view. `nearest`
      rather than `center` so this is a no-op on a desktop where they all fit. */
   const act = $('#tabs .active');
-  if(act && act.scrollIntoView) act.scrollIntoView({block:'nearest', inline:'nearest'});
+  if(act && act.scrollIntoView){
+    /* An instant jump gives no clue which direction the strip moved, so the
+       tabs either side change without explanation. Sliding it is the one
+       thing here that earns motion: spatial consistency, and it is the strip
+       correcting itself rather than a response to a click, so the 300ms bar
+       for UI feedback does not apply the same way. Honour reduced motion --
+       the correction still has to happen, it just happens at once. */
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    act.scrollIntoView({block:'nearest', inline:'nearest',
+                        behavior: calm ? 'auto' : 'smooth'});
+  }
 }
 
 /* Ordered by how often it is reached for, and separated so the destructive
