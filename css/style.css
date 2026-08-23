@@ -34,7 +34,12 @@
   --line-2:    rgba(255, 255, 255, 0.20);
   --text:      var(--white);
   --muted:     var(--grey-300);
-  --muted-2:   var(--grey-500);
+  /* was --grey-500, which measured 3.44:1 on the glass panels and 3.92:1 on
+     solid navy -- under AA either way, and it carries 18 usages of small
+     uppercase label text, none of it large enough to qualify for the 3:1
+     exemption. --grey-400 is the next step on the existing scale: 5.2:1, and
+     still three steps down from white, so the labels stay quiet. */
+  --muted-2:   var(--grey-400);
   --accent:    var(--grey-200);
   --brand:     var(--navy-600);
 
@@ -158,6 +163,33 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ---------- ambient field ----------
+   Glass shows what is behind it, and behind flat navy there is nothing to
+   show -- a glass panel on this ground was a faintly outlined grey box. The
+   recipe's answer is an ambient mesh, and the one it ships is violet, pink
+   and cyan, which on an industrial site reads as a SaaS landing page.
+
+   This is the same device in the palette the site already owns: the hero has
+   carried radial-gradient(90% 70% at 78% 8%, rgba(38,38,140,0.5)) since the
+   start. Three cool radials -- indigo, steel, a cold slate -- all low alpha,
+   all well under the saturation of the hero's own glow. Fixed to the
+   viewport, so it does not travel with the scroll and never reads as a
+   pattern.
+
+   Verify this before styling a single panel: with no glass anywhere the page
+   must already look subtly uneven. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58rem 44rem at 76% 6%, rgba(38, 38, 140, 0.26), transparent 62%),
+    radial-gradient(50rem 40rem at 12% 34%, rgba(32, 58, 112, 0.18), transparent 64%),
+    radial-gradient(54rem 46rem at 88% 78%, rgba(28, 44, 92, 0.20), transparent 62%);
 }
 
 body {
@@ -623,12 +655,19 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
    ============================================================ */
 /* The glow is a background LAYER, not a pseudo-element: .seam-top and
    .seam-bottom need ::before and ::after, and a section can only have one
-   of each. */
+   of each.
+
+   Centred at 88% 50% it sat squarely across the card row. That did not matter
+   while the cards were opaque tiles -- they covered it. Once they became one
+   glass panel it came through, and measured 22 levels of blue between the left
+   and right halves: BITZER visibly dimmer than DANFOSS, two partners of equal
+   standing rendered unequal. Moved up behind the section head, where it still
+   lights the band and the two cards measure identical. */
 .partners-band {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(70% 120% at 88% 50%, rgba(45, 53, 190, 0.30), transparent 66%),
+    radial-gradient(62% 70% at 88% 10%, rgba(45, 53, 190, 0.30), transparent 66%),
     var(--bg-2);
 }
 .partners-band > * { position: relative; z-index: 1; }
@@ -643,13 +682,19 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
      the logos below them out of step. Reserving two lines everywhere would
      have bought that alignment with dead space at full width. */
   grid-template-rows: auto auto 1fr;
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  gap: 0;
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-top),
+    inset 0 0 0 1px var(--glass-rim-hairline),
+    inset 0 -1px 0 var(--glass-rim-bottom);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  backdrop-filter: blur(14px) saturate(130%);
 }
 .partner {
   min-width: 0;
-  background: var(--bg-2);
+  border-left: 1px solid var(--line);
   padding: clamp(30px, 3.6vw, 52px);
   display: grid;
   grid-row: span 3;
@@ -662,7 +707,11 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 @supports not (grid-template-rows: subgrid) {
   .partner { display: flex; flex-direction: column; }
 }
-.partner:hover { background: var(--navy-700); }
+/* The hover used to repaint an opaque fill, which is exactly what rule three
+   forbids -- it covers the very thing the panel is showing. Lift the tint
+   instead: same brightening, nothing painted over the backdrop. */
+.partner:first-child { border-left: 0; }
+.partner:hover { background: rgba(255, 255, 255, 0.05); }
 /* NB: these two are scoped `.partner .x` on purpose. Written as bare
    `.partner-name`, the generic `.partner p` rule below out-specifies them
    (class + element beats class), and both collapse to 14px body text. */
@@ -716,14 +765,29 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 /* ============================================================
    FACT STRIP
    ============================================================ */
+/* One glass panel, not four tiles. The strip used the hairline trick -- a 1px
+   grid gap over a --line container background, with each cell painting an
+   opaque fill on top. That cannot become glass: translucent cells would let
+   the divider colour wash through every one of them, and a child of a glass
+   panel is supposed to paint no surface at all. So the container carries the
+   glass and the cells carry nothing but a divider rule. */
 .facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  gap: 0;
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-top),
+    inset 0 0 0 1px var(--glass-rim-hairline),
+    inset 0 -1px 0 var(--glass-rim-bottom);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  backdrop-filter: blur(14px) saturate(130%);
 }
-.fact { background: var(--bg); padding: 36px 30px 32px; min-width: 0; }
+.fact { padding: 36px 30px 32px; min-width: 0; border-left: 1px solid var(--line); }
+/* auto-fit rewraps, so :first-child is not enough -- the first cell of every
+   row needs no rule to its left. */
+.fact:first-child { border-left: 0; }
 .fact-value {
   font-size: clamp(34px, 4.2vw, 62px);
   font-weight: 700;
@@ -1023,7 +1087,18 @@ a.card::after {
 /* ============================================================
    DOCUMENT LIST (certificates)
    ============================================================ */
-.docs { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.docs {
+  display: grid;
+  gap: 0;
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-top),
+    inset 0 0 0 1px var(--glass-rim-hairline),
+    inset 0 -1px 0 var(--glass-rim-bottom);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  backdrop-filter: blur(14px) saturate(130%);
+}
 /* The certificate itself, beside what it says. A page that lists
    accreditations and shows none of them is a page of claims; the thumbnail is
    what lets a reader recognise the society's mark and the company's name
@@ -1033,12 +1108,13 @@ a.card::after {
   grid-template-columns: clamp(150px, 15vw, 186px) 1fr;
   align-items: start;
   gap: clamp(18px, 2.4vw, 32px);
-  background: var(--bg);
+  border-top: 1px solid var(--line);
   padding: clamp(20px, 2.4vw, 30px);
   min-width: 0;
   transition: background 0.3s var(--ease);
 }
-.doc:hover { background: var(--panel); }
+.doc:first-child { border-top: 0; }
+.doc:hover { background: rgba(255, 255, 255, 0.05); }
 .doc-shot {
   display: block;
   border: 1px solid var(--line-2);
