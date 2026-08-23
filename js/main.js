@@ -477,6 +477,229 @@
 
   var paintFrostBtn = null;
 
+
+  /* ============================================================
+     REFRACTION  —  the frost probe only
+     ------------------------------------------------------------
+     The refraction field is a port of the fragment shader in liquid-glass-js
+     (https://github.com/dashersw/liquid-glass-js) — Copyright (c) 2025 Armagan
+     Amcalar, MIT. Permission is hereby granted, free of charge, to any person
+     obtaining a copy of that software to deal in it without restriction,
+     provided this notice travels with it; it is provided "as is", without
+     warranty of any kind. Keep this header on any copy or port.
+
+     CSS has no primitive for bending a backdrop, so this builds one: bake a
+     displacement map into a canvas, encode the x/y offset per pixel into the
+     R and G channels, and hand it to feDisplacementMap as a backdrop-filter.
+     Because it filters the BACKDROP, the source is the live page — scrolling,
+     the frost gradient animating in, all of it tracks for free.
+
+     Scoped to one element on purpose. It is Chromium-only (Safari parses the
+     SVG-referenced filter and paints nothing, so @supports cannot be used to
+     detect it), and it bakes a canvas per element size. The probe is 175x97,
+     appears only while the easter egg runs, and is the one surface here where
+     glass is the subject rather than a finish. Everywhere else keeps the
+     stylesheet's plain blur, which is what Safari and Firefox see here too.
+     ============================================================ */
+  var GLASS = {
+    edgeIntensity: 0.015, rimIntensity: 0.028, baseIntensity: 0.05,
+    edgeDistance: 0.5, rimDistance: 1.7, baseDistance: 0.2,
+    cornerBoost: 0.06, rippleEffect: 0.26, blurRadius: 2, warp: false
+  };
+  var SUPERSAMPLE = 2, MAX_MAP_EDGE = 1400, BLUR_STD_PER_RADIUS = 0.35;
+
+  /* Chromium only. Not a feature query: Safari accepts the declaration and
+     draws nothing, so @supports reports success and the panel goes blank. */
+  function canRefract() {
+    var b = navigator.userAgentData && navigator.userAgentData.brands;
+    if (b) {
+      for (var i = 0; i < b.length; i++) {
+        if (/Chromium|Google Chrome|Microsoft Edge/.test(b[i].brand)) return true;
+      }
+      return false;
+    }
+    return /Chrome\//.test(navigator.userAgent) && !/Edge\//.test(navigator.userAgent);
+  }
+
+  var refractDefs = null, refractSeq = 0;
+
+  function bakeRefraction(el) {
+    var r = el.getBoundingClientRect();
+    var w = Math.round(r.width), h = Math.round(r.height);
+    if (!w || !h) return null;
+
+    /* CSS stays the single source of shape — read the radius rather than
+       taking it as an argument. */
+    var cs = getComputedStyle(el);
+    var radius = parseFloat(cs.borderTopLeftRadius) || 0;
+    if (/%$/.test(cs.borderTopLeftRadius)) radius = Math.min(w, h) * radius / 100;
+    radius = Math.min(radius, Math.min(w, h) / 2);
+
+    /* Displacement is in fractions of the page texture, whose live equivalent
+       is the viewport — which is why this rebuilds on window resize, not only
+       on element resize. */
+    var pageW = window.innerWidth, pageH = window.innerHeight;
+    var factor = Math.max(0.25, Math.min(SUPERSAMPLE, MAX_MAP_EDGE / Math.max(w, h)));
+    var mw = Math.max(1, Math.round(w * factor)), mh = Math.max(1, Math.round(h * factor));
+
+    var cv = doc.createElement("canvas");
+    cv.width = mw; cv.height = mh;
+    var ctx = cv.getContext("2d");
+    var img = ctx.createImageData(mw, mh);
+    var data = img.data;
+    var dxs = new Float32Array(mw * mh), dys = new Float32Array(mw * mh);
+    var maxAbs = 0, minEdge = Math.min(w, h);
+
+    for (var y = 0; y < mh; y++) {
+      for (var x = 0; x < mw; x++) {
+        var px = (x + 0.5) / factor, py = (y + 0.5) / factor;
+        var cx = px / w, cy = py / h;
+
+        /* signed distance to the rounded rectangle, clamped at the edge */
+        var tx = Math.abs(px - w / 2) - (w / 2 - radius);
+        var ty = Math.abs(py - h / 2) - (h / 2 - radius);
+        var outer = Math.hypot(Math.max(tx, 0), Math.max(ty, 0));
+        var distPx = Math.max(-(outer + Math.min(Math.max(tx, ty), 0) - radius), 0);
+
+        var edgeFall = Math.exp(-distPx * GLASS.edgeDistance);
+        var rimFall = Math.exp(-distPx * GLASS.rimDistance);
+        var baseFall = 1 - Math.exp(-distPx * GLASS.baseDistance);
+
+        /* warp stays off: centre distortion looks impressive on a demo tile
+           and makes anything under the middle of the panel unreadable */
+        var total = (GLASS.warp ? baseFall * GLASS.baseIntensity : 0) +
+                    edgeFall * GLASS.edgeIntensity + rimFall * GLASS.rimIntensity;
+
+        var nx = cx - 0.5, ny = cy - 0.5;
+        var nlen = Math.hypot(nx, ny) || 1;
+        nx /= nlen; ny /= nlen;
+
+        var corner = Math.exp(-(Math.max(Math.min(cx, 1 - cx), Math.min(cy, 1 - cy)) *
+                                minEdge) * 0.3) * GLASS.cornerBoost;
+        var ripple = Math.sin((distPx / minEdge) * 25) * GLASS.rippleEffect * rimFall;
+
+        var dx = (nx * (total + corner) - ny * ripple) * pageW;
+        var dy = (ny * (total + corner) + nx * ripple) * pageH;
+
+        var i = y * mw + x;
+        dxs[i] = dx; dys[i] = dy;
+        var a = Math.max(Math.abs(dx), Math.abs(dy));
+        if (a > maxAbs) maxAbs = a;
+      }
+    }
+
+    /* feDisplacementMap decodes b as scale*(b/255 - 0.5), and the obvious
+       neutral 128 is NOT zero: 128/255 = 0.50196, so a flat interior would
+       drift by scale/510 px. With warp off the middle is supposed to be
+       perfectly undistorted, and that drift is exactly what you would see. */
+    var scale = Math.max(maxAbs * 2, 1e-4);
+    var bias = scale * (128 / 255 - 0.5);
+    for (var k = 0; k < mw * mh; k++) {
+      var o = k * 4;
+      data[o]     = Math.max(0, Math.min(255, Math.round(255 * (0.5 + (dxs[k] - bias) / scale))));
+      data[o + 1] = Math.max(0, Math.min(255, Math.round(255 * (0.5 + (dys[k] - bias) / scale))));
+      data[o + 2] = 128;
+      data[o + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+
+    /* Edge pixels sample up to scale/2 away plus the blur spread. A region
+       that stops at the box clips the refraction to transparent at the
+       corners — and displacement is viewport-proportional, so on an element
+       this small the margin can exceed the box. Size it from the field. */
+    var margin = scale / 2 + 3 * GLASS.blurRadius * BLUR_STD_PER_RADIUS;
+    var mx = (margin / w) * 100, my = (margin / h) * 100;
+
+    if (!refractDefs || !refractDefs.isConnected) {
+      var svg = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("width", "0"); svg.setAttribute("height", "0");
+      svg.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
+      refractDefs = doc.createElementNS("http://www.w3.org/2000/svg", "defs");
+      svg.appendChild(refractDefs);
+      doc.body.appendChild(svg);
+    }
+
+    var id = "lg-refract-" + (++refractSeq);
+    var NS = "http://www.w3.org/2000/svg";
+    var f = doc.createElementNS(NS, "filter");
+    f.setAttribute("id", id);
+    f.setAttribute("filterUnits", "objectBoundingBox");
+    f.setAttribute("x", (-mx) + "%"); f.setAttribute("y", (-my) + "%");
+    f.setAttribute("width", (100 + mx * 2) + "%");
+    f.setAttribute("height", (100 + my * 2) + "%");
+
+    var fe = doc.createElementNS(NS, "feImage");
+    fe.setAttribute("result", "map");
+    fe.setAttribute("preserveAspectRatio", "none");
+    /* A primitive with no subregion fills the FILTER REGION, and this region
+       is deliberately ~216% of the box so the corners are not clipped. Left
+       unset, the map was being stretched across all of that -- putting its
+       1-2px rim band well outside the element, which is why the displacement
+       measured 13/255 over a gradient and 12 over a photograph: it was bending
+       the wrong pixels. primitiveUnits is userSpaceOnUse by default, so pin it
+       to the box in user units. */
+    fe.setAttribute("x", "0"); fe.setAttribute("y", "0");
+    fe.setAttribute("width", String(w)); fe.setAttribute("height", String(h));
+    fe.setAttributeNS("http://www.w3.org/1999/xlink", "href", cv.toDataURL());
+    fe.setAttribute("href", cv.toDataURL());
+
+    var dm = doc.createElementNS(NS, "feDisplacementMap");
+    dm.setAttribute("in", "SourceGraphic"); dm.setAttribute("in2", "map");
+    dm.setAttribute("scale", String(scale));
+    dm.setAttribute("xChannelSelector", "R"); dm.setAttribute("yChannelSelector", "G");
+    dm.setAttribute("result", "disp");
+
+    var gb = doc.createElementNS(NS, "feGaussianBlur");
+    gb.setAttribute("in", "disp");
+    gb.setAttribute("stdDeviation", String(GLASS.blurRadius * BLUR_STD_PER_RADIUS));
+
+    f.appendChild(fe); f.appendChild(dm); f.appendChild(gb);
+    refractDefs.appendChild(f);
+
+    if (el._lgFilter && el._lgFilter.parentNode) {
+      el._lgFilter.parentNode.removeChild(el._lgFilter);
+    }
+    el._lgFilter = f;
+    /* url() ALONE, replacing the stylesheet's blur(10px) saturate(130%)
+       outright. Chaining a blur in front of it seemed obviously right -- keep
+       the frosting, add the bend -- and it is wrong: a blur smooths the
+       backdrop, and displacement of an already-smooth image moves nothing you
+       can see. Measured over the same frame, the displacement's own
+       contribution was max 26/255 across 7470 pixels with no pre-blur, and
+       10-13 across ~1200 with blur(3px) or blur(9px) in front. The pre-blur
+       was erasing the effect it was meant to accompany.
+
+       So the frosting is the filter's own feGaussianBlur, which is why it sits
+       AFTER the displacement in the chain and why it is small. Text stays
+       readable on the panel's own rgba(7,8,36,0.78) ground, not on blur. */
+    el.style.backdropFilter = "url(#" + id + ")";
+    el.style.webkitBackdropFilter = "url(#" + id + ")";
+    return f;
+  }
+
+  function releaseRefraction(el) {
+    if (!el) return;
+    if (el._lgResize) { window.removeEventListener("resize", el._lgResize); el._lgResize = null; }
+    if (el._lgFilter && el._lgFilter.parentNode) {
+      el._lgFilter.parentNode.removeChild(el._lgFilter);
+    }
+    el._lgFilter = null;
+  }
+
+  function refract(el) {
+    if (!el || !canRefract()) return;
+    bakeRefraction(el);
+    /* the window resize changes pageW/pageH for the whole field at once, so
+       debounce it rather than rebaking on every frame of a drag */
+    var t = null;
+    el._lgResize = function () {
+      clearTimeout(t);
+      t = setTimeout(function () { if (el.isConnected) bakeRefraction(el); }, 180);
+    };
+    window.addEventListener("resize", el._lgResize);
+  }
+
   function setFrost(on) {
     var root = doc.documentElement;
     root.classList.toggle("is-frost", on);
@@ -487,7 +710,12 @@
 
     if (on) {
       if (!ice) doc.body.appendChild(buildIce());
-      if (!probe) { probe = buildProbe(); doc.body.appendChild(probe); }
+      if (!probe) {
+        probe = buildProbe();
+        doc.body.appendChild(probe);
+        /* after layout, so the bake reads the real box */
+        requestAnimationFrame(function () { refract(probe); });
+      }
 
       var t = 18, target = -25;
       var readout = probe.querySelector(".fp-t");
@@ -511,6 +739,7 @@
       [ice, probe].forEach(function (el) {
         if (!el) return;
         if (el._iv) clearInterval(el._iv);
+        releaseRefraction(el);
         el.classList.add("is-out");
         setTimeout(function () {
           if (el && el.parentNode) el.parentNode.removeChild(el);
