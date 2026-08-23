@@ -1056,6 +1056,33 @@ both. It is a plan change, not a migration: same code, same database.
 is a long way off at this scale, but it is not unlimited — worth a look once
 there are hundreds of jobs.
 
+## The GA drawing was smaller than the space it had
+
+Three things were shrinking it, and only the first was visible:
+
+- **The viewBox was `0 0 900 660` while the drawing occupied `70,105` to
+  `886,646`** — 105 units of empty above it and 70 to the left, so a sixth of
+  the box was margin. Cropped to `62 97 842 557`, with a few units of air for
+  balloon 04 and the dimension arrow, which overhang.
+- **The column split was `1.5fr 1fr`**, giving the drawing 765px of a 1325px
+  row. The parts list is five short numbered lines; the drawing is the point of
+  the section. `2.1fr 1fr`.
+- ⚠️ **`.ga { max-height: 48svh }` was the real cost.** With the height capped
+  below what the section had room for, `preserveAspectRatio` fitted the drawing
+  to the height and centred it — the SVG box measured 870×456 while the drawing
+  inside it was **668 wide, with 202px letterboxed away**. Nothing in the
+  markup says so; it only shows up by comparing `getBBox()` mapped through
+  `getScreenCTM()` against the element's own rect.
+
+`58svh`, not a rounder number: at 62svh the section grew past one screen at
+1512×857 and 1280×760, because the overhead above the drawing is not constant —
+the section padding scales with viewport height and the heading block wraps
+differently at each width.
+
+Net: the drawing is **21% wider**, and the whole section still clears one
+screen everywhere from 1280×760 to 2560×1440 (1280×720 exceeds it by 2px,
+which is rounding).
+
 ## The hero has to fit the screen it is on
 
 ⚠️ **Every vertical measure in the hero scaled with viewport WIDTH and none

@@ -1415,8 +1415,11 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
    ============================================================ */
 .drawing {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: clamp(26px, 3.5vw, 56px);
+  /* The parts list is five short numbered lines; the drawing is the point of
+     the section. 1.5fr left it at 765px of a 1325px row -- 58% of the width,
+     for the thing everything else is labelling. */
+  grid-template-columns: 2.1fr 1fr;
+  gap: clamp(22px, 2.8vw, 46px);
   align-items: center;
 }
 .drawing > * { min-width: 0; }
@@ -1607,7 +1610,11 @@ a.aldy:hover img { opacity: 1; }
      section has to clear one screen including it */
   .drawing-section .section-head { margin-bottom: clamp(20px, 2.6vh, 38px); }
   .drawing-section .section-head .lead { font-size: var(--text-l); }
-  .ga { max-height: 48svh; }
+  /* 48svh capped the drawing well below what the section had room for: the
+     SVG box came out 870x456 while the drawing inside it was 668 wide, so
+     202px was letterboxed away by preserveAspectRatio. The cap is what the
+     heading block actually leaves, not a round number. */
+  .ga { max-height: 58svh; }
 }
 
 /* ============================================================

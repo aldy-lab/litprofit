@@ -1155,7 +1155,13 @@ def compressor_drawing():
         </div>
 
         <div class="drawing reveal" id="drawing">
-          <svg class="ga" viewBox="0 0 900 660" aria-hidden="true"
+          <!-- The viewBox is cropped to the drawing itself. It used to be
+               0 0 900 660 while the content occupied 70,105 to 886,646 -- 105
+               units of empty above it and 70 to the left, so a sixth of the
+               box was margin and the drawing rendered a fifth smaller than the
+               space it was given. Balloon 04 and the dimension arrow overhang,
+               hence overflow:visible and the few units of air here. -->
+          <svg class="ga" viewBox="62 97 842 557" aria-hidden="true"
                preserveAspectRatio="xMidYMid meet">
 
             <!-- shaft centre line, dash-dot, the way a drawing marks an axis -->
