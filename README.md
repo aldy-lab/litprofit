@@ -1056,6 +1056,42 @@ both. It is a plan change, not a migration: same code, same database.
 is a long way off at this scale, but it is not unlimited — worth a look once
 there are hundreds of jobs.
 
+## The hero has to fit the screen it is on
+
+⚠️ **Every vertical measure in the hero scaled with viewport WIDTH and none
+with height.** So the hero grew as the screen got wider while the room to put
+it in did not, and a wide-but-short laptop was the worst case of all.
+Measured on load, before the fix:
+
+| | |
+|---|---|
+| 1440 × 900 | trust strip **39px** below the fold |
+| 1512 × 857 (MacBook Pro 14) | **96px** below |
+| 1280 × 720 | **176px** below |
+
+The partner logos, the class certificates and the frost control were simply
+invisible until you scrolled — on the one screen the site exists to make a
+first impression with.
+
+The fix is `min(Xvw, Yvh)` on the headline size and on every gap: it takes
+whichever is the tighter constraint, so the rhythm opens up on a tall screen
+and closes on a short one, continuously, with no breakpoint to fall off. A
+single `@media (max-height: 780px)` rule takes the last few pixels on genuinely
+short laptops; it carries a `min-width` floor so it never touches a phone,
+which is short for a different reason.
+
+Verified across ten sizes from 1280×720 to 2560×1440 plus iPad landscape: the
+whole hero, trust strip and frost control included, is above the fold on load
+everywhere.
+
+⚠️ **This is what broke the frost button's absolute positioning.** Pinned to
+the hero's bottom edge it worked only while the hero had room to spare; the
+moment the padding tightened, the button and the trust strip went straight
+through each other. It rides at the end of the trust rule now, in the flow,
+where it costs no height and cannot collide with anything. Its 44px tap target
+stays behind `@media (hover: none)` — on a pointer screen it only made the row
+taller than the text in it.
+
 ## The frost note
 
 The frost easter egg is a typed sequence, which nobody discovers and nobody on
