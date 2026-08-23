@@ -1201,12 +1201,22 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted-2);
-  opacity: 0.34;
-  transition: opacity 0.45s var(--ease);
-  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.4s var(--ease), color 0.4s var(--ease);
+  /* it is a button now, so it takes the pointer and none of the chrome */
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 10px 12px 10px 0;
+  cursor: pointer;
   user-select: none;
 }
-.frost-note b { color: var(--white); font-weight: 600; letter-spacing: 0.22em; }
+.frost-flake { width: 12px; height: 12px; flex: none; fill: none; }
+.frost-note span:not(.frost-lead):not(.visually-hidden) {
+  color: var(--white);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
 /* the leader line of a drawing note, drawn to the label */
 .frost-lead {
   display: block;
@@ -1222,14 +1232,28 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   background: currentColor;
   transform: translate(-1px, -1px);
 }
-.hero:hover .frost-note { opacity: 0.75; }
+.hero:hover .frost-note { opacity: 0.8; }
+.frost-note:hover,
+.frost-note:focus-visible { opacity: 1; color: var(--accent); }
+.frost-note:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+/* pressed reads as running, because it is: the effect times out on its own */
+.frost-note[aria-pressed="true"] { color: var(--accent); }
 /* While the page is iced there is nothing left to hint at. Both selectors,
    because `.hero:hover .frost-note` is (0,3,0) and `html.is-frost .frost-note`
    is only (0,2,1) — the hover rule won and the note stayed lit through the
    whole effect. */
 html.is-frost .frost-note,
 html.is-frost .hero:hover .frost-note { opacity: 0; }
-@media (hover: none) { .frost-note { display: none; } }
+/* It used to stand down on touch, when it was only a caption saying "type
+   FROST" -- advice you cannot follow without a keyboard. As a button it is the
+   only way in on a phone, so it stays, with a tap target that can be hit. */
+@media (hover: none) {
+  .frost-note { opacity: 0.8; padding: 12px 14px 12px 0; min-height: 44px; }
+  .frost-lead { width: 20px; }
+}
 @media (prefers-reduced-motion: reduce) { .frost-note { transition: none; } }
 
 .footer-bottom {

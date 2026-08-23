@@ -1058,23 +1058,35 @@ there are hundreds of jobs.
 
 ## The frost note
 
-The frost easter egg is a typed sequence, so it was findable only by reading
-the console signature. There is a hint on the hero now — a drawing annotation
-at bottom-left, a leader line and a label, mirroring the scroll rule at
-bottom-right and set at the drawing's own weight and colour.
+The frost easter egg is a typed sequence, which nobody discovers and nobody on
+a phone can use at all. There is a **button** on the hero now — bottom-left,
+mirroring the scroll rule at bottom-right, drawn as a note on the drawing:
+leader line, snowflake, label, at the drawing's own weight and colour. No
+border, no background; it does not read as interface until you go near it.
 
-The brief was that the hidden things stay invisible until sought. This is
-sought by looking **at** the drawing: it rests at `opacity: 0.34`, which reads
-as one of the plant's own annotations rather than as interface, and lifts to
-`0.75` while the pointer is anywhere in the hero.
+It started as a caption reading *type FROST*, which was advice you cannot
+follow without a keyboard. A caption that tells a phone user to type is worse
+than no caption.
 
-- **It stands down on touch** (`@media (hover: none)`). There is nothing to
-  type on, so the label would be clutter with no payoff.
+- It rests at `opacity: 0.55`, lifts to `0.8` when the pointer is anywhere in
+  the hero, and goes to full strength with the accent colour on hover or
+  keyboard focus.
+- **The button and the typed word are one switch.** `setFrost` paints the
+  button rather than the click doing it, because the effect also times out
+  after eleven seconds — an `aria-pressed` left at `true` would be telling a
+  screen reader the page is still iced when it thawed ten seconds ago.
+  Verified: pressed goes back to `false` on its own.
+- The `title` swaps between *Frost the page over* and *Thaw the page*, so the
+  control says what it will do next rather than what it is.
+- **44px tall on touch**, where it is the only way in. It used to be hidden
+  there.
 - **It disappears while the page is iced** — there is nothing left to hint at.
-- The word `FROST` is the literal trigger in every language; only the verb
-  around it translates (`type` / `įveskite` / `введите`).
-- The full sentence is repeated for screen readers in `.visually-hidden`,
-  because a leader line and two words are not self-explanatory read aloud.
+- `FROST` is the literal trigger in every language, so only the label
+  translates (`Frost` / `Šerkšnas` / `Иней`).
+
+Verified: click, tap, `Enter` from the keyboard and typing the word all toggle
+it; the button is reachable by Tab; the phone tap target measures 110×44 with
+no page overflow.
 
 ⚠️ **`.hero:hover .frost-note` is (0,3,0) and `html.is-frost .frost-note` is
 only (0,2,1)** — so the hover rule won and the note stayed lit through the whole

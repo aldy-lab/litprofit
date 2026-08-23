@@ -475,9 +475,12 @@
     return probe;
   }
 
+  var paintFrostBtn = null;
+
   function setFrost(on) {
     var root = doc.documentElement;
     root.classList.toggle("is-frost", on);
+    if (paintFrostBtn) paintFrostBtn(on);
 
     var ice = doc.getElementById("frostIce");
     var probe = doc.getElementById("frostProbe");
@@ -514,6 +517,22 @@
         }, 1100);
       });
     }
+  }
+
+  /* The button and the typed word are the same switch, so the button's state
+     has to follow setFrost rather than its own click -- the effect also times
+     out after eleven seconds, and an aria-pressed left at true would be
+     telling a screen reader the page is still iced when it is not. */
+  var frostBtn = doc.getElementById("frostToggle");
+  if (frostBtn) {
+    on(frostBtn, "click", function () {
+      setFrost(!doc.documentElement.classList.contains("is-frost"));
+    });
+    paintFrostBtn = function (on_) {
+      frostBtn.setAttribute("aria-pressed", on_ ? "true" : "false");
+      var label = frostBtn.getAttribute(on_ ? "data-off" : "data-on");
+      if (label) frostBtn.setAttribute("title", label);
+    };
   }
 
   on(doc, "keydown", function (e) {

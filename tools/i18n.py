@@ -62,7 +62,8 @@ S["en"] = dict(
     # take the reader's language.
     addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lithuania",
     # The frost easter egg, annotated on the drawing the way a note is.
-    frost_hint="type", frost_hint_a11y="Hidden feature: type the word FROST to frost the page over.",
+    frost_hint="Frost", frost_hint_a11y="Frost the page over. You can also just type FROST.",
+    frost_hint_off="Thaw the page.",
     hero_h1="Ship repair and maintenance all over the world",
     hero_lead='%(legal)s overhauls marine engines, refrigeration plant and piping '
               'systems for fishing fleets, shipowners and shore installations — '
@@ -145,7 +146,8 @@ S["lt"] = dict(
 
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lietuva",
-    frost_hint="įveskite", frost_hint_a11y="Paslėpta funkcija: įveskite žodį FROST ir puslapį apšerkšnys.",
+    frost_hint="Šerkšnas", frost_hint_a11y="Apšerkšnyti puslapį. Taip pat galite tiesiog įvesti FROST.",
+    frost_hint_off="Atitirpdyti puslapį.",
     hero_h1="Laivų remontas ir aptarnavimas visame pasaulyje",
     hero_lead='%(legal)s remontuoja laivų variklius, šaldymo įrangą ir '
               'vamzdynų sistemas žvejybos laivynams, laivų savininkams ir kranto '
@@ -228,7 +230,8 @@ S["ru"] = dict(
 
     hero_eyebrow="Клайпеда, Литва", hero_since="с",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Клайпеда", addr_country="Литва",
-    frost_hint="введите", frost_hint_a11y="Скрытая функция: введите слово FROST, и страницу затянет инеем.",
+    frost_hint="Иней", frost_hint_a11y="Покрыть страницу инеем. Можно и просто ввести FROST.",
+    frost_hint_off="Растопить иней.",
     hero_h1="Ремонт и обслуживание судов в любой точке земного шара",
     hero_lead='%(legal)s ремонтирует судовые двигатели, холодильное '
               'оборудование и трубопроводные системы для рыболовных флотов, '

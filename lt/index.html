@@ -127,15 +127,23 @@
           <span>Jūrinio šaldymo partneriai <b>DANFOSS</b></span>
           <span>Sertifikuota <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
         </p>
-        <!-- The frost egg is typed, not clicked, so the hint is written on
-             the drawing the way a note is written on a drawing: a leader line
-             and a label, at the drawing's own weight. Anyone scanning the page
-             reads past it; anyone looking AT the drawing finds it. -->
-        <p class="frost-note">
+        <!-- A real control, not a caption. Written as a note on the drawing
+             -- leader line, label, the drawing's own weight -- but it is a
+             button, so it works by tapping as well as by typing FROST, and it
+             is reachable by keyboard. The label carries the word that is also
+             the shortcut. -->
+        <button type="button" class="frost-note" id="frostToggle"
+                aria-pressed="false" data-on="Apšerkšnyti puslapį. Taip pat galite tiesiog įvesti FROST." data-off="Atitirpdyti puslapį." title="Apšerkšnyti puslapį. Taip pat galite tiesiog įvesti FROST.">
           <span class="frost-lead" aria-hidden="true"></span>
-          <span>įveskite <b>FROST</b></span>
-          <span class="visually-hidden">Paslėpta funkcija: įveskite žodį FROST ir puslapį apšerkšnys.</span>
-        </p>
+          <svg class="frost-flake" viewBox="0 0 16 16" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+              <path d="M8 1.6v12.8M2.5 4.8l11 6.4M2.5 11.2l11-6.4"/>
+              <path d="M5.9 3.1 8 4.5l2.1-1.4M5.9 12.9 8 11.5l2.1 1.4"/>
+            </g>
+          </svg>
+          <span>Šerkšnas</span>
+          <span class="visually-hidden">Apšerkšnyti puslapį. Taip pat galite tiesiog įvesti FROST.</span>
+        </button>
         <span class="scroll-cue" aria-hidden="true"></span>
       </div>
     </section>

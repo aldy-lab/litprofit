@@ -921,15 +921,23 @@ def home():
           <span>{tr} <b>DANFOSS</b></span>
           <span>{tc} <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
         </p>
-        <!-- The frost egg is typed, not clicked, so the hint is written on
-             the drawing the way a note is written on a drawing: a leader line
-             and a label, at the drawing's own weight. Anyone scanning the page
-             reads past it; anyone looking AT the drawing finds it. -->
-        <p class="frost-note">
+        <!-- A real control, not a caption. Written as a note on the drawing
+             -- leader line, label, the drawing's own weight -- but it is a
+             button, so it works by tapping as well as by typing FROST, and it
+             is reachable by keyboard. The label carries the word that is also
+             the shortcut. -->
+        <button type="button" class="frost-note" id="frostToggle"
+                aria-pressed="false" data-on="{fha}" data-off="{fho}" title="{fha}">
           <span class="frost-lead" aria-hidden="true"></span>
-          <span>{fh} <b>FROST</b></span>
+          <svg class="frost-flake" viewBox="0 0 16 16" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+              <path d="M8 1.6v12.8M2.5 4.8l11 6.4M2.5 11.2l11-6.4"/>
+              <path d="M5.9 3.1 8 4.5l2.1-1.4M5.9 12.9 8 11.5l2.1 1.4"/>
+            </g>
+          </svg>
+          <span>{fh}</span>
           <span class="visually-hidden">{fha}</span>
-        </p>
+        </button>
         <span class="scroll-cue" aria-hidden="true"></span>
       </div>
     </section>
@@ -1058,7 +1066,8 @@ def home():
                 hlead=T("hero_lead", legal=LEGAL), s1=T("step1"), s2=T("step2"),
                 s3=T("step3"), hsvc=T("hero_services"), tp=T("role_bitzer"),
                 tr=T("role_danfoss"), tc=T("trust_cert"),
-                fh=T("frost_hint"), fha=attr(T("frost_hint_a11y")),
+                fh=text(T("frost_hint")), fha=attr(T("frost_hint_a11y")),
+                fho=attr(T("frost_hint_off")),
                 rep_e=T("rep_eyebrow"),
                 rep_h=T("rep_h2"), rep_l=T("rep_lead"), rep_b=T("rep_bitzer"),
                 rep_d=T("rep_danfoss"), f1=T("fact_years"), f2=T("fact_service"),
