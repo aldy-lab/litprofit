@@ -1225,6 +1225,16 @@ const CLOUD = (function(){
       return by;
     },
 
+    /* The role is a property of the person, not of a project row. Reading it
+       from the row that happened to arrive means it is unknown until one does
+       -- and unknowable if none ever do. */
+    async role(){
+      if(!session || !session.user) return 'staff';
+      const rows = await rest('profiles?select=role&id=eq.' +
+                              encodeURIComponent(session.user.id));
+      return (rows && rows[0] && rows[0].role) || 'staff';
+    },
+
     async pull(){
       return await rest('projects_v?select=' + COLS + '&order=project_id.asc') || [];
     },
@@ -1925,7 +1935,21 @@ function datalists(ids){
    simply has no revenue in it. This flag only stops the interface offering
    things that would be empty -- it is not the permission, it is the manners.
    With no database configured everyone is the owner of their own browser. */
-var CAN_MONEY = true;
+/* Starts FALSE with a database attached. It used to start true and wait to be
+   corrected by the `money` column on the first project row that arrived, which
+   is wrong twice: the interface offers every money view for as long as the
+   request is in flight, and a staff member who can see no projects is never
+   corrected at all -- no row, no correction, and the flag stays true for the
+   whole session. A permission that defaults to granted and waits to be revoked
+   is not a permission.
+
+   The figures themselves were never exposed: projects_v redacts revenue, the
+   contract, the advance, the target margin and both rebill fields before they
+   leave Postgres, and the app has no privilege on public.projects at all. This
+   is the interface catching up with what the server already enforces --
+   without it staff were shown margin and profit rows computed from redacted
+   input, which is a different bug wearing the same clothes. */
+var CAN_MONEY = false;
 function canMoney(){ return !CLOUD.on || CAN_MONEY; }
 
 /* ================= rendering ================= */
@@ -2714,6 +2738,13 @@ const MENU_ACTS = {
   },
   async signout(){
     await CLOUD.signOut();
+    /* The reload resets CAN_MONEY on its own, but not localStorage. On a
+       shared machine the cached copy still held the previous session's
+       projects -- revenue included, if that person was allowed to see it --
+       and the next person to sign in would be rendered from it until the pull
+       landed. The server copy is the record; the cache is only there to make a
+       reload instant, and it is worth nothing once its owner has left. */
+    try { localStorage.removeItem(LS_KEY); } catch(e){}
     location.reload();
     return 'noop';
   },
@@ -3506,6 +3537,14 @@ $('#siForgot').addEventListener('click', async ()=>{
 
 async function bootCloud(){
   if(!CLOUD.signedIn()){ showSignIn(); return; }
+  /* Before anything is drawn. CAN_MONEY starts false, so a failure here leaves
+     the interface in its restricted state rather than its permissive one --
+     which is the right way round for a question about what someone is allowed
+     to see. profiles.role defaults to 'staff' in the schema, and role() falls
+     back to 'staff' on any error, so every path that is not an affirmative
+     'admin' or 'manager' lands in the same place. */
+  try { CAN_MONEY = ['admin','manager'].indexOf(await CLOUD.role()) !== -1; }
+  catch(e){ CAN_MONEY = false; }
   try {
     /* Anything still queued goes up BEFORE the pull, or the pull replaces
        state.projects wholesale and takes it with it. That is the path where a
