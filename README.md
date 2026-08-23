@@ -1100,7 +1100,16 @@ The partner logos, the class certificates and the frost control were simply
 invisible until you scrolled — on the one screen the site exists to make a
 first impression with.
 
-The fix is `min(Xvw, Yvh)` on the headline size and on every gap: it takes
+⚠️ **Fitting the content is not the same as filling the screen.** With the
+content made to fit, the hero ended **35px short of the fold** on a 1512×780
+window, and the next section's rivet seam showed underneath it as a thin
+strip — not a glimpse of what follows, just a line that looks like a mistake.
+`min-height` is `min(100svh, 1080px)` now, so the hero is exactly one screen.
+The cap means a very tall monitor gets a genuine reveal of the partners band
+instead of a void under the headline. Verified at nine sizes: the element at
+the fold is the hero's own drawing layer, never the section below it.
+
+The fix for the content is `min(Xvw, Yvh)` on the headline size and on every gap: it takes
 whichever is the tighter constraint, so the rhythm opens up on a tall screen
 and closes on a short one, continuously, with no breakpoint to fall off. A
 single `@media (max-height: 780px)` rule takes the last few pixels on genuinely

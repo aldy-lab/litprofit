@@ -435,7 +435,12 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   position: relative;
   display: flex;
   align-items: flex-end;
-  min-height: clamp(620px, 92vh, 960px);
+  /* Exactly one screen, not 92% of one. At 92vh the hero stopped 35px short
+     of the fold and the next section's rivet seam showed underneath it as a
+     thin strip -- not a glimpse of what follows, just a line that looks like a
+     mistake. Capped at 1080px so a very tall monitor gets a genuine reveal of
+     the band below rather than a void under the headline. */
+  min-height: min(100svh, 1080px);
   /* Every vertical measure in here used to scale with viewport WIDTH only, so
      the hero grew as the screen got wider while the space to put it in did
      not. On a MacBook Pro 14 the trust strip finished 96px below the fold and
