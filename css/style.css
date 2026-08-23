@@ -836,33 +836,18 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   transition: background 0.35s var(--ease), border-color 0.35s var(--ease),
               transform 0.35s var(--ease);
 }
-a.card:hover {
-  background: var(--panel-2);
-  border-color: var(--line-2);
-  transform: translateY(-5px);
-}
-/* A light sweep across the card, skewed to the monogram's diagonal so the
-   movement traces the mark's own geometry. Purely decorative, so it is
-   hidden from assistive tech by being a pseudo-element, and suppressed
-   under prefers-reduced-motion by the global rule at the top of the file. */
+a.card:hover { border-color: var(--line-2); }
+/* There was a white glare sweeping 460% across the card over 850ms here,
+   skewed to the monogram's diagonal. It is gone. A shine wiping across a card
+   is the single most template-looking effect on the web, it ran at nearly
+   three times the hover budget, and it was one of FIVE things this card did at
+   once on hover -- background lift, border, a 5px jump, the sweep and a photo
+   zoom. The pile-up was the problem, not any one of them.
+
+   What is left is the card reacting without the card moving: the border
+   brightens, the photograph wakes up, and the arrow advances. Three signals,
+   all inside 260ms, none of which announce themselves. */
 a.card { position: relative; }
-a.card::after {
-  content: "";
-  position: absolute;
-  top: -20%;
-  bottom: -20%;
-  left: -60%;
-  width: 34%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent);
-  transform: skewX(calc(var(--slant) * -1)) translateX(0);
-  transition: transform 0.85s var(--ease), opacity 0.4s var(--ease);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 3;
-}
-@media (hover: hover) and (pointer: fine) {
-  a.card:hover::after { opacity: 1; transform: skewX(calc(var(--slant) * -1)) translateX(460%); }
-}
 
 .card-media {
   position: relative;
@@ -895,7 +880,11 @@ a.card::after {
   transition: transform 0.26s var(--ease), opacity 0.26s var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
-  a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
+  /* No scale. A slow zoom on a thumbnail is the other half of the template
+     look, and it moved the one thing on the card worth looking at. The photo
+     brightens and loses a little of its desaturation instead -- it wakes up
+     without going anywhere. */
+  a.card:hover .card-media img { opacity: 0.82; filter: saturate(0.78); }
 }
 .card-media::after {
   content: "";
@@ -929,7 +918,14 @@ a.card::after {
   text-transform: uppercase;
   color: var(--accent);
 }
-.card-more::after { content: " \2192"; }
+.card-more::after {
+  content: " \2192";
+  display: inline-block;
+  transition: transform 0.2s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  a.card:hover .card-more::after { transform: translateX(4px); }
+}
 
 /* ============================================================
    SPLIT (text + panel)
