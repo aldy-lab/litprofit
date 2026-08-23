@@ -633,10 +633,16 @@ CLIENTS = [
     ("OWH", "logo-owh.png", 246, 161, "", ""),
 ]
 
+# Read off the documents themselves. Both entries previously carried the date
+# 2025-10-21, which is neither certificate's date -- it was the file's. On a
+# page whose whole purpose is to make an accreditation checkable, a date that
+# does not appear anywhere on the certificate is worse than no date.
 CERTIFICATES = [
-    dict(name="RINA", file="rina-certificate-2025.pdf", size="329 KB", date="2025-10-21",
+    dict(name="RINA", file="rina-certificate-2025.pdf", size="329 KB", thumb_h=1165,
+         no="REC037725XF", issued="2025-05-08", valid="2028-05-12",
          note="Italian classification society"),
-    dict(name="PRS", file="prs-certificate.pdf", size="961 KB", date="2025-10-21",
+    dict(name="PRS", file="prs-certificate.pdf", size="961 KB", thumb_h=1273,
+         no="TM/1703/842502/25", issued="2025-10-15", valid="2028-10-14",
          note="Polish Register of Shipping"),
 ]
 
@@ -1523,11 +1529,26 @@ def partners():
 def certificates():
     notes = {"RINA": PT("c_rina_note"), "PRS": PT("c_prs_note")}
     docs = "\n".join("""        <a class="doc" href="{href}" target="_blank" rel="noopener">
-          <span class="doc-name">{name}</span>
-          <span class="doc-meta">{note} <span class="sep">//</span> PDF {size} <span class="sep">//</span> {date}</span>
-          <span class="doc-get">{open}</span>
-        </a>""".format(href=u("/assets/certs/" + c["file"]), name=c["name"],
-                       note=notes[c["name"]], size=c["size"], date=c["date"],
+          <span class="doc-shot">
+            <img src="{shot}" alt="{alt}" width="900" height="{sh}" loading="lazy" decoding="async">
+          </span>
+          <span class="doc-body">
+            <span class="doc-name">{name}</span>
+            <span class="doc-note">{note}</span>
+            <span class="doc-facts">
+              <span><i>{l_no}</i>{no}</span>
+              <span><i>{l_issued}</i>{issued}</span>
+              <span><i>{l_valid}</i>{valid}</span>
+            </span>
+            <span class="doc-get">{open} <span class="doc-size">PDF {size}</span></span>
+          </span>
+        </a>""".format(href=u("/assets/certs/" + c["file"]),
+                       shot=u("/assets/certs/" + c["file"].replace(".pdf", ".webp")),
+                       sh=c.get("thumb_h", 1200),
+                       alt=attr(PT("c_shot_alt", name=c["name"])),
+                       name=c["name"], note=notes[c["name"]], size=c["size"],
+                       no=c["no"], issued=c["issued"], valid=c["valid"],
+                       l_no=PT("c_no"), l_issued=PT("c_issued"), l_valid=PT("c_valid"),
                        open=PT("c_open")) for c in CERTIFICATES)
 
     return page_head(PT("c_eyebrow"), PT("c_h1"), PT("c_lead"),
@@ -1542,6 +1563,13 @@ def certificates():
     </section>
 
     <section class="container prose">
+      <h2>{h_scope}</h2>
+      <p>{p_scope}</p>
+      <ul class="scope-list">
+{scope}
+      </ul>
+      <p>{p_scope_x}</p>
+
       <h2>{h_what}</h2>
       <p>{p_what}</p>
       <h2>{h_ins}</h2>
@@ -1552,6 +1580,10 @@ def certificates():
 {cta}""".format(docs=docs, h_what=PT("c_what"), p_what=PT("c_what_p"),
                 h_ins=PT("c_ins"), p_ins=PT("a_cert_2"),
                 h_war=PT("c_war"), p_war=PT("c_war_p"),
+                h_scope=PT("c_scope_h"), p_scope=PT("c_scope_lead"),
+                p_scope_x=PT("c_scope_extra"),
+                scope="\n".join("        <li>%s</li>" % text(x)
+                                 for x in i18n.P[LANG]["c_scope"]),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
 

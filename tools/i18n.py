@@ -724,6 +724,22 @@ P["en"] = dict(
     p_clients_h2="Companies we have worked for",
     p_clients_lead="Fishing groups, shipowners and shipyards across the Baltic and beyond.",
 
+    c_no="No.", c_issued="Issued", c_valid="Valid until",
+    c_shot_alt="First page of the %(name)s certificate",
+    # Straight off the PRS certificate, which is the definitive statement of
+    # what the company is approved to repair. It was not on the site at all.
+    c_scope_h="What the PRS approval covers",
+    c_scope_lead="Certificate TM/1703/842502/25 approves UAB \u201eLitprofit\u201c to carry "
+                 "out repairs of:",
+    c_scope=["Main and auxiliary engines \u2014 two-stroke and four-stroke",
+             "Deck machinery and mechanisms",
+             "Fuel equipment of main and auxiliary engines, compressors and pumps",
+             "Turbochargers",
+             "Reduction gears",
+             "Alignment of diesel engines",
+             "Refrigeration equipment and systems"],
+    c_scope_extra="It also approves the <strong>design</strong> of refrigeration "
+                  "equipment and systems \u2014 not only their repair.",
     c_eyebrow="Certificates", c_h1="Certification and cover",
     c_lead="Class approvals, and the liability insurance behind the work.",
     c_meta="RINA and PRS certification, and EUR 250,000 civil liability insurance with "
@@ -850,6 +866,20 @@ P["lt"] = dict(
     p_clients_h2="Įmonės, kurioms dirbome",
     p_clients_lead="Žvejybos grupės, laivų savininkai ir laivų statyklos Baltijos regione ir toliau.",
 
+    c_no="Nr.", c_issued="Išduota", c_valid="Galioja iki",
+    c_shot_alt="%(name)s sertifikato pirmasis puslapis",
+    c_scope_h="Ką apima PRS pripažinimas",
+    c_scope_lead="Sertifikatas TM/1703/842502/25 suteikia UAB \u201eLitprofit\u201c teisę "
+                 "remontuoti:",
+    c_scope=["Pagrindinius ir pagalbinius variklius \u2014 dviejų ir keturių taktų",
+             "Denio mechanizmus ir įrenginius",
+             "Pagrindinių ir pagalbinių variklių, kompresorių ir siurblių kuro įrangą",
+             "Turbokompresorius",
+             "Reduktorius",
+             "Dyzelinių variklių centravimą",
+             "Šaldymo įrangą ir sistemas"],
+    c_scope_extra="Jis taip pat suteikia teisę <strong>projektuoti</strong> šaldymo "
+                  "įrangą ir sistemas \u2014 ne tik jas remontuoti.",
     c_eyebrow="Sertifikatai", c_h1="Sertifikatai ir draudimas",
     c_lead="Klasifikacinių bendrovių patvirtinimai ir civilinės atsakomybės draudimas.",
     c_meta="RINA ir PRS sertifikatai bei 250 000 EUR civilinės atsakomybės draudimas "
@@ -976,6 +1006,20 @@ P["ru"] = dict(
     p_clients_h2="Компании, для которых мы работали",
     p_clients_lead="Рыболовные группы, судовладельцы и верфи Балтики и не только.",
 
+    c_no="№", c_issued="Выдан", c_valid="Действует до",
+    c_shot_alt="Первая страница сертификата %(name)s",
+    c_scope_h="Что охватывает признание PRS",
+    c_scope_lead="Сертификат TM/1703/842502/25 даёт UAB \u201eLitprofit\u201c право "
+                 "выполнять ремонт:",
+    c_scope=["Главных и вспомогательных двигателей \u2014 двух- и четырёхтактных",
+             "Палубных механизмов и устройств",
+             "Топливной аппаратуры главных и вспомогательных двигателей, компрессоров и насосов",
+             "Турбокомпрессоров",
+             "Редукторов",
+             "Центровки дизельных двигателей",
+             "Холодильного оборудования и систем"],
+    c_scope_extra="Он также даёт право на <strong>проектирование</strong> холодильного "
+                  "оборудования и систем \u2014 не только на их ремонт.",
     c_eyebrow="Сертификаты", c_h1="Сертификаты и страхование",
     c_lead="Одобрения классификационных обществ и страхование гражданской ответственности.",
     c_meta="Сертификаты RINA и PRS и страхование гражданской ответственности на 250 000 EUR "
