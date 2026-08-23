@@ -1083,6 +1083,11 @@ a.card:hover .card-media img { transform: scale(1.06); opacity: 0.85; }
   opacity: 0.72;
   filter: saturate(0.6);
 }
+/* The workshop frames are roughly 4:3 and the banner is 21:8, so the crop is
+   severe and centring it is wrong: in these photographs the machine sits above
+   the middle and the bottom third is bare floor. Bias the window upward. */
+.page-media--low img { object-position: center 38%; }
+
 .page-media::after {
   content: "";
   position: absolute;
@@ -1403,13 +1408,18 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
   border: 1px solid var(--line);
   background: var(--navy-800);
 }
-/* the wide ones carry the whole row: the bench layout and the valve range are
-   both panoramas, and halving them throws away what makes them worth showing */
+/* kept for a panorama: a photograph wide enough that halving it would throw
+   away what makes it worth showing takes the whole row */
 .shot--wide { grid-column: 1 / -1; }
 .shot img {
   display: block;
   width: 100%;
   height: auto;
+  /* Every other photograph on the site is desaturated to 0.6. Left at full
+     strength these were the most colourful thing on a near-monochrome site --
+     a teal casing stand and a red tool cabinet pulling the eye off the
+     machine. The colour here is workshop clutter, not information. */
+  filter: saturate(0.6);
 }
 /* The two that share a row are 1.60 and 1.36, so one image finished 69px
    above the other and their captions started at different heights -- the grid

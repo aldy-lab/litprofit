@@ -1300,6 +1300,12 @@ def about():
                      PT("about_lead", legal=LEGAL, founded=FOUNDED),
                      [(T("home"), "/"), (PT("about_eyebrow"), None)],
                      path="/about/") + """
+    <div class="container">
+      <div class="page-media page-media--low cornered reveal">
+        <img src="{shot}" alt="{shot_alt}" width="1320" height="968">
+      </div>
+    </div>
+
     <section class="container prose">
       <h2>{h_spec}</h2>
       <ul>
@@ -1327,6 +1333,8 @@ def about():
       {l_cid}: {cid}<br>{l_vat}: {vat}</p>
     </section>
 {cta}""".format(spec=spec, h_spec=PT("a_spec"), h_people=PT("a_people"),
+                shot=u("/assets/photos/workshop-bench.webp"),
+                shot_alt=attr(PT("shot_bench")),
                 people1=PT("a_people_1"), people2=PT("a_people_2"),
                 h_how=T("how_h2"), s1=T("step1"), s2=T("step2"), s3=T("step3"),
                 how1=T("how1"), how2=T("how2"), how3=T("how3"),
@@ -1402,11 +1410,13 @@ def service_page(s):
 # The workshop photographs. Unlike .page-media, which holds a picture back to
 # 72% and desaturates it so text can sit on top, these are shown at full
 # strength: they are the evidence, not the texture behind something else.
+# Four photographs exist. Two of them carry a service page each -- the valve
+# range is what "spare parts" means, and the stripped compressor is what
+# "refrigeration systems" means -- so the band keeps the other two rather than
+# showing the same picture twice on one visit.
 SHOTS = [
-    ("workshop-overhaul", 1320, 877, "shot_overhaul", "wide"),
-    ("workshop-rotors",   1254, 786, "shot_rotors",   ""),
-    ("workshop-bench",    1320, 968, "shot_bench",    ""),
-    ("workshop-valves",   1313, 444, "shot_valves",   "wide"),
+    ("workshop-rotors", 1254, 786, "shot_rotors", ""),
+    ("workshop-bench",  1320, 968, "shot_bench",  ""),
 ]
 
 

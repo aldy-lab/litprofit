@@ -624,24 +624,31 @@ ORDER = ["refrigeration-systems", "ship-engine-repair", "hull-and-piping", "spar
 
 # image per service, shared across languages
 IMG = {
-    "refrigeration-systems": ("svc-refrigeration.webp", 800, 609),
+    # the first two are our own workshop; the other two are still stock and
+    # look it -- replace them as soon as there are photographs of an engine
+    # job and a pipe weld
+    "refrigeration-systems": ("workshop-overhaul.webp", 1320, 877),
     "ship-engine-repair": ("svc-engine-repair.webp", 600, 410),
     "hull-and-piping": ("svc-hull-piping.webp", 800, 533),
-    "spare-parts": ("svc-spare-parts.webp", 450, 300),
+    "spare-parts": ("workshop-valves.webp", 1313, 444),
 }
 ALT = {
-    "en": {"refrigeration-systems": "Industrial refrigeration compressor plant",
+    "en": {"refrigeration-systems": "A screw compressor stripped for overhaul, "
+           "rotor set and bearings laid out on the bench",
            "ship-engine-repair": "Marine diesel engine in a ship's engine room",
            "hull-and-piping": "Welder joining a steel pipe bend",
-           "spare-parts": "Spare parts warehouse shelving"},
-    "lt": {"refrigeration-systems": "Pramoninė šaldymo kompresorinė",
+           "spare-parts": "Stop, solenoid and regulating valves held in stock"},
+    "lt": {"refrigeration-systems": "Sraigtinis kompresorius, išardytas kapitaliniam "
+           "remontui: rotoriai ir guoliai ant stalo",
            "ship-engine-repair": "Laivo dyzelinis variklis mašinų skyriuje",
            "hull-and-piping": "Suvirintojas jungia plieninę vamzdžio alkūnę",
-           "spare-parts": "Atsarginių dalių sandėlio lentynos"},
-    "ru": {"refrigeration-systems": "Промышленная холодильная компрессорная",
+           "spare-parts": "Sandėlyje laikomi uždaromieji, elektromagnetiniai ir "
+           "reguliuojamieji vožtuvai"},
+    "ru": {"refrigeration-systems": "Винтовой компрессор, разобранный для капитального "
+           "ремонта: роторы и подшипники на верстаке",
            "ship-engine-repair": "Судовой дизельный двигатель в машинном отделении",
            "hull-and-piping": "Сварщик соединяет стальной отвод трубы",
-           "spare-parts": "Стеллажи склада запасных частей"},
+           "spare-parts": "Запорные, электромагнитные и регулирующие клапаны на складе"},
 }
 
 
@@ -692,13 +699,9 @@ P["en"] = dict(
     shots_eyebrow="In the workshop", shots_h2="What an overhaul looks like",
     shots_lead="Klaipeda, on the bench. Machines come in whole, leave the same way, "
                "and everything in between is measured.",
-    shot_overhaul="A screw compressor stripped for overhaul \u2014 casing, rotor set, "
-                  "bearing housings, seals and valves laid out for inspection.",
     shot_rotors="The rotor set beside its casing bore. Clearances are measured "
                 "against the maker\u2019s limits before anything goes back together.",
     shot_bench="Compressor housing, rotors and bearing pedestals on the bench.",
-    shot_valves="Stop, solenoid and regulating valves \u2014 the common sizes are held "
-                "in Klaipeda so a job does not wait on a supplier.",
     cw_lead="Two strands run through everything the company has delivered since "
             "%(founded)s: engines, and refrigeration.",
     cw_meta="Engine overhauls and refrigeration projects delivered by %(legal)s for "
@@ -834,13 +837,9 @@ P["lt"] = dict(
     shots_eyebrow="Dirbtuvėse", shots_h2="Kaip atrodo kapitalinis remontas",
     shots_lead="Klaipėda, ant stalo. Mašinos atkeliauja surinktos, tokios ir išvyksta, "
                "o viskas, kas tarp to \u2014 išmatuota.",
-    shot_overhaul="Sraigtinis kompresorius, išardytas kapitaliniam remontui \u2014 korpusas, "
-                  "rotoriai, guolių korpusai, sandarikliai ir vožtuvai, paruošti apžiūrai.",
     shot_rotors="Rotoriai šalia korpuso angos. Tarpai matuojami pagal gamintojo "
                 "leistinas ribas prieš surenkant atgal.",
     shot_bench="Kompresoriaus korpusas, rotoriai ir guolių atramos ant stalo.",
-    shot_valves="Uždaromieji, elektromagnetiniai ir reguliuojamieji vožtuvai \u2014 "
-                "dažniausi dydžiai laikomi Klaipėdoje, kad darbas nelauktų tiekėjo.",
     cw_lead="Dvi kryptys eina per viską, ką įmonė nuveikė nuo %(founded)s metų: varikliai "
             "ir šaldymas.",
     cw_meta="Variklių kapitalinis remontas ir šaldymo projektai, kuriuos %(legal)s atliko "
@@ -975,13 +974,9 @@ P["ru"] = dict(
     shots_eyebrow="В мастерской", shots_h2="Как выглядит капитальный ремонт",
     shots_lead="Клайпеда, на верстаке. Машины приходят собранными, такими и уходят, "
                "а всё, что между \u2014 измерено.",
-    shot_overhaul="Винтовой компрессор, разобранный для капитального ремонта \u2014 корпус, "
-                  "роторы, корпуса подшипников, уплотнения и клапаны, выложенные для осмотра.",
     shot_rotors="Роторы рядом с расточкой корпуса. Зазоры измеряются по допускам "
                 "изготовителя, прежде чем что-либо собирать обратно.",
     shot_bench="Корпус компрессора, роторы и опоры подшипников на верстаке.",
-    shot_valves="Запорные, электромагнитные и регулирующие клапаны \u2014 ходовые "
-                "размеры хранятся в Клайпеде, чтобы работа не ждала поставщика.",
     cw_lead="Две линии проходят через всё, что компания сделала с %(founded)s года: двигатели "
             "и холод.",
     cw_meta="Капитальный ремонт двигателей и холодильные проекты, выполненные %(legal)s для "
