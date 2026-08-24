@@ -186,12 +186,16 @@
 
   /* Stop the pipe flow once the hero has gone by. The animation is CSS, so it
      keeps its own time and simply resumes where it left off. */
-  var heroEl = doc.querySelector(".hero");
-  if (heroEl && "IntersectionObserver" in window) {
+  /* Both drawings idle when they are not on screen. A CSS animation on a
+     scrolled-away element still repaints, and on an 8,000px page that is most
+     of the time. */
+  ["\u002ehero", ".vessel-section"].forEach(function (sel) {
+    var el = doc.querySelector(sel);
+    if (!el || !("IntersectionObserver" in window)) return;
     new IntersectionObserver(function (es) {
-      heroEl.classList.toggle("is-idle", !es[0].isIntersecting);
-    }, { rootMargin: "120px" }).observe(heroEl);
-  }
+      el.classList.toggle("is-idle", !es[0].isIntersecting);
+    }, { rootMargin: "120px" }).observe(el);
+  });
 
   if (bar || heroImg || lwWords) {
     on(window, "scroll", scrollFx, { passive: true });

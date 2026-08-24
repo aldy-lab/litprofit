@@ -1492,16 +1492,27 @@ def vessel_drawing():
     add('<path class="vs-body" d="M792 100 L792 66 L884 66 L884 100"/>')
     for wx in range(756, 881, 26):
         add('<line class="vs-thin" x1="%d" y1="114" x2="%d" y2="132"/>' % (wx, wx))
-    add('<line class="vs-thin" x1="838" y1="66" x2="838" y2="16"/>')
-    add('<line class="vs-thin" x1="814" y1="30" x2="862" y2="30"/>')
+    # A vertical spar with a centred horizontal yard is a crucifix, whatever
+    # it was meant to be. The bare mast with two stays down to the wheelhouse
+    # roof reads as rigging: a triangle, and no horizontal at the head at all.
+    # A scanner bar was tried there first and put a small cross back on top.
+    add('<line class="vs-thin" x1="838" y1="66" x2="838" y2="18"/>')
+    add('<line class="vs-thin" x1="838" y1="26" x2="796" y2="66"/>')
+    add('<line class="vs-thin" x1="838" y1="26" x2="880" y2="66"/>')
 
     # ---- the four spaces, dashed like compartment boundaries ----
     def space(x, w, label, h=78):
+        # SVG text does not wrap, so a label long enough to need two lines says
+        # so with a pipe and gets a tspan rather than running out of its box.
+        lines = str(label).split("|")
+        spans = "".join('<tspan x="%d" dy="%d">%s</tspan>'
+                        % (x + 12, 0 if i == 0 else 15, text(l))
+                        for i, l in enumerate(lines))
         return ('<g class="vs-space"><rect x="%d" y="178" width="%d" height="%d"/>'
                 '<text x="%d" y="200">%s</text></g>'
-                % (x, w, h, x + 12, text(label)))
+                % (x, w, h, x + 12, spans))
     add(space(116, 236, T("vsl_pipe")))     # aft
-    add(space(372, 246, T("vsl_er")))       # amidships
+    add(space(360, 262, T("vsl_er")))       # amidships
     add(space(638, 266, T("vsl_hold")))     # refrigerated hold
     # shorter: the forefoot has begun to rise under it, and a full-height box
     # put its bottom corner outside the hull.
@@ -1512,14 +1523,17 @@ def vessel_drawing():
     # than crossing them, the way a leader on a real print is routed.
     def balloon(n, cx, tx, href, label):
         # The visible balloon is r=16 in a 1200-unit viewBox, which on a phone
-        # scales down to about 9px across -- the audit measured the link at
-        # 21px wide and failed it. A transparent circle carries the tap target
-        # instead, sized so it clears 24px at the narrowest layout. Balloon
-        # centres are at least 230 units apart, so r=44 cannot overlap its
-        # neighbour. fill:transparent, not fill:none -- none takes no pointer.
+        # scales to about 9px across. A transparent circle carries the tap
+        # target instead. r=44 cleared the 24px WCAG floor and was still only
+        # 25px on a 390px screen, well under the 44 this project holds
+        # everywhere else -- the viewBox scales the target down with the
+        # drawing, so it has to be sized for the narrowest layout, not the
+        # widest. r=76 lands at about 43px there. Balloon centres are at least
+        # 230 units apart, so two of these still cannot touch.
+        # fill:transparent, not fill:none -- none takes no pointer at all.
         return ('<a class="vs-ball" href="%s" aria-label="%s">'
                 '<line x1="%d" y1="70" x2="%d" y2="176"/>'
-                '<circle class="vs-hit" cx="%d" cy="54" r="44"/>'
+                '<circle class="vs-hit" cx="%d" cy="54" r="76"/>'
                 '<circle cx="%d" cy="54" r="16"/>'
                 '<text x="%d" y="59">%s</text></a>'
                 % (href, attr(label), cx, tx, cx, cx, cx, n))

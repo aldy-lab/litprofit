@@ -1816,7 +1816,25 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
 .vs-thin { stroke: rgba(255, 255, 255, 0.3); stroke-width: 1; fill: none; }
 
 /* the datum, dash-dot, as on a real print */
-.vs-wl { stroke: rgba(158, 201, 255, 0.5); stroke-width: 1; stroke-dasharray: 22 5 3 5; }
+/* The waterline drifts, and nothing else does.
+   A general arrangement is a drawing of a vessel at rest, so animating the
+   ship would be animating the wrong thing -- and a hull that bobs is a toy.
+   The datum is the one line on the sheet that represents something moving, so
+   the dash-dot pattern runs slowly aft and the ship holds still. Same
+   technique as the pipe flow on the hero, so the two drawings behave alike.
+
+   35 units is the dash-dot pattern's own length (22+5+3+5), so it loops with
+   no seam. Twelve seconds: this sits under a drawing somebody is reading
+   labels off, and anything faster would pull the eye down to it. */
+.vs-wl {
+  stroke: rgba(158, 201, 255, 0.5);
+  stroke-width: 1;
+  stroke-dasharray: 22 5 3 5;
+  animation: vs-drift 12s linear infinite;
+}
+@keyframes vs-drift { to { stroke-dashoffset: -35; } }
+.vessel-section.is-idle .vs-wl { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .vs-wl { animation: none; } }
 .vs-datum, .vs-tb text, .vs-space text {
   font-family: var(--mono);
   letter-spacing: 0.12em;
@@ -1836,7 +1854,11 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
 .vs-tb text { fill: rgba(255, 255, 255, 0.5); }
 .vs-tb-b { fill: rgba(255, 255, 255, 0.85); font-weight: 700; }
 
-.vs-hit { fill: transparent; stroke: none; }
+/* .vs-ball circle is (0,1,1) and .vs-hit alone is (0,1,0), so the tap-target
+   circle inherited the balloon's stroke and drew a 44-unit ring around every
+   balloon. Invisible in the audit, which only measured whether the target was
+   big enough. Needs the parent in the selector to win. */
+.vs-ball .vs-hit { fill: transparent; stroke: none; }
 .vs-ball line { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1; }
 .vs-ball circle {
   fill: var(--bg-2);
