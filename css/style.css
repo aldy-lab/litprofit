@@ -2055,10 +2055,17 @@ a.pg-cell:hover .pg-name { color: var(--accent); }
    reader who lands below the section, or arrives with the section already
    passed, gets every word lit. Reduced motion lights all of them outright.
    ============================================================ */
-.lightwords .w { color: rgba(176, 179, 196, 0.2); transition: color 0.42s linear; }
-.lightwords .w.lit { color: var(--muted); }
+/* On display type, and only on display type. Put on a 21px body lead first,
+   where 20% of the muted grey floated ABOVE the navy as pale ghost text and
+   read as a drop shadow rather than as unlit type. alprojects works because
+   the unlit word sits barely above a near-black ground -- etched into it, not
+   hovering over it -- at 46px where that reads as deliberate. So: white at
+   0.12 over this section's navy lands a few levels above the ground, which is
+   the same relationship, and it lights to full white rather than to muted. */
+.lightwords .w { color: rgba(255, 255, 255, 0.12); transition: color 0.42s linear; }
+.lightwords .w.lit { color: var(--white); }
 @media (prefers-reduced-motion: reduce) {
-  .lightwords .w { color: var(--muted); transition: none; }
+  .lightwords .w { color: var(--white); transition: none; }
 }
 
 /* ============================================================

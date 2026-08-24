@@ -953,7 +953,7 @@ def home():
         <div class="section-head reveal">
           <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>{rep_e}</p>
           <h2>{rep_h}</h2>
-          <p class="lead lightwords">{rep_l}</p>
+          <p class="lead">{rep_l}</p>
         </div>
         <div class="partner-grid reveal">
           <div class="partner">
@@ -1036,7 +1036,7 @@ def home():
         <div class="split" style="align-items: center">
           <div class="reveal">
             <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{cap_e}</p>
-            <h2>{cap_h}</h2>
+            <h2 class="lightwords">{cap_h}</h2>
             <p class="lead">{cap_l}</p>
             <div class="btn-row">
               <a class="btn btn-outline" href="{refrig}">{refrig_label}</a>
