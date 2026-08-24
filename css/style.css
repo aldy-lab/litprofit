@@ -1762,6 +1762,77 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
 }
 
 /* ============================================================
+   VESSEL GENERAL ARRANGEMENT
+   Same drawing-office conventions as the compressor package: hairline
+   geometry, a dash-dot datum, dashed compartment boundaries, numbered
+   balloons on leaders and a title block. The balloons are links -- each
+   space leads to the discipline that works in it.
+   ============================================================ */
+.vessel { margin-top: clamp(26px, 3vw, 48px); }
+.vs { width: 100%; height: auto; overflow: visible; }
+
+.vs-hull, .vs-body {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.62);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+/* fill:none is not optional on a <path>: SVG defaults to fill:black, so the
+   sheer curve painted a solid wedge across the hull. */
+.vs-deck { fill: none; stroke: rgba(255, 255, 255, 0.5); stroke-width: 1.2; }
+.vs-thin { stroke: rgba(255, 255, 255, 0.3); stroke-width: 1; fill: none; }
+
+/* the datum, dash-dot, as on a real print */
+.vs-wl { stroke: rgba(158, 201, 255, 0.5); stroke-width: 1; stroke-dasharray: 22 5 3 5; }
+.vs-datum, .vs-tb text, .vs-space text {
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  fill: rgba(158, 201, 255, 0.8);
+  font-size: 11px;
+}
+.vs-space rect {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
+  stroke-dasharray: 6 5;
+}
+.vs-space text { fill: rgba(255, 255, 255, 0.6); }
+.vs-datum--end { text-anchor: end; }
+
+.vs-tb rect, .vs-tb line { fill: none; stroke: rgba(255, 255, 255, 0.28); stroke-width: 1; }
+.vs-tb text { fill: rgba(255, 255, 255, 0.5); }
+.vs-tb-b { fill: rgba(255, 255, 255, 0.85); font-weight: 700; }
+
+.vs-hit { fill: transparent; stroke: none; }
+.vs-ball line { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1; }
+.vs-ball circle {
+  fill: var(--bg-2);
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 1.4;
+  transition: fill 0.25s var(--ease), stroke 0.25s var(--ease);
+}
+.vs-ball text {
+  fill: var(--white);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+@media (hover: hover) and (pointer: fine) {
+  .vs-ball:hover circle { fill: var(--accent); stroke: var(--white); }
+}
+.vs-ball:focus-visible circle { fill: var(--accent); stroke: var(--white); }
+.vs-ball:focus { outline: none; }
+
+/* Below about 700px the compartment labels collide with their own boxes and
+   the balloons crowd the mast. The drawing keeps every line -- it is the
+   labels that go, and the four services are listed as cards directly above
+   it, so nothing is lost that is not said twice. */
+@media (max-width: 700px) {
+  .vs-space text, .vs-datum, .vs-tb { display: none; }
+}
+
+/* ============================================================
    GENERAL ARRANGEMENT DRAWING
    Workshop-drawing conventions: hairline geometry, dash-dot centre
    lines, ticked dimension lines, hatched skid, numbered balloons on

@@ -57,6 +57,15 @@ S["en"] = dict(
     company_no="Company No.", vat="VAT code", lang_label="Language",
 
     hero_eyebrow="Klaipeda, Lithuania", hero_since="since",
+    # vessel general arrangement -- the four spaces the company works in.
+    # vsl_, not ga_: ga_ is the compressor package drawing further down.
+    vsl_eyebrow="Where the work is", vsl_h2="Four disciplines, one vessel",
+    vsl_lead="The same ship, from the side. Every discipline on this page is a "
+             "space you can point at.",
+    vsl_hold="Fish hold // RSW", vsl_er="Engine room",
+    vsl_pipe="Piping and bilge", vsl_store="Stores",
+    vsl_wl="Waterline", vsl_tb="Typical fishing vessel",
+    vsl_tb2="Arrangement // not to scale",
     # The street keeps its Lithuanian form in every language: that is what the
     # register holds and what the post office reads. Only the country and city
     # take the reader's language.
@@ -145,6 +154,13 @@ S["lt"] = dict(
     company_no="Įmonės kodas", vat="PVM mokėtojo kodas", lang_label="Kalba",
 
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
+    vsl_eyebrow="Kur vyksta darbai", vsl_h2="Keturios sritys, vienas laivas",
+    vsl_lead="Tas pats laivas iš šono. Kiekviena šio puslapio sritis — konkreti "
+             "laivo erdvė.",
+    vsl_hold="Žuvies triumas // RSW", vsl_er="Mašinų skyrius",
+    vsl_pipe="Vamzdynai ir triumas", vsl_store="Sandėliai",
+    vsl_wl="Vaterlinija", vsl_tb="Tipinis žvejybos laivas",
+    vsl_tb2="Išdėstymas // ne mastelyje",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lietuva",
     frost_hint="Šerkšnas", frost_hint_a11y="Apšerkšnyti puslapį. Taip pat galite tiesiog įvesti FROST.",
     frost_hint_off="Atitirpdyti puslapį.",
@@ -229,6 +245,13 @@ S["ru"] = dict(
     company_no="Код предприятия", vat="Код плательщика НДС", lang_label="Язык",
 
     hero_eyebrow="Клайпеда, Литва", hero_since="с",
+    vsl_eyebrow="Где идёт работа", vsl_h2="Четыре направления, одно судно",
+    vsl_lead="То же судно сбоку. Каждое направление на этой странице — "
+             "конкретное помещение.",
+    vsl_hold="Рыбный трюм // RSW", vsl_er="Машинное отделение",
+    vsl_pipe="Трубопроводы и льяла", vsl_store="Кладовые",
+    vsl_wl="Ватерлиния", vsl_tb="Типовое рыболовное судно",
+    vsl_tb2="Схема // вне масштаба",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Клайпеда", addr_country="Литва",
     frost_hint="Иней", frost_hint_a11y="Покрыть страницу инеем. Можно и просто ввести FROST.",
     frost_hint_off="Растопить иней.",

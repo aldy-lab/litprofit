@@ -1022,11 +1022,12 @@ def home():
         </div>
       </div>
     </section>
+{vessel}
 
     <section class="section">
       <div class="container split">
         <div class="reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{how_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>{how_e}</p>
           <h2>{how_h}</h2>
           <p class="lead">{how_l}</p>
         </div>
@@ -1054,7 +1055,7 @@ def home():
       <div class="container">
         <div class="split" style="align-items: center">
           <div class="reveal">
-            <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{cap_e}</p>
+            <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{cap_e}</p>
             <h2 class="lightwords">{cap_h}</h2>
             <p class="lead">{cap_l}</p>
             <div class="btn-row">
@@ -1068,7 +1069,7 @@ def home():
         </div>
 
         <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">
-          <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{cl_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">07</span><span class="sep">//</span>{cl_e}</p>
           <h2>{cl_h}</h2>
         </div>
         <div class="client-rail-wrap reveal">
@@ -1083,7 +1084,7 @@ def home():
       </div>
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
-                hero_drawing=hero_drawing(),
+                hero_drawing=hero_drawing(), vessel=vessel_drawing(),
                 rail_prev=attr(T("rail_prev")), rail_next=attr(T("rail_next")),
                 hero_drawing_lit=hero_drawing(lit=True),
                 he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
@@ -1174,7 +1175,7 @@ def compressor_drawing():
     <section class="section section-alt drawing-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>{ga_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{ga_e}</p>
           <h2>{ga_h}</h2>
           <p class="lead">{ga_l}</p>
         </div>
@@ -1365,6 +1366,111 @@ def about():
                 legal=LEGAL, street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
                 l_cid=T("company_no"), cid=COMPANY_ID, l_vat=T("vat"), vat=VAT,
                 cta=cta(T("cta_h2"), T("cta_p")))
+
+
+# ============================================================
+# VESSEL GENERAL ARRANGEMENT
+# A ship in profile, with the four spaces this company works in called out on
+# leaders. The site draws a refrigeration circuit and a compressor package and
+# never once drew the thing they are fitted to -- which for a ship repair yard
+# is the drawing that was missing.
+#
+# The title block says "typical" and "not to scale" and carries no designer
+# credit, deliberately. The compressor drawing signs itself LITPROFIT because
+# the PRS certificate approves them to design refrigeration equipment. It does
+# not approve them to design vessels, and a signed hull would say it did.
+# ============================================================
+def vessel_drawing():
+    P = []
+    add = P.append
+
+    # ---- hull, bow to the right ----
+    # Sheer: the deck is lowest amidships and lifts at both ends, which is what
+    # stops a profile reading as a barge. The first attempt had a dead flat
+    # deck line and a straight wedge for a stem, and looked like one.
+    DECK = "M70 146 Q620 174 1150 116"
+    add('<path class="vs-hull" d="M70 146 L70 250 Q70 266 108 266 L860 266 '
+        'Q1012 266 1074 212 L1150 116 Q620 174 70 146 Z"/>')
+    add('<path class="vs-deck" d="%s"/>' % DECK)
+
+    # waterline: dash-dot, the convention for a datum
+    add('<line class="vs-wl" x1="24" y1="230" x2="1176" y2="230"/>')
+    # right of the forefoot, where the datum line runs clear of the hull.
+    # At the left it sat across the transom and the rudder.
+    add('<text class="vs-datum vs-datum--end" x="1172" y="222">%s</text>' % text(T("vsl_wl")))
+
+    # ---- rudder and propeller, aft ----
+    add('<path class="vs-body" d="M52 236 L52 264 L70 258 L70 240 Z"/>')
+    add('<line class="vs-body" x1="70" y1="248" x2="118" y2="248"/>')
+    add('<path class="vs-body" d="M84 234 L96 248 L84 262 Z"/>')
+
+    # ---- deck furniture, kept clear of the leader lines ----
+    add('<path class="vs-body" d="M250 152 L250 104 L360 104 L360 156"/>')
+    add('<path class="vs-body" d="M690 160 L690 120 L724 120 L724 162"/>')
+    add('<path class="vs-body" d="M736 162 L736 100 L900 100 L900 158"/>')
+    add('<path class="vs-body" d="M792 100 L792 66 L884 66 L884 100"/>')
+    for wx in range(756, 881, 26):
+        add('<line class="vs-thin" x1="%d" y1="114" x2="%d" y2="132"/>' % (wx, wx))
+    add('<line class="vs-thin" x1="838" y1="66" x2="838" y2="16"/>')
+    add('<line class="vs-thin" x1="814" y1="30" x2="862" y2="30"/>')
+
+    # ---- the four spaces, dashed like compartment boundaries ----
+    def space(x, w, label, h=78):
+        return ('<g class="vs-space"><rect x="%d" y="178" width="%d" height="%d"/>'
+                '<text x="%d" y="200">%s</text></g>'
+                % (x, w, h, x + 12, text(label)))
+    add(space(116, 236, T("vsl_pipe")))     # aft
+    add(space(372, 246, T("vsl_er")))       # amidships
+    add(space(638, 266, T("vsl_hold")))     # refrigerated hold
+    # shorter: the forefoot has begun to rise under it, and a full-height box
+    # put its bottom corner outside the hull.
+    add(space(918, 104, T("vsl_store"), h=62))
+
+    # ---- balloons: each space leads to the discipline that works in it ----
+    # Leader anchors chosen to clear the gantry, funnel and wheelhouse rather
+    # than crossing them, the way a leader on a real print is routed.
+    def balloon(n, cx, tx, href, label):
+        # The visible balloon is r=16 in a 1200-unit viewBox, which on a phone
+        # scales down to about 9px across -- the audit measured the link at
+        # 21px wide and failed it. A transparent circle carries the tap target
+        # instead, sized so it clears 24px at the narrowest layout. Balloon
+        # centres are at least 230 units apart, so r=44 cannot overlap its
+        # neighbour. fill:transparent, not fill:none -- none takes no pointer.
+        return ('<a class="vs-ball" href="%s" aria-label="%s">'
+                '<line x1="%d" y1="70" x2="%d" y2="176"/>'
+                '<circle class="vs-hit" cx="%d" cy="54" r="44"/>'
+                '<circle cx="%d" cy="54" r="16"/>'
+                '<text x="%d" y="59">%s</text></a>'
+                % (href, attr(label), cx, tx, cx, cx, cx, n))
+    add(balloon("03", 150, 200, u("/services/hull-and-piping/"),       T("vsl_pipe")))
+    add(balloon("02", 380, 430, u("/services/ship-engine-repair/"),    T("vsl_er")))
+    add(balloon("01", 630, 680, u("/services/refrigeration-systems/"), T("vsl_hold")))
+    add(balloon("04", 1030, 980, u("/services/spare-parts/"),          T("vsl_store")))
+
+    # ---- title block ----
+    add('<g class="vs-tb"><rect x="836" y="292" width="336" height="46"/>'
+        '<line x1="836" y1="315" x2="1172" y2="315"/>'
+        '<line x1="1046" y1="292" x2="1046" y2="338"/>'
+        '<text x="848" y="308">%s</text>'
+        '<text x="848" y="331">%s</text>'
+        '<text class="vs-tb-b" x="1058" y="308">GA</text>'
+        '<text x="1058" y="331">DWG 02</text></g>'
+        % (text(T("vsl_tb")), text(T("vsl_tb2"))))
+
+    return """
+    <section class="section section-alt vessel-section seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{e}</p>
+          <h2>{h}</h2>
+          <p class="lead">{l}</p>
+        </div>
+        <div class="vessel reveal">
+          <svg class="vs" viewBox="0 0 1200 352" role="img" aria-label="{alt}">{p}</svg>
+        </div>
+      </div>
+    </section>""".format(e=T("vsl_eyebrow"), h=T("vsl_h2"), l=T("vsl_lead"),
+                         alt=attr(T("vsl_h2")), p="".join(P))
 
 
 # ============================================================
