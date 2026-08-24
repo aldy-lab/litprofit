@@ -1261,7 +1261,7 @@ def compressor_drawing():
           <p class="lead">{ga_l}</p>
         </div>
 
-        <div class="drawing reveal" id="drawing">
+        <div class="drawing bleed reveal" id="drawing">
           <!-- The viewBox is cropped to the drawing itself. It used to be
                0 0 900 660 while the content occupied 70,105 to 886,646 -- 105
                units of empty above it and 70 to the left, so a sixth of the
@@ -1546,7 +1546,7 @@ def vessel_drawing():
           <h2>{h}</h2>
           <p class="lead">{l}</p>
         </div>
-        <div class="vessel reveal">
+        <div class="vessel bleed reveal">
           <svg class="vs" viewBox="0 0 1200 352" role="img" aria-label="{alt}">{p}</svg>
         </div>
       </div>

@@ -59,7 +59,7 @@ S["en"] = dict(
     hero_eyebrow="Klaipeda, Lithuania", hero_since="since",
     # vessel general arrangement -- the four spaces the company works in.
     # vsl_, not ga_: ga_ is the compressor package drawing further down.
-    vsl_eyebrow="Where the work is", vsl_h2="Four disciplines, one vessel",
+    vsl_eyebrow="Where the work is", vsl_h2="A ship, deck to keel",
     vsl_lead="The same ship, from the side. Every discipline on this page is a "
              "space you can point at.",
     vsl_hold="Fish hold // RSW", vsl_er="Engine room",
@@ -154,7 +154,7 @@ S["lt"] = dict(
     company_no="Įmonės kodas", vat="PVM mokėtojo kodas", lang_label="Kalba",
 
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
-    vsl_eyebrow="Kur vyksta darbai", vsl_h2="Keturios sritys, vienas laivas",
+    vsl_eyebrow="Kur vyksta darbai", vsl_h2="Laivas nuo denio iki kilio",
     vsl_lead="Tas pats laivas iš šono. Kiekviena šio puslapio sritis — konkreti "
              "laivo erdvė.",
     vsl_hold="Žuvies triumas // RSW", vsl_er="Mašinų skyrius",
@@ -245,7 +245,7 @@ S["ru"] = dict(
     company_no="Код предприятия", vat="Код плательщика НДС", lang_label="Язык",
 
     hero_eyebrow="Клайпеда, Литва", hero_since="с",
-    vsl_eyebrow="Где идёт работа", vsl_h2="Четыре направления, одно судно",
+    vsl_eyebrow="Где идёт работа", vsl_h2="Судно от палубы до киля",
     vsl_lead="То же судно сбоку. Каждое направление на этой странице — "
              "конкретное помещение.",
     vsl_hold="Рыбный трюм // RSW", vsl_er="Машинное отделение",

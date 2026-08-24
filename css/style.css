@@ -1762,6 +1762,39 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
 }
 
 /* ============================================================
+   BLEED
+   Every section on the home page sat in the same 1440px container -- nine
+   blocks, nine identical widths, which is what made the page feel like one
+   shape repeated rather than a document with a rhythm.
+
+   The rule is not "vary it for variety": text keeps its measure, because a
+   reading column has a right width and 1440px of prose is not it. Drawings
+   do not. A general arrangement runs to the edge of the sheet, and the two
+   here were being cropped to a text measure they have no reason to obey.
+
+   width:100vw with a negative margin rather than a wider container, so the
+   section head above it stays exactly where every other head on the page is
+   and only the drawing escapes. calc against 100% covers the scrollbar, which
+   100vw includes and the element does not get.
+   ============================================================ */
+.bleed {
+  /* Capped, not edge-to-edge. On a 3440px display true 100vw stretched a
+     vessel profile to three and a half thousand pixels of thin line, which is
+     not width, it is distortion. 2160 is wide enough to read as a sheet and
+     narrow enough that the drawing keeps its proportions. Below that it is
+     simply the viewport. */
+  /* --pad is the TEXT gutter, and using it here made the drawing 1325px
+     inside a 1440px viewport -- exactly the width of the text column it
+     was supposed to escape, so nothing changed at all. A drawing wants a
+     narrower margin than a paragraph; 24px is the sheet edge. */
+  width: min(100vw - 48px, 2160px);
+  max-width: none;
+  position: relative;
+  left: 50%;
+  translate: -50%;
+}
+
+/* ============================================================
    VESSEL GENERAL ARRANGEMENT
    Same drawing-office conventions as the compressor package: hairline
    geometry, a dash-dot datum, dashed compartment boundaries, numbered
