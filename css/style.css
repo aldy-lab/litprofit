@@ -72,8 +72,6 @@
   --pad: clamp(20px, 4vw, 64px);
   --nav-h: 76px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  /* exponential out -- heavier than --ease, for things arriving */
-  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ---------- rivets (Guidelines › Graphic › Pattern) ----------
      The guidelines call for "small squares arranged in a strict grid". Drawn
@@ -1601,50 +1599,24 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
    simply has not run yet, every section below the hero renders blank.
    Hiding content by default is not something a stylesheet should do.
    ============================================================ */
-/* Expensive motion moves a SHORT distance SLOWLY, and never shows you how it
-   works. Cheap motion travels a long way, or performs a mechanism you can
-   watch -- a wipe, a curtain, a mask crossing the type. There was a mask here
-   and you could see it working, which is exactly why it read as cheap.
+/* Matched to alprojects, which is the one that reads right: 700ms, 18px, and
+   the site's own --ease. I had this at 420/14 and then at 900/8 on an
+   exponential curve with the head's three parts staggered against each other,
+   and both were further from it than the 750/24 it started at.
 
-   So: nothing is revealed, nothing is uncovered. The block is already whole
-   and simply arrives -- 8px, and an exponential-out curve that is roughly
-   three quarters of the way there in the first fifth of the time and spends
-   the rest settling. That asymmetry is the whole effect. It reads as fast,
-   because it is; it reads as heavy, because it keeps moving after you have
-   stopped watching. A linear 800ms drift over the same distance would feel
-   slow and cheap, and a 200ms snap would feel weightless. */
+   will-change is set while the element is waiting and released the moment it
+   lands -- held permanently it costs a compositor layer per revealed block for
+   the rest of the session. */
 .js .reveal {
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.9s var(--ease-settle), transform 0.9s var(--ease-settle);
+  transform: translateY(18px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  will-change: opacity, transform;
 }
-.js .reveal.is-in { opacity: 1; transform: none; }
-
-/* The heading has no separate trick. It arrives a beat after its eyebrow and a
-   beat before its lead, so the head resolves as one considered sequence rather
-   than three things landing together -- the only thing a heading needs, and
-   invisible as a technique.
-
-   The animation has to move off the head and onto its three children to do
-   that. Written as transition-delay on the children alone it was inert: the
-   .reveal element is the head itself, so the head was the only thing
-   transitioning, and a delay on a child that never changes delays nothing.
-   Confirmed with computed styles -- the h2 carried its 0.08s and animated not
-   at all. */
-.js .section-head.reveal { opacity: 1; transform: none; transition: none; }
-.js .section-head.reveal > * {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.9s var(--ease-settle), transform 0.9s var(--ease-settle);
-}
-.js .section-head.reveal.is-in > * { opacity: 1; transform: none; }
-.js .section-head.reveal > .eyebrow { transition-delay: 0s; }
-.js .section-head.reveal > h2       { transition-delay: 0.08s; }
-.js .section-head.reveal > .lead    { transition-delay: 0.16s; }
+.js .reveal.is-in { opacity: 1; transform: none; will-change: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   .js .reveal { opacity: 1; transform: none; transition: none; }
-  .js .section-head.reveal > * { opacity: 1; transform: none; transition: none; transition-delay: 0s; }
 }
 
 /* ============================================================
