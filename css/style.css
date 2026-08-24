@@ -1783,52 +1783,6 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
 /* the label interrupts its own dimension line, rather than sitting on top */
 .ga .dim-bg { fill: var(--bg-2); }
 
-/* ============================================================
-   THE DRAWING PLOTS ITSELF
-   A pen plotter lays a sheet down left to right, and the annotations go on
-   after the geometry -- which is also the order a draughtsman works in. That
-   is the whole idea: the section does not "animate in", it gets drawn.
-
-   Driven by a scroll timeline rather than JavaScript, so it runs off the main
-   thread and costs nothing during the scroll. The timeline is named on the
-   section and referenced by the children, so the geometry and the annotations
-   share one driver and cannot drift apart.
-
-   Everything is inside @supports. animation-timeline is the whole mechanism,
-   and a browser that ignores it would otherwise keep the hidden start state
-   and run the animation once on the document timeline -- a drawing that
-   flashes past on load, or worse, one clipped to nothing forever. Outside the
-   support query the drawing is simply there, complete, which is the correct
-   fallback and what Firefox gets today.
-   ============================================================ */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .drawing-section { view-timeline-name: --ga-scroll; }
-
-    /* clip-path, not stroke-dashoffset. The centre lines carry a dash-dot
-       pattern as an engineering convention -- 22 5 3 5 -- and animating
-       stroke-dashoffset would have to overwrite that, turning the one element
-       whose dashes MEAN something into a plain animated line. A wipe leaves
-       every convention on the sheet intact. */
-    .ga {
-      clip-path: inset(0 100% 0 0);
-      animation: ga-plot 1s linear both;
-      animation-timeline: --ga-scroll;
-      animation-range: entry 26% cover 42%;
-    }
-    /* dimensions and balloons are what a draughtsman adds last */
-    .ga .dim,
-    .ga .ball {
-      opacity: 0;
-      animation: ga-annotate 1s linear both;
-      animation-timeline: --ga-scroll;
-      animation-range: cover 38% cover 56%;
-    }
-  }
-}
-@keyframes ga-plot { to { clip-path: inset(0 0 0 0); } }
-@keyframes ga-annotate { to { opacity: 1; } }
-
 /* balloons */
 .ga .ball line { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1; }
 .ga .ball circle {
