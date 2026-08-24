@@ -1599,14 +1599,54 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
    simply has not run yet, every section below the hero renders blank.
    Hiding content by default is not something a stylesheet should do.
    ============================================================ */
+/* 750ms and 24px of travel was a long, soft drift on every block on the page.
+   An entrance is supposed to be over before you have finished registering it;
+   past about half a second it stops reading as arrival and starts reading as
+   the page being slow. Shorter, and less distance to cover. */
 .js .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+  transform: translateY(14px);
+  transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
 }
 .js .reveal.is-in { opacity: 1; transform: none; }
+
+/* The section heading gets a different treatment from the block it sits in:
+   it does not fade, it is uncovered. The line is masked to its own baseline
+   and rises the last fraction of an em into place -- type behaving like type,
+   printed rather than faded up.
+
+   No fade on the heading itself, which is the point: a fading headline reads
+   as a slideshow transition, and half-opacity display type at 60px looks
+   broken rather than arriving. The eyebrow and lead above and below it still
+   fade with the block, so the head arrives as one movement. */
+/* The block itself must NOT fade, or the heading fades with it: opacity on a
+   parent composites the whole subtree and a child cannot be more opaque than
+   the element containing it. Written the other way round first, and the
+   headline came up grey for the first 200ms -- the exact slideshow look the
+   mask was there to avoid. So the head holds full opacity and its two smaller
+   parts do the fading. */
+.js .section-head.reveal { opacity: 1; transform: none; }
+.js .section-head.reveal > .eyebrow,
+.js .section-head.reveal > .lead {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+}
+.js .section-head.reveal.is-in > .eyebrow,
+.js .section-head.reveal.is-in > .lead { opacity: 1; transform: none; }
+
+.js .section-head.reveal h2 {
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(0.16em);
+  transition: clip-path 0.55s var(--ease), transform 0.55s var(--ease);
+}
+.js .section-head.reveal.is-in h2 { clip-path: inset(0 0 0 0); transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .js .reveal { opacity: 1; transform: none; }
+  .js .section-head.reveal h2 { clip-path: none; transform: none; transition: none; }
+  .js .section-head.reveal > .eyebrow,
+  .js .section-head.reveal > .lead { opacity: 1; transform: none; }
 }
 
 /* ============================================================
@@ -2002,6 +2042,32 @@ a.pg-cell:hover .pg-name { color: var(--accent); }
     align-items: center;
     min-height: 44px;
   }
+}
+
+/* ============================================================
+   THE DRAWING CROSSHAIR
+   Over a photograph or a drawing the pointer becomes a registration mark --
+   gapped cross, corner ticks, a dot on the exact point -- which is the same
+   language as the seams and the balloons rather than a new idea bolted on.
+
+   An SVG data URI in `cursor`, so it is the real system cursor: it cannot lag
+   behind the pointer, costs no JavaScript and no frame, and needs no
+   mousemove handler. A cursor drawn in a div and chased with transforms is
+   what makes custom cursors feel cheap -- it is always a frame or two behind
+   the thing the hand is holding.
+
+   White over a dark halo so it holds on a bright valve and a dark engine room
+   alike, and `crosshair` as the keyword fallback if the URI is ever refused.
+   Only on the imagery: text still gets a text cursor, links still get a hand.
+   Coarse pointers have no cursor at all, so this simply does not apply.
+   ============================================================ */
+@media (hover: hover) and (pointer: fine) {
+  .card-media,
+  .page-media,
+  .shot img,
+  .doc-shot,
+  .ga,
+  .hero-drawing { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke='%23000' stroke-opacity='.55' stroke-width='3'%3E%3Cpath d='M17 3v9M17 22v9M3 17h9M22 17h9'/%3E%3Cpath d='M4 8V4h4M26 4h4v4M30 26v4h-4M8 30H4v-4'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.25'%3E%3Cpath d='M17 3v9M17 22v9M3 17h9M22 17h9'/%3E%3Cpath d='M4 8V4h4M26 4h4v4M30 26v4h-4M8 30H4v-4'/%3E%3Ccircle cx='17' cy='17' r='1.1'/%3E%3C/g%3E%3C/svg%3E") 17 17, crosshair; }
 }
 
 /* ============================================================
