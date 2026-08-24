@@ -631,8 +631,35 @@ svg text{font-family:var(--mono)}
   .rp-two{display:grid;grid-template-columns:1fr 1fr;gap:6mm;break-inside:avoid}
   .rp-two h3{margin-top:0}
   .rp-landscape{page:detail}
-  .rp-landscape table{font-size:6.6pt}
+  /* The comment above promises that a browser ignoring `page:` shrinks these
+     to fit instead. It did not. Measured on portrait A4 at 186mm of content:
+     the thirteen-column labour table wants 819px, the page gives 703, and
+     TWENTY cells sat past the right edge -- the last two columns, Plan Total
+     and Actual Total, straight off the paper with nothing to say they had
+     gone. Exactly the failure the landscape page was added to prevent, still
+     happening anywhere `page:` is not honoured, which includes Safari.
+
+     A table will not shrink below its min-content width, and min-content here
+     is set by names like "Aleksandras Petrauskas" that cannot break. So: fixed
+     layout to stop columns sizing themselves to their content, and permission
+     to break inside a word. Names wrap; the figures, which are short, do not.
+     Landscape still gives them room, so this only bites where it has to. */
+  /* Fixed layout so the columns stop sizing themselves to their content -- a
+     table will not shrink below min-content otherwise, and min-content here is
+     set by names like "Aleksandras Petrauskas".
+
+     Then: only the text columns may break. Letting everything break did fit
+     the page and made "-1,215" read as "-1,21 / 5". A financial table where a
+     figure splits across two lines is worse than one with a column missing,
+     because it is wrong rather than merely incomplete. Numeric cells carry
+     .num, so they keep their figure whole and a name gives way instead. */
+  .rp-landscape table{font-size:6.6pt;table-layout:fixed;width:100%}
   .rp-landscape th,.rp-landscape td{padding:1mm 1.2mm}
+  .rp-landscape th,.rp-landscape td{overflow-wrap:anywhere}
+  /* except the figures: normal wrapping has nowhere to break inside "24,975",
+     so it stays whole. nowrap was tried and is wrong -- with fixed columns it
+     let the headings overflow into each other and print "EMPLOYEEROLE". */
+  .rp-landscape td.num{overflow-wrap:normal}
   .rp-kpi{border:.3mm solid #d3d5e0;padding:4mm}
   .rp-kpi span{
     display:block;font-family:var(--mono);font-size:6.8pt;letter-spacing:.15em;
