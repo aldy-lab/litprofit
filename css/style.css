@@ -91,6 +91,16 @@
      every context. */
   --rivet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Crect x='11.7' y='11.7' width='9' height='9' rx='1.8' fill='%23000000' fill-opacity='0.7'/%3E%3Crect x='10.5' y='10.5' width='9' height='9' rx='1.8' fill='%23ffffff'/%3E%3C/svg%3E");
   --rivet-pitch: 30px;
+  /* The seam has its own tile. --rivet is a 30px square and the seam
+     repeated it every 30px, which on a wide screen is 114 rivets in a
+     row -- a dotted rule rather than a line of fasteners. This is the
+     same 9px rivet in a 56px tile, so the spacing opens up and the rivet
+     itself does not change size. It needed a separate tile because
+     background-size scales the artwork: widening --rivet-pitch would
+     have enlarged every rivet with it, including the two corner marks
+     .cornered draws from the same token on the media banners. */
+  --rivet-seam: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='30'%3E%3Crect x='24.7' y='11.7' width='9' height='9' rx='1.8' fill='%23000000' fill-opacity='0.7'/%3E%3Crect x='23.5' y='10.5' width='9' height='9' rx='1.8' fill='%23ffffff'/%3E%3C/svg%3E");
+  --rivet-seam-pitch: 56px;
 
   /* ---------- the brand angle ----------
      The monogram is built on a single diagonal. Measured off the artwork,
@@ -129,8 +139,8 @@
   position: absolute;
   left: 0; right: 0;
   height: var(--rivet-pitch);
-  background-image: var(--rivet);
-  background-size: var(--rivet-pitch) var(--rivet-pitch);
+  background-image: var(--rivet-seam);
+  background-size: var(--rivet-seam-pitch) var(--rivet-pitch);
   background-repeat: repeat-x;
   opacity: 0.45;
   pointer-events: none;
