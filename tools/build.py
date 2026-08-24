@@ -832,19 +832,36 @@ def hero_drawing(lit=False):
     add(room(1150, 96, 380, 300, i18n.ROOMS[LANG][1], "&minus;20 &#176;C"))
     add(room(1150, 470, 380, 300, i18n.ROOMS[LANG][2], "+17 &#176;C"))
 
+    def pipe(kind, d, i):
+        """The run, plus a twin that carries a travelling pip along it.
+
+        Two paths rather than dashing the pipe itself: on a P&ID a dashed line
+        is not decoration, it means a different service or a future run, so
+        making the live pipes dashed would be saying something untrue about the
+        plant. The pipe stays solid and the pip rides over it.
+
+        Every `d` here is written from source to destination -- discharge
+        leaves the compressors, liquid leaves the condensers, suction returns
+        to the accumulators -- so one animation carries all three circuits in
+        the direction the refrigerant actually travels. The delay staggers them
+        so the pips do not march in lockstep."""
+        add('<path class="rp-pipe %s" d="%s"/>' % (kind, d))
+        add('<path class="rp-pipe rp-flow %s" d="%s" style="animation-delay:%.1fs"/>'
+            % (kind, d, -1.7 * i))
+
     # discharge: compressors -> condensers (high pressure)
-    add('<path class="rp-pipe rp-hp" d="M348 138 L420 138 L420 300 L248 300 L248 320"/>')
-    add('<path class="rp-pipe rp-hp" d="M348 512 L420 512 L420 674 L248 674 L248 694"/>')
+    pipe('rp-hp', 'M348 138 L420 138 L420 300 L248 300 L248 320', 0)
+    pipe('rp-hp', 'M348 512 L420 512 L420 674 L248 674 L248 694', 1)
     # liquid line: condensers -> receiver header -> rooms
-    add('<path class="rp-pipe rp-lq" d="M426 358 L640 358 L640 620 L700 620"/>')
-    add('<path class="rp-pipe rp-lq" d="M426 732 L640 732"/>')
-    add('<path class="rp-pipe rp-lq" d="M700 620 L700 170 L790 170"/>')
-    add('<path class="rp-pipe rp-lq" d="M700 200 L1190 200"/>')
-    add('<path class="rp-pipe rp-lq" d="M700 574 L1190 574"/>')
+    pipe('rp-lq', 'M426 358 L640 358 L640 620 L700 620', 2)
+    pipe('rp-lq', 'M426 732 L640 732', 3)
+    pipe('rp-lq', 'M700 620 L700 170 L790 170', 4)
+    pipe('rp-lq', 'M700 200 L1190 200', 5)
+    pipe('rp-lq', 'M700 574 L1190 574', 6)
     # suction: rooms -> accumulators (low pressure)
-    add('<path class="rp-pipe rp-lp" d="M930 396 L930 440 L560 440 L560 200 L96 200"/>')
-    add('<path class="rp-pipe rp-lp" d="M1340 396 L1340 452 L590 452 L590 574"/>')
-    add('<path class="rp-pipe rp-lp" d="M1340 770 L1340 812 L560 812 L560 574 L96 574"/>')
+    pipe('rp-lp', 'M930 396 L930 440 L560 440 L560 200 L96 200', 7)
+    pipe('rp-lp', 'M1340 396 L1340 452 L590 452 L590 574', 8)
+    pipe('rp-lp', 'M1340 770 L1340 812 L560 812 L560 574 L96 574', 9)
 
     # valves and fittings along the runs
     add(check(420, 220)); add(check(420, 594))

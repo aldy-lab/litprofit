@@ -2451,6 +2451,38 @@ html.is-frost::after {
   stroke-width: 1;
 }
 .rp-pipe { fill: none; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+
+/* ---------- the plant is running ----------
+   A short pip travels each run in the direction the refrigerant actually goes:
+   out of the compressors on the discharge, down the liquid line to the rooms,
+   back to the accumulators on the suction. It is the one thing a P&ID is
+   about, so the drawing behaves like the thing it depicts rather than being
+   decorated.
+
+   16 on, 210 off, offset by exactly their sum so the loop closes with no jump.
+   Slow -- nine seconds end to end -- because this sits behind the headline and
+   anything quicker there is a distraction rather than a background.
+
+   Paused whenever the hero is off screen. A CSS animation on an element that
+   has scrolled away still burns a frame budget on a long page, and this one
+   repaints an SVG that fills the viewport. */
+.rp-flow {
+  stroke-dasharray: 16 210;
+  stroke-width: 2.8;
+  animation: rp-flow 9s linear infinite;
+}
+.hero.is-idle .rp-flow { animation-play-state: paused; }
+@keyframes rp-flow { to { stroke-dashoffset: -226; } }
+
+.rp-flow.rp-hp { stroke: rgba(255, 214, 176, 0.95); }
+.rp-flow.rp-lq { stroke: rgba(214, 232, 178, 0.9); }
+.rp-flow.rp-lp { stroke: rgba(186, 219, 255, 0.95); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* not merely stopped: a pip frozen mid-run is a dashed pipe, which on a
+     P&ID means a different service. Take them off the drawing entirely. */
+  .rp-flow { display: none; }
+}
 /* temperature coding, as on a real plant drawing */
 .rp-hp { stroke: rgba(255, 206, 168, 0.55); }
 .rp-lp { stroke: rgba(158, 201, 255, 0.58); }

@@ -184,6 +184,15 @@
     if (!ticking) { ticking = true; window.requestAnimationFrame(scrollFxFrame); }
   }
 
+  /* Stop the pipe flow once the hero has gone by. The animation is CSS, so it
+     keeps its own time and simply resumes where it left off. */
+  var heroEl = doc.querySelector(".hero");
+  if (heroEl && "IntersectionObserver" in window) {
+    new IntersectionObserver(function (es) {
+      heroEl.classList.toggle("is-idle", !es[0].isIntersecting);
+    }, { rootMargin: "120px" }).observe(heroEl);
+  }
+
   if (bar || heroImg || lwWords) {
     on(window, "scroll", scrollFx, { passive: true });
     on(window, "resize", scrollFx);
