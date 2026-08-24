@@ -72,6 +72,8 @@
   --pad: clamp(20px, 4vw, 64px);
   --nav-h: 76px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* exponential out -- heavier than --ease, for things arriving */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ---------- rivets (Guidelines › Graphic › Pattern) ----------
      The guidelines call for "small squares arranged in a strict grid". Drawn
@@ -1599,54 +1601,50 @@ html.is-frost .hero:hover .frost-note { opacity: 0; }
    simply has not run yet, every section below the hero renders blank.
    Hiding content by default is not something a stylesheet should do.
    ============================================================ */
-/* 750ms and 24px of travel was a long, soft drift on every block on the page.
-   An entrance is supposed to be over before you have finished registering it;
-   past about half a second it stops reading as arrival and starts reading as
-   the page being slow. Shorter, and less distance to cover. */
+/* Expensive motion moves a SHORT distance SLOWLY, and never shows you how it
+   works. Cheap motion travels a long way, or performs a mechanism you can
+   watch -- a wipe, a curtain, a mask crossing the type. There was a mask here
+   and you could see it working, which is exactly why it read as cheap.
+
+   So: nothing is revealed, nothing is uncovered. The block is already whole
+   and simply arrives -- 8px, and an exponential-out curve that is roughly
+   three quarters of the way there in the first fifth of the time and spends
+   the rest settling. That asymmetry is the whole effect. It reads as fast,
+   because it is; it reads as heavy, because it keeps moving after you have
+   stopped watching. A linear 800ms drift over the same distance would feel
+   slow and cheap, and a 200ms snap would feel weightless. */
 .js .reveal {
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+  transform: translateY(8px);
+  transition: opacity 0.9s var(--ease-settle), transform 0.9s var(--ease-settle);
 }
 .js .reveal.is-in { opacity: 1; transform: none; }
 
-/* The section heading gets a different treatment from the block it sits in:
-   it does not fade, it is uncovered. The line is masked to its own baseline
-   and rises the last fraction of an em into place -- type behaving like type,
-   printed rather than faded up.
+/* The heading has no separate trick. It arrives a beat after its eyebrow and a
+   beat before its lead, so the head resolves as one considered sequence rather
+   than three things landing together -- the only thing a heading needs, and
+   invisible as a technique.
 
-   No fade on the heading itself, which is the point: a fading headline reads
-   as a slideshow transition, and half-opacity display type at 60px looks
-   broken rather than arriving. The eyebrow and lead above and below it still
-   fade with the block, so the head arrives as one movement. */
-/* The block itself must NOT fade, or the heading fades with it: opacity on a
-   parent composites the whole subtree and a child cannot be more opaque than
-   the element containing it. Written the other way round first, and the
-   headline came up grey for the first 200ms -- the exact slideshow look the
-   mask was there to avoid. So the head holds full opacity and its two smaller
-   parts do the fading. */
-.js .section-head.reveal { opacity: 1; transform: none; }
-.js .section-head.reveal > .eyebrow,
-.js .section-head.reveal > .lead {
+   The animation has to move off the head and onto its three children to do
+   that. Written as transition-delay on the children alone it was inert: the
+   .reveal element is the head itself, so the head was the only thing
+   transitioning, and a delay on a child that never changes delays nothing.
+   Confirmed with computed styles -- the h2 carried its 0.08s and animated not
+   at all. */
+.js .section-head.reveal { opacity: 1; transform: none; transition: none; }
+.js .section-head.reveal > * {
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+  transform: translateY(8px);
+  transition: opacity 0.9s var(--ease-settle), transform 0.9s var(--ease-settle);
 }
-.js .section-head.reveal.is-in > .eyebrow,
-.js .section-head.reveal.is-in > .lead { opacity: 1; transform: none; }
-
-.js .section-head.reveal h2 {
-  clip-path: inset(0 0 100% 0);
-  transform: translateY(0.16em);
-  transition: clip-path 0.55s var(--ease), transform 0.55s var(--ease);
-}
-.js .section-head.reveal.is-in h2 { clip-path: inset(0 0 0 0); transform: none; }
+.js .section-head.reveal.is-in > * { opacity: 1; transform: none; }
+.js .section-head.reveal > .eyebrow { transition-delay: 0s; }
+.js .section-head.reveal > h2       { transition-delay: 0.08s; }
+.js .section-head.reveal > .lead    { transition-delay: 0.16s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .reveal { opacity: 1; transform: none; }
-  .js .section-head.reveal h2 { clip-path: none; transform: none; transition: none; }
-  .js .section-head.reveal > .eyebrow,
-  .js .section-head.reveal > .lead { opacity: 1; transform: none; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .js .section-head.reveal > * { opacity: 1; transform: none; transition: none; transition-delay: 0s; }
 }
 
 /* ============================================================
