@@ -858,6 +858,7 @@ en: {
     sessionEnded:'Your session has ended. Please sign in again.',
     signOut:'Sign out',
     noProjects:'No projects yet. A manager needs to create one.',
+    roleUnknown:'Could not confirm your access level — some tools may be missing. Refresh from server.',
     needsSchema:'The database needs updating — run db/schema.sql in the Supabase SQL editor.',
     refresh:'Refresh from server',
     offline:'Not saved to server',
@@ -927,6 +928,7 @@ lt: {
     sessionEnded:'Sesija baigėsi. Prisijunkite iš naujo.',
     signOut:'Atsijungti',
     noProjects:'Projektų dar nėra. Juos sukuria vadovas.',
+    roleUnknown:'Nepavyko patvirtinti jūsų teisių — kai kurių įrankių gali trūkti. Atnaujinkite iš serverio.',
     needsSchema:'Reikia atnaujinti duomenų bazę — paleiskite db/schema.sql Supabase SQL redaktoriuje.',
     refresh:'Atnaujinti iš serverio',
     offline:'Neišsaugota serveryje',
@@ -996,6 +998,7 @@ ru: {
     sessionEnded:'Сессия завершена. Войдите снова.',
     signOut:'Выйти',
     noProjects:'Проектов пока нет. Их создаёт руководитель.',
+    roleUnknown:'Не удалось подтвердить уровень доступа — часть инструментов может отсутствовать. Обновите с сервера.',
     needsSchema:'Нужно обновить базу данных — выполните db/schema.sql в SQL-редакторе Supabase.',
     refresh:'Обновить с сервера',
     offline:'Не сохранено на сервере',
@@ -1950,6 +1953,37 @@ function datalists(ids){
    without it staff were shown margin and profit rows computed from redacted
    input, which is a different bug wearing the same clothes. */
 var CAN_MONEY = false;
+/* Fail closed, but not fail forgetful.
+
+   Starting false and waiting for the server is right for a permission. It is
+   wrong for the FIRST PAINT: init calls render() before bootCloud() has asked
+   anything, so a manager reloading the page got a calculator with no reports,
+   no exports and no Revenue tab until a round-trip finished -- and if the
+   round-trip was slow, or the lookup failed, that state was simply where they
+   stayed. That is the state you hit. Before this gate existed CAN_MONEY
+   defaulted true and the reports were there instantly, so it was a regression
+   I introduced.
+
+   So the last role the server confirmed is remembered and used to paint the
+   first frame, then overwritten by whatever the server says this time. The
+   figures are not at stake either way: projects_v strips revenue, the contract,
+   the advance, the target margin and the rebills before they leave Postgres,
+   and the app has no privilege on public.projects at all. This flag decides
+   which controls to offer, not what anyone is allowed to read. */
+var ROLE_KEY = 'litprofit_role';
+try {
+  var lastRole = localStorage.getItem(ROLE_KEY);
+  if(lastRole === 'admin' || lastRole === 'manager') CAN_MONEY = true;
+} catch(e){}
+var ROLE_UNKNOWN = false;   /* the lookup failed -- say so rather than restrict silently */
+
+function rememberRole(role){
+  CAN_MONEY = role === 'admin' || role === 'manager';
+  try {
+    if(CAN_MONEY) localStorage.setItem(ROLE_KEY, role);
+    else localStorage.removeItem(ROLE_KEY);
+  } catch(e){}
+}
 function canMoney(){ return !CLOUD.on || CAN_MONEY; }
 
 /* ================= rendering ================= */
@@ -2744,7 +2778,7 @@ const MENU_ACTS = {
        and the next person to sign in would be rendered from it until the pull
        landed. The server copy is the record; the cache is only there to make a
        reload instant, and it is worth nothing once its owner has left. */
-    try { localStorage.removeItem(LS_KEY); } catch(e){}
+    try { localStorage.removeItem(LS_KEY); localStorage.removeItem(ROLE_KEY); } catch(e){}
     location.reload();
     return 'noop';
   },
@@ -3279,7 +3313,10 @@ function cloudPayload(p){
 function adopt(p, row){
   p.id = row.id; p.rev = row.rev;
   p.updatedAt = row.updated_at; p.updatedBy = row.updated_by;
-  if(row.money !== undefined) CAN_MONEY = !!row.money;
+  /* projects_v returns sees_money() as `money` -- the same question asked of
+     the same database, so it corroborates the role lookup and keeps the
+     remembered value in step with it. */
+  if(row.money !== undefined) rememberRole(row.money ? 'manager' : 'staff');
 }
 
 function pushSoon(delay){
@@ -3543,8 +3580,13 @@ async function bootCloud(){
      to see. profiles.role defaults to 'staff' in the schema, and role() falls
      back to 'staff' on any error, so every path that is not an affirmative
      'admin' or 'manager' lands in the same place. */
-  try { CAN_MONEY = ['admin','manager'].indexOf(await CLOUD.role()) !== -1; }
-  catch(e){ CAN_MONEY = false; }
+  try { rememberRole(await CLOUD.role()); ROLE_UNKNOWN = false; }
+  catch(e){
+    /* Do not silently drop a manager to the restricted view on a flaky
+       lookup. Keep the last confirmed answer for this paint, and flag it so
+       the reason is visible instead of the reports just being gone. */
+    ROLE_UNKNOWN = true;
+  }
   try {
     /* Anything still queued goes up BEFORE the pull, or the pull replaces
        state.projects wholesale and takes it with it. That is the path where a
@@ -3566,6 +3608,10 @@ async function bootCloud(){
     cloudErr = /projects_v|save_project|does not exist|schema cache/i.test(e.message)
       ? tr().cloud.needsSchema : e.message;
   }
+  /* A failed role lookup used to just mean fewer buttons, with nothing said.
+     Fewer buttons and no reason is indistinguishable from the tool being
+     broken -- which is exactly how it was reported. */
+  if(ROLE_UNKNOWN && !cloudErr) cloudErr = tr().cloud.roleUnknown;
   render();
   paintSaveState(cloudErr ? 'error' : null);
 }
