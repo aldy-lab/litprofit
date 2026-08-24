@@ -119,10 +119,51 @@
   var bar = doc.querySelector(".progress");
   var heroImg = doc.querySelector(".hero-drawing");
 
+  /* ---------- words light as the sentence crosses the screen ----------
+     Split once, on load, into one span per word. textContent is read before
+     anything is written back, so the markup carries the sentence and this only
+     re-expresses it -- with scripting off, or if this never runs, the
+     stylesheet's dim colour never applies either, because .w is what it keys
+     on and .w only exists once this has run. */
+  var lw = doc.querySelector(".lightwords");
+  var lwWords = null;
+  if (lw) {
+    var parts = lw.textContent.trim().split(/\s+/);
+    lw.textContent = "";
+    parts.forEach(function (word, i) {
+      var sp = doc.createElement("span");
+      sp.className = "w";
+      sp.textContent = word;
+      lw.appendChild(sp);
+      if (i < parts.length - 1) lw.appendChild(doc.createTextNode(" "));
+    });
+    lwWords = lw.querySelectorAll(".w");
+    if (calm) {
+      Array.prototype.forEach.call(lwWords, function (w) { w.classList.add("lit"); });
+      lwWords = null;
+    }
+  }
+
+  function paintWords() {
+    if (!lwWords) return;
+    var r = lw.getBoundingClientRect();
+    var vh = window.innerHeight;
+    /* 0 as it comes up past the lower third, 1 by the time it is mid-screen */
+    var startAt = vh * 0.85, endAt = vh * 0.35;
+    var p = (startAt - r.top) / (startAt - endAt);
+    p = p < 0 ? 0 : p > 1 ? 1 : p;
+    var lit = Math.round(p * lwWords.length);
+    for (var i = 0; i < lwWords.length; i++) {
+      lwWords[i].classList.toggle("lit", i < lit);
+    }
+  }
+
 
   function scrollFxFrame() {
     ticking = false;
     var d = doc.documentElement;
+
+    paintWords();
 
     if (bar) {
       var max = d.scrollHeight - d.clientHeight;
@@ -143,7 +184,7 @@
     if (!ticking) { ticking = true; window.requestAnimationFrame(scrollFxFrame); }
   }
 
-  if (bar || heroImg) {
+  if (bar || heroImg || lwWords) {
     on(window, "scroll", scrollFx, { passive: true });
     on(window, "resize", scrollFx);
     scrollFxFrame();

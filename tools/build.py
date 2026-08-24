@@ -953,7 +953,7 @@ def home():
         <div class="section-head reveal">
           <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>{rep_e}</p>
           <h2>{rep_h}</h2>
-          <p class="lead">{rep_l}</p>
+          <p class="lead lightwords">{rep_l}</p>
         </div>
         <div class="partner-grid reveal">
           <div class="partner">

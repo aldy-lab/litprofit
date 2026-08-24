@@ -2041,6 +2041,27 @@ a.pg-cell:hover .pg-name { color: var(--accent); }
 }
 
 /* ============================================================
+   WORDS LIGHT AS YOU SCROLL
+   One statement on the site, not a device applied everywhere: the sentence
+   that claims factory backing from BITZER and DANFOSS is the strongest thing
+   the page says, so it is the one worth reading a word at a time.
+
+   Colour only -- nothing moves, nothing is masked, and the reader drives it
+   with the scrollbar rather than watching it play. `linear` on purpose: an
+   eased colour change would make each word arrive with a character of its own,
+   and the point is that the line fills evenly, like a level rising.
+
+   The dim state is transient by construction -- progress is clamped to 1, so a
+   reader who lands below the section, or arrives with the section already
+   passed, gets every word lit. Reduced motion lights all of them outright.
+   ============================================================ */
+.lightwords .w { color: rgba(176, 179, 196, 0.2); transition: color 0.42s linear; }
+.lightwords .w.lit { color: var(--muted); }
+@media (prefers-reduced-motion: reduce) {
+  .lightwords .w { color: var(--muted); transition: none; }
+}
+
+/* ============================================================
    SCROLL PROGRESS
    A hairline on the header's own bottom edge. It reads as part of the
    rule that is already there, rather than as a bar bolted on top.
