@@ -3090,6 +3090,35 @@ function printChart(d){
     `<span style="color:#c9722c">&#9632;</span> ${esc(t.dash.actual)}</div></div>`;
 }
 
+/* The browser names a Save-as-PDF file after document.title, so every report
+   anyone saved was called "LITPROFIT — Project Calculator.pdf" -- fine once,
+   useless by the fifth. Name it for what it is, then put the title back: the
+   tab is not called that once the dialog has gone.
+
+   afterprint is the reliable signal and fires on cancel as well as save, but
+   it does not fire everywhere, so a timer backs it up. Restoring twice is
+   harmless; never restoring leaves the tab misnamed for the session.
+
+   Slashes and colons are stripped because a client name is free text and both
+   are illegal in a filename on some systems -- the browser would silently
+   mangle the name rather than refuse it. */
+const DOC_TITLE = document.title;   /* captured once, at load */
+function printAs(name){
+  /* Restore to the title the document loaded with, NOT to whatever it happens
+     to hold now. Reading it here looked equivalent and is not: print two
+     reports in a row and the second call captures the FIRST report's name as
+     the "original", so the tab keeps a report name for the rest of the
+     session. Caught by printing twice in a row and checking what came back. */
+  const prev = DOC_TITLE;
+  document.title = String(name).replace(/[\/\\:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+  let done = false;
+  const restore = () => { if(done) return; done = true; document.title = prev;
+                          window.removeEventListener('afterprint', restore); };
+  window.addEventListener('afterprint', restore);
+  setTimeout(restore, 8000);
+  window.print();
+}
+
 function printProjectReport(){
   if(!canMoney()) return;
   const t = tr(), p = proj(), d = computeDash(p), dd = t.dash, c = p.card;
@@ -3203,7 +3232,9 @@ function printProjectReport(){
          extra sheet on them. */
       ? `<div class="rp-page"></div><div class="rp-landscape">${detail}${reportFoot(t)}</div>`
       : reportFoot(t)}`;
-  window.print();
+  /* ISO date last, so a folder of these sorts by project then by date */
+  printAs([c.projectId, c.client, t.printProject,
+           new Date().toISOString().slice(0,10)].filter(Boolean).join(' \u2014 '));
 }
 
 function reportFoot(t){
@@ -3282,7 +3313,8 @@ function printCompanyReport(){
       <tbody>${body || `<tr><td colspan="9">${esc(t.pfNone)}</td></tr>`}${foot}</tbody></table>
 
     ${reportFoot(t)}`;
-  window.print();
+  printAs(['Litprofit', t.printCompany,
+           new Date().toISOString().slice(0,10)].join(' \u2014 '));
 }
 
 /* The button prints what you are looking at: the portfolio is the company,
