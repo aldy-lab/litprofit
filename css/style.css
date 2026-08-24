@@ -570,14 +570,32 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   max-width: 620px;
   border-top: 1px solid var(--line);
 }
-.promise li {
-  min-width: 0;
-  flex: 1 1 170px;
+.promise li { min-width: 0; flex: 1 1 170px; }
+/* All three carry a rule, and each one leads somewhere. Only the first was lit
+   before, with the other two on a transparent border -- which read as one live
+   step and two dead labels, when in fact all three are the company describing
+   what it does. Each now links to its own paragraph further down the page, so
+   the strip is a contents list for the section that explains it rather than
+   decoration that happens to be numbered. */
+.promise a {
+  display: block;
   padding: clamp(10px, 1.9vh, 18px) 22px 0 0;
-  border-top: 2px solid transparent;
+  border-top: 2px solid var(--line-2);
   margin-top: -1px;
+  transition: border-color 0.25s var(--ease);
 }
-.promise li:first-child { border-top-color: var(--white); }
+@media (hover: hover) and (pointer: fine) {
+  .promise a:hover { border-top-color: var(--white); }
+  .promise a:hover .step-num { color: var(--white); }
+}
+.promise a:focus-visible { border-top-color: var(--white); }
+.promise a:focus-visible .step-num { color: var(--white); }
+/* A finger has no hover to find these with, and the rule is the only thing
+   saying they are more than labels -- so on touch they are simply all lit. */
+@media (hover: none) {
+  .promise a { border-top-color: var(--line-2); min-height: 44px; }
+}
+.promise .step-num { transition: color 0.25s var(--ease); }
 .promise .step-num {
   display: block;
   font-size: var(--label);

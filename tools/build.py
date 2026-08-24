@@ -914,9 +914,9 @@ def home():
         <h1>{h1}</h1>
         <p class="lead">{hlead}</p>
         <ul class="promise">
-          <li><span class="step-num">01</span><span class="step-label">{s1}</span></li>
-          <li><span class="step-num">02</span><span class="step-label">{s2}</span></li>
-          <li><span class="step-num">03</span><span class="step-label">{s3}</span></li>
+          <li><a href="#consult"><span class="step-num">01</span><span class="step-label">{s1}</span></a></li>
+          <li><a href="#organise"><span class="step-num">02</span><span class="step-label">{s2}</span></a></li>
+          <li><a href="#ensure"><span class="step-num">03</span><span class="step-label">{s3}</span></a></li>
         </ul>
         <div class="btn-row">
           <a class="btn btn-solid" href="{book}"{book_attrs}>{book_label}</a>
@@ -1014,15 +1014,17 @@ def home():
           <p class="lead">{how_l}</p>
         </div>
         <div class="pillars reveal">
-          <div class="pillar">
+          <!-- ids stay in English across all three languages: they are the
+               target of a same-page link, not something a reader sees. -->
+          <div class="pillar" id="consult">
             <h3>{s1}</h3>
             <p>{how1}</p>
           </div>
-          <div class="pillar">
+          <div class="pillar" id="organise">
             <h3>{s2}</h3>
             <p>{how2}</p>
           </div>
-          <div class="pillar">
+          <div class="pillar" id="ensure">
             <h3>{s3}</h3>
             <p>{how3}</p>
           </div>
