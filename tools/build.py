@@ -124,6 +124,39 @@ def u(path):
     return pre + path
 
 
+def img_size(rel):
+    """(width, height) read out of the file itself.
+
+    The certificate thumbnails carried hand-written heights in the CERTIFICATES
+    table, and the moment the generator changed width those numbers described
+    files that no longer existed -- the browser would have reserved the wrong
+    box and the page would have shifted as they loaded. Numbers that describe a
+    file belong to the file.
+
+    Parses the WebP header rather than importing Pillow, so the site build
+    keeps its only dependency being Python itself; the image tools that need
+    Pillow are run by hand and separately."""
+    path = os.path.join(ROOT, rel.lstrip("/"))
+    with open(path, "rb") as fh:
+        d = fh.read(32)
+    if d[:4] != b"RIFF" or d[8:12] != b"WEBP":
+        raise ValueError("not a WebP: %s" % rel)
+    fmt = d[12:16]
+    if fmt == b"VP8X":
+        w = int.from_bytes(d[24:27], "little") + 1
+        h = int.from_bytes(d[27:30], "little") + 1
+    elif fmt == b"VP8L":
+        b0, b1, b2, b3 = d[21], d[22], d[23], d[24]
+        w = ((b1 & 0x3F) << 8 | b0) + 1
+        h = ((b3 & 0x0F) << 10 | b2 << 2 | (b1 & 0xC0) >> 6) + 1
+    elif fmt == b"VP8 ":
+        w = int.from_bytes(d[26:28], "little") & 0x3FFF
+        h = int.from_bytes(d[28:30], "little") & 0x3FFF
+    else:
+        raise ValueError("unknown WebP chunk %r in %s" % (fmt, rel))
+    return w, h
+
+
 def canonical(path):
     return ORIGIN + u(path)
 
@@ -519,6 +552,39 @@ def crumb(trail):
     return '<p class="crumb">%s</p>' % '<span class="sep">//</span>'.join(parts)
 
 
+def strip_tags(v):
+    """Plain text for JSON-LD. A crumb label is usually a bare string, but some
+    come from the same i18n entries the page renders as markup, and a stray
+    <span> inside a schema name is invisible until a validator refuses it."""
+    return _html.unescape(re.sub(r"<[^>]+>", "", str(v))).strip()
+
+
+def crumb_ld(trail, path=None):
+    """BreadcrumbList for the trail the page already shows.
+
+    Emitted from page_head, off the same `trail` the visible breadcrumb is
+    built from, so the two cannot drift apart -- a marked-up trail that
+    disagrees with the one on screen is worse than none, and that is exactly
+    what happens when the two are maintained separately.
+
+    The last crumb is the current page and carries no href in the trail; Google
+    allows the final item to omit `item`, but giving it the canonical is more
+    use and costs nothing."""
+    if not trail:
+        return ""
+    items = []
+    for i, (label, href) in enumerate(trail, 1):
+        node = {"@type": "ListItem", "position": i, "name": strip_tags(label)}
+        target = href or path
+        if target:
+            node["item"] = canonical(target)
+        items.append(node)
+    return ('  <script type="application/ld+json">\n  %s\n  </script>\n'
+            % json.dumps({"@context": "https://schema.org",
+                          "@type": "BreadcrumbList",
+                          "itemListElement": items}, ensure_ascii=False))
+
+
 def page_head(eyebrow, h1, lead, trail=None, path=None):
     return """
     <section class="container page-head">
@@ -527,8 +593,8 @@ def page_head(eyebrow, h1, lead, trail=None, path=None):
       <h1>{h1}</h1>
       <p class="lead">{lead}</p>
     </section>
-""".format(crumb=crumb(trail) if trail else "", eyebrow=eyebrow, h1=h1, lead=lead,
-           sheet=sheet_tag(path) if path else "")
+{ld}""".format(crumb=crumb(trail) if trail else "", eyebrow=eyebrow, h1=h1, lead=lead,
+           sheet=sheet_tag(path) if path else "", ld=crumb_ld(trail, path))
 
 
 def tags(items):
@@ -638,10 +704,10 @@ CLIENTS = [
 # page whose whole purpose is to make an accreditation checkable, a date that
 # does not appear anywhere on the certificate is worse than no date.
 CERTIFICATES = [
-    dict(name="RINA", file="rina-certificate-2025.pdf", size="329 KB", thumb_h=1165,
+    dict(name="RINA", file="rina-certificate-2025.pdf", size="329 KB",
          no="REC037725XF", issued="2025-05-08", valid="2028-05-12",
          note="Italian classification society"),
-    dict(name="PRS", file="prs-certificate.pdf", size="961 KB", thumb_h=1273,
+    dict(name="PRS", file="prs-certificate.pdf", size="961 KB",
          no="TM/1703/842502/25", issued="2025-10-15", valid="2028-10-14",
          note="Polish Register of Shipping"),
 ]
@@ -655,17 +721,32 @@ def card(s, level="h3", variant=""):
     only rearranges itself when one card is marked as the feature."""
     f, w, h, alt = s["img"]
     cls = "card reveal" + (" card--" + variant if variant else "")
+
+    # One file was serving two very different slots: a 1325px banner on the
+    # service page and a 148px thumbnail in the compact card here. The card was
+    # being handed 1313px of valve photograph to draw 148px of it. A card-width
+    # copy goes in the srcset and the browser picks -- which also means a phone,
+    # where these cards go full width at 348px, still gets the large file,
+    # because there it genuinely needs it.
+    card_rel = "assets/photos/%s-card.webp" % f.rsplit(".", 1)[0]
+    srcset = ""
+    if os.path.exists(os.path.join(ROOT, card_rel)):
+        cw, _ = img_size(card_rel)
+        slot = "690px" if variant == "feature" else "150px"
+        srcset = (' srcset="%s %dw, %s %dw" sizes="(min-width: 900px) %s, 100vw"'
+                  % (u("/" + card_rel), cw, u("/assets/photos/" + f), w, slot))
+
     return """          <a class="{cls}" href="{href}">
             <span class="card-media">
               <span class="card-num">{num}</span>
-              <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy">
+              <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy"{srcset}>
             </span>
             <span class="card-body">
               <{lv}>{title}</{lv}>
               <p>{short}</p>
               <span class="card-more">{more}</span>
             </span>
-          </a>""".format(cls=cls, href=u("/services/%s/" % s["slug"]),
+          </a>""".format(cls=cls, srcset=srcset, href=u("/services/%s/" % s["slug"]),
                          img=u("/assets/photos/" + f),
                          alt=alt, w=w, h=h, lv=level, num=s["num"],
                          title=s["title"], short=s["short"], more=T("read_more"))
@@ -1490,6 +1571,28 @@ def services_index():
 {cta}""".format(cards=service_cards("h2"), cta=cta(T("cta_h2"), T("cta_p")))
 
 
+def service_ld(s):
+    """Service, tied to the Organization that provides it.
+
+    `provider` is the same @id the home page's Organization publishes, so the
+    four services attach to the company rather than floating as four unrelated
+    entities. areaServed is stated because this company's whole claim is that
+    it travels -- "wherever the vessel happens to be" -- and a service with no
+    area reads as local-only."""
+    return ('  <script type="application/ld+json">\n  %s\n  </script>\n'
+            % json.dumps({
+                "@context": "https://schema.org",
+                "@type": "Service",
+                "name": strip_tags(s["title"]),
+                "description": strip_tags(s["meta"]),
+                "serviceType": strip_tags(s["title"]),
+                "url": canonical("/services/%s/" % s["slug"]),
+                "provider": {"@type": "Organization", "name": LEGAL,
+                             "url": canonical("/")},
+                "areaServed": {"@type": "Place", "name": "Worldwide"},
+            }, ensure_ascii=False))
+
+
 def service_page(s):
     blocks = []
     for heading, paras in s["blocks"]:
@@ -1501,7 +1604,8 @@ def service_page(s):
 
     return page_head("%s %s" % (T("svc_eyebrow"), s["num"]), s["title"], s["lead"],
                      [(T("home"), "/"), (T("svc_eyebrow"), "/services/"),
-                      (s["title"], None)]) + """
+                      (s["title"], None)],
+                     path="/services/%s/" % s["slug"]) + service_ld(s) + """
     <div class="container">
       <div class="page-media cornered reveal">
         <img src="{img}" alt="{alt}" width="{w}" height="{h}">
@@ -1665,7 +1769,7 @@ def certificates():
     notes = {"RINA": PT("c_rina_note"), "PRS": PT("c_prs_note")}
     docs = "\n".join("""        <a class="doc" href="{href}" target="_blank" rel="noopener">
           <span class="doc-shot">
-            <img src="{shot}" alt="{alt}" width="900" height="{sh}" loading="lazy" decoding="async">
+            <img src="{shot}" alt="{alt}" width="{sw}" height="{sh}" loading="lazy" decoding="async">
           </span>
           <span class="doc-body">
             <span class="doc-name">{name}</span>
@@ -1679,7 +1783,8 @@ def certificates():
           </span>
         </a>""".format(href=u("/assets/certs/" + c["file"]),
                        shot=u("/assets/certs/" + c["file"].replace(".pdf", ".webp")),
-                       sh=c.get("thumb_h", 1200),
+                       sw=img_size("assets/certs/" + c["file"].replace(".pdf", ".webp"))[0],
+                       sh=img_size("assets/certs/" + c["file"].replace(".pdf", ".webp"))[1],
                        alt=attr(PT("c_shot_alt", name=c["name"])),
                        name=c["name"], note=notes[c["name"]], size=c["size"],
                        no=c["no"], issued=c["issued"], valid=c["valid"],

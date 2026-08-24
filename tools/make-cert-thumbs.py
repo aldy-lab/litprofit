@@ -19,7 +19,11 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CERTS = os.path.join(ROOT, "assets", "certs")
-WIDTH = 900            # ~3x the size it is shown at
+# The thumbnail is displayed at a maximum of 186px (clamp(150px, 15vw, 186px))
+# and is never used anywhere else, so 900 was 5x what the densest screen can
+# show. 380 covers 186 at 2x with a little room, and takes ~85 KB off the
+# certificates page.
+WIDTH = 380
 QUALITY = 84
 
 
