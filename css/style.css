@@ -2015,29 +2015,36 @@ a.pg-cell:hover .pg-name { color: var(--accent); }
 }
 
 /* ============================================================
-   THE DRAWING CROSSHAIR
-   Over a photograph or a drawing the pointer becomes a registration mark --
-   gapped cross, corner ticks, a dot on the exact point -- which is the same
-   language as the seams and the balloons rather than a new idea bolted on.
+   THE CROSS
+   The pointer is a registration cross everywhere on the site, not only over
+   the imagery. Two strokes, no corner ticks, no centre dot -- the mark you
+   line a drawing up with.
 
-   An SVG data URI in `cursor`, so it is the real system cursor: it cannot lag
-   behind the pointer, costs no JavaScript and no frame, and needs no
-   mousemove handler. A cursor drawn in a div and chased with transforms is
-   what makes custom cursors feel cheap -- it is always a frame or two behind
-   the thing the hand is holding.
+   An SVG data URI in `cursor`, so it IS the system cursor: it cannot lag
+   behind the pointer, costs no JavaScript and no frame, and needs no mousemove
+   handler. A cursor drawn in a div and chased with transforms is what makes
+   custom cursors feel cheap; it is always a frame or two behind the thing the
+   hand is holding.
 
-   White over a dark halo so it holds on a bright valve and a dark engine room
-   alike, and `crosshair` as the keyword fallback if the URI is ever refused.
-   Only on the imagery: text still gets a text cursor, links still get a hand.
-   Coarse pointers have no cursor at all, so this simply does not apply.
+   A 3px black stroke at half opacity sits under a 1px white one, so the cross
+   holds on a white certificate scan and on a near-black engine room without
+   changing colour. `crosshair` is the keyword fallback if the URI is refused.
+
+   Two exceptions, both about not breaking the thing underneath. Fields where
+   text is typed keep their caret, because a cross gives no indication of where
+   a character will land. And coarse pointers have no cursor at all, so none of
+   this applies on a phone.
    ============================================================ */
 @media (hover: hover) and (pointer: fine) {
-  .card-media,
-  .page-media,
-  .shot img,
-  .doc-shot,
-  .ga,
-  .hero-drawing { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke='%23000' stroke-opacity='.55' stroke-width='3'%3E%3Cpath d='M17 3v9M17 22v9M3 17h9M22 17h9'/%3E%3Cpath d='M4 8V4h4M26 4h4v4M30 26v4h-4M8 30H4v-4'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.25'%3E%3Cpath d='M17 3v9M17 22v9M3 17h9M22 17h9'/%3E%3Cpath d='M4 8V4h4M26 4h4v4M30 26v4h-4M8 30H4v-4'/%3E%3Ccircle cx='17' cy='17' r='1.1'/%3E%3C/g%3E%3C/svg%3E") 17 17, crosshair; }
+  html, body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23000' stroke-opacity='.5' stroke-width='3'/%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 13 13, crosshair; }
+  a, button, summary, [role="button"], label { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23000' stroke-opacity='.5' stroke-width='3'/%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 13 13, crosshair; }
+  input, textarea, select { cursor: auto; }
+  input[type="checkbox"], input[type="radio"], input[type="file"] { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23000' stroke-opacity='.5' stroke-width='3'/%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 13 13, crosshair; }
+  /* Five components set cursor:pointer on a class, and a class beats a bare
+     element selector -- so .btn, .burger, .rail-btn, .frost-note and .part all
+     kept the hand while everything around them had the cross. Named here
+     rather than chased with !important. */
+  .btn, .burger, .rail-btn, .frost-note, .part { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23000' stroke-opacity='.5' stroke-width='3'/%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 13 13, crosshair; }
 }
 
 /* ============================================================
