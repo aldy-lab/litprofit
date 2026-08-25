@@ -465,10 +465,24 @@
               <a class="btn btn-outline" href="/litprofit/services/refrigeration-systems/">Refrigeration systems and equipment</a>
             </div>
           </div>
-          <div class="media-panel cornered reveal">
+          <!-- A link, not a div. It brightens under the cursor like the service
+               cards do, and something that answers the pointer has to go
+               somewhere -- the destination is the one already named in the
+               button beside it.
+
+               Which is exactly why it is hidden from assistive tech and taken
+               out of the tab order. Announced, it made four links to the
+               refrigeration page on one screen, two of them adjacent and
+               carrying the identical name -- the button, then the photograph
+               of the same thing, read out twice in a row. This is a
+               mouse-and-touch shortcut over a link that is already there;
+               tabindex="-1" is what makes aria-hidden legitimate here rather
+               than a focusable element hidden from the people focusing it. -->
+          <a class="media-panel cornered reveal" href="/litprofit/services/refrigeration-systems/"
+             aria-hidden="true" tabindex="-1">
             <img src="/litprofit/assets/photos/plant-room.webp" alt="Industrial refrigeration compressor plant"
                  width="800" height="555" loading="lazy">
-          </div>
+          </a>
         </div>
 
         <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">

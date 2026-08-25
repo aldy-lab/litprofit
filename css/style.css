@@ -1025,7 +1025,22 @@ a.card { position: relative; }
   overflow: hidden;
   background: var(--navy-700);
 }
-.media-panel img { width: 100%; object-fit: cover; opacity: 0.8; filter: saturate(0.65); }
+/* Matched to the service cards. At 0.8 this sat noticeably brighter than every
+   other photograph on the page and pulled the eye off the heading beside it;
+   the cards rest at 0.62 and wake to 0.82. Same numbers here, same curve, and
+   the panel is a link so the wake means something. */
+.media-panel { display: block; }
+.media-panel img {
+  width: 100%;
+  object-fit: cover;
+  opacity: 0.62;
+  filter: saturate(0.6);
+  transition: opacity 0.26s var(--ease), filter 0.26s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  a.media-panel:hover img { opacity: 0.82; filter: saturate(0.78); }
+}
+/* no :focus-visible rule -- it is tabindex=-1 and cannot take focus */
 
 /* ---------- corner rivets ----------
    The guidelines' pattern block sets a solid square at each of its four
