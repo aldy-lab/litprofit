@@ -1643,6 +1643,11 @@ def project_card(pr):
     if days:
         facts.append('<span><i>%s</i>%s&nbsp;%s</span>'
                      % (text(T("prj_days")), days, text(T("prj_days_unit"))))
+    # The discipline goes in a column of its own on the right. Left in the fact
+    # row it was the fifth item on a line and the card's whole right half was
+    # empty; as a column it squares the card up and says at a glance which of
+    # the four services the job belongs to.
+    svc = i18n.SVC[LANG].get(pr.get("scope"), {})
     return """          <a class="prj-card reveal" href="{href}">
             <span class="prj-num">{n}</span>
             <span class="prj-body">
@@ -1650,9 +1655,10 @@ def project_card(pr):
               <span class="prj-lead">{lead}</span>
               <span class="prj-facts">{facts}</span>
             </span>
+            <span class="prj-scope">{scope}</span>
           </a>""".format(href=u(project_url(pr)), n=pr.get("year", ""),
                          title=text(pr["title"]), lead=text(pr["lead"]),
-                         facts="".join(facts))
+                         facts="".join(facts), scope=text(svc.get("title", "")))
 
 
 def projects_band():
