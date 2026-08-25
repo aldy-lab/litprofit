@@ -1658,6 +1658,75 @@ def service_ld(s):
             }, ensure_ascii=False))
 
 
+# Published performance for a six-cylinder semi-hermetic on R404A, at three
+# condensing temperatures. Cooling capacity in watts against evaporating
+# temperature in degrees C, per EN12900 with 20 C suction gas and no liquid
+# subcooling. Figures are the manufacturer's; the chart is ours.
+CAP_TO = (-40, -35, -30, -25, -20, -15, -10, -5)
+CAP_CURVES = (
+    (30, (16741, 22638, 29678, 38014, 47812, 59256, 72553, 87943)),
+    (40, (13438, 18595, 24718, 31933, 40375, 50196, 61562, 74665)),
+    # the 50 C row has no figure at -5: the machine is outside its envelope there,
+    # and a chart that invents a point to close a curve is a chart that lies
+    (50, (10395, 14765, 19920, 25960, 32992, 41135, 50514, None)),
+)
+
+
+def capacity_chart():
+    L, R, TOP, BOT = 116, 790, 58, 424
+    QMAX = 92_000
+
+    def px(to):  return L + (to + 40) / 35 * (R - L)
+    def py(q):   return BOT - q / QMAX * (BOT - TOP)
+
+    P = []
+    add = P.append
+
+    # frame and grid
+    add('<rect class="cc-frame" x="%d" y="%d" width="%d" height="%d"/>'
+        % (L, TOP, R - L, BOT - TOP))
+    for q in range(0, 100_000, 20_000):
+        add('<line class="cc-grid" x1="%d" y1="%.1f" x2="%d" y2="%.1f"/>' % (L, py(q), R, py(q)))
+        add('<text class="cc-ax" x="%d" y="%.1f" text-anchor="end">%d</text>'
+            % (L - 12, py(q) + 4, q // 1000))
+    for to in CAP_TO:
+        add('<line class="cc-grid" x1="%.1f" y1="%d" x2="%.1f" y2="%d"/>' % (px(to), TOP, px(to), BOT))
+        add('<text class="cc-ax" x="%.1f" y="%d" text-anchor="middle">%d</text>' % (px(to), BOT + 22, to))
+
+    # the three curves
+    for tc, row in CAP_CURVES:
+        pts = [(px(t), py(q)) for t, q in zip(CAP_TO, row) if q is not None]
+        add('<polyline class="cc-line cc-tc%d" points="%s"/>'
+            % (tc, " ".join("%.1f,%.1f" % xy for xy in pts)))
+        for x, y in pts:
+            add('<circle class="cc-dot cc-tc%d" cx="%.1f" cy="%.1f" r="3.4"/>' % (tc, x, y))
+        lx, ly = pts[-1]
+        add('<text class="cc-lbl cc-tc%d" x="%.1f" y="%.1f">tc %d \u00b0C</text>'
+            % (tc, lx + 12, ly + 4, tc))
+
+    add('<text class="cc-ax cc-axis-x" x="%.1f" y="%d" text-anchor="middle">%s \u00b0C</text>'
+        % ((L + R) / 2, BOT + 52, text(T("cap_chart_x"))))
+    add('<text class="cc-ax" x="%d" y="%d">%s  kW</text>' % (L - 44, TOP - 18, text(T("cap_chart_y"))))
+
+    # Below the axis caption, not across it. At y=454 the block sat exactly
+    # where "Evaporating temperature" is centred and the two overprinted.
+    # Second time the same fault: 196px of left cell for a 28-character caption
+    # at 12px mono. "EN12900 // 20 C suction gas" ran through the divider into
+    # DWG 06. Measure the caption, then cut the cell -- not the other way round.
+    add('<g class="cc-tb"><rect x="470" y="514" width="378" height="44"/>'
+        '<line x1="470" y1="536" x2="848" y2="536"/>'
+        '<line x1="740" y1="514" x2="740" y2="558"/>'
+        '<text x="482" y="530">%s</text><text x="482" y="552">%s</text>'
+        '<text class="cc-tb-b" x="752" y="530">6H-25.2</text>'
+        '<text x="752" y="552">DWG 06</text></g>'
+        % (text(T("cap_chart_tb")), text(T("cap_chart_tb2"))))
+
+    return """
+        <div class="capchart reveal">
+          <svg class="cc" viewBox="0 0 900 578" role="img" aria-label="{alt}">{p}</svg>
+        </div>""".format(alt=attr(T("cap_chart_h2")), p="".join(P))
+
+
 def recip_drawing():
     """Semi-hermetic four-cylinder reciprocating compressor, side elevation.
 
@@ -1781,9 +1850,11 @@ def recip_drawing():
           <svg class="rc" viewBox="0 0 980 590" role="img" aria-label="{alt}">{p}</svg>
         </div>
         <ol class="rc-legend reveal">{lg}</ol>
+{chart}
       </div>
     </section>""".format(e=T("rec_eyebrow"), h=T("rec_h2"), l=T("rec_lead"),
-                         alt=attr(T("rec_h2")), p="".join(P), lg=legend)
+                         alt=attr(T("rec_h2")), p="".join(P), lg=legend,
+                         chart=capacity_chart())
 
 
 def service_page(s):

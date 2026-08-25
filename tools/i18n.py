@@ -62,6 +62,12 @@ S["en"] = dict(
     company_no="Company No.", vat="VAT code", lang_label="Language",
 
     # semi-hermetic reciprocating compressor plate, on the refrigeration page
+    cap_chart_eyebrow="What it delivers", cap_chart_h2="Capacity against evaporating temperature",
+    cap_chart_lead="A six-cylinder on R404A, at three condensing temperatures. Published "
+                   "figures, plotted \u2014 the curve a refrigeration engineer reads before "
+                   "deciding whether a machine will hold a hold.",
+    cap_chart_x="Evaporating temperature", cap_chart_y="Cooling capacity",
+    cap_chart_tb="Six-cylinder // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C suction gas",
     rec_eyebrow="On the bench", rec_h2="A semi-hermetic four-cylinder, in section",
     rec_lead="The size we overhaul most: four cylinders, 55 mm bore, 34 mm stroke, "
              "28.11 m\u00b3/h at 1450 rpm. Drawn to the connection schedule a "
@@ -170,6 +176,12 @@ S["lt"] = dict(
     f_calc="Skaičiuoklė",
     company_no="Įmonės kodas", vat="PVM mokėtojo kodas", lang_label="Kalba",
 
+    cap_chart_eyebrow="Ką jis duoda", cap_chart_h2="Galia priklausomai nuo garavimo temperatūros",
+    cap_chart_lead="Šešiacilindris su R404A, esant trims kondensavimo temperatūroms. "
+                   "Paskelbti duomenys grafike \u2014 kreivė, kurią šaldymo inžinierius "
+                   "žiūri prieš spręsdamas, ar mašina išlaikys triumą.",
+    cap_chart_x="Garavimo temperatūra", cap_chart_y="Šaldymo galia",
+    cap_chart_tb="Šešiacilindris // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C siurbimo dujos",
     rec_eyebrow="Ant stalo", rec_h2="Pusiau hermetiškas keturcilindris, pjūvyje",
     rec_lead="Dydis, kurį remontuojame dažniausiai: keturi cilindrai, 55 mm skersmuo, "
              "34 mm eiga, 28,11 m\u00b3/h esant 1450 aps./min. Nubraižyta pagal "

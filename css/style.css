@@ -1808,6 +1808,42 @@ html.is-frost #frostToggle {
   translate: -50%;
 }
 
+/* ---------- capacity chart ----------
+   Published figures, plotted in the site's own drawing hand. Three curves, one
+   per condensing temperature. The 50 C curve genuinely stops short of -5: the
+   machine is outside its envelope there, and the line ends where the data ends
+   rather than being carried to the frame edge to look tidy. */
+.capchart { margin-top: clamp(26px, 3.4vw, 52px); }
+.cc { width: 100%; height: auto; overflow: visible; }
+.cc-frame { fill: none; stroke: rgba(255,255,255,0.24); stroke-width: 1; }
+.cc-grid { stroke: rgba(255,255,255,0.10); stroke-width: 1; }
+.cc-ax { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em;
+         fill: rgba(255,255,255,0.5); }
+.cc-axis-x { letter-spacing: 0.14em; }
+.cc-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.cc-dot { stroke: none; }
+.cc-lbl { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; }
+/* Scoped to the element, not to the shared colour class. Written as
+   .cc-tc30 { stroke: X; fill: X } the fill applied to the POLYLINE too and it
+   came after .cc-line { fill: none }, so all three curves rendered as filled
+   wedges rather than lines. */
+.cc-line.cc-tc30 { stroke: rgba(186,219,255,0.95); }
+.cc-line.cc-tc40 { stroke: rgba(158,201,255,0.72); }
+.cc-line.cc-tc50 { stroke: rgba(140,166,214,0.60); }
+.cc-dot.cc-tc30, .cc-lbl.cc-tc30 { fill: rgba(186,219,255,0.95); }
+.cc-dot.cc-tc40, .cc-lbl.cc-tc40 { fill: rgba(158,201,255,0.72); }
+.cc-dot.cc-tc50, .cc-lbl.cc-tc50 { fill: rgba(140,166,214,0.60); }
+.cc-tb rect, .cc-tb line { fill: none; stroke: rgba(255,255,255,0.28); stroke-width: 1; }
+.cc-tb text { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+              fill: rgba(255,255,255,0.5); }
+.cc-tb-b { fill: rgba(255,255,255,0.85); font-weight: 700; }
+
+/* at phone width the axis numbers collide; the title block goes with them */
+@media (max-width: 700px) {
+  .cc-tb { display: none; }
+  .cc-ax { font-size: 15px; }
+}
+
 /* ============================================================
    RECIPROCATING COMPRESSOR PLATE
    Same conventions as the other two drawings: hairline geometry, a dash-dot
