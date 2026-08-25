@@ -64,7 +64,7 @@ FOUNDED = "2010"
 # this site: the worst case is a missing link, never a broken one. The file is
 # also checked for on disk, so a filename typed here that is not there behaves
 # exactly like a blank.
-PRESENTATION = ""
+PRESENTATION = "litprofit-presentation.pdf"
 
 # The lockup is the supplied monogram plus the supplied wordmark, both as
 # outlined paths — so no font is loaded, no web licence is needed, and the
@@ -320,6 +320,15 @@ def header(active, path="/"):
 CALCULATOR_URL = "/calculator/"
 
 
+def pres_link():
+    """The presentation in the footer nav, or nothing. Same rule as calc_link."""
+    pr = presentation()
+    if not pr:
+        return ""
+    return ('            <li><a href="%s" download>%s</a></li>\n'
+            % (attr(pr[0]), text(T("pres_title"))))
+
+
 def calc_link():
     if not CALCULATOR_URL:
         return ""
@@ -368,7 +377,7 @@ FOOTER_TPL = """  <footer class="site-footer">
           <h2 class="col-title">{f_site}</h2>
           <ul>
 {navlinks}
-          </ul>
+{preslink}          </ul>
         </div>
       </div>
 
@@ -390,6 +399,7 @@ def footer():
     privacy=u("/privacy/"), calc=calc_link(), made=aldy_credit(),
     f_address=T("f_address"), f_contacts=T("f_contacts"), f_details=T("f_details"),
     f_site=T("f_site"), l_privacy=T("f_privacy"), l_cid=T("company_no"), l_vat=T("vat"),
+    preslink=pres_link(),
     navlinks="\n".join('            <li><a href="%s">%s</a></li>' % (u(h), l)
                         for l, h in nav_items()))
 
