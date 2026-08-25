@@ -1038,6 +1038,51 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 @keyframes niceUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){ .nice-pop.nice-sheet{animation:none} }
 .nice-pop.nice-sheet button{min-height:46px;font-size:15px}
+
+/* ---------- language: the site's segmented pill ----------
+   Lifted from css/style.css so the two front doors of this company look like
+   each other. The glass tokens come with it -- this file had none, and picking
+   approximate greys instead is how two designs drift apart one shade at a
+   time. Width and travel are computed from --n, so this stays correct if a
+   language is added or dropped. */
+:root{
+  --glass-tint-top:rgba(255,255,255,.06); --glass-tint-bottom:rgba(179,179,179,.06);
+  --glass-rim-top:rgba(255,255,255,.5); --glass-rim-hairline:rgba(255,255,255,.1);
+  --glass-rim-bottom:rgba(255,255,255,.06); --glass-border:rgba(255,255,255,.08);
+}
+:root[data-theme=light]{
+  /* On white the rim has to darken rather than lighten, or the indicator is
+     a bright rectangle on a bright ground and disappears. */
+  --glass-tint-top:rgba(11,13,42,.05); --glass-tint-bottom:rgba(11,13,42,.03);
+  --glass-rim-top:rgba(255,255,255,.9); --glass-rim-hairline:rgba(11,13,42,.06);
+  --glass-rim-bottom:rgba(11,13,42,.05); --glass-border:rgba(11,13,42,.14);
+}
+.langs{
+  display:flex;align-items:center;gap:0;flex:none;position:relative;isolation:isolate
+}
+.langs::before{
+  content:"";position:absolute;top:0;bottom:0;left:0;z-index:-1;
+  width:calc(100% / var(--n, 3));
+  transform:translateX(calc(var(--i, 0) * 100%));
+  border-radius:2px;border:1px solid var(--glass-border);
+  background:linear-gradient(180deg,var(--glass-tint-top),var(--glass-tint-bottom));
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-top),
+    inset 0 0 0 1px var(--glass-rim-hairline),
+    inset 0 -1px 0 var(--glass-rim-bottom);
+  transition:transform .34s var(--ease)
+}
+@media (prefers-reduced-motion:reduce){ .langs::before{transition:none} }
+.langs button{
+  appearance:none;background:transparent;border:1px solid transparent;border-radius:2px;
+  display:grid;place-items:center;min-width:38px;min-height:34px;padding:6px 8px;
+  font:inherit;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);cursor:pointer;
+  transition:color .25s var(--ease)
+}
+.langs button:hover{color:var(--ink-1)}
+.langs button[aria-current]{color:var(--ink-1)}
+.langs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 </style>
 </head>
 <body>
@@ -2782,8 +2827,45 @@ function niceOpen(sel, host){
   });
 }
 
+/* The site switches language with a segmented pill: every language visible at
+   once and a glass indicator that slides to the chosen one. Three languages is
+   exactly the count that suits it -- a dropdown to choose between three things
+   hides two of them behind a click, and the calculator's interface language is
+   changed by people who are looking for the language they can read.
+   Width and travel are arithmetic on --n and --i, the same as on the site, so
+   dropping a language changes the markup and nothing else. */
+function enhanceLangPill(sel){
+  let pill = sel.nextElementSibling;
+  if(!pill || !pill.classList.contains('langs')){
+    pill = document.createElement('div');
+    pill.className = 'langs';
+    pill.setAttribute('role', 'group');
+    sel.after(pill);
+    sel.classList.add('nice-native');
+    sel.tabIndex = -1;
+    sel.setAttribute('aria-hidden', 'true');
+    pill.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]'); if(!b) return;
+      sel.value = b.dataset.lang;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+  const opts = [...sel.options];
+  const i = Math.max(0, sel.selectedIndex);
+  pill.style.setProperty('--n', opts.length);
+  pill.style.setProperty('--i', i);
+  const want = opts.map(o => o.value).join(',') + '|' + i;
+  if(pill.dataset.sig !== want){
+    pill.dataset.sig = want;
+    pill.innerHTML = opts.map((o, k) =>
+      `<button type="button" data-lang="${esc(o.value)}" lang="${esc(o.value)}"
+         ${k === i ? 'aria-current="true"' : ''}>${esc(o.textContent)}</button>`).join('');
+  }
+}
+
 function enhanceSelects(root){
   (root || document).querySelectorAll('select').forEach(sel => {
+    if(sel.id === 'langSel'){ enhanceLangPill(sel); return; }
     let host = sel.nextElementSibling;
     if(!host || !host.classList || !host.classList.contains('nice')){
       host = document.createElement('button');
