@@ -557,7 +557,11 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .hero {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  /* Centred, not bottom-aligned. flex-end was right while the trust strip was
+     the block's last line and wanted to sit on the hero's bottom edge. With
+     the strip gone the same rule left the headline low: 440px of empty screen
+     above it and 40px below the buttons. */
+  align-items: center;
   /* Exactly one screen, not 92% of one. At 92vh the hero stopped 35px short
      of the fold and the next section's rivet seam showed underneath it as a
      thin strip -- not a glimpse of what follows, just a line that looks like a
@@ -673,24 +677,7 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   .hero .lead { font-size: clamp(15px, 2.2vh, 19px); }
   .promise { margin-top: clamp(12px, 2.2vh, 40px); }
   .promise li { padding-top: clamp(6px, 1.2vh, 14px); }
-  .hero-trust { margin-top: clamp(12px, 2.2vh, 40px); padding-top: clamp(10px, 1.8vh, 24px); }
 }
-
-/* trust strip pinned to the bottom of the hero */
-.hero-trust {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 34px;
-  margin-top: clamp(18px, min(5vw, 4vh), 64px);
-  padding-top: clamp(12px, 2.2vh, 24px);
-  border-top: 1px solid var(--line);
-  font-size: var(--text-s);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted-2);
-}
-.hero-trust b { color: var(--white); font-weight: 600; letter-spacing: 0.1em; }
 
 /* scroll cue — a rule that draws itself down, so the hero has a bottom edge
    that invites rather than just stops */

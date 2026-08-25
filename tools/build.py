@@ -1056,11 +1056,6 @@ def home():
           <a class="btn btn-solid" href="{book}"{book_attrs}>{book_label}</a>
           <a class="btn btn-outline" href="{services}">{hsvc}</a>
         </div>
-        <p class="hero-trust">
-          <span>{tp} <b>BITZER</b></span>
-          <span>{tr} <b>DANFOSS</b></span>
-          <span>{tc} <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
-        </p>
         <span class="scroll-cue" aria-hidden="true"></span>
       </div>
     </section>
@@ -1204,8 +1199,11 @@ def home():
                 hero_drawing_lit=hero_drawing(lit=True),
                 he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
                 hlead=T("hero_lead", legal=LEGAL), s1=T("step1"), s2=T("step2"),
-                s3=T("step3"), hsvc=T("hero_services"), tp=T("role_bitzer"),
-                tr=T("role_danfoss"), tc=T("trust_cert"),
+                s3=T("step3"), hsvc=T("hero_services"),
+                # role_bitzer and role_danfoss still feed the partner cards further
+                # down this page. trust_cert is gone with the hero strip -- the
+                # certificates page is where RINA and PRS are stated now.
+                tp=T("role_bitzer"), tr=T("role_danfoss"),
                 # frost_hint is no longer rendered -- icon only, like the lamp.
                 fha=attr(T("frost_hint_a11y")),
                 fho=attr(T("frost_hint_off")),
