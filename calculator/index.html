@@ -934,6 +934,83 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 
 .co-chart{margin:0 0 10px;font-size:12px;font-weight:600;letter-spacing:.06em;
   text-transform:uppercase;color:var(--ink-3);font-family:var(--mono)}
+
+/* ---------- dropdowns ---------- */
+/* The native control keeps the value and the handlers; it just stops being
+   what anybody sees or tabs to. Not display:none -- an element with no box
+   cannot be focused programmatically, and .value on a detached control is a
+   different class of bug to chase. */
+select.nice-native{
+  position:absolute!important;
+  /* min-width beats width, always, and .enq-filters select sets min-width:130px
+     -- so seven hidden controls went on reserving 130px each behind the ones
+     that replaced them. Measured, not assumed: they still had a box. */
+  width:1px!important;height:1px!important;min-width:0!important;max-width:none!important;
+  padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);
+  border:0;opacity:0;pointer-events:none
+}
+button.nice{
+  display:inline-flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;min-width:0;box-sizing:border-box;cursor:pointer;
+  background:var(--surface-1);color:var(--ink-1);
+  border:1px solid var(--border);border-radius:2px;
+  padding:7px 9px;font:inherit;font-size:13px;line-height:1.2;text-align:left;
+  /* The filter labels are uppercase mono and the trigger sits inside that
+     label, so it inherited both. "OCHEAN WHALE COMPANY" in a list of sixty-
+     three clients is a wall; the label names the field, the value is a name. */
+  text-transform:none;letter-spacing:normal;
+  transition:border-color .16s var(--ease),background .16s var(--ease)
+}
+button.nice > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+button.nice:hover{border-color:var(--baseline)}
+button.nice:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+button.nice[aria-expanded=true]{border-color:var(--accent)}
+button.nice:disabled{opacity:.55;cursor:default}
+.nice-chev{flex:none;width:12px;height:12px;color:var(--ink-3);transition:transform .16s var(--ease)}
+button.nice[aria-expanded=true] .nice-chev{transform:rotate(180deg)}
+
+.nice-pop{
+  position:fixed;z-index:2000;overflow:auto;overscroll-behavior:contain;
+  background:var(--surface-1);border:1px solid var(--baseline);border-radius:3px;
+  box-shadow:0 12px 34px rgba(4,4,13,.34);padding:4px;min-width:140px;
+  animation:niceIn .13s var(--ease)
+}
+@keyframes niceIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ .nice-pop{animation:none} }
+.nice-pop button{
+  display:block;width:100%;text-align:left;appearance:none;border:0;background:transparent;
+  color:var(--ink-2);font:inherit;font-size:13px;border-radius:2px;cursor:pointer;
+  text-transform:none;letter-spacing:normal;
+  /* 40px of row: these are chosen with a finger as often as a mouse */
+  padding:10px 10px;min-height:40px;white-space:nowrap
+}
+.nice-pop button:hover,.nice-pop button:focus{background:var(--accent-soft);color:var(--ink-1);outline:none}
+.nice-pop button.on{color:var(--ink-1);font-weight:600}
+.nice-pop button.on::before{content:"\2713";margin-right:8px;color:var(--accent)}
+.nice-pop button:not(.on)::before{content:"";display:inline-block;width:0;margin-right:16px}
+.nice-pop button:disabled{opacity:.45;cursor:default}
+
+/* width:100% is right for a filter in a labelled column and wrong for
+   everything in the header, where the row is shared. The language picker in
+   particular took a whole line to itself on a phone. */
+.tabrow > #projectSel + button.nice{width:auto;max-width:280px;min-width:190px}
+header.app #langSel + button.nice{width:auto;min-width:72px;flex:none}
+header.app select + button.nice{width:auto;flex:none}
+@media(max-width:760px){
+  .tabrow > #projectSel + button.nice{width:100%;max-width:none}
+}
+/* in a table cell the control is the cell */
+table.grid td button.nice{padding:4px 6px;font-size:12.5px}
+
+/* the phone sheet */
+.nice-pop.nice-sheet{
+  left:8px;right:8px;bottom:8px;top:auto;min-width:0;max-height:62vh;
+  border-radius:6px;padding:6px;
+  animation:niceUp .16s var(--ease)
+}
+@keyframes niceUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ .nice-pop.nice-sheet{animation:none} }
+.nice-pop.nice-sheet button{min-height:46px;font-size:15px}
 </style>
 </head>
 <body>
@@ -2528,6 +2605,162 @@ function paintPulse(){
   el.innerHTML = html;
 }
 
+/* ============================================================
+   DROPDOWNS
+   ------------------------------------------------------------
+   A native <select> opens the operating system's own list: white, rounded,
+   system type, sitting on top of a dark technical instrument like a sticker.
+   It is the one control on the page the design cannot reach.
+
+   The real <select> stays in the DOM and keeps its id, its value and every
+   handler already bound to it -- the app reads .value in a dozen places and
+   listens for 'change' in a dozen more, and none of that should have to know
+   this exists. It is taken out of the tab order and covered by a button that
+   mirrors it; choosing writes the value back and dispatches 'change', so from
+   the application's side nothing has changed at all.
+
+   The list is appended to <body> and positioned fixed, because half of these
+   live inside table cells with their own scrolling and clipping, and a popup
+   inside an overflow container is a popup with a corner cut off.
+   ============================================================ */
+var NICE_OPEN = null;
+
+function niceClose(focusBack){
+  if(!NICE_OPEN) return;
+  const { pop, host } = NICE_OPEN;
+  NICE_OPEN = null;
+  pop.remove();
+  host.setAttribute('aria-expanded', 'false');
+  if(focusBack) host.focus();
+}
+
+function niceLabel(sel){
+  const o = sel.options[sel.selectedIndex];
+  return o ? o.textContent : '';
+}
+
+function niceOpen(sel, host){
+  niceClose(false);
+  const pop = document.createElement('div');
+  pop.className = 'nice-pop';
+  pop.setAttribute('role', 'listbox');
+  pop.innerHTML = [...sel.options].map((o, i) =>
+    `<button role="option" data-i="${i}" aria-selected="${i === sel.selectedIndex}"
+       class="${i === sel.selectedIndex ? 'on' : ''}"${o.disabled ? ' disabled' : ''}>${
+       esc(o.textContent)}</button>`).join('');
+  document.body.appendChild(pop);
+
+  /* On a phone it is a sheet across the bottom, not a box pinned to a 63px
+     button. Anchored, a sixty-four-item list came out 943px tall in a 664px
+     window and there was nowhere to put it; as a sheet the position is not a
+     calculation at all, and the rows land under the thumb rather than at the
+     top of the screen. */
+  const narrow = window.innerWidth < 620;
+  if(narrow){
+    pop.classList.add('nice-sheet');
+  } else {
+    const r = host.getBoundingClientRect();
+    const h = pop.offsetHeight;
+    /* Below by default, above when there is no room below and more above -- a
+       list that opens off the bottom of the window is a list you scroll the
+       page to read, and the page under it is what you were choosing for. */
+    const below = window.innerHeight - r.bottom;
+    const up = below < h + 8 && r.top > below;
+    pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - pop.offsetWidth - 8)) + 'px';
+    pop.style.minWidth = r.width + 'px';
+    pop.style.top = up ? Math.max(8, r.top - h - 4) + 'px' : (r.bottom + 4) + 'px';
+    pop.style.maxHeight = Math.max(120, (up ? r.top : below) - 12) + 'px';
+  }
+
+  host.setAttribute('aria-expanded', 'true');
+  NICE_OPEN = { pop, host, sel };
+
+  const items = [...pop.querySelectorAll('button:not([disabled])')];
+  const cur = pop.querySelector('button.on') || items[0];
+  if(cur){ cur.focus(); cur.scrollIntoView({ block: 'nearest' }); }
+
+  const pick = b => {
+    sel.selectedIndex = +b.dataset.i;
+    /* bubbles, because some of these are listened for on a container rather
+       than on the element itself */
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    niceClose(true);
+  };
+  pop.addEventListener('click', e => {
+    const b = e.target.closest('button[role=option]'); if(b) pick(b);
+  });
+  pop.addEventListener('keydown', e => {
+    const i = items.indexOf(document.activeElement);
+    if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      e.preventDefault();
+      const n = (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      items[n].focus(); items[n].scrollIntoView({ block: 'nearest' });
+    } else if(e.key === 'Home' || e.key === 'End'){
+      e.preventDefault(); (e.key === 'Home' ? items[0] : items[items.length - 1]).focus();
+    } else if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault(); if(i >= 0) pick(items[i]);
+    } else if(e.key === 'Escape' || e.key === 'Tab'){
+      e.preventDefault(); niceClose(true);
+    } else if(e.key.length === 1){
+      /* type-ahead, the one thing a native select does that people rely on
+         without noticing */
+      const c = e.key.toLowerCase();
+      const from = items.slice(i + 1).concat(items.slice(0, i + 1));
+      const hit = from.find(b => b.textContent.trim().toLowerCase().startsWith(c));
+      if(hit){ hit.focus(); hit.scrollIntoView({ block: 'nearest' }); }
+    }
+  });
+}
+
+function enhanceSelects(root){
+  (root || document).querySelectorAll('select').forEach(sel => {
+    let host = sel.nextElementSibling;
+    if(!host || !host.classList || !host.classList.contains('nice')){
+      host = document.createElement('button');
+      host.type = 'button';
+      host.className = 'nice';
+      host.setAttribute('aria-haspopup', 'listbox');
+      host.setAttribute('aria-expanded', 'false');
+      sel.after(host);
+      sel.classList.add('nice-native');
+      /* out of the tab order, but still focusable programmatically and still
+         the element the rest of the app talks to */
+      sel.tabIndex = -1;
+      sel.setAttribute('aria-hidden', 'true');
+      host.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        if(NICE_OPEN && NICE_OPEN.host === host) niceClose(true); else niceOpen(sel, host);
+      });
+      host.addEventListener('keydown', e => {
+        if(e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' '){
+          e.preventDefault(); niceOpen(sel, host);
+        }
+      });
+    }
+    if(sel.title && !host.title) host.title = sel.title;
+    host.disabled = sel.disabled;
+    /* the label is re-read every pass: the app sets .value directly in places
+       and never tells anybody */
+    const label = niceLabel(sel);
+    if(host.dataset.label !== label){
+      host.dataset.label = label;
+      host.innerHTML = `<span>${esc(label)}</span>${ICON_CHEV}`;
+    }
+  });
+}
+
+const ICON_CHEV = '<svg viewBox="0 0 12 12" aria-hidden="true" class="nice-chev">' +
+  '<path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" ' +
+  'stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+document.addEventListener('click', e => {
+  if(NICE_OPEN && !e.target.closest('.nice-pop') && !e.target.closest('.nice')) niceClose(false);
+});
+window.addEventListener('resize', () => niceClose(false));
+/* capture: a scroll inside a table does not bubble, and the popup is fixed, so
+   it would otherwise sit still while the control it belongs to slides away */
+window.addEventListener('scroll', () => niceClose(false), true);
+
 function render(){
   renderChrome();
   const m = $('#main');
@@ -2539,6 +2772,10 @@ function render(){
     m.dataset.view = 'sheet';
     wireEnquiries();
     paintPulse(); measureChrome();
+    /* This branch returns before the end of the function, so anything added
+       down there never runs for the register -- which is how seven of its nine
+       dropdowns stayed native while the two in the chrome were replaced. */
+    enhanceSelects();
     return;
   }
   /* Nothing to show and nothing this person may do about it. Every view below
@@ -2547,7 +2784,7 @@ function render(){
     m.innerHTML = `<div class="card"><h2 class="sheet">${esc(tr().pfTitle)}</h2>
       <p class="muted">${esc(tr().cloud.noProjects)}</p></div>`;
     m.dataset.view = 'page';
-    paintPulse(); measureChrome();
+    paintPulse(); measureChrome(); enhanceSelects();
     return;
   }
   if(state.tab==='portfolio') m.innerHTML = viewPortfolio();
@@ -2561,6 +2798,7 @@ function render(){
   paintPulse();
   measureChrome();
   paintSaveState();
+  enhanceSelects();
 }
 
 /* ---- generic sheet table ---- */
