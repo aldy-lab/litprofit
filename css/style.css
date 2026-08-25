@@ -202,6 +202,42 @@ body::before {
     radial-gradient(54rem 46rem at 88% 78%, rgba(28, 44, 92, 0.20), transparent 62%);
 }
 
+/* ---------- and a moving light over it ----------
+   The field above is static. The glass on this page -- the stat strip, the two
+   partner cards, the certificate list, the menu -- all show whatever is behind
+   them, and behind them nothing ever moved, so the panels were as fixed as the
+   ground. This is the light that moves, and the glass picks it up without any
+   panel animating anything itself.
+
+   A separate FIXED layer rather than animating the field: the field is behind a
+   document 8,000px tall, and handing the compositor a layer that size to
+   transform is not worth it on a phone. Fixed means it is only ever one screen.
+
+   inset:-30% so no edge of the layer can scroll into view as it drifts, and
+   40s alternate so it never snaps back to a start position.
+
+   Cool only. alprojects carries a warm gradient in its equivalent and it works
+   there; on this site warm reads as cheap, so all three of these are indigo
+   through steel. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -30%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(44% 46% at 24% 26%, rgba(48, 58, 150, 0.55) 0%, transparent 68%),
+    radial-gradient(38% 42% at 78% 70%, rgba(38, 74, 128, 0.34) 0%, transparent 64%),
+    radial-gradient(36% 38% at 66% 12%, rgba(58, 66, 168, 0.42) 0%, transparent 70%);
+  animation: ground-drift 40s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes ground-drift {
+  from { transform: translate3d(-13%, -8%, 0) scale(1); }
+  to   { transform: translate3d(16%, 12%, 0) scale(1.42); }
+}
+@media (prefers-reduced-motion: reduce) { body::after { animation: none; } }
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -321,7 +357,12 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 }
 
 .section { padding-block: clamp(66px, 9vw, 150px); }
-.section-alt { background: var(--bg-2); }
+/* Translucent, so the page's own field shows through.
+   Opaque, this covered both body layers completely -- sampling the About page
+   found not one pixel anywhere that was actually background, which means the
+   ambient field was invisible and the glass panels on top of it were
+   refracting a flat section colour. A section is a band of tone, not a lid. */
+.section-alt { background: color-mix(in srgb, var(--bg-2) 62%, transparent); }
 .section-tight { padding-block: clamp(48px, 6vw, 96px); }
 
 /* 30ch here was a mistake worth naming: the cap applies to the whole
