@@ -1083,6 +1083,21 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 .langs button:hover{color:var(--ink-1)}
 .langs button[aria-current]{color:var(--ink-1)}
 .langs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+.enq-meta{margin:14px 0 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+.enq-cap{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--warning)}
+
+.enq-hist{margin-top:16px;border-top:1px solid var(--border);padding-top:12px}
+.enq-hist h3{margin:0 0 8px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.enq-hist p{margin:0 0 5px;font-size:12px;color:var(--ink-2);display:flex;gap:8px;
+  align-items:baseline;flex-wrap:wrap}
+.enq-hist span{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);flex:none}
+.enq-hist b{font-weight:600;color:var(--ink-1)}
+.enq-hist i{font-style:normal;font-family:var(--mono);font-size:11.5px}
+.enq-hist u{text-decoration:none;color:var(--ink-3);font-size:11px;margin-left:auto}
 </style>
 </head>
 <body>
@@ -1164,6 +1179,17 @@ en: {
     kReceived:'Enquiries received',kPO:'PO received',kProgress:'In progress',kRejected:'Rejected',
     hDate:'Date',hToSupplier:'To supplier',hQuoted:'Quoted',hDays:'Days',
     hPo:'PO date',hDelivery:'Delivered',
+    lastChanged:'Last changed',narrowIt:'narrow the filters to see the rest',
+    history:'Recent changes',
+    h:{number:'No.',client:'Client',description:'Description',enquiry_date:'Enquiry date',
+       supplier:'Supplier',sent_to_supplier:'Sent to supplier',quoted_to_client:'Quoted to client',
+       status:'Status',po_date:'PO date',cost_ex_vat:'Cost',price_ex_vat:'Sell',
+       delivered:'Delivered',paid:'Paid',paid_date:'Paid on',invoice_no:'Invoice no.',owner:'Owner'},
+    importCosts:'Import costs',impWillUpdate:'Rows that will change',
+    impUnchanged:'Already the same',impSkipped:'Skipped',impDone:'Updated',
+    impFailed:'Failed',impConfirm:'Apply these?',impNothing:'That file is empty.',
+    impNoMatch:'no enquiry with this number',impNoNumber:'cost is not a number',
+    impAmbiguous:'this number is on two rows — set it by hand',
     pdf:'PDF',quick:'Show me',qOwed:'Owed to us',qNoQuote:'No quote sent',
     qStale:'Waiting over 30 days',qNoCost:'Cost missing',qMonth:'This month',
     qWon:'Won',clickToEdit:'Click a cost or a tick to change it',
@@ -1269,6 +1295,17 @@ lt: {
     kReceived:'Gauta užklausų',kPO:'Gauti',kProgress:'Vykdomi',kRejected:'Atmesti',
     hDate:'Data',hToSupplier:'Tiekėjui',hQuoted:'Pasiūlyta',hDays:'Dienos',
     hPo:'PO data',hDelivery:'Pristatyta',
+    lastChanged:'Paskutinis keitimas',narrowIt:'susiaurinkite filtrus, kad matytumėte likusius',
+    history:'Paskutiniai pakeitimai',
+    h:{number:'Numeris',client:'Klientas',description:'Aprašymas',enquiry_date:'Užklausos data',
+       supplier:'Tiekėjas',sent_to_supplier:'Užklausa tiekėjams',quoted_to_client:'Pasiūlymas klientui',
+       status:'Būsena',po_date:'PO data',cost_ex_vat:'Savikaina',price_ex_vat:'Pardavimas',
+       delivered:'Pristatyta',paid:'Apmokėta',paid_date:'Apmokėjimo data',invoice_no:'Sąskaitos nr.',owner:'Atsakingas'},
+    importCosts:'Importuoti savikainas',impWillUpdate:'Bus pakeista eilučių',
+    impUnchanged:'Jau tokios pačios',impSkipped:'Praleista',impDone:'Atnaujinta',
+    impFailed:'Nepavyko',impConfirm:'Taikyti?',impNothing:'Failas tuščias.',
+    impNoMatch:'nėra užklausos tokiu numeriu',impNoNumber:'savikaina ne skaičius',
+    impAmbiguous:'šis numeris yra dviejose eilutėse — įveskite ranka',
     pdf:'PDF',quick:'Rodyti',qOwed:'Mums skolingi',qNoQuote:'Pasiūlymas neišsiųstas',
     qStale:'Laukia daugiau nei 30 d.',qNoCost:'Trūksta savikainos',qMonth:'Šį mėnesį',
     qWon:'Laimėta',clickToEdit:'Spustelėkite savikainą ar varnelę, kad pakeistumėte',
@@ -1374,6 +1411,17 @@ ru: {
     kReceived:'Получено запросов',kPO:'Получен PO',kProgress:'В работе',kRejected:'Отклонены',
     hDate:'Дата',hToSupplier:'Поставщику',hQuoted:'Предложено',hDays:'Дней',
     hPo:'Дата PO',hDelivery:'Поставлено',
+    lastChanged:'Последнее изменение',narrowIt:'сузьте фильтры, чтобы увидеть остальные',
+    history:'Последние изменения',
+    h:{number:'Номер',client:'Клиент',description:'Описание',enquiry_date:'Дата запроса',
+       supplier:'Поставщик',sent_to_supplier:'Запрос поставщику',quoted_to_client:'Предложение клиенту',
+       status:'Статус',po_date:'Дата PO',cost_ex_vat:'Себестоимость',price_ex_vat:'Продажа',
+       delivered:'Поставлено',paid:'Оплачено',paid_date:'Дата оплаты',invoice_no:'Счёт №',owner:'Ответственный'},
+    importCosts:'Импорт себестоимости',impWillUpdate:'Строк изменится',
+    impUnchanged:'Уже совпадают',impSkipped:'Пропущено',impDone:'Обновлено',
+    impFailed:'Не удалось',impConfirm:'Применить?',impNothing:'Файл пуст.',
+    impNoMatch:'нет запроса с таким номером',impNoNumber:'себестоимость не число',
+    impAmbiguous:'этот номер стоит в двух строках — внесите вручную',
     pdf:'PDF',quick:'Показать',qOwed:'Нам должны',qNoQuote:'Предложение не отправлено',
     qStale:'Ждёт больше 30 дней',qNoCost:'Нет себестоимости',qMonth:'Этот месяц',
     qWon:'Выиграно',clickToEdit:'Нажмите на себестоимость или галочку, чтобы изменить',
@@ -1789,6 +1837,14 @@ const CLOUD = (function(){
       return firstRow(await rest('rpc/save_enquiry', {
         method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
       }));
+    },
+
+    /* The last few changes to one row. Not loaded with the register: 216 rows
+       of history is a request nobody asked for, and this is read when somebody
+       opens the row to argue about it. */
+    async enquiryHistory(id){
+      return await rest('enquiry_history_v?select=at,by_user,field,was,now_is&enquiry_id=eq.' +
+                        encodeURIComponent(id) + '&order=at.desc,id.desc&limit=8') || [];
     },
 
     async enquiryRemove(id){
@@ -3582,7 +3638,25 @@ function viewEnquiries(){
   const flag = (on, yes, no) =>
     `<span class="enq-flag ${on ? 'ok' : 'bad'}">${esc(on ? yes : no)}</span>`;
 
-  const body = rows.length ? rows.map(r => `<tr data-enq="${esc(r.id)}" style="cursor:pointer">
+  /* Everything renders at once: 5,702 nodes for 216 rows, which is fine, and
+     stops being fine somewhere in the low thousands -- where the failure is a
+     page that locks up rather than one that slows down. A ceiling, and a line
+     that says so, because silent truncation is worse than either. */
+  const CAP = 400;
+  const capped = rows.length > CAP;
+  const shown = capped ? rows.slice(0, CAP) : rows;
+
+  const body = shown.length ? shown.map(r => {
+    /* The register is kept by several people, and when two of them disagree
+       the first question is who wrote this. On the row rather than in a column
+       of its own: sixteen columns is enough, and it is asked one row at a
+       time. */
+    const who = r.updated_at
+      ? new Date(r.updated_at).toLocaleDateString(L) +
+        (PEOPLE[r.updated_by] ? ' \u2014 ' + PEOPLE[r.updated_by] : '')
+      : '';
+    return `<tr data-enq="${esc(r.id)}" style="cursor:pointer"${
+      who ? ` title="${esc(e.lastChanged)}: ${esc(who)}"` : ''}>
       <td class="pf-id"><b>${esc(r.number)}</b></td>
       <td data-label="${esc(e.client)}">${esc(r.client) || '—'}</td>
       <td data-label="${esc(e.description)}">${esc(r.description) || '—'}</td>
@@ -3607,8 +3681,11 @@ function viewEnquiries(){
       <td data-label="${esc(e.delivery)}">${flag(r.delivered, e.delivered, e.undelivered)}</td>
       <td class="enq-edit" data-edit="paid" data-label="${esc(e.paid)}"
           title="${esc(e.clickToEdit)}">${flag(r.paid, e.paid, e.unpaid)}</td>
-    </tr>`).join('')
-    : `<tr><td colspan="12" style="padding:26px;text-align:center" class="muted">${esc(e.none)}</td></tr>`;
+    </tr>`; }).join('')
+    /* sixteen columns, not twelve -- the empty-state row has been short since
+       the money columns were added, so the message sat under two thirds of a
+       table and the rest was blank */
+    : `<tr><td colspan="16" style="padding:26px;text-align:center" class="muted">${esc(e.none)}</td></tr>`;
 
   const quick = (k, label) =>
     `<button class="enq-chip${enqState().quick === k ? ' on' : ''}" data-quick="${k}">${esc(label)}</button>`;
@@ -3656,6 +3733,10 @@ function viewEnquiries(){
       ${sel('enqToSupplier', e.toSupplier, [{v:'true',l:t.yes},{v:'false',l:t.no}], enqState().toSupplier)}
       ${sel('enqQuoted', e.quoted, [{v:'true',l:t.yes},{v:'false',l:t.no}], enqState().quoted)}
       ${sel('enqPaid', e.paid, [{v:'true',l:e.paid},{v:'false',l:e.unpaid}], enqState().paid)}
+      ${enqDistinct('owner').length
+        /* nobody has been named yet, and an empty slicer is furniture */
+        ? sel('enqOwner', e.owner, enqDistinct('owner').map(v => ({v, l: v})), enqState().owner)
+        : ''}
       ${sel('enqYear', e.date, years.map(v => ({v, l: v})), enqState().year)}
       <button id="enqClear" class="ghost">${t.clearF}</button>
       <button id="enqCsv">${esc(e.csv)}</button>
@@ -3663,6 +3744,8 @@ function viewEnquiries(){
            to not be found. A register that cannot be handed to somebody on
            paper is half a tool. -->
       <button id="enqPdf">${esc(e.report)} ${esc(e.pdf)}</button>
+      <button id="enqImportBtn">${esc(e.importCosts)}</button>
+      <input type="file" id="enqImportFile" accept=".csv,text/csv" hidden>
       <button id="enqAdd" class="primary">${esc(e.add)}</button>
     </div>
 
@@ -3675,6 +3758,8 @@ function viewEnquiries(){
       <i class="enq-tip">${esc(e.clickToEdit)}</i>
     </div>
 
+    ${capped ? `<p class="enq-cap">${esc(t.showing)} ${CAP} ${esc(t.of)} ${rows.length}
+      &mdash; ${esc(e.narrowIt)}</p>` : ''}
     <div class="tablewrap"><table class="grid" id="enqTable">
       <thead><tr>
         ${th('number', e.number)}${th('client', e.client)}${th('description', e.description)}
@@ -3720,20 +3805,33 @@ function viewEnquiries(){
 }
 
 /* ---- enquiry register: events, editing, export ---- */
+var ENQ_Q_TIMER = null;
+
 function wireEnquiries(){
   const t = tr(), e = t.enq, f = enqState();
   const on = (id, ev, fn) => { const el = $('#' + id); if(el) el.addEventListener(ev, fn); };
   const set = (k, v) => { f[k] = v; persist(); render(); };
 
-  /* typing re-renders the whole table, so the caret has to be put back --
-     without this the field loses focus on the first keystroke and the second
-     one goes to the document */
+  /* Debounced, because a keystroke here costs a whole re-render: the cards,
+     six charts and 216 rows, 5,702 nodes, 29ms median. Measured at 4x CPU
+     throttling that came to 107-133ms a letter, and about 100ms is where
+     typing stops feeling connected to the keys. Waiting 180ms after the last
+     letter costs nothing anybody notices and renders once instead of seven
+     times for "danfoss".
+
+     The caret still has to be put back: the render replaces the input, and
+     without this the field loses focus and the next letter goes to the
+     document. */
   on('enqQ', 'input', ev => {
     const pos = ev.target.selectionStart;
-    f.q = ev.target.value;
-    render();
-    const again = $('#enqQ');
-    if(again){ again.focus(); try { again.setSelectionRange(pos, pos); } catch(_){} }
+    const val = ev.target.value;
+    clearTimeout(ENQ_Q_TIMER);
+    ENQ_Q_TIMER = setTimeout(() => {
+      f.q = val;
+      persist(); render();
+      const again = $('#enqQ');
+      if(again){ again.focus(); try { again.setSelectionRange(pos, pos); } catch(_){} }
+    }, 180);
   });
   on('enqClient',     'change', ev => set('client', ev.target.value));
   on('enqSupplier',   'change', ev => set('supplier', ev.target.value));
@@ -3741,6 +3839,7 @@ function wireEnquiries(){
   on('enqToSupplier', 'change', ev => set('toSupplier', ev.target.value));
   on('enqQuoted',     'change', ev => set('quoted', ev.target.value));
   on('enqPaid',       'change', ev => set('paid', ev.target.value));
+  on('enqOwner',      'change', ev => set('owner', ev.target.value));
   on('enqYear',       'change', ev => set('year', ev.target.value));
   on('enqClear', 'click', () => {
     state.enq = null; persist(); render();
@@ -3748,6 +3847,13 @@ function wireEnquiries(){
   on('enqAdd', 'click', () => enqEdit(null));
   on('enqCsv', 'click', () => enqCsv());
   on('enqPdf', 'click', () => printEnquiryReport());
+  on('enqImportBtn', 'click', () => $('#enqImportFile').click());
+  on('enqImportFile', 'change', ev => {
+    const f = ev.target.files && ev.target.files[0];
+    /* cleared, so choosing the same file twice in a row still fires */
+    ev.target.value = '';
+    if(f) enqImport(f);
+  });
 
   document.querySelectorAll('.enq-chip').forEach(b => b.addEventListener('click', () => {
     /* clicking the chip that is already on turns it off, so the same button
@@ -3826,6 +3932,9 @@ function enqEdit(row){
           r.paid ? ' checked' : ''}> ${esc(e.paid)}</label>
         <label class="wide">${esc(e.note)}<input name="note" value="${val(r.note)}"></label>
       </div>
+      ${r.updated_at ? `<p class="enq-meta">${esc(e.lastChanged)}:
+        ${esc(new Date(r.updated_at).toLocaleString(LOCALES[state.lang]))}${
+        PEOPLE[r.updated_by] ? ' &mdash; ' + esc(PEOPLE[r.updated_by]) : ''}</p>` : ''}
       <div class="enq-actions">
         ${isNew ? '' : `<button type="button" value="del" class="ghost danger">${esc(e.del)}</button>`}
         <span class="spacer"></span>
@@ -3902,6 +4011,26 @@ function enqEdit(row){
   form.price_ex_vat.addEventListener('input', live);
   live();
 
+  /* Filled in after the dialog is on screen: the history is a second request
+     and the form must not wait for it -- and on a register that has just been
+     migrated there may not be any yet. */
+  if(!isNew && CLOUD.on){
+    CLOUD.enquiryHistory(r.id).then(list => {
+      if(!list.length || !dlg.isConnected) return;
+      const box = document.createElement('div');
+      box.className = 'enq-hist';
+      box.innerHTML = `<h3>${esc(e.history)}</h3>` + list.map(h => {
+        const label = (e[h.field] || e.h[h.field] || h.field);
+        return `<p><span>${esc(new Date(h.at).toLocaleDateString(LOCALES[state.lang]))}</span>
+          <b>${esc(label)}</b>
+          <i>${esc(h.was == null || h.was === '' ? '—' : h.was)}</i>
+          &rarr; <i>${esc(h.now_is == null || h.now_is === '' ? '—' : h.now_is)}</i>
+          ${PEOPLE[h.by_user] ? `<u>${esc(PEOPLE[h.by_user])}</u>` : ''}</p>`;
+      }).join('');
+      form.insertBefore(box, form.querySelector('.enq-actions'));
+    }).catch(() => {});
+  }
+
   dlg.addEventListener('cancel', close);
   dlg.showModal();
   const first = dlg.querySelector('input');
@@ -3943,7 +4072,26 @@ function enqCostCell(td, row){
 /* One changed field, sent as the whole row, because save_enquiry takes a whole
    row -- and the row it takes is the one on screen, so a field this patch does
    not mention is written back unchanged rather than blanked. */
-async function enqPatch(row, change){
+/* An edit made in one click deserves a way back in one click. The project
+   undo stack snapshots local state, and these rows live on the server, so this
+   keeps what the row held before and offers to send it back -- which is also
+   the only correct way to undo something another person may have read already:
+   a new save, with its own revision, not a rewind. */
+function enqUndoable(row, saved, t){
+  const before = {};
+  Object.keys(row).forEach(k => { before[k] = row[k]; });
+  toast(t.enq.saved, t.undo, async () => {
+    const cur = (state.enquiries || []).find(x => x.id === saved.id) || saved;
+    await enqPatch(cur, {
+      cost_ex_vat: before.cost_ex_vat == null ? '' : String(before.cost_ex_vat),
+      price_ex_vat: Number(before.price_ex_vat) || 0,
+      paid: !!before.paid, paid_date: before.paid_date,
+      delivered: !!before.delivered, status: before.status
+    }, true);
+  });
+}
+
+async function enqPatch(row, change, quiet){
   const t = tr();
   const payload = {
     number: row.number, client: row.client, description: row.description,
@@ -3966,9 +4114,114 @@ async function enqPatch(row, change){
     if(!saved){ toast(t.enq.conflict); return; }
     state.enquiries = (state.enquiries || []).map(x => x.id === saved.id ? saved : x);
     render();
+    /* not on the undo itself, or the offer to undo never goes away */
+    if(!quiet) enqUndoable(row, saved, t);
   } catch(err){
     toast(t.enq.savingFailed + ' — ' + err.message);
   }
+}
+
+/* ---- bringing costs in from a file ----
+   105 of the 216 rows have a sale price and no supplier price, and they are
+   not going to be typed in one at a time by anybody who has the invoices in a
+   spreadsheet already. Two columns are enough: the enquiry number and the
+   cost. Anything else in the file is ignored, so the supplier's own export can
+   be handed over unedited.
+
+   It reports what it did and what it could not do, per row, and changes
+   nothing until that has been read. An importer that silently skips the rows
+   it did not understand is how a register ends up half right. */
+function enqParseCsv(text){
+  /* comma or semicolon, whichever the file actually uses -- Excel in a
+     European locale writes semicolons and everybody forgets */
+  const first = (text.split(/\r?\n/).find(l => l.trim()) || '');
+  const sep = (first.split(';').length > first.split(',').length) ? ';' : ',';
+  const rows = [];
+  text.split(/\r?\n/).forEach(line => {
+    if(!line.trim()) return;
+    const cells = [];
+    let cur = '', q = false;
+    for(let i = 0; i < line.length; i++){
+      const c = line[i];
+      if(c === '"'){ if(q && line[i+1] === '"'){ cur += '"'; i++; } else q = !q; }
+      else if(c === sep && !q){ cells.push(cur); cur = ''; }
+      else cur += c;
+    }
+    cells.push(cur);
+    rows.push(cells.map(x => x.trim()));
+  });
+  return rows;
+}
+
+function enqNumber(v){
+  /* 1 234,56 and 1,234.56 and 1234.56 all mean the same thing to a person */
+  let x = String(v).replace(/[^0-9.,-]/g, '').trim();
+  if(!x) return null;
+  const lastComma = x.lastIndexOf(','), lastDot = x.lastIndexOf('.');
+  if(lastComma > lastDot) x = x.replace(/\./g, '').replace(',', '.');
+  else x = x.replace(/,/g, '');
+  const n = Number(x);
+  return isFinite(n) ? n : null;
+}
+
+async function enqImport(file){
+  const t = tr(), e = t.enq;
+  const text = await file.text();
+  const rows = enqParseCsv(text);
+  if(!rows.length){ toast(e.impNothing); return; }
+
+  /* Find the two columns by name if there is a header, and fall back to the
+     first two if there is not -- a file exported from this register has the
+     right headings already. */
+  const head = rows[0].map(x => x.toLowerCase());
+  const findCol = names => head.findIndex(h => names.some(n => h.indexOf(n) >= 0));
+  let iNum  = findCol(['no.', 'numer', 'номер', 'number']);
+  let iCost = findCol(['cost', 'savikain', 'себестоим']);
+  const hasHeader = iNum >= 0 && iCost >= 0;
+  if(!hasHeader){ iNum = 0; iCost = 1; }
+
+  const byNumber = new Map();
+  (state.enquiries || []).forEach(r => {
+    const k = (r.number || '').trim().toLowerCase();
+    if(!byNumber.has(k)) byNumber.set(k, []);
+    byNumber.get(k).push(r);
+  });
+
+  const plan = [], skipped = [];
+  rows.slice(hasHeader ? 1 : 0).forEach((cells, i) => {
+    const num = (cells[iNum] || '').trim();
+    const cost = enqNumber(cells[iCost]);
+    if(!num) return;
+    const hits = byNumber.get(num.toLowerCase());
+    if(!hits){ skipped.push(`${num} — ${e.impNoMatch}`); return; }
+    if(cost == null){ skipped.push(`${num} — ${e.impNoNumber}`); return; }
+    /* One number can carry two lines -- 26.2-19.2 does. Writing the same cost
+       to both would double the cost of that enquiry, so it is left for a
+       person. */
+    if(hits.length > 1){ skipped.push(`${num} — ${e.impAmbiguous}`); return; }
+    plan.push({ row: hits[0], cost });
+  });
+
+  const changed = plan.filter(x => Number(x.row.cost_ex_vat) !== x.cost);
+  const msg = [
+    `${e.impWillUpdate}: ${changed.length}`,
+    plan.length - changed.length ? `${e.impUnchanged}: ${plan.length - changed.length}` : '',
+    skipped.length ? `${e.impSkipped}: ${skipped.length}` : ''
+  ].filter(Boolean).join('\n');
+  if(!changed.length){ alert(msg + (skipped.length ? '\n\n' + skipped.slice(0, 12).join('\n') : '')); return; }
+  if(!confirm(msg + '\n\n' + e.impConfirm)) return;
+
+  let done = 0, failed = 0;
+  for(const item of changed){
+    try {
+      const cur = (state.enquiries || []).find(x => x.id === item.row.id) || item.row;
+      await enqPatch(cur, { cost_ex_vat: String(item.cost) }, true);
+      done++;
+    } catch(err){ failed++; }
+  }
+  alert(`${e.impDone}: ${done}${failed ? `\n${e.impFailed}: ${failed}` : ''}${
+    skipped.length ? `\n${e.impSkipped}: ${skipped.length}\n\n` + skipped.slice(0, 12).join('\n') : ''}`);
+  render();
 }
 
 function enqCsv(){
