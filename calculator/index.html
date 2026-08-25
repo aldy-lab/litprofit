@@ -920,6 +920,20 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
   .tabrow{flex-wrap:wrap;gap:0;padding:0 12px}
   .tabrow > #projectSel{flex:1 1 100%;max-width:none;margin:8px 0}
 }
+
+/* ---------- the company's own position, on the portfolio ---------- */
+.co-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.co-kpi{border:1px solid var(--border);border-radius:3px;padding:12px 14px;background:var(--surface-2)}
+.co-kpi span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:5px}
+.co-kpi b{display:block;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums}
+.co-kpi i{display:block;margin-top:3px;font-style:normal;font-family:var(--mono);
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.co-kpi.ok b{color:var(--good)}
+.co-kpi.bad b{color:var(--critical)}
+
+.co-chart{margin:0 0 10px;font-size:12px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);font-family:var(--mono)}
 </style>
 </head>
 <body>
@@ -2732,7 +2746,49 @@ function viewPortfolio(){
     </tr>`;
   }).join('') : `<tr><td colspan="10" style="padding:26px;text-align:center" class="muted">${t.pfNone}</td></tr>`;
 
-  return `${noticeBar()}<div class="card">
+  /* The portfolio was a filtered list and nothing else, so the company's own
+     position was only ever visible on paper, in the printed company report.
+     The same figures and the same two charts belong on the screen: this tab is
+     the company, the way the dashboard is the job. */
+  const open = rows.filter(r => !r.p.locked).length;
+  const onT  = rows.filter(r => r.d.marginActual >= r.d.target).length;
+  const started = totals.some(g => g.rev > 0);
+
+  const kpi = (label, big, note, tone) =>
+    `<div class="co-kpi${tone ? ' ' + tone : ''}"><span>${esc(label)}</span><b>${big}</b>${
+      note ? `<i>${note}</i>` : ''}</div>`;
+
+  /* Actual once anything has been invoiced, plan before that -- and it says
+     which it is showing rather than letting a plan pass for a result. */
+  const money = totals.map(g => {
+    const rev = started ? g.rev : g.revPlan, cost = started ? g.cost : g.costPlan;
+    const prof = rev - cost, marg = rev ? prof / rev : 0;
+    const basis = esc(started ? dd.actual : dd.plan);
+    return kpi(`${esc(dd.totalRevenue)} ${esc(g.currency)}`, fmt(rev), basis) +
+           kpi(dd.totalCost, fmt(cost), basis) +
+           kpi(dd.grossProfit, fmt(prof), basis, prof >= 0 ? 'ok' : 'bad') +
+           kpi(dd.margin, pct(marg), basis, marg >= 0 ? 'ok' : 'bad');
+  }).join('');
+
+  const summary = rows.length ? `<div class="card">
+      <h2 class="sheet">${esc(t.companyTitle)}</h2>
+      <div class="co-kpis">
+        ${money}
+        ${kpi(t.projectsN, rows.length, `${open} ${esc(t.openN)}`)}
+        ${kpi(dd.onTarget, `${onT}/${rows.length}`, '&nbsp;', onT === rows.length ? 'ok' : '')}
+      </div>
+    </div>
+    <div class="enq-charts">
+      <!-- The title these helpers take goes into the SVG's aria-label, which a
+           screen reader hears and nobody else does. On paper each of them sits
+           under an h3; on screen they were two unlabelled bar charts. -->
+      <div class="card"><h3 class="co-chart">${esc(t.marginByProject)}</h3>
+        ${chartProjectMargins(rows, PAL_SCREEN, {title: t.marginByProject, empty: dd.noData})}</div>
+      <div class="card"><h3 class="co-chart">${esc(t.revenueByClient)}</h3>
+        ${chartByClient(rows, PAL_SCREEN, {title: t.revenueByClient, empty: dd.noData, unnamed: '—'})}</div>
+    </div>` : '';
+
+  return `${noticeBar()}${summary}<div class="card">
     <h2 class="sheet">${t.pfTitle} <span class="muted" style="font-weight:400">// ${
       t.showing} ${rows.length} ${t.of} ${all}</span></h2>
     <p class="hint" style="margin:-8px 0 14px">${t.pfLead}</p>
@@ -2779,17 +2835,27 @@ function viewPortfolio(){
    exactly as it did, plus the unit; with more than one it says so instead of
    inventing a number. The screen and the CSV share this, so they cannot drift
    apart into two different answers. */
+/* Grouped by currency and never summed across them: adding euros to dollars
+   produces a number that is wrong in a way nobody can see. Plan is carried
+   alongside actual because a book of jobs that have not started yet is all
+   plan, and an actual-only summary reads as a company that has done nothing. */
 function portfolioTotals(rows){
   const by = new Map();
   rows.forEach(r=>{
     const cur = ((r.p.settings && r.p.settings.currency) || '').trim() || '—';
-    const g = by.get(cur) || { currency: cur, rev: 0, cost: 0 };
+    const g = by.get(cur) || { currency: cur, rev: 0, cost: 0, revPlan: 0, costPlan: 0, n: 0 };
     g.rev += r.d.revActual; g.cost += r.d.costActual;
+    g.revPlan += r.d.revPlan; g.costPlan += r.d.costPlan;
+    g.n++;
     by.set(cur, g);
   });
   return [...by.values()]
     .sort((a, b) => a.currency.localeCompare(b.currency))
-    .map(g => Object.assign(g, { profit: g.rev - g.cost, margin: g.rev ? (g.rev - g.cost) / g.rev : 0 }));
+    .map(g => Object.assign(g, {
+      profit: g.rev - g.cost, margin: g.rev ? (g.rev - g.cost) / g.rev : 0,
+      profitPlan: g.revPlan - g.costPlan,
+      marginPlan: g.revPlan ? (g.revPlan - g.costPlan) / g.revPlan : 0
+    }));
 }
 
 /* Portfolio CSV: one row per project plus the company line, so the whole book
