@@ -15,10 +15,25 @@ say(){ printf '\n\033[1m%s\033[0m\n' "$*"; }
 say "Calculator publish"
 echo "Three things are needed. Nothing typed here is saved or echoed back."
 
-printf '\nSupabase project URL (https://xxxx.supabase.co): '
+echo
+echo "Both of these are in the Supabase dashboard under"
+echo "  Project Settings -> Data API"
+echo "NOT the address in your browser's bar -- that is the dashboard, and a"
+echo "build made with it silently falls back to browser-only storage."
+printf '\nProject URL (https://<ref>.supabase.co): '
 read -r CALC_SUPABASE_URL
-printf 'Supabase anon key (input hidden): '
+case "$CALC_SUPABASE_URL" in
+  *supabase.com/dashboard*|*/project/*)
+    ref=$(printf '%s' "$CALC_SUPABASE_URL" | tr '/' '\n' | grep -Ex '[a-z0-9]{20}' | head -1)
+    echo "  That is the dashboard address."
+    [ -n "$ref" ] && echo "  You want:  https://$ref.supabase.co"
+    exit 1 ;;
+esac
+printf 'anon / publishable key (input hidden): '
 read -rs CALC_SUPABASE_KEY; echo
+if [ ${#CALC_SUPABASE_KEY} -lt 20 ]; then
+  echo "  That key is too short to be one — nothing was built."; exit 1
+fi
 
 echo
 echo "Now the people who may open the calculator."

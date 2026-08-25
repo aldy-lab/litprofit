@@ -292,8 +292,40 @@ def build_cloud():
     local = SUPA_URL.startswith(("http://127.0.0.1", "http://localhost"))
     if not SUPA_URL.startswith("https://") and not local:
         sys.exit("CALC_SUPABASE_URL must be the https project URL.")
+    # The dashboard address is the one in the browser's address bar while you
+    # are looking at the project, so it is the one that gets pasted. It is not
+    # the API host, and the app cannot tell: it just decides there is no cloud
+    # and falls back to browser-local storage. Everything then looks like it
+    # works and no data ever arrives. One build shipped that way.
+    if "supabase.com/dashboard" in SUPA_URL or "/project/" in SUPA_URL:
+        ref = ""
+        for part in SUPA_URL.split("/"):
+            if len(part) == 20 and part.isalnum() and part.islower():
+                ref = part
+                break
+        sys.exit(
+            "CALC_SUPABASE_URL is the dashboard address, not the API host.\n"
+            "  you gave : %s\n"
+            "  wanted   : https://%s.supabase.co\n"
+            "Supabase dashboard -> Project Settings -> Data API -> Project URL."
+            % (SUPA_URL, ref or "<project-ref>"))
     if len(SUPA_KEY) < 20:
         sys.exit("CALC_SUPABASE_ANON_KEY does not look like a key.")
+    # A personal access token is not the anon key. It is an account credential
+    # -- it manages projects, it does not read rows -- and this file is
+    # published, so baking one in hands the account to whoever opens the page.
+    # One build did exactly that; GitHub's push protection is what stopped it,
+    # which is not a control this project should be relying on.
+    if SUPA_KEY.startswith("sbp_"):
+        sys.exit(
+            "That is a Supabase PERSONAL ACCESS TOKEN (sbp_...), not the anon key.\n"
+            "It manages your account, and this file is published, so it must never\n"
+            "be built in. Revoke it: Supabase -> Account -> Access Tokens.\n"
+            "The key you want is in Project Settings -> Data API -> anon public.")
+    if SUPA_KEY.startswith("sb_secret_") or "service_role" in SUPA_KEY:
+        sys.exit(
+            "That is a SERVICE ROLE key. It bypasses row level security, and this\n"
+            "file is published. Use the anon / publishable key instead.")
     # The publishable key is public by design -- it names the project, it
     # grants nothing. Anything else here is a real secret and must not ship.
     # Two formats are current: the newer sb_publishable_ / sb_secret_ pair, and
