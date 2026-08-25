@@ -1905,6 +1905,30 @@ html.is-frost #frostToggle {
   .vs-space text, .vs-datum, .vs-tb { display: none; }
 }
 
+/* The legend only exists where the labels cannot: above 700px the drawing
+   carries its own and a second copy would be noise. */
+.vs-legend { display: none; }
+@media (max-width: 700px) {
+  .vs-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 18px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-s);
+    color: var(--muted);
+  }
+  .vs-legend li { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+  .vs-legend span {
+    font-family: var(--mono);
+    font-size: var(--label);
+    letter-spacing: 0.12em;
+    color: var(--muted-2);
+    flex: none;
+  }
+}
+
 /* ============================================================
    GENERAL ARRANGEMENT DRAWING
    Workshop-drawing conventions: hairline geometry, dash-dot centre
@@ -2575,6 +2599,44 @@ html.is-frost::after {
   .nav-actions .langs { display: none; }
 }
 @media (min-width: 981px) { .nav-links .langs { display: none; } }
+
+/* ============================================================
+   PHONE LAYOUT
+   The home page ran to 14.9 screens on a 390px phone, and it got there by
+   being the desktop layout narrowed rather than a layout for a phone: every
+   grid collapsed to one column and every card put a full-width 16:10
+   photograph above its text. Four services alone were 1,840px -- more than two
+   screens to say four things.
+
+   Nothing here shrinks type. The sizes were already right: 40px h1, 19px card
+   title, 14px body. It is the arrangement that was wrong.
+   ============================================================ */
+@media (max-width: 620px) {
+  /* The row layout the desktop already uses for its compact cards. A
+     photograph beside its title says the same thing as a photograph above it
+     and costs a third of the height. */
+  .card, .card--feature { flex-direction: row; align-items: stretch; }
+  .card-media, .card--feature .card-media {
+    width: 112px;
+    flex: none;
+    aspect-ratio: auto;
+    align-self: stretch;
+  }
+  .card-body, .card--feature .card-body { padding: 15px 16px 14px; }
+  .card h2, .card h3, .card--feature h2, .card--feature h3 {
+    font-size: var(--text-l);
+    margin-bottom: 6px;
+  }
+  .card p, .card--feature p { font-size: var(--text-s); }
+  .card-more { padding-top: 12px; }
+
+  /* Four short figures do not need four rows. The dividers move with them:
+     a rule to the left of the right-hand column, and above the second row. */
+  .facts { grid-template-columns: 1fr 1fr; }
+  .fact { border-left: 0; padding: 22px 18px 20px; }
+  .fact:nth-child(2n) { border-left: 1px solid var(--line); }
+  .fact:nth-child(n + 3) { border-top: 1px solid var(--line); }
+}
 
 /* ============================================================
    CAREERS

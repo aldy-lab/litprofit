@@ -1602,9 +1602,23 @@ def vessel_drawing():
         <div class="vessel bleed reveal">
           <svg class="vs" viewBox="0 0 1200 352" role="img" aria-label="{alt}">{p}</svg>
         </div>
+        <!-- On a phone the drawing is 100px tall and the compartment labels are
+             hidden, because at that size they collide with their own boxes. That
+             left four balloons pointing at four empty rectangles. A legend is
+             what a real sheet does when the labels will not fit on the drawing.
+             Plain text, not links: the balloons above are already the links, and
+             the four service cards two screens up are the same four again. -->
+        <ol class="vs-legend reveal">
+          <li><span>01</span>{lg1}</li>
+          <li><span>02</span>{lg2}</li>
+          <li><span>03</span>{lg3}</li>
+          <li><span>04</span>{lg4}</li>
+        </ol>
       </div>
     </section>""".format(e=T("vsl_eyebrow"), h=T("vsl_h2"), l=T("vsl_lead"),
-                         alt=attr(T("vsl_h2")), p="".join(P))
+                         alt=attr(T("vsl_h2")), p="".join(P),
+                         lg1=text(T("vsl_hold")), lg2=text(T("vsl_er").replace("|", " ")),
+                         lg3=text(T("vsl_pipe")), lg4=text(T("vsl_store")))
 
 
 # ============================================================
