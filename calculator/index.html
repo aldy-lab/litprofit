@@ -500,9 +500,28 @@ table.grid{width:100%;border-collapse:collapse}
 table.grid th{
   font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
   font-weight:600;text-align:left;padding:9px 8px;border-bottom:1px solid var(--baseline);
-  white-space:nowrap;font-family:var(--mono)
+  font-family:var(--mono);
+  /* Headers wrap. On one line a long name sets the column width whatever is
+     under it: "SENT TO SUPPLIER" is 122px of heading over 37px of Yes/No, and
+     four columns like that made the register 1,782px wide inside a 1,500px
+     window. Measured per column, header against widest cell.
+     Bottom-aligned so a two-line heading still sits on the same baseline as a
+     one-line one, and a tighter line-height so the second line costs 12px
+     rather than a whole row. */
+  white-space:normal;line-height:1.25;vertical-align:bottom;
+  /* Wraps at spaces and nowhere else. overflow-wrap:anywhere was tried and it
+     breaks INSIDE words -- SUPPLIER came out as "SUPP LIER" and QUOTED TO
+     CLIENT as "QUOT ED TO CLIE NT", which is narrower and unreadable, so it
+     solved the measurement and not the problem. A header too long for its
+     column gets a shorter name instead; the full one is its tooltip. */
+  overflow-wrap:normal;word-break:normal;hyphens:none
 }
 table.grid td{padding:4px 6px;border-bottom:1px solid var(--grid);vertical-align:middle}
+/* A floor, so "MARGIN %" over an em dash does not collapse to four characters
+   a line. Wide enough for two short words, no wider. */
+/* wide enough for the longest single word any of these headings contains */
+table.grid th{min-width:66px}
+#enqTable th{max-width:150px}
 table.grid td.num,table.grid th.num{text-align:right}
 table.grid td.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
 table.grid input{width:100%}
@@ -1098,6 +1117,8 @@ en: {
   /* ---- enquiry register (was a Power BI report) ---- */
   enq:{title:'Enquiry register',lead:'Every enquiry, from the day it came in to the day it was delivered.',
     kReceived:'Enquiries received',kPO:'PO received',kProgress:'In progress',kRejected:'Rejected',
+    hDate:'Date',hToSupplier:'To supplier',hQuoted:'Quoted',hDays:'Days',
+    hPo:'PO date',hDelivery:'Delivered',
     pdf:'PDF',quick:'Show me',qOwed:'Owed to us',qNoQuote:'No quote sent',
     qStale:'Waiting over 30 days',qNoCost:'Cost missing',qMonth:'This month',
     qWon:'Won',clickToEdit:'Click a cost or a tick to change it',
@@ -1201,6 +1222,8 @@ lt: {
   /* ---- užklausų registras ---- */
   enq:{title:'Užklausų registras',lead:'Kiekviena užklausa nuo gavimo dienos iki pristatymo.',
     kReceived:'Gauta užklausų',kPO:'Gauti',kProgress:'Vykdomi',kRejected:'Atmesti',
+    hDate:'Data',hToSupplier:'Tiekėjui',hQuoted:'Pasiūlyta',hDays:'Dienos',
+    hPo:'PO data',hDelivery:'Pristatyta',
     pdf:'PDF',quick:'Rodyti',qOwed:'Mums skolingi',qNoQuote:'Pasiūlymas neišsiųstas',
     qStale:'Laukia daugiau nei 30 d.',qNoCost:'Trūksta savikainos',qMonth:'Šį mėnesį',
     qWon:'Laimėta',clickToEdit:'Spustelėkite savikainą ar varnelę, kad pakeistumėte',
@@ -1304,6 +1327,8 @@ ru: {
   /* ---- реестр запросов ---- */
   enq:{title:'Реестр запросов',lead:'Каждый запрос — от дня поступления до дня поставки.',
     kReceived:'Получено запросов',kPO:'Получен PO',kProgress:'В работе',kRejected:'Отклонены',
+    hDate:'Дата',hToSupplier:'Поставщику',hQuoted:'Предложено',hDays:'Дней',
+    hPo:'Дата PO',hDelivery:'Поставлено',
     pdf:'PDF',quick:'Показать',qOwed:'Нам должны',qNoQuote:'Предложение не отправлено',
     qStale:'Ждёт больше 30 дней',qNoCost:'Нет себестоимости',qMonth:'Этот месяц',
     qWon:'Выиграно',clickToEdit:'Нажмите на себестоимость или галочку, чтобы изменить',
@@ -3463,9 +3488,13 @@ function viewEnquiries(){
      nothing. */
   const money = v => v == null ? '<span class="muted">&mdash;</span>' : fmt(v);
 
-  const th = (key, label, num) =>
+  /* Short in the head, full in the tooltip. A heading is a label for a column,
+     not the place to explain it -- and "Neišsiųstas pasiūlymas, dienos" over a
+     column of single digits is three lines of explanation. */
+  const th = (key, label, num, full) =>
     `<th class="${num ? 'num' : ''} pf-sort${enqState().sort === key ? ' on' : ''}"
-       data-esort="${key}">${esc(label)}${enqState().sort === key
+       data-esort="${key}"${full ? ` title="${esc(full)}"` : ''}>${esc(label)}${
+        enqState().sort === key
         ? `<span class="pf-arr">${enqState().dir > 0 ? '↑' : '↓'}</span>` : ''}</th>`;
 
   const flag = (on, yes, no) =>
@@ -3567,11 +3596,14 @@ function viewEnquiries(){
     <div class="tablewrap"><table class="grid" id="enqTable">
       <thead><tr>
         ${th('number', e.number)}${th('client', e.client)}${th('description', e.description)}
-        ${th('date', e.date)}<th>${esc(e.toSupplier)}</th>${th('supplier', e.supplier)}
-        <th>${esc(e.quoted)}</th>${th('days', e.daysUnquoted, 1)}${th('status', e.status)}
-        ${th('poDate', e.poDate)}${th('cost', e.cost, 1)}${th('price', e.sell, 1)}
+        ${th('date', e.hDate, 0, e.date)}
+        <th title="${esc(e.toSupplier)}">${esc(e.hToSupplier)}</th>
+        ${th('supplier', e.supplier)}
+        <th title="${esc(e.quoted)}">${esc(e.hQuoted)}</th>
+        ${th('days', e.hDays, 1, e.daysUnquoted)}${th('status', e.status)}
+        ${th('poDate', e.hPo, 0, e.poDate)}${th('cost', e.cost, 1)}${th('price', e.sell, 1)}
         ${th('margin', e.margin, 1)}${th('marginPct', e.marginPct, 1)}
-        <th>${esc(e.delivery)}</th><th>${esc(e.paid)}</th>
+        <th title="${esc(e.delivery)}">${esc(e.hDelivery)}</th><th>${esc(e.paid)}</th>
       </tr></thead>
       <tbody>${body}</tbody>
       <tfoot><tr class="totals">
