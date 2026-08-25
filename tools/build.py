@@ -1078,6 +1078,31 @@ def home():
           <a class="btn btn-solid" href="{book}"{book_attrs}>{book_label}</a>
           <a class="btn btn-outline" href="{services}">{hsvc}</a>
         </div>
+        <!-- The four figures used to be a glass panel of their own, a screen
+             further down. They are the first things a shipowner checks, and
+             they belong on the first screen -- but not as a second panel under
+             the buttons. Here they are a measurement rule along the foot of
+             the hero: hairline ticks, figures on the baseline, units under
+             them. The trust strip that was removed from this hero was claims;
+             this is numbers, which is the difference. -->
+        <ul class="facts reveal">
+          <li class="fact">
+            <p class="fact-value">{years}+</p>
+            <p class="fact-label">{f1}</p>
+          </li>
+          <li class="fact">
+            <p class="fact-value">24/7</p>
+            <p class="fact-label">{f2}</p>
+          </li>
+          <li class="fact">
+            <p class="fact-value">2</p>
+            <p class="fact-label">{f3}</p>
+          </li>
+          <li class="fact">
+            <p class="fact-value">&euro;250k</p>
+            <p class="fact-label">{f4}</p>
+          </li>
+        </ul>
         <span class="scroll-cue" aria-hidden="true"></span>
       </div>
     </section>
@@ -1102,29 +1127,6 @@ def home():
             <p>{rep_d}</p>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <ul class="facts reveal">
-          <li class="fact">
-            <p class="fact-value">{years}+</p>
-            <p class="fact-label">{f1}</p>
-          </li>
-          <li class="fact">
-            <p class="fact-value">24/7</p>
-            <p class="fact-label">{f2}</p>
-          </li>
-          <li class="fact">
-            <p class="fact-value">2</p>
-            <p class="fact-label">{f3}</p>
-          </li>
-          <li class="fact">
-            <p class="fact-value">&euro;250k</p>
-            <p class="fact-label">{f4}</p>
-          </li>
-        </ul>
       </div>
     </section>
 

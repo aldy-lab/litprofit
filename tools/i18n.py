@@ -264,7 +264,10 @@ S["lt"] = dict(
                 "tiekiami laivams, o ne pritaikyti iš kranto įrangos.",
 
     fact_years="Metai šaldymo rinkoje", fact_service="Serviso atsakas",
-    fact_certs="Klasifikacijos sertifikatai", fact_insured="Civilinė atsakomybė",
+    # "Klasifikacijos sertifikatai" is the one label in either language that
+    # will not sit on a single line of the hero rule. "Klasės sertifikatai"
+    # says the same thing about the same two class societies.
+    fact_certs="Klasės sertifikatai", fact_insured="Civilinė atsakomybė",
 
     svc_eyebrow="Paslaugos", svc_h2="Keturios sritys, vienas rangovas",
     svc_lead="Daugumai darbų reikia ne vienos iš jų vienu metu. Kai viską "
