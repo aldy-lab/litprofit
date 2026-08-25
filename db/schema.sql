@@ -479,6 +479,11 @@ revoke all on public.project_history_v from anon;
 -- ============================================================
 -- ENQUIRIES  (Užklausų registras)
 -- ============================================================
+-- DO NOT run this file against a database that already exists. It is the
+-- from-scratch schema, and the `create trigger` / `create policy` statements
+-- above have no `if not exists` form, so on a live project the script aborts
+-- at the first of them and nothing below here is created. Use
+-- db/migrate-enquiries.sql, which is this section on its own and re-runnable.
 -- This register lived in a Power BI report published to the web, reading from
 -- a spreadsheet. Two problems with leaving it there: a publish-to-web link is
 -- readable by anyone who has the URL -- client names, suppliers and prices for
