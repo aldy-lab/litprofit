@@ -61,6 +61,17 @@ S["en"] = dict(
     f_calc="Calculator",
     company_no="Company No.", vat="VAT code", lang_label="Language",
 
+    # semi-hermetic reciprocating compressor plate, on the refrigeration page
+    rec_eyebrow="On the bench", rec_h2="A semi-hermetic four-cylinder, in section",
+    rec_lead="The size we overhaul most: four cylinders, 55 mm bore, 34 mm stroke, "
+             "28.11 m\u00b3/h at 1450 rpm. Drawn to the connection schedule a "
+             "fitter actually works to.",
+    rec_tb="Semi-hermetic reciprocating", rec_tb2="Side elevation // not to scale",
+    rec_c1="Discharge line", rec_c2="Suction line", rec_c3="High pressure",
+    rec_c4="Low pressure", rec_c5="Oil fill plug", rec_c6="Oil drain",
+    rec_c7="Oil return, separator", rec_c8="Oil heater",
+    rec_motor="Motor", rec_crank="Crankcase", rec_head="Cylinder heads",
+    rec_terminal="Terminal box",
     hero_eyebrow="Klaipeda, Lithuania", hero_since="since",
     # vessel general arrangement -- the four spaces the company works in.
     # vsl_, not ga_: ga_ is the compressor package drawing further down.
@@ -159,6 +170,16 @@ S["lt"] = dict(
     f_calc="Skaičiuoklė",
     company_no="Įmonės kodas", vat="PVM mokėtojo kodas", lang_label="Kalba",
 
+    rec_eyebrow="Ant stalo", rec_h2="Pusiau hermetiškas keturcilindris, pjūvyje",
+    rec_lead="Dydis, kurį remontuojame dažniausiai: keturi cilindrai, 55 mm skersmuo, "
+             "34 mm eiga, 28,11 m\u00b3/h esant 1450 aps./min. Nubraižyta pagal "
+             "prijungimų schemą, su kuria dirba montuotojas.",
+    rec_tb="Pusiau hermetiškas stūmoklinis", rec_tb2="Vaizdas iš šono // ne mastelyje",
+    rec_c1="Slėginė linija", rec_c2="Siurbimo linija", rec_c3="Aukštas slėgis",
+    rec_c4="Žemas slėgis", rec_c5="Alyvos pildymo kamštis", rec_c6="Alyvos išleidimas",
+    rec_c7="Alyvos grąžinimas iš separatoriaus", rec_c8="Alyvos šildytuvas",
+    rec_motor="Variklis", rec_crank="Karteris", rec_head="Cilindrų galvutės",
+    rec_terminal="Gnybtų dėžutė",
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
     vsl_eyebrow="Kur vyksta darbai", vsl_h2="Laivas nuo denio iki kilio",
     vsl_lead="Tas pats laivas iš šono. Kiekviena šio puslapio sritis — konkreti "

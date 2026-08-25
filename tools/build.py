@@ -1658,6 +1658,134 @@ def service_ld(s):
             }, ensure_ascii=False))
 
 
+def recip_drawing():
+    """Semi-hermetic four-cylinder reciprocating compressor, side elevation.
+
+    Drawn from scratch in this site's own drawing language. The BITZER
+    selection sheets for the 4Z-8.2Y were the reference for the FACTS -- the
+    673 x 439 x 420 envelope, four cylinders at 55 mm bore and 34 mm stroke,
+    28.11 m3/h at 1450 rpm, 140 kg, and the connection schedule a fitter works
+    to. Those are measurements, and measurements are not authorship.
+
+    The sheets themselves are BITZER's copyright and are not reproduced here,
+    nor traced. Being an authorised service partner is a right to work on the
+    machine, not a licence to republish the manufacturer's drawings.
+    """
+    P = []
+    add = P.append
+
+    # ---- feet and mounting line ----
+    # The /> was missing here. An unterminated <path> does not error, it eats
+    # the tags after it -- which is why the motor housing vanished from the
+    # first render while its cooling ribs stayed.
+    add('<line class="rc-thin" x1="60" y1="470" x2="880" y2="470"/>')
+    for fx in (150, 300, 560, 710):
+        add('<path class="rc-body" d="M%d 446 L%d 446 L%d 470 L%d 470 Z"/>'
+            % (fx, fx + 54, fx + 62, fx - 8))
+
+    # ---- motor housing, left: a semi-hermetic motor shares the crankcase ----
+    add('<path class="rc-body" d="M96 250 Q96 224 128 224 L300 224 L300 446 '
+        'L128 446 Q96 446 96 420 Z"/>')
+    for cx in range(120, 297, 18):      # cooling ribs
+        add('<line class="rc-thin" x1="%d" y1="236" x2="%d" y2="434"/>' % (cx, cx))
+    add('<path class="rc-body" d="M172 224 L172 176 L268 176 L268 224"/>')   # terminal box
+    add('<line class="rc-thin" x1="188" y1="190" x2="252" y2="190"/>')
+    add('<line class="rc-thin" x1="188" y1="204" x2="252" y2="204"/>')
+
+    # ---- crankcase ----
+    add('<path class="rc-body" d="M300 268 L640 268 L640 446 L300 446 Z"/>')
+    add('<line class="rc-thin" x1="300" y1="392" x2="640" y2="392"/>')        # oil level
+    add('<circle class="rc-body" cx="470" cy="356" r="46"/>')                 # crankshaft
+    add('<circle class="rc-thin" cx="470" cy="356" r="18"/>')
+    add('<line class="rc-cl" x1="420" y1="356" x2="520" y2="356"/>')
+    add('<line class="rc-cl" x1="470" y1="306" x2="470" y2="406"/>')
+
+    # ---- two banks of two cylinders, in V ----
+    # Rotated about the crankcase top centre, which is where a V actually
+    # hinges. The first attempt rotated about the translate origin, so both
+    # banks swung away from the block and floated beside it.
+    # Each bank hinges on its own INNER base corner and splays outward. Both
+    # rotating about one centre point put them through each other in an X.
+    for x0, x1, pivot, tilt in ((374, 464, 464, -21), (476, 566, 476, 21)):
+        add('<g transform="rotate(%d %d 268)">' % (tilt, pivot)
+            + '<path class="rc-body" d="M%d 268 L%d 268 L%d 152 L%d 152 Z"/>' % (x0, x1, x1, x0)
+            + '<path class="rc-body" d="M%d 152 L%d 152 L%d 126 L%d 126 Z"/>'
+              % (x0 - 10, x1 + 10, x1 + 10, x0 - 10)
+            + ''.join('<line class="rc-thin" x1="%d" y1="162" x2="%d" y2="258"/>' % (h, h)
+                      for h in (x0 + 22, x0 + 45, x0 + 68))
+            + '</g>')
+
+    # ---- suction and discharge, top corners ----
+    # Both stubs leave the block itself rather than hanging in space.
+    add('<path class="rc-body" d="M640 300 L706 300 L706 250 L760 250"/>')
+    add('<path class="rc-thin" d="M694 300 L694 250"/>')
+    add('<text class="rc-tag" x="768" y="255">SL</text>')
+    # Routed over the motor, not through it: at y=250 it ran straight across the
+    # housing and the terminal box, which on a drawing reads as a pipe passing
+    # through solid castings.
+    add('<path class="rc-body" d="M300 262 L290 262 L290 148 L136 148"/>')
+    add('<path class="rc-thin" d="M300 274 L278 274 L278 160 L136 160"/>')
+    add('<text class="rc-tag" x="96" y="153">DL</text>')
+
+    # ---- dimensions, off the real envelope ----
+    def dim(x1, x2, y, label):
+        return ('<g class="rc-dim"><line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                '<line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                '<rect class="rc-dim-bg" x="%d" y="%d" width="52" height="16"/>'
+                '<text x="%d" y="%d" text-anchor="middle">%s</text></g>'
+                % (x1, y - 7, x1, y + 7, x2, y - 7, x2, y + 7, x1, y, x2, y,
+                   (x1 + x2) // 2 - 26, y - 8, (x1 + x2) // 2, y + 4, label))
+    add(dim(96, 748, 510, "673"))
+    add('<g class="rc-dim"><line x1="912" y1="176" x2="912" y2="470"/>'
+        '<line x1="905" y1="176" x2="919" y2="176"/>'
+        '<line x1="905" y1="470" x2="919" y2="470"/>'
+        '<rect class="rc-dim-bg" x="886" y="315" width="52" height="16"/>'
+        '<text x="912" y="327" text-anchor="middle">439</text></g>')
+
+    # ---- connection balloons, the schedule a fitter works to ----
+    def ball(n, cx, cy, tx, ty):
+        return ('<g class="rc-ball"><line x1="%d" y1="%d" x2="%d" y2="%d"/>'
+                '<circle cx="%d" cy="%d" r="15"/>'
+                '<text x="%d" y="%d">%s</text></g>'
+                % (cx, cy, tx, ty, cx, cy, cx, cy + 5, n))
+    add(ball("05", 250, 92, 330, 300))     # oil fill plug
+    add(ball("06", 350, 92, 402, 438))     # oil drain
+    add(ball("08", 452, 92, 520, 288))     # oil return from separator
+    add(ball("10", 554, 92, 600, 430))     # oil heater
+
+    # 336 wide could not hold "Semi-hermetic reciprocating" at 12px mono -- the
+    # caption ran straight through the divider and into R404A. 412, split 260/152.
+    add('<g class="rc-tb"><rect x="520" y="524" width="412" height="46"/>'
+        '<line x1="520" y1="547" x2="932" y2="547"/>'
+        '<line x1="780" y1="524" x2="780" y2="570"/>'
+        '<text x="532" y="540">%s</text><text x="532" y="563">%s</text>'
+        '<text class="rc-tb-b" x="792" y="540">R404A</text>'
+        '<text x="792" y="563">DWG 05</text></g>'
+        % (text(T("rec_tb")), text(T("rec_tb2"))))
+
+    legend = "".join(
+        '<li><span>%s</span>%s</li>' % (n, text(T(k)))
+        for n, k in (("05", "rec_c5"), ("06", "rec_c6"),
+                     ("08", "rec_c7"), ("10", "rec_c8")))
+
+    return """
+    <section class="section section-alt recip-section seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{e}</p>
+          <h2>{h}</h2>
+          <p class="lead">{l}</p>
+        </div>
+        <div class="recip bleed reveal">
+          <svg class="rc" viewBox="0 0 980 590" role="img" aria-label="{alt}">{p}</svg>
+        </div>
+        <ol class="rc-legend reveal">{lg}</ol>
+      </div>
+    </section>""".format(e=T("rec_eyebrow"), h=T("rec_h2"), l=T("rec_lead"),
+                         alt=attr(T("rec_h2")), p="".join(P), lg=legend)
+
+
 def service_page(s):
     blocks = []
     for heading, paras in s["blocks"]:
@@ -1677,6 +1805,7 @@ def service_page(s):
       </div>
     </div>
 
+{recip}
     <section class="container prose">
 {blocks}
     </section>
@@ -1694,6 +1823,9 @@ def service_page(s):
     </section>
 {cta}""".format(img=u("/assets/photos/" + f), alt=alt, w=w, h=h,
                 blocks="\n\n".join(blocks), more=more,
+                # The compressor plate belongs to one page: it is that page's
+                # machine. Putting a drawing on all four would make it wallpaper.
+                recip=recip_drawing() if s["slug"] == "refrigeration-systems" else "",
                 other_e=T("svc_eyebrow"), other_h=PT("svc_h1"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 

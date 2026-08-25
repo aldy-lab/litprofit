@@ -1809,6 +1809,47 @@ html.is-frost #frostToggle {
 }
 
 /* ============================================================
+   RECIPROCATING COMPRESSOR PLATE
+   Same conventions as the other two drawings: hairline geometry, a dash-dot
+   axis, ticked dimensions, numbered balloons on leaders, a title block.
+   ============================================================ */
+.recip { margin-top: clamp(24px, 3vw, 44px); }
+.rc { width: 100%; height: auto; overflow: visible; }
+.rc-body { fill: none; stroke: rgba(255,255,255,0.62); stroke-width: 1.6; stroke-linejoin: round; }
+.rc-thin { fill: none; stroke: rgba(255,255,255,0.26); stroke-width: 1; }
+.rc-cl { stroke: rgba(158,201,255,0.5); stroke-width: 1; stroke-dasharray: 18 4 3 4; }
+.rc-tag, .rc-tb text { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+                       fill: rgba(255,255,255,0.55); }
+.rc-dim line { stroke: rgba(158,201,255,0.55); stroke-width: 1; }
+.rc-dim text { fill: #9ec9ff; font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; }
+.rc-dim-bg { fill: var(--bg-2); }
+.rc-tb rect, .rc-tb line { fill: none; stroke: rgba(255,255,255,0.28); stroke-width: 1; }
+.rc-tb-b { fill: rgba(255,255,255,0.85); font-weight: 700; }
+.rc-ball line { stroke: rgba(255,255,255,0.45); stroke-width: 1; }
+.rc-ball circle { fill: var(--bg-2); stroke: rgba(255,255,255,0.6); stroke-width: 1.4; }
+.rc-ball text { fill: var(--white); font-family: var(--mono); font-size: 13px;
+                font-weight: 700; text-anchor: middle; }
+
+.rc-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px 26px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-s);
+  color: var(--muted);
+}
+.rc-legend li { display: flex; gap: 9px; align-items: baseline; min-width: 0; }
+.rc-legend span { font-family: var(--mono); font-size: var(--label); letter-spacing: 0.12em;
+                  color: var(--muted-2); flex: none; }
+
+/* the dimensions and the title block are unreadable at phone width */
+@media (max-width: 700px) {
+  .rc-dim, .rc-tb, .rc-tag { display: none; }
+}
+
+/* ============================================================
    VESSEL GENERAL ARRANGEMENT
    Same drawing-office conventions as the compressor package: hairline
    geometry, a dash-dot datum, dashed compartment boundaries, numbered
