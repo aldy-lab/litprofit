@@ -1487,6 +1487,44 @@ a.card { position: relative; }
 
 .footer-brand p { font-size: var(--text-m); color: var(--muted-2); max-width: 30ch; }
 
+/* ---------- the work lamp control ----------
+   Icon only, top right of the hero, directly over the drawing it lights. It
+   was a labelled chip in the trust rule, which put a button reading LAMP next
+   to a button reading FROST and turned a line of proof -- BITZER, DANFOSS,
+   RINA, PRS -- into a row of controls.
+
+   Below the header rather than under it, and on the hero's own padding edge so
+   it lines up with what the drawing already respects. */
+.lamp-btn {
+  position: absolute;
+  top: calc(var(--nav-h) + clamp(14px, 2.4vh, 30px));
+  right: var(--pad);
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--muted-2);
+  cursor: inherit;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease),
+              background 0.25s var(--ease);
+}
+.lamp-btn svg { width: 20px; height: 20px; display: block; }
+@media (hover: hover) and (pointer: fine) {
+  .lamp-btn:hover { color: var(--white); border-color: var(--line-2); }
+}
+.lamp-btn:focus-visible { color: var(--white); border-color: var(--line-2); }
+/* lit: the control shows the state it put the page into */
+.hero.is-lamp .lamp-btn {
+  color: var(--white);
+  border-color: var(--line-2);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 /* ============================================================
    FROST NOTE
    The easter egg is typed, so a hint only helps someone with a

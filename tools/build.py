@@ -1007,6 +1007,22 @@ def home():
 {hero_drawing_lit}
         </span>
       </div>
+      <!-- Icon only, and up beside the drawing rather than down in the trust
+           rule: this lights the drawing, so it belongs next to it. No label --
+           a chip reading LAMP next to a chip reading FROST made the strip a
+           row of buttons instead of a line of proof. -->
+      <button type="button" class="lamp-btn" id="lampToggle"
+              aria-pressed="false" data-on="{lha}" data-off="{lho}" title="{lha}">
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none">
+            <circle cx="10" cy="10" r="3.2"/>
+            <path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4"/>
+            <path d="M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M15.8 4.2l-1.7 1.7M5.9 14.1l-1.7 1.7"/>
+          </g>
+        </svg>
+        <span class="visually-hidden">{lha}</span>
+      </button>
+
       <div class="container hero-inner">
         <p class="eyebrow eyebrow-plain">{he} <span class="sep">//</span> {hs} {founded}</p>
         <h1>{h1}</h1>
@@ -1039,23 +1055,6 @@ def home():
             </svg>
             <span>{fh}</span>
             <span class="visually-hidden">{fha}</span>
-          </button>
-          <!-- The work lamp had no affordance at all: it was double-click on
-               the hero, which nobody discovers and which a touchscreen cannot
-               perform. Same control as FROST, and the double-click still
-               works for anyone who already knew. -->
-          <button type="button" class="frost-note lamp-note" id="lampToggle"
-                  aria-pressed="false" data-on="{lha}" data-off="{lho}" title="{lha}">
-            <span class="frost-lead" aria-hidden="true"></span>
-            <svg class="frost-flake" viewBox="0 0 16 16" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none">
-                <circle cx="8" cy="8" r="2.6"/>
-                <path d="M8 1.4v1.8M8 12.8v1.8M1.4 8h1.8M12.8 8h1.8"/>
-                <path d="M3.4 3.4l1.3 1.3M11.3 11.3l1.3 1.3M12.6 3.4l-1.3 1.3M4.7 11.3l-1.3 1.3"/>
-              </g>
-            </svg>
-            <span>{lh}</span>
-            <span class="visually-hidden">{lha}</span>
           </button>
         </p>
         <span class="scroll-cue" aria-hidden="true"></span>
@@ -1205,7 +1204,9 @@ def home():
                 tr=T("role_danfoss"), tc=T("trust_cert"),
                 fh=text(T("frost_hint")), fha=attr(T("frost_hint_a11y")),
                 fho=attr(T("frost_hint_off")),
-                lh=text(T("lamp_hint")), lha=attr(T("lamp_hint_a11y")),
+                # lamp_hint is no longer rendered -- the control is icon-only.
+                # The string stays in i18n in case it ever carries a label again.
+                lha=attr(T("lamp_hint_a11y")),
                 lho=attr(T("lamp_hint_off")),
                 rep_e=T("rep_eyebrow"),
                 rep_h=T("rep_h2"), rep_l=T("rep_lead"), rep_b=T("rep_bitzer"),
