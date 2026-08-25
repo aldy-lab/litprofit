@@ -852,6 +852,32 @@ table.rp-narrow td.num{text-align:right;font-variant-numeric:tabular-nums}
   table.rp-landscape{page:detail}
   .rp-scope{color:#333}
 }
+
+/* ---------- register: quick filters, inline editing ---------- */
+.enq-quick{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:-4px 0 14px}
+.enq-quick > span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);margin-right:2px}
+.enq-chip{border:1px solid var(--border);background:transparent;border-radius:99px;
+  padding:4px 12px;font-size:12.5px;color:var(--ink-2);cursor:pointer;
+  transition:background .18s var(--ease),border-color .18s var(--ease)}
+.enq-chip:hover{border-color:var(--baseline)}
+.enq-chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink-1)}
+.enq-tip{margin-left:auto;font-style:normal;font-size:11px;color:var(--ink-3)}
+@media(max-width:820px){ .enq-tip{display:none} }
+
+.enq-edit{cursor:pointer;position:relative}
+.enq-edit:hover{background:var(--accent-soft)}
+/* a corner tick, so an editable cell says so without a border round every one */
+.enq-edit::after{content:"";position:absolute;right:2px;top:2px;width:0;height:0;
+  border-top:5px solid var(--baseline);border-left:5px solid transparent;opacity:.5}
+input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
+  border-radius:2px;background:var(--page);padding:3px 6px;font-size:13px;
+  text-align:right;font-variant-numeric:tabular-nums}
+
+.enq-rate{margin:0 0 14px;font-size:13px;color:var(--ink-2)}
+.enq-rate b{font-size:17px;color:var(--ink-1);font-variant-numeric:tabular-nums}
+/* the enquiry number is an identifier; wrapping it makes two of one */
+#enqTable td.pf-id{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -921,6 +947,13 @@ en: {
   /* ---- enquiry register (was a Power BI report) ---- */
   enq:{title:'Enquiry register',lead:'Every enquiry, from the day it came in to the day it was delivered.',
     kReceived:'Enquiries received',kPO:'PO received',kProgress:'In progress',kRejected:'Rejected',
+    pdf:'PDF',quick:'Show me',qOwed:'Owed to us',qNoQuote:'No quote sent',
+    qStale:'Waiting over 30 days',qNoCost:'Cost missing',qMonth:'This month',
+    qWon:'Won',clickToEdit:'Click a cost or a tick to change it',
+    saved:'Saved',savingFailed:'Not saved',
+    byMonthMoney:'Sold and earned, by month',ageingBuckets:'How long the money has been owed',
+    b30:'to 30 d',b60:'31–60 d',b90:'61–90 d',b90p:'over 90 d',
+    winRate:'Won of decided',ofDecided:'of those decided',
     cost:'Cost',sell:'Sell',margin:'Margin',marginPct:'Margin %',
     paid:'Paid',unpaid:'Unpaid',paidDate:'Paid on',invoice:'Invoice no.',
     kTurnover:'Sold',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',
@@ -1015,6 +1048,13 @@ lt: {
   /* ---- užklausų registras ---- */
   enq:{title:'Užklausų registras',lead:'Kiekviena užklausa nuo gavimo dienos iki pristatymo.',
     kReceived:'Gauta užklausų',kPO:'Gauti',kProgress:'Vykdomi',kRejected:'Atmesti',
+    pdf:'PDF',quick:'Rodyti',qOwed:'Mums skolingi',qNoQuote:'Pasiūlymas neišsiųstas',
+    qStale:'Laukia daugiau nei 30 d.',qNoCost:'Trūksta savikainos',qMonth:'Šį mėnesį',
+    qWon:'Laimėta',clickToEdit:'Spustelėkite savikainą ar varnelę, kad pakeistumėte',
+    saved:'Išsaugota',savingFailed:'Neišsaugota',
+    byMonthMoney:'Parduota ir uždirbta per mėnesį',ageingBuckets:'Kiek laiko laukiama pinigų',
+    b30:'iki 30 d.',b60:'31–60 d.',b90:'61–90 d.',b90p:'virš 90 d.',
+    winRate:'Laimėta iš nuspręstų',ofDecided:'iš nuspręstų',
     cost:'Savikaina',sell:'Pardavimas',margin:'Marža',marginPct:'Marža %',
     paid:'Apmokėta',unpaid:'Neapmokėta',paidDate:'Apmokėjimo data',invoice:'Sąskaitos nr.',
     kTurnover:'Parduota',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',
@@ -1109,6 +1149,13 @@ ru: {
   /* ---- реестр запросов ---- */
   enq:{title:'Реестр запросов',lead:'Каждый запрос — от дня поступления до дня поставки.',
     kReceived:'Получено запросов',kPO:'Получен PO',kProgress:'В работе',kRejected:'Отклонены',
+    pdf:'PDF',quick:'Показать',qOwed:'Нам должны',qNoQuote:'Предложение не отправлено',
+    qStale:'Ждёт больше 30 дней',qNoCost:'Нет себестоимости',qMonth:'Этот месяц',
+    qWon:'Выиграно',clickToEdit:'Нажмите на себестоимость или галочку, чтобы изменить',
+    saved:'Сохранено',savingFailed:'Не сохранено',
+    byMonthMoney:'Продано и заработано по месяцам',ageingBuckets:'Сколько ждём денег',
+    b30:'до 30 дн.',b60:'31–60 дн.',b90:'61–90 дн.',b90p:'больше 90 дн.',
+    winRate:'Выиграно из решённых',ofDecided:'из решённых',
     cost:'Себестоимость',sell:'Продажа',margin:'Заработок',marginPct:'Наценка %',
     paid:'Оплачено',unpaid:'Не оплачено',paidDate:'Дата оплаты',invoice:'Счёт №',
     kTurnover:'Продано',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',
@@ -1518,9 +1565,21 @@ var dirty = false;
 var autoTimer = null;
 var savedAt = null;
 
+/* The register is never written to disk.
+   state is persisted whole, and once the enquiries arrived that meant 96 KB of
+   client names and prices sitting in localStorage -- surviving sign-out, on
+   whatever machine somebody happened to log in from. The server side is
+   careful about who may read this (enquiries_v is gated on sees_money and the
+   table is revoked outright); a plaintext copy in the browser walks around all
+   of it. It is fetched on every load anyway, so keeping it is not even a
+   saving. The filters stay: they are settings, not data. */
 function persist(){
   mem = state;
-  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); return true; }
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(state,
+      (k, v) => k === 'enquiries' ? undefined : v));
+    return true;
+  }
   catch(e){ return false; }
 }
 
@@ -2719,7 +2778,7 @@ const ENQ_STATUSES = ['Vykdoma', 'Gautas PO', 'Atmesta užklausa'];
 function enqState(){
   if(!state.enq) state.enq = {
     q:'', client:'', supplier:'', status:'', owner:'',
-    toSupplier:'', quoted:'', paid:'', from:'', to:'', year:'',
+    toSupplier:'', quoted:'', paid:'', from:'', to:'', year:'', quick:'',
     sort:'date', dir:-1
   };
   return state.enq;
@@ -2734,10 +2793,25 @@ function enqTone(v){
        : v === 'Vykdoma' ? 'wip' : '';
 }
 
+/* A named question, expressed once. Written as preset filter values instead
+   these would fight whatever the dropdowns already say; as a predicate they
+   stack on top of them, so "owed to us" narrowed to one client still means
+   what it says. */
+const ENQ_QUICK = {
+  owed:    r => r.status === 'Gautas PO' && !r.paid,
+  noquote: r => !r.quoted_to_client && r.status !== 'Atmesta užklausa',
+  stale:   r => (r.days_unquoted || 0) > 30,
+  nocost:  r => r.cost_ex_vat == null && (Number(r.price_ex_vat) || 0) > 0,
+  won:     r => r.status === 'Gautas PO',
+  month:   r => (r.enquiry_date || '').slice(0, 7) === new Date().toISOString().slice(0, 7)
+};
+
 function enqRows(){
   const f = enqState();
   const q = f.q.trim().toLowerCase();
+  const quick = ENQ_QUICK[f.quick];
   return (state.enquiries || []).filter(r => {
+    if(quick && !quick(r)) return false;
     if(q){
       const hay = [r.number, r.client, r.description, r.supplier, r.owner]
         .map(x => (x || '').toLowerCase()).join(' ');
@@ -2864,6 +2938,70 @@ function enqBars(items, opt){
         stroke="var(--grid)" stroke-width="1"/>${bars}</svg></figure>`;
 }
 
+/* Sold against earned, month by month. The count-per-month chart says how busy
+   the desk was; this one says whether the work was worth doing, which is a
+   different question and the one the two price columns exist to answer. */
+function enqMonthMoney(rows){
+  const by = new Map();
+  rows.forEach(r => {
+    if(!r.enquiry_date) return;
+    const k = r.enquiry_date.slice(0, 7);
+    const o = by.get(k) || { sell: 0, margin: 0 };
+    o.sell += Number(r.price_ex_vat) || 0;
+    if(r.margin_eur != null) o.margin += Number(r.margin_eur);
+    by.set(k, o);
+  });
+  return [...by.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([l, o]) => ({ l, a: o.sell, b: o.margin }));
+}
+
+/* How long the money has been owed, in the buckets a debtor list is read in.
+   Only enquiries with a PO: nobody is waiting on a rejected quote. */
+function enqAgeing(rows, t){
+  const e = t.enq, today = new Date();
+  const buckets = [
+    { l: e.b30,  max: 30,       v: 0 },
+    { l: e.b60,  max: 60,       v: 0 },
+    { l: e.b90,  max: 90,       v: 0 },
+    { l: e.b90p, max: Infinity, v: 0 }
+  ];
+  rows.forEach(r => {
+    if(r.paid || r.status !== 'Gautas PO') return;
+    const from = r.po_date || r.enquiry_date;
+    if(!from) return;
+    const days = Math.max(0, Math.round((today - new Date(from)) / 86400000));
+    (buckets.find(b => days <= b.max) || buckets[3]).v += Number(r.price_ex_vat) || 0;
+  });
+  return buckets;
+}
+
+/* Two series side by side. enqBars draws one; a second one over the top of it
+   would just hide the shorter series. */
+function enqBars2(items, opt){
+  const o = opt || {};
+  if(!items.length) return `<p class="chart-empty">${esc(o.empty || '')}</p>`;
+  const W = 560, H = 168, padL = 34, padB = 28, padT = 14;
+  const max = Math.max(1, ...items.map(i => Math.max(i.a, i.b)));
+  const gw = (W - padL - 10) / items.length;
+  const bw = gw * 0.33;
+  const bars = items.map((it, i) => {
+    const x = padL + i * gw + gw * 0.1;
+    const ha = (it.a / max) * (H - padT - padB), hb = (it.b / max) * (H - padT - padB);
+    return `<rect x="${x.toFixed(1)}" y="${(H - padB - ha).toFixed(1)}" width="${bw.toFixed(1)}"
+        height="${Math.max(1, ha).toFixed(1)}" fill="var(--series-1)" rx="1"/>
+      <rect x="${(x + bw + 2).toFixed(1)}" y="${(H - padB - hb).toFixed(1)}" width="${bw.toFixed(1)}"
+        height="${Math.max(1, hb).toFixed(1)}" fill="var(--series-2)" rx="1"/>
+      <text x="${(x + bw).toFixed(1)}" y="${H - 9}" font-size="9.5" fill="var(--ink-3)"
+        text-anchor="middle">${esc(String(it.l).slice(-2))}</text>`;
+  }).join('');
+  return `<figure class="chart"><figcaption>${esc(o.title || '')}</figcaption>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.title || '')}">
+      <line x1="${padL}" y1="${H - padB}" x2="${W - 6}" y2="${H - padB}"
+        stroke="var(--grid)" stroke-width="1"/>${bars}</svg>
+    <div class="legend"><span><i style="background:var(--series-1)"></i>${esc(o.a || '')}</span>
+      <span><i style="background:var(--series-2)"></i>${esc(o.b || '')}</span></div></figure>`;
+}
+
 function viewEnquiries(){
   const t = tr(), e = t.enq, L = LOCALES[state.lang];
   const all = (state.enquiries || []).length;
@@ -2902,16 +3040,21 @@ function viewEnquiries(){
         esc(e.st[r.status] || r.status)}</span></td>
       <td class="muted" data-label="${esc(e.poDate)}">${
         r.po_date ? new Date(r.po_date).toLocaleDateString(L) : '—'}</td>
-      <td class="num" data-label="${esc(e.cost)}">${money(r.cost_ex_vat)}</td>
+      <td class="num enq-edit" data-edit="cost" data-label="${esc(e.cost)}"
+          title="${esc(e.clickToEdit)}">${money(r.cost_ex_vat)}</td>
       <td class="num" data-label="${esc(e.sell)}">${fmt(Number(r.price_ex_vat) || 0)}</td>
       <td class="num calc ${r.margin_eur == null ? '' : (r.margin_eur >= 0 ? 'pos' : 'neg')}"
           data-label="${esc(e.margin)}">${money(r.margin_eur)}</td>
       <td class="num" data-label="${esc(e.marginPct)}">${
         r.margin_pct == null ? '<span class="muted">&mdash;</span>' : pct(Number(r.margin_pct))}</td>
       <td data-label="${esc(e.delivery)}">${flag(r.delivered, e.delivered, e.undelivered)}</td>
-      <td data-label="${esc(e.paid)}">${flag(r.paid, e.paid, e.unpaid)}</td>
+      <td class="enq-edit" data-edit="paid" data-label="${esc(e.paid)}"
+          title="${esc(e.clickToEdit)}">${flag(r.paid, e.paid, e.unpaid)}</td>
     </tr>`).join('')
     : `<tr><td colspan="12" style="padding:26px;text-align:center" class="muted">${esc(e.none)}</td></tr>`;
+
+  const quick = (k, label) =>
+    `<button class="enq-chip${enqState().quick === k ? ' on' : ''}" data-quick="${k}">${esc(label)}</button>`;
 
   const sel = (id, label, opts, val) =>
     `<label>${esc(label)}<select id="${id}"><option value="">${esc(e.all)}</option>${
@@ -2939,6 +3082,13 @@ function viewEnquiries(){
             T.costed ? (T.pct == null ? '' : pct(T.pct)) : e.noCost)}
       ${kpi(e.kUnpaid, fmt(T.unpaid, 0), T.unpaid > 0 ? 'wip' : 'ok')}
     </div>
+    ${(() => {
+      /* Win rate over DECIDED enquiries. Counting the ones still in progress
+         as losses reports a collapsing hit rate every time the desk gets busy. */
+      const won = count('Gautas PO'), lost = count('Atmesta užklausa'), decided = won + lost;
+      return decided ? `<p class="enq-rate"><b>${pct(won / decided)}</b> ${esc(e.winRate)}
+        <span class="muted">// ${won} / ${decided} ${esc(e.ofDecided)}</span></p>` : '';
+    })()}
 
     <div class="pf-filters enq-filters">
       <label>${esc(e.search)}<input type="search" id="enqQ" value="${esc(enqState().q)}"
@@ -2952,7 +3102,20 @@ function viewEnquiries(){
       ${sel('enqYear', e.date, years.map(v => ({v, l: v})), enqState().year)}
       <button id="enqClear" class="ghost">${t.clearF}</button>
       <button id="enqCsv">${esc(e.csv)}</button>
+      <!-- The report was only in the overflow menu, which is where things go
+           to not be found. A register that cannot be handed to somebody on
+           paper is half a tool. -->
+      <button id="enqPdf">${esc(e.report)} ${esc(e.pdf)}</button>
       <button id="enqAdd" class="primary">${esc(e.add)}</button>
+    </div>
+
+    <!-- The five questions this register is actually opened to answer. Each
+         one is two or three filters that nobody sets by hand twice. -->
+    <div class="enq-quick">
+      <span>${esc(e.quick)}</span>
+      ${quick('owed', e.qOwed)}${quick('noquote', e.qNoQuote)}${quick('stale', e.qStale)}
+      ${quick('nocost', e.qNoCost)}${quick('won', e.qWon)}${quick('month', e.qMonth)}
+      <i class="enq-tip">${esc(e.clickToEdit)}</i>
     </div>
 
     <div class="tablewrap"><table class="grid" id="enqTable">
@@ -2987,6 +3150,12 @@ function viewEnquiries(){
     <div class="card">${enqBars(enqMonths(rows), {title: e.byMonth, empty: e.none, short: true})}</div>
     <div class="card">${enqBars(ENQ_STATUSES.map(st => ({l: e.st[st] || st, v: count(st)})),
       {title: e.byStatus, empty: e.none})}</div>
+  </div>
+  <div class="enq-charts">
+    <div class="card">${enqBars2(enqMonthMoney(rows),
+      {title: e.byMonthMoney, empty: e.none, a: e.sell, b: e.margin})}</div>
+    <div class="card">${enqBars(enqAgeing(rows, t).map(b => ({l: b.l, v: Math.round(b.v)})),
+      {title: e.ageingBuckets, empty: e.none})}</div>
   </div>`;
 }
 
@@ -2994,7 +3163,7 @@ function viewEnquiries(){
 function wireEnquiries(){
   const t = tr(), e = t.enq, f = enqState();
   const on = (id, ev, fn) => { const el = $('#' + id); if(el) el.addEventListener(ev, fn); };
-  const set = (k, v) => { f[k] = v; render(); };
+  const set = (k, v) => { f[k] = v; persist(); render(); };
 
   /* typing re-renders the whole table, so the caret has to be put back --
      without this the field loses focus on the first keystroke and the second
@@ -3014,10 +3183,18 @@ function wireEnquiries(){
   on('enqPaid',       'change', ev => set('paid', ev.target.value));
   on('enqYear',       'change', ev => set('year', ev.target.value));
   on('enqClear', 'click', () => {
-    state.enq = null; render();
+    state.enq = null; persist(); render();
   });
   on('enqAdd', 'click', () => enqEdit(null));
   on('enqCsv', 'click', () => enqCsv());
+  on('enqPdf', 'click', () => printEnquiryReport());
+
+  document.querySelectorAll('.enq-chip').forEach(b => b.addEventListener('click', () => {
+    /* clicking the chip that is already on turns it off, so the same button
+       is the way back out */
+    f.quick = f.quick === b.dataset.quick ? '' : b.dataset.quick;
+    render();
+  }));
 
   const table = $('#enqTable');
   if(table){
@@ -3026,9 +3203,20 @@ function wireEnquiries(){
       if(f.sort === k) f.dir = -f.dir; else { f.sort = k; f.dir = 1; }
       render();
     }));
-    table.querySelectorAll('tr[data-enq]').forEach(tr_ => tr_.addEventListener('click', () => {
+    table.querySelectorAll('tr[data-enq]').forEach(tr_ => tr_.addEventListener('click', ev => {
+      /* the two editable cells handle themselves; without this the row's own
+         handler opens the dialog on top of the cell you just clicked */
+      if(ev.target.closest('.enq-edit')) return;
       const row = (state.enquiries || []).find(r => r.id === tr_.dataset.enq);
       if(row) enqEdit(row);
+    }));
+
+    table.querySelectorAll('.enq-edit').forEach(td => td.addEventListener('click', ev => {
+      ev.stopPropagation();
+      const row = (state.enquiries || []).find(r => r.id === td.closest('tr').dataset.enq);
+      if(!row) return;
+      if(td.dataset.edit === 'paid') enqPatch(row, { paid: !row.paid });
+      else enqCostCell(td, row);
     }));
   }
 }
@@ -3158,6 +3346,69 @@ function enqEdit(row){
   dlg.showModal();
   const first = dlg.querySelector('input');
   if(first) first.focus();
+}
+
+/* ---- editing without leaving the table ----
+   216 rows arrived with no supplier price, and they are the reason this exists:
+   opening a dialog, tabbing to one box, saving and waiting for a re-render, two
+   hundred times, is not a thing anybody will finish. A cost cell becomes an
+   input where it stands; the paid tick toggles on one click. */
+function enqCostCell(td, row){
+  if(td.querySelector('input')) return;
+  const before = td.innerHTML;
+  const val = row.cost_ex_vat == null ? '' : row.cost_ex_vat;
+  td.innerHTML = `<input type="number" step="0.01" class="enq-cell" value="${esc(val)}">`;
+  const input = td.querySelector('input');
+  input.focus(); input.select();
+
+  let closed = false;
+  const cancel = () => { if(closed) return; closed = true; td.innerHTML = before; };
+  const commit = () => {
+    if(closed) return; closed = true;
+    const raw = input.value.trim();
+    /* An emptied box means "I do not know", which is what null is for. Left
+       exactly as it was, nothing is sent at all. */
+    const same = (raw === '' && row.cost_ex_vat == null) ||
+                 (raw !== '' && Number(raw) === Number(row.cost_ex_vat));
+    td.innerHTML = before;
+    if(!same) enqPatch(row, { cost_ex_vat: raw });
+  };
+  input.addEventListener('keydown', ev => {
+    if(ev.key === 'Enter'){ ev.preventDefault(); commit(); }
+    if(ev.key === 'Escape'){ ev.preventDefault(); cancel(); }
+  });
+  input.addEventListener('blur', commit);
+}
+
+/* One changed field, sent as the whole row, because save_enquiry takes a whole
+   row -- and the row it takes is the one on screen, so a field this patch does
+   not mention is written back unchanged rather than blanked. */
+async function enqPatch(row, change){
+  const t = tr();
+  const payload = {
+    number: row.number, client: row.client, description: row.description,
+    enquiry_date: row.enquiry_date, sent_to_supplier: !!row.sent_to_supplier,
+    supplier: row.supplier, quoted_to_client: !!row.quoted_to_client,
+    status: row.status, po_date: row.po_date,
+    cost_ex_vat: row.cost_ex_vat == null ? '' : String(row.cost_ex_vat),
+    price_ex_vat: Number(row.price_ex_vat) || 0,
+    delivered: !!row.delivered, paid: !!row.paid, paid_date: row.paid_date,
+    invoice_no: row.invoice_no, owner: row.owner, note: row.note
+  };
+  Object.assign(payload, change);
+  /* Ticking paid without a date leaves the register unable to say when, so the
+     tick fills today in and clearing it takes the date away again. */
+  if('paid' in change){
+    payload.paid_date = change.paid ? (row.paid_date || new Date().toISOString().slice(0,10)) : null;
+  }
+  try {
+    const saved = await CLOUD.enquirySave(row.id, row.rev, payload);
+    if(!saved){ toast(t.enq.conflict); return; }
+    state.enquiries = (state.enquiries || []).map(x => x.id === saved.id ? saved : x);
+    render();
+  } catch(err){
+    toast(t.enq.savingFailed + ' — ' + err.message);
+  }
 }
 
 function enqCsv(){
