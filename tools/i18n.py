@@ -77,8 +77,12 @@ S["en"] = dict(
     cap_chart_tb="Six-cylinder // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C suction gas",
     # the live 3D of the same machine, above the elevation
     cmp_eyebrow="The machine", cmp_h2="The compressor, in the round",
-    cmp_lead="The same four-cylinder as the elevation below, built from the same "
-             "numbers and shaded live in the browser. Drag it round.",
+    # "the elevation below" was true while this sat above the side elevation on
+    # the refrigeration page. It is on the home page now and the elevation is
+    # not below it, so the sentence had to stop saying so.
+    cmp_lead="The size we overhaul most: four cylinders, 55 mm bore, 34 mm stroke. "
+             "Built from the published envelope and shaded live in the browser \u2014 "
+             "drag it round.",
     cmp_hint="Drag to turn",
     cmp_tb="Semi-hermetic reciprocating", cmp_tb2="Built to the published envelope",
     cmp_alt="A semi-hermetic four-cylinder reciprocating compressor seen in three "
@@ -206,8 +210,9 @@ S["lt"] = dict(
     cap_chart_x="Garavimo temperatūra", cap_chart_y="Šaldymo galia",
     cap_chart_tb="Šešiacilindris // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C siurbimo dujos",
     cmp_eyebrow="Mašina", cmp_h2="Kompresorius \u2014 erdvėje",
-    cmp_lead="Tas pats keturių cilindrų kompresorius kaip ir brėžinyje žemiau, "
-             "sudėtas iš tų pačių matmenų ir šešėliuojamas naršyklėje. Pasukite jį.",
+    cmp_lead="Dažniausiai remontuojamas dydis: keturi cilindrai, 55 mm skersmuo, "
+             "34 mm eiga. Sudėtas pagal skelbiamus gabaritus ir šešėliuojamas "
+             "naršyklėje \u2014 pasukite jį.",
     cmp_hint="Vilkite, kad pasuktumėte",
     cmp_tb="Pusiau hermetiškas stūmoklinis", cmp_tb2="Pagal skelbiamus gabaritus",
     cmp_alt="Pusiau hermetiškas keturių cilindrų stūmoklinis kompresorius trijų "

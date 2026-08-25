@@ -16,6 +16,7 @@ import datetime
 import html as _html
 import io
 import json
+import hashlib
 import os
 import re
 
@@ -108,6 +109,27 @@ def lang_prefix(lang=None):
 # at, and the footer link went straight to one until this line existed.
 SHARED = ("/assets/", "/css/", "/js/", "/sitemap.xml", "/robots.txt", "/404.html",
           "/calculator/")
+
+
+def asset(path):
+    """A site-absolute asset URL with the file's own content stamped into it.
+
+    GitHub Pages serves css and js with max-age=600, and the browser caches
+    them independently of the HTML. Ship markup that needs new rules and for
+    the next ten minutes a returning visitor gets the new page with the old
+    stylesheet: on this site that put the compressor canvas back to its
+    default 300x150 in the corner and dropped every caption to unstyled text.
+    It looked exactly like a build that had gone wrong, and nothing was wrong
+    with the build. The hash changes when the file does, so the URL changes
+    when the file does, and a stale copy can no longer be found.
+    """
+    full = os.path.join(ROOT, path.lstrip("/"))
+    try:
+        with open(full, "rb") as f:
+            h = hashlib.sha1(f.read()).hexdigest()[:10]
+    except OSError:
+        return u(path)
+    return "%s?v=%s" % (u(path), h)
 
 
 def u(path):
@@ -499,8 +521,8 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
            htmllang=i18n.LOCALE[LANG][0], oglocale=i18n.LOCALE[LANG][1],
            alts=alternates(path),
            font=u("/assets/fonts/montserrat-latin.woff2"),
-           fonts_css=u("/css/fonts.css"), style_css=u("/css/style.css"),
-           js=u("/js/main.js"), head_extra=head_extra,
+           fonts_css=asset("/css/fonts.css"), style_css=asset("/css/style.css"),
+           js=asset("/js/main.js"), head_extra=head_extra,
            header=header(active if active is not None else path, path), body=body,
            pager=pager(path), footer=footer(), og=og_image(path))
 
@@ -1146,12 +1168,13 @@ def home():
       </div>
     </section>
 
+{machine}
 {cycle}
     <section class="section section-alt">
       <div class="container">
         <div class="split" style="align-items: center">
           <div class="reveal">
-            <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{cap_e}</p>
+            <p class="eyebrow"><span class="eyebrow-num">07</span><span class="sep">//</span>{cap_e}</p>
             <h2 class="lightwords">{cap_h}</h2>
             <p class="lead">{cap_l}</p>
             <div class="btn-row">
@@ -1179,7 +1202,7 @@ def home():
         </div>
 
         <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">
-          <p class="eyebrow"><span class="eyebrow-num">07</span><span class="sep">//</span>{cl_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">08</span><span class="sep">//</span>{cl_e}</p>
           <h2>{cl_h}</h2>
         </div>
         <div class="client-rail-wrap reveal">
@@ -1222,6 +1245,7 @@ def home():
                 cl_h=T("clients_h2"),
                 refrig_label=i18n.SVC[LANG]["refrigeration-systems"]["title"],
                 cards=cards, logos=logos, cycle=compressor_drawing(),
+                machine=recip_3d(),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
                 plant_img=u("/assets/photos/plant-room.webp"),
@@ -1293,7 +1317,7 @@ def compressor_drawing():
     <section class="section section-alt drawing-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{ga_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{ga_e}</p>
           <h2>{ga_h}</h2>
           <p class="lead">{ga_l}</p>
         </div>
@@ -1930,7 +1954,7 @@ def recip_3d():
     <section class="section section-alt cmp-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{e}</p>
           <h2>{h}</h2>
           <p class="lead">{l}</p>
         </div>
@@ -1951,7 +1975,7 @@ def recip_3d():
     <script src="{js}" defer></script>""".format(
         e=text(T("cmp_eyebrow")), h=text(T("cmp_h2")), l=text(T("cmp_lead")),
         alt=attr(T("cmp_alt")), hint=text(T("cmp_hint")), marks=marks,
-        tb=text(T("cmp_tb")), tb2=text(T("cmp_tb2")), js=u("/js/compressor.js"))
+        tb=text(T("cmp_tb")), tb2=text(T("cmp_tb2")), js=asset("/js/compressor.js"))
 
 
 def recip_drawing():
@@ -2123,7 +2147,7 @@ def service_page(s):
                 blocks="\n\n".join(blocks), more=more,
                 # The compressor plate belongs to one page: it is that page's
                 # machine. Putting a drawing on all four would make it wallpaper.
-                recip=(recip_3d() + recip_drawing()) if s["slug"] == "refrigeration-systems" else "",
+                recip=recip_drawing() if s["slug"] == "refrigeration-systems" else "",
                 other_e=T("svc_eyebrow"), other_h=PT("svc_h1"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 

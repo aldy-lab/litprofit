@@ -196,10 +196,15 @@
      Flat per-face lambert with a cool fill and a rim term. The palette is the
      site's own greys: there is no third hue anywhere on this page and the
      compressor is not going to be the first. */
+  /* Silver. The blue-steel set read as part of the navy behind it rather than
+     as metal standing in front of it; a machined casting is close to neutral
+     and gets its colour from what it is reflecting. The barest cool cast is
+     kept in the shadows -- fully neutral greys go muddy against this ground --
+     and the highlight runs almost to white so the lit edges catch. */
   var TONE = [
-    { base: [ 34,  37,  56], hi: [206, 210, 226] },   // STEEL
-    { base: [ 19,  21,  36], hi: [124, 129, 154] },   // DARK
-    { base: [ 27,  30,  48], hi: [178, 183, 202] }    // PIPE
+    { base: [ 56,  59,  68], hi: [243, 244, 247] },   // STEEL
+    { base: [ 28,  30,  37], hi: [146, 149, 158] },   // DARK
+    { base: [ 46,  49,  58], hi: [219, 221, 227] }    // PIPE
   ];
   var LIGHT = norm([-0.42, 0.78, 0.46]);
   var FILL  = norm([0.6, -0.2, -0.7]);
@@ -219,7 +224,7 @@
      the same fraction of the frame everywhere; the narrow case backs off a
      little further to leave the callout columns somewhere to live. */
   function refocus() {
-    FOCAL = W * (W < 620 ? 1.42 : 1.54);
+    FOCAL = W * (W < 620 ? 1.60 : 1.86);
   }
 
   function project(out) {
@@ -244,7 +249,7 @@
     // The rim is taken against the view axis, which after projection is simply
     // +Z: a face turned away from the camera catches the edge light.
     var rim = Math.pow(1 - Math.min(1, Math.abs(n[2])), 4);
-    return 0.08 + d * 0.70 + f * 0.13 + rim * 0.40;
+    return 0.06 + d * 0.62 + f * 0.12 + rim * 0.34 + Math.pow(d, 22) * 0.55;
   }
 
   var order = [];
@@ -296,7 +301,7 @@
       ctx.fill();
       // The edge is what makes it read as a machined part rather than a blob.
       // Stroking every face at low alpha gives the creases for free.
-      ctx.strokeStyle = "rgba(214,216,226," + (0.06 + L * 0.20).toFixed(3) + ")";
+      ctx.strokeStyle = "rgba(238,240,244," + (0.05 + L * 0.22).toFixed(3) + ")";
       ctx.lineWidth = 1;
       ctx.stroke();
     }
@@ -321,7 +326,11 @@
     });
   });
 
-  var MONO = '11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+  var MONO_STACK = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+  // 11px is right on a 1392px stage and a whisper on a 2160px one
+  function monoFont(w) {
+    return Math.round(Math.max(11, Math.min(15, w / 150))) + 'px ' + MONO_STACK;
+  }
 
   function drawTags(w, h) {
     if (!tags.length) return;
@@ -361,11 +370,11 @@
 
     ctx.save();
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.font = MONO;
+    ctx.font = monoFont(w);
     ctx.textBaseline = "middle";
     for (i = 0; i < live.length; i++) {
       var o = live[i];
-      var dim = o.behind ? 0.30 : 1;
+      var dim = o.behind ? 0.48 : 1;
       if (!narrow) {
         var reach = Math.max(34, Math.min(116, w * 0.10));
         var elbow = o.side ? o.lx + reach : o.lx - reach;
