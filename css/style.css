@@ -1815,6 +1815,186 @@ html.is-frost #frostToggle {
   translate: -50%;
 }
 
+/* ---------- where on the vessel ----------
+   Draw-on rather than fade-in: a print appears line by line under a pen, and
+   the site already spends its motion budget on that idea elsewhere. Every
+   stroke carries pathLength="1" from the generator, so one dasharray value
+   covers a hull, a waterline and a 12-unit propeller blade alike. */
+.jp { margin: 34px 0 0; }
+.jp svg { width: 100%; height: auto; display: block; overflow: visible; }
+.jp figcaption {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin-top: 10px;
+}
+.jp-hull, .jp-deck, .jp-body { fill: none; stroke: var(--grey-600); stroke-width: 1.6; }
+.jp-hull { stroke: var(--muted-2); }
+.jp-wl { stroke: var(--grey-600); stroke-width: 1; stroke-dasharray: 14 5 2 5; }
+.jp-datum {
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.12em;
+  fill: var(--muted-2); text-anchor: end;
+}
+.jp-space rect { fill: none; stroke: var(--line-2, var(--line)); stroke-width: 1; stroke-dasharray: 6 5; }
+.jp-space text { font-family: var(--mono); font-size: 13px; letter-spacing: 0.1em; fill: var(--grey-600); }
+/* the worked compartment: filled, solid-edged and in the accent, so it is the
+   one thing on the drawing that is not a thin grey line */
+.jp-space.is-work rect {
+  fill: color-mix(in srgb, var(--accent) 22%, transparent);
+  stroke: var(--accent); stroke-dasharray: none; stroke-width: 1.4;
+}
+.jp-space.is-work text { fill: var(--white); }
+.jp-dim line { stroke: var(--accent); stroke-width: 1.2; }
+
+/* The drawing carries its own labels wherever they are legible; under 700px
+   they are about four pixels a character, so they go and the figcaption says
+   the same thing in running type instead. Never both. */
+.jp-legend { display: none; }
+@media (max-width: 700px) {
+  .jp-space text, .jp-datum { display: none; }
+  .jp-legend {
+    display: block;
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: none;
+  }
+}
+
+/* The pen.
+   Two things here were bugs first. (1) A keyframe, not a transition: the
+   class arrives from script and a transition needs a resolved before-state to
+   interpolate from, so the strokes sat at offset 1 and the hull never
+   appeared -- only the compartments drew, and the drawing read as four boxes
+   floating in the dark. (2) The strokes are selected by .jp-line, not by
+   [pathLength]: Chrome lowercases the attribute name when it parses the
+   selector, and attribute matching on SVG elements is case-sensitive, so the
+   selector is not reliably the same thing you wrote. The screenshot caught
+   both; the diff looked correct throughout. */
+.js .jp .jp-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js .jp.is-in .jp-line { animation: jp-draw 1.1s var(--ease) forwards; }
+.js .jp.is-in .jp-deck { animation-delay: 0.15s; }
+.js .jp.is-in .jp-body { animation-delay: 0.3s; }
+/* transform-box: fill-box so the origin is the line's own left end and not
+   the SVG's user-space origin, which is off the left of the drawing */
+.js .jp .jp-wl { transform: scaleX(0); transform-box: fill-box; transform-origin: left; }
+.js .jp.is-in .jp-wl { animation: jp-wipe 0.9s var(--ease) 0.45s forwards; }
+@keyframes jp-wipe { to { transform: scaleX(1); } }
+@keyframes jp-draw { to { stroke-dashoffset: 0; } }
+
+/* the boxes and their rules arrive after the hull has finished drawing */
+.js .jp .jp-space, .js .jp .jp-dim, .js .jp .jp-datum { opacity: 0; }
+.js .jp.is-in .jp-space,
+.js .jp.is-in .jp-dim,
+.js .jp.is-in .jp-datum { animation: jp-fade 0.5s var(--ease) 0.9s forwards; }
+@keyframes jp-fade { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .jp .jp-line { stroke-dashoffset: 0; }
+  .js .jp .jp-wl { transform: none; }
+  .js .jp .jp-space, .js .jp .jp-dim, .js .jp .jp-datum { opacity: 1; }
+  .js .jp.is-in .jp-line,
+  .js .jp.is-in .jp-wl,
+  .js .jp.is-in .jp-space,
+  .js .jp.is-in .jp-dim,
+  .js .jp.is-in .jp-datum { animation: none; }
+}
+
+/* ============================================================
+   COMPLETED PROJECTS
+   A job is a record, so it is set as one: the facts in a ruled block, the
+   scope as a list, the photographs underneath. Same glass and the same rules
+   as the certificate list, which is the other place on this site where a
+   document is being shown rather than described.
+   ============================================================ */
+.prj-grid { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--glass-border); }
+.prj-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(16px, 2.2vw, 30px);
+  padding: clamp(20px, 2.4vw, 30px);
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  transition: background 0.3s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .prj-card:hover { background: rgba(255, 255, 255, 0.05); }
+}
+.prj-num {
+  font-family: var(--mono);
+  font-size: var(--text-s);
+  letter-spacing: 0.16em;
+  color: var(--muted-2);
+  padding-top: 4px;
+}
+.prj-title { display: block; font-size: var(--h4); font-weight: 600; margin-bottom: 8px; color: var(--white); }
+.prj-lead { display: block; color: var(--muted); font-size: var(--text-m); margin-bottom: 14px; }
+.prj-facts { display: flex; flex-wrap: wrap; gap: 6px 26px; }
+.prj-facts span { display: flex; gap: 8px; font-size: var(--text-s); color: var(--muted); }
+.prj-facts i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+/* the job page itself */
+.prj-page { max-width: var(--container); padding-bottom: clamp(50px, 7vw, 100px); }
+/* The measure goes on the elements that want one, not on every child. As
+   `.prj-page > *` it also capped the record, the drawing and the photographs
+   at 74ch -- and because it is declared below them in this file it beat their
+   own max-width: none, so the bled drawing came out half the width of the
+   block above it and looked deliberate. */
+.prj-page > p, .prj-page > ul { max-width: 74ch; }
+.prj-page h2 { font-size: var(--h3); margin: 46px 0 16px; max-width: 24ch; }
+.prj-record {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--glass-border);
+}
+.prj-record > div {
+  padding: 20px 22px;
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+}
+.prj-record span {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin-bottom: 8px;
+}
+.prj-record b { font-size: var(--text-l); font-weight: 600; color: var(--white); }
+.prj-list { margin: 0 0 22px; display: grid; gap: 10px; }
+.prj-list li { position: relative; padding-left: 26px; color: var(--muted); }
+.prj-list li::before { content: "//"; position: absolute; left: 0; color: var(--grey-600); font-size: var(--text-s); }
+.prj-shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 34px; }
+.prj-shot { margin: 0; border: 1px solid var(--line); overflow: hidden; }
+.prj-shot img { width: 100%; height: auto; display: block; filter: saturate(0.6); }
+.prj-back { margin-top: 40px; }
+/* inline-flex, not block: the link sits inside a <p> and a block link would
+   stretch the full measure, giving a 1325px-wide tap target that swallows the
+   whitespace beside it. The audit caught this one at 19px tall. */
+.prj-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px 0 0;
+}
+.prj-back a::before { content: "//"; color: var(--grey-600); font-size: var(--text-s); }
+
+@media (max-width: 620px) {
+  .prj-card { grid-template-columns: 1fr; gap: 10px; }
+  .prj-record { grid-template-columns: 1fr 1fr; }
+}
+
 /* ---------- capacity chart ----------
    Published figures, plotted in the site's own drawing hand. Three curves, one
    per condensing temperature. The 50 C curve genuinely stops short of -5: the

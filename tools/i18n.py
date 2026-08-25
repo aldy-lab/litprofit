@@ -62,6 +62,13 @@ S["en"] = dict(
     company_no="Company No.", vat="VAT code", lang_label="Language",
 
     # semi-hermetic reciprocating compressor plate, on the refrigeration page
+    prj_eyebrow="Selected work", prj_h2="Jobs, one at a time",
+    prj_lead="Each one as it was done: the vessel, the plant, the scope and how long she was alongside.",
+    prj_vessel="Vessel", prj_owner="Owner", prj_year="Year", prj_port="Port",
+    prj_days="Alongside", prj_days_unit="days", prj_scope="Discipline",
+    prj_work="What was done", prj_plant="Plant", prj_all="All completed works",
+    prj_where="Where on the vessel",
+    prj_tb="Job record", prj_tb2="As carried out",
     cap_chart_eyebrow="What it delivers", cap_chart_h2="Capacity against evaporating temperature",
     cap_chart_lead="A six-cylinder on R404A, at three condensing temperatures. Published "
                    "figures, plotted \u2014 the curve a refrigeration engineer reads before "
@@ -176,6 +183,13 @@ S["lt"] = dict(
     f_calc="Skaičiuoklė",
     company_no="Įmonės kodas", vat="PVM mokėtojo kodas", lang_label="Kalba",
 
+    prj_eyebrow="Atrinkti darbai", prj_h2="Darbai po vieną",
+    prj_lead="Kiekvienas taip, kaip buvo atliktas: laivas, įranga, apimtis ir kiek stovėta prie kranto.",
+    prj_vessel="Laivas", prj_owner="Savininkas", prj_year="Metai", prj_port="Uostas",
+    prj_days="Prie kranto", prj_days_unit="d.", prj_scope="Sritis",
+    prj_work="Kas atlikta", prj_plant="Įranga", prj_all="Visi atlikti darbai",
+    prj_where="Kurioje laivo dalyje",
+    prj_tb="Darbo įrašas", prj_tb2="Kaip atlikta",
     cap_chart_eyebrow="Ką jis duoda", cap_chart_h2="Galia priklausomai nuo garavimo temperatūros",
     cap_chart_lead="Šešiacilindris su R404A, esant trims kondensavimo temperatūroms. "
                    "Paskelbti duomenys grafike \u2014 kreivė, kurią šaldymo inžinierius "
@@ -719,6 +733,38 @@ ALT = {
            "hull-and-piping": "Сварщик соединяет стальной отвод трубы",
            "spare-parts": "Запорные, электромагнитные и регулирующие клапаны на складе"},
 }
+
+
+# ============================================================
+# COMPLETED PROJECTS
+# ============================================================
+# Empty on purpose, and the site is correct while it stays empty: no cards, no
+# pages, no sitemap entries, no link to a section that does not exist. Add one
+# entry and it grows a card on Completed works, its own page with the drawing
+# and photographs, a sitemap line and its own structured data -- the same
+# arrangement as the booking URL, where a blank value removes the element
+# rather than shipping a dead one.
+#
+# Nothing here may be invented. Every field is a claim about work a real
+# company did for a real owner, and a portfolio is the one part of a site where
+# a plausible guess is indistinguishable from a lie.
+#
+# One entry looks like this:
+#
+#     dict(slug="rsw-refit-2024",
+#          vessel="MV Example",            # or "" if the owner will not be named
+#          owner="Example Fishing Ltd",    # or ""
+#          year="2024",
+#          port="Klaipeda",                # where the work was done
+#          days=18,                        # alongside, or "" if not recorded
+#          scope="refrigeration-systems",  # must match a services slug
+#          title="RSW plant overhaul",
+#          lead="One sentence a superintendent would recognise.",
+#          work=["What was actually done.", "One line per item."],
+#          plant=["SABROE SMC 116", "R404A"],   # equipment involved
+#          photos=["workshop-overhaul", "workshop-rotors"]),  # names in assets/photos
+#
+PROJECTS = []
 
 
 # ============================================================

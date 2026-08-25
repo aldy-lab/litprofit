@@ -1620,6 +1620,178 @@ def vessel_drawing():
 
 
 # ============================================================
+# COMPLETED PROJECTS
+# Driven entirely by i18n.PROJECTS. While that list is empty nothing here
+# renders, nothing is linked and nothing enters the sitemap -- the site is
+# simply as it was. Add a job and it appears in all four places at once.
+# ============================================================
+def project_url(pr):
+    return "/completed-works/%s/" % pr["slug"]
+
+
+def project_card(pr):
+    """A job as a record card: the facts on the left, the scope beneath."""
+    # The year is already the record number in the left gutter, where it reads
+    # as a date stamp; repeating it in the fact row said 2024 twice on one card.
+    facts = []
+    for label, val in ((T("prj_vessel"), pr.get("vessel")),
+                       (T("prj_owner"), pr.get("owner")),
+                       (T("prj_port"), pr.get("port"))):
+        if val:
+            facts.append('<span><i>%s</i>%s</span>' % (text(label), text(val)))
+    days = pr.get("days")
+    if days:
+        facts.append('<span><i>%s</i>%s&nbsp;%s</span>'
+                     % (text(T("prj_days")), days, text(T("prj_days_unit"))))
+    return """          <a class="prj-card reveal" href="{href}">
+            <span class="prj-num">{n}</span>
+            <span class="prj-body">
+              <span class="prj-title">{title}</span>
+              <span class="prj-lead">{lead}</span>
+              <span class="prj-facts">{facts}</span>
+            </span>
+          </a>""".format(href=u(project_url(pr)), n=pr.get("year", ""),
+                         title=text(pr["title"]), lead=text(pr["lead"]),
+                         facts="".join(facts))
+
+
+def projects_band():
+    if not i18n.PROJECTS:
+        return ""
+    return """
+    <section class="section projects-band seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{e}</p>
+          <h2>{h}</h2>
+          <p class="lead">{l}</p>
+        </div>
+        <div class="prj-grid">
+{cards}
+        </div>
+      </div>
+    </section>""".format(e=T("prj_eyebrow"), h=T("prj_h2"), l=T("prj_lead"),
+                         cards="\n".join(project_card(p) for p in i18n.PROJECTS))
+
+
+# ---- where on the ship the job was ----
+# The home page carries the full GA with its four balloons linking to the
+# services. A job page wants the opposite: the same hull, everything else
+# stripped, and one compartment picked out -- so the reader sees where the
+# work was before reading a word of what it was.
+#
+# Every stroke carries pathLength="1", so the draw-on can be written as a
+# dasharray of 1 without knowing a single real path length at build time.
+# Measuring them would mean either shipping a geometry library or hardcoding
+# numbers that go stale the first time the hull is redrawn.
+JOB_SPACES = {
+    "pipe":  (116, 236, 78, "vsl_pipe"),
+    "er":    (360, 262, 78, "vsl_er"),
+    "hold":  (638, 266, 78, "vsl_hold"),
+    "store": (918, 104, 62, "vsl_store"),
+}
+
+
+def job_profile(pr):
+    zones = [z for z in pr.get("zones", []) if z in JOB_SPACES]
+    if not zones:
+        return ""
+    P = []
+    add = P.append
+    add('<path class="jp-line jp-hull" pathLength="1" d="M70 146 L70 250 Q70 266 108 266 '
+        'L860 266 Q1012 266 1074 212 L1150 116 Q620 174 70 146 Z"/>')
+    add('<path class="jp-line jp-deck" pathLength="1" d="M70 146 Q620 174 1150 116"/>')
+    # not a jp-line: the draw-on works by owning stroke-dasharray, and the
+    # datum's whole meaning is its dash-dot. It is wiped in by scaleX instead,
+    # which leaves the dash pattern alone.
+    add('<line class="jp-wl" x1="24" y1="230" x2="1176" y2="230"/>')
+    add('<text class="jp-datum" x="1172" y="222">%s</text>' % text(T("vsl_wl")))
+    # rudder and propeller: without them the aft end reads as a cut, not a stern
+    add('<path class="jp-line jp-body" pathLength="1" d="M52 236 L52 264 L70 258 L70 240 Z"/>')
+    add('<line class="jp-line jp-body" pathLength="1" x1="70" y1="248" x2="118" y2="248"/>')
+    add('<path class="jp-line jp-body" pathLength="1" d="M84 234 L96 248 L84 262 Z"/>')
+
+    for key, (x, w, h, label) in JOB_SPACES.items():
+        on = key in zones
+        lines = str(T(label)).split("|")
+        spans = "".join('<tspan x="%d" dy="%d">%s</tspan>'
+                        % (x + 12, 0 if i == 0 else 15, text(l))
+                        for i, l in enumerate(lines))
+        add('<g class="jp-space%s"><rect x="%d" y="178" width="%d" height="%d"/>'
+            '<text x="%d" y="200">%s</text></g>'
+            % (" is-work" if on else "", x, w, h, x + 12, spans))
+        if on:
+            # dimension rule under the marked space, the way a print calls out
+            # the extent of a job rather than just shading it
+            add('<g class="jp-dim"><line x1="%d" y1="286" x2="%d" y2="286"/>'
+                '<line x1="%d" y1="280" x2="%d" y2="292"/>'
+                '<line x1="%d" y1="280" x2="%d" y2="292"/></g>'
+                % (x, x + w, x, x, x + w, x + w))
+
+    return """
+      <figure class="jp bleed reveal">
+        <svg viewBox="24 96 1152 208" role="img" aria-label="{alt}" focusable="false">
+{body}
+        </svg>
+        <figcaption>{cap}<span class="jp-legend">{legend}</span></figcaption>
+      </figure>""".format(
+        body="\n".join("          " + x for x in P),
+        alt=attr("%s \u2014 %s" % (T("prj_where"), pr.get("vessel", ""))),
+        cap=text(T("prj_where")),
+        # Below 700px the labels inside the drawing are about four pixels per
+        # character -- the home page hides its own there for the same reason.
+        # The marked compartments are the whole point of this drawing, so they
+        # are repeated here in running type and the CSS swaps which copy shows.
+        legend=text(", ".join(str(T(JOB_SPACES[z][3])).replace("|", " ") for z in zones)))
+
+
+def project_page(pr):
+    def row(label, val):
+        return ('<div><span>%s</span><b>%s</b></div>' % (text(label), text(val))) if val else ""
+    svc = i18n.SVC[LANG].get(pr.get("scope"), {})
+    facts = "".join([
+        row(T("prj_vessel"), pr.get("vessel")),
+        row(T("prj_owner"), pr.get("owner")),
+        row(T("prj_year"), pr.get("year")),
+        row(T("prj_port"), pr.get("port")),
+        row(T("prj_days"), "%s %s" % (pr["days"], T("prj_days_unit")) if pr.get("days") else ""),
+        row(T("prj_scope"), svc.get("title", "")),
+    ])
+    work = "".join("<li>%s</li>" % text(x) for x in pr.get("work", []))
+    plant = "".join("<li>%s</li>" % text(x) for x in pr.get("plant", []))
+    shots = ""
+    for name in pr.get("photos", []):
+        rel = "assets/photos/%s.webp" % name
+        if not os.path.exists(os.path.join(ROOT, rel)):
+            continue
+        w, h = img_size(rel)
+        shots += ('<figure class="prj-shot"><img src="%s" alt="%s" width="%d" height="%d" '
+                  'loading="lazy" decoding="async"></figure>'
+                  % (u("/" + rel), attr(pr["title"]), w, h))
+
+    return page_head(T("prj_eyebrow"), pr["title"], pr["lead"],
+                     [(T("home"), "/"), (PT("cw_eyebrow"), "/completed-works/"),
+                      (pr["title"], None)],
+                     path=project_url(pr)) + """
+    <section class="container prj-page">
+      <div class="prj-record reveal">{facts}</div>
+      {profile}
+      {work}
+      {plant}
+      {shots}
+      <p class="prj-back"><a href="{all}">{all_label}</a></p>
+    </section>
+{cta}""".format(
+        facts=facts,
+        profile=job_profile(pr),
+        work=('<h2>%s</h2><ul class="prj-list reveal">%s</ul>' % (text(T("prj_work")), work)) if work else "",
+        plant=('<h2>%s</h2><ul class="tags reveal">%s</ul>' % (text(T("prj_plant")), plant)) if plant else "",
+        shots=('<div class="prj-shots reveal">%s</div>' % shots) if shots else "",
+        all=u("/completed-works/"), all_label=text(T("prj_all")),
+        cta=cta(T("cta_h2"), T("cta_p")))
+
+
+# ============================================================
 # SERVICES INDEX + DETAIL
 # ============================================================
 def services_index():
@@ -1966,12 +2138,13 @@ def completed_works():
       <p>Sealord, Limarko Group, Ocean Whale Company, Baltreids &mdash;
       <a href="{partners}">{p_more}</a>.</p>
     </section>
-{gallery}
+{gallery}{projects}
 {cta}""".format(h1=PT("cw_engines"), p1=PT("cw_engines_p"), tags1=tags(i18n.ENGINES),
                 h2=PT("cw_refrig"), p2=PT("cw_refrig_p"), tags2=tags(i18n.SYSTEMS),
                 h3=PT("cw_who"), partners=u("/partners/"),
                 p_more=PT("p_clients_h2").lower(),
                 gallery=shots("03"),
+                projects=projects_band(),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
 
@@ -2506,6 +2679,13 @@ for _lang in i18n.LANGS:
     for _s in services():
         _p = "/services/%s/" % _s["slug"]
         write(outfile(_p), page(_p, _s["title"], _s["meta"], service_page(_s)))
+        SITEMAP_ROWS.append((_lang, _p))
+    # One page per completed job. The list is empty, so this loop does nothing
+    # and no /completed-works/<slug>/ exists -- add a job and the page, the
+    # card and the sitemap line all appear together.
+    for _pr in i18n.PROJECTS:
+        _p = project_url(_pr)
+        write(outfile(_p), page(_p, _pr["title"], _pr["lead"], project_page(_pr)))
         SITEMAP_ROWS.append((_lang, _p))
 
 # 404 is served by GitHub Pages for any unmatched path anywhere on the host, so

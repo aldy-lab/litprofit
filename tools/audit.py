@@ -35,6 +35,12 @@ BASE_PATHS = ["/", "/about/", "/services/", "/services/ship-engine-repair/",
               "/services/spare-parts/", "/completed-works/", "/partners/",
               "/certificates/", "/contacts/", "/careers/", "/privacy/"]
 
+# Completed jobs come from the same list the build reads, for the same reason
+# the languages do. The list is empty today, so this adds nothing; the first
+# job added starts being swept without anyone remembering to come here.
+import i18n as _i18n_p
+BASE_PATHS += ["/completed-works/%s/" % _pr["slug"] for _pr in _i18n_p.PROJECTS]
+
 # Every page in every language. A translation that only half-renders is still a
 # broken page, so they all get the same structural and mobile checks.
 #
