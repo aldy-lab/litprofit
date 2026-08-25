@@ -828,6 +828,30 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
   .enq-grid{grid-template-columns:1fr}
   .enq-grid input:not([type=checkbox]),.enq-grid select{font-size:16px}
 }
+
+/* ---------- register: the money columns ---------- */
+.enq-kpis--money{margin-top:-6px}
+.enq-kpi i{display:block;margin-top:3px;font-style:normal;font-size:11px;color:var(--ink-3);
+  font-family:var(--mono)}
+.enq-live{flex-direction:row!important;align-items:baseline;gap:12px!important;
+  border-top:1px solid var(--border);padding-top:12px}
+.enq-live output{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;
+  font-family:var(--mono);color:var(--ink-2)}
+.enq-live output.pos{color:var(--good)}
+.enq-live output.neg{color:var(--critical)}
+
+/* ---------- register report ---------- */
+/* Written before these existed, so the scope line and the two short tables
+   came out as unstyled defaults on the first print. Caught on the page. */
+.rp-scope{margin:-6px 0 14px;font-family:var(--mono);font-size:9.5pt;color:#444}
+table.rp-narrow{width:auto;min-width:62mm;margin-bottom:10px}
+table.rp-narrow td{padding:2px 10px 2px 0;border-bottom:1px solid #e6e6ec}
+table.rp-narrow td.num{text-align:right;font-variant-numeric:tabular-nums}
+@media print{
+  /* fifteen columns will not sit on a portrait page */
+  table.rp-landscape{page:detail}
+  .rp-scope{color:#333}
+}
 </style>
 </head>
 <body>
@@ -897,6 +921,13 @@ en: {
   /* ---- enquiry register (was a Power BI report) ---- */
   enq:{title:'Enquiry register',lead:'Every enquiry, from the day it came in to the day it was delivered.',
     kReceived:'Enquiries received',kPO:'PO received',kProgress:'In progress',kRejected:'Rejected',
+    cost:'Cost',sell:'Sell',margin:'Margin',marginPct:'Margin %',
+    paid:'Paid',unpaid:'Unpaid',paidDate:'Paid on',invoice:'Invoice no.',
+    kTurnover:'Sold',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',
+    noCost:'no cost entered',costHint:'What the supplier charges. Leave blank if not known yet — blank is not zero.',
+    report:'Register report',open:'Enquiry register',
+    reportSub:'Enquiries, margin and what is still unpaid',
+    money:'Money',ageing:'Oldest unquoted',topClients:'Biggest clients',topSuppliers:'Biggest suppliers',
     number:'No.',client:'Client',description:'Description',date:'Enquiry date',
     toSupplier:'Sent to supplier',supplier:'Supplier',quoted:'Quoted to client',
     daysUnquoted:'Days unquoted',status:'Status',poDate:'PO date',price:'Price ex VAT',
@@ -984,6 +1015,13 @@ lt: {
   /* ---- užklausų registras ---- */
   enq:{title:'Užklausų registras',lead:'Kiekviena užklausa nuo gavimo dienos iki pristatymo.',
     kReceived:'Gauta užklausų',kPO:'Gauti',kProgress:'Vykdomi',kRejected:'Atmesti',
+    cost:'Savikaina',sell:'Pardavimas',margin:'Marža',marginPct:'Marža %',
+    paid:'Apmokėta',unpaid:'Neapmokėta',paidDate:'Apmokėjimo data',invoice:'Sąskaitos nr.',
+    kTurnover:'Parduota',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',
+    noCost:'savikaina neįvesta',costHint:'Kiek ima tiekėjas. Palikite tuščią, jei dar nežinoma — tuščia nėra nulis.',
+    report:'Registro ataskaita',open:'Užklausų registras',
+    reportSub:'Užklausos, marža ir kas dar neapmokėta',
+    money:'Pinigai',ageing:'Seniausios be pasiūlymo',topClients:'Didžiausi klientai',topSuppliers:'Didžiausi tiekėjai',
     number:'Numeris',client:'Klientas',description:'Aprašymas',date:'Užklausos data',
     toSupplier:'Užklausa tiekėjams',supplier:'Tiekėjas',quoted:'Pasiūlymas klientui',
     daysUnquoted:'Neišsiųstas pasiūlymas, dienos',status:'Užklausos būsena',poDate:'PO data',
@@ -1071,6 +1109,13 @@ ru: {
   /* ---- реестр запросов ---- */
   enq:{title:'Реестр запросов',lead:'Каждый запрос — от дня поступления до дня поставки.',
     kReceived:'Получено запросов',kPO:'Получен PO',kProgress:'В работе',kRejected:'Отклонены',
+    cost:'Себестоимость',sell:'Продажа',margin:'Заработок',marginPct:'Наценка %',
+    paid:'Оплачено',unpaid:'Не оплачено',paidDate:'Дата оплаты',invoice:'Счёт №',
+    kTurnover:'Продано',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',
+    noCost:'себестоимость не внесена',costHint:'Сколько берёт поставщик. Оставьте пустым, если ещё не известно — пусто это не ноль.',
+    report:'Отчёт по реестру',open:'Реестр запросов',
+    reportSub:'Запросы, заработок и что ещё не оплачено',
+    money:'Деньги',ageing:'Дольше всего без предложения',topClients:'Крупнейшие клиенты',topSuppliers:'Крупнейшие поставщики',
     number:'Номер',client:'Клиент',description:'Описание',date:'Дата запроса',
     toSupplier:'Запрос поставщику',supplier:'Поставщик',quoted:'Предложение клиенту',
     daysUnquoted:'Дней без предложения',status:'Статус',poDate:'Дата PO',
@@ -2158,7 +2203,14 @@ function canMoney(){ return !CLOUD.on || CAN_MONEY; }
 
 /* ================= rendering ================= */
 const $ = sel => document.querySelector(sel);
-const ALL_TABS = ['portfolio','dashboard','enquiries','card','revenue','labor','subs','travel','materials','logistics','settings'];
+/* The register is not a project tab. Every other tab here is a sheet of ONE
+   job -- its labour, its materials, its revenue -- and the enquiry register is
+   the company's order book: a different subject on a different timescale that
+   happens to share a login. Sitting in the same row it read as one more page
+   of the job in front of you. It lives in the overflow menu now, which is
+   where this app already keeps the things that are about the company rather
+   than the project. */
+const ALL_TABS = ['portfolio','dashboard','card','revenue','labor','subs','travel','materials','logistics','settings'];
 /* Portfolio and Dashboard are the company's position, Revenue is the company's
    income, and Settings holds the target margin. None of them is an employee's
    business, and all four would be blank or misleading with the figures gone. */
@@ -2190,7 +2242,12 @@ function renderChrome(){
   /* A tab that is gone cannot stay selected -- a staff member whose last
      session ended on the dashboard would open to a blank main. */
   const tabs = tabList();
-  if(tabs.indexOf(state.tab) === -1) state.tab = tabs[0];
+  /* The register is reached from the menu and has no button in this strip, so
+     it must not be treated as an unknown tab and thrown back to Portfolio --
+     which is what happened the moment it left ALL_TABS. It is still gated on
+     canMoney(), the same as every tab that carries a figure. */
+  const off = tabs.indexOf(state.tab) === -1 && !(state.tab === 'enquiries' && canMoney());
+  if(off) state.tab = tabs[0];
   $('#tabs').innerHTML = tabs.map(k=>`<button data-tab="${k}" class="${state.tab===k?'active':''}">${t.tabs[k]}</button>`).join('');
   /* Ten sheets, and on a 390px screen three of them fit. Nothing ever scrolled
      the strip, so opening Materials left the strip sitting at Portfolio and
@@ -2238,6 +2295,10 @@ function menuItems(t, locked){
     `<div class="menu-head">${esc(t.grpData)}</div>`,
     item('printProject', t.printProject),
     item('printCompany', t.printCompany),
+    '<div class="menu-sep"></div>',
+    `<div class="menu-head">${esc(t.enq.title)}</div>`,
+    item('enquiries', t.enq.open),
+    item('enqReport', t.enq.report),
     item('csv', t.csv),
     item('json', t.json),
     item('import', t.importJson + '\u2026'),   /* the ellipsis says a file dialog follows */
@@ -2658,7 +2719,7 @@ const ENQ_STATUSES = ['Vykdoma', 'Gautas PO', 'Atmesta užklausa'];
 function enqState(){
   if(!state.enq) state.enq = {
     q:'', client:'', supplier:'', status:'', owner:'',
-    toSupplier:'', quoted:'', from:'', to:'', year:'',
+    toSupplier:'', quoted:'', paid:'', from:'', to:'', year:'',
     sort:'date', dir:-1
   };
   return state.enq;
@@ -2688,6 +2749,7 @@ function enqRows(){
     if(f.owner    && (r.owner || '') !== f.owner) return false;
     if(f.toSupplier && String(!!r.sent_to_supplier) !== f.toSupplier) return false;
     if(f.quoted     && String(!!r.quoted_to_client) !== f.quoted)     return false;
+    if(f.paid       && String(!!r.paid)              !== f.paid)       return false;
     if(f.year && (r.enquiry_date || '').slice(0,4) !== f.year) return false;
     if(f.from && (!r.enquiry_date || r.enquiry_date < f.from)) return false;
     if(f.to   && (!r.enquiry_date || r.enquiry_date > f.to))   return false;
@@ -2702,7 +2764,12 @@ function enqSorted(rows){
     description: r => r.description || '', date: r => r.enquiry_date || '',
     supplier: r => r.supplier || '', days: r => r.days_unquoted || 0,
     status: r => r.status || '', poDate: r => r.po_date || '',
-    price: r => Number(r.price_ex_vat) || 0
+    cost: r => r.cost_ex_vat == null ? -1 : Number(r.cost_ex_vat),
+    price: r => Number(r.price_ex_vat) || 0,
+    /* null sorts below every real margin rather than beside zero: "not known"
+       and "made nothing" are different answers and must not interleave */
+    margin: r => r.margin_eur == null ? -Infinity : Number(r.margin_eur),
+    marginPct: r => r.margin_pct == null ? -Infinity : Number(r.margin_pct)
   };
   const get = KEY[f.sort] || KEY.date;
   return rows.slice().sort((a, b) => {
@@ -2711,6 +2778,34 @@ function enqSorted(rows){
       ? x - y : String(x).localeCompare(String(y));
     return c * f.dir;
   });
+}
+
+/* One pass, so the KPI cards, the table foot and the report can never
+   disagree about what is in scope. */
+function enqTotals(rows){
+  let sell = 0, cost = 0, margin = 0, costed = 0, sellCosted = 0, unpaid = 0, days = 0;
+  rows.forEach(r => {
+    sell += Number(r.price_ex_vat) || 0;
+    days += r.days_unquoted || 0;
+    if(r.cost_ex_vat != null){
+      cost += Number(r.cost_ex_vat);
+      margin += Number(r.margin_eur) || 0;
+      /* The denominator for a margin percentage is the revenue it was earned
+         on, not all revenue. Divided by the whole register the figure reads
+         low by exactly the share of lines that have no supplier price yet --
+         with a third of them costed it showed 5% where the real answer was
+         nearer 33%, which is the kind of wrong somebody prices a job on. */
+      sellCosted += Number(r.price_ex_vat) || 0;
+      costed++;
+    }
+    /* Only a sale that has actually been sold can be outstanding. An enquiry
+       that was rejected is not money anybody is waiting for. */
+    if(!r.paid && r.status === 'Gautas PO') unpaid += Number(r.price_ex_vat) || 0;
+  });
+  return { sell, cost, margin, costed, sellCosted, unpaid, days,
+           pct: sellCosted ? margin / sellCosted : null,
+           /* what share of the register can answer the margin question at all */
+           coverage: rows.length ? costed / rows.length : 0 };
 }
 
 function enqDistinct(key){
@@ -2774,9 +2869,15 @@ function viewEnquiries(){
   const all = (state.enquiries || []).length;
   const rows = enqSorted(enqRows());
 
-  const kpi = (label, n, tone) =>
-    `<div class="enq-kpi${tone ? ' ' + tone : ''}"><b>${n}</b><span>${esc(label)}</span></div>`;
+  const T = enqTotals(rows);
+  const kpi = (label, n, tone, note) =>
+    `<div class="enq-kpi${tone ? ' ' + tone : ''}"><b>${n}</b><span>${esc(label)}</span>${
+      note ? `<i>${esc(note)}</i>` : ''}</div>`;
   const count = st => rows.filter(r => r.status === st).length;
+  /* An em dash, not 0.00. A line with no supplier price has an unknown margin,
+     and printing zero there would report every historic row as a job done for
+     nothing. */
+  const money = v => v == null ? '<span class="muted">&mdash;</span>' : fmt(v);
 
   const th = (key, label, num) =>
     `<th class="${num ? 'num' : ''} pf-sort${enqState().sort === key ? ' on' : ''}"
@@ -2801,13 +2902,16 @@ function viewEnquiries(){
         esc(e.st[r.status] || r.status)}</span></td>
       <td class="muted" data-label="${esc(e.poDate)}">${
         r.po_date ? new Date(r.po_date).toLocaleDateString(L) : '—'}</td>
-      <td class="num" data-label="${esc(e.price)}">${fmt(Number(r.price_ex_vat) || 0)}</td>
+      <td class="num" data-label="${esc(e.cost)}">${money(r.cost_ex_vat)}</td>
+      <td class="num" data-label="${esc(e.sell)}">${fmt(Number(r.price_ex_vat) || 0)}</td>
+      <td class="num calc ${r.margin_eur == null ? '' : (r.margin_eur >= 0 ? 'pos' : 'neg')}"
+          data-label="${esc(e.margin)}">${money(r.margin_eur)}</td>
+      <td class="num" data-label="${esc(e.marginPct)}">${
+        r.margin_pct == null ? '<span class="muted">&mdash;</span>' : pct(Number(r.margin_pct))}</td>
       <td data-label="${esc(e.delivery)}">${flag(r.delivered, e.delivered, e.undelivered)}</td>
+      <td data-label="${esc(e.paid)}">${flag(r.paid, e.paid, e.unpaid)}</td>
     </tr>`).join('')
     : `<tr><td colspan="12" style="padding:26px;text-align:center" class="muted">${esc(e.none)}</td></tr>`;
-
-  const total = rows.reduce((a, r) => a + (Number(r.price_ex_vat) || 0), 0);
-  const totalDays = rows.reduce((a, r) => a + (r.days_unquoted || 0), 0);
 
   const sel = (id, label, opts, val) =>
     `<label>${esc(label)}<select id="${id}"><option value="">${esc(e.all)}</option>${
@@ -2828,6 +2932,13 @@ function viewEnquiries(){
       ${kpi(e.kProgress, count('Vykdoma'), 'wip')}
       ${kpi(e.kRejected, count('Atmesta užklausa'), 'bad')}
     </div>
+    <div class="enq-kpis enq-kpis--money">
+      ${kpi(e.kTurnover, fmt(T.sell, 0), '')}
+      ${kpi(e.kCost, T.costed ? fmt(T.cost, 0) : '—', '')}
+      ${kpi(e.kMargin, T.costed ? fmt(T.margin, 0) : '—', T.margin >= 0 ? 'ok' : 'bad',
+            T.costed ? (T.pct == null ? '' : pct(T.pct)) : e.noCost)}
+      ${kpi(e.kUnpaid, fmt(T.unpaid, 0), T.unpaid > 0 ? 'wip' : 'ok')}
+    </div>
 
     <div class="pf-filters enq-filters">
       <label>${esc(e.search)}<input type="search" id="enqQ" value="${esc(enqState().q)}"
@@ -2837,6 +2948,7 @@ function viewEnquiries(){
       ${sel('enqStatus', e.status, ENQ_STATUSES.map(v => ({v, l: e.st[v] || v})), enqState().status)}
       ${sel('enqToSupplier', e.toSupplier, [{v:'true',l:t.yes},{v:'false',l:t.no}], enqState().toSupplier)}
       ${sel('enqQuoted', e.quoted, [{v:'true',l:t.yes},{v:'false',l:t.no}], enqState().quoted)}
+      ${sel('enqPaid', e.paid, [{v:'true',l:e.paid},{v:'false',l:e.unpaid}], enqState().paid)}
       ${sel('enqYear', e.date, years.map(v => ({v, l: v})), enqState().year)}
       <button id="enqClear" class="ghost">${t.clearF}</button>
       <button id="enqCsv">${esc(e.csv)}</button>
@@ -2848,13 +2960,19 @@ function viewEnquiries(){
         ${th('number', e.number)}${th('client', e.client)}${th('description', e.description)}
         ${th('date', e.date)}<th>${esc(e.toSupplier)}</th>${th('supplier', e.supplier)}
         <th>${esc(e.quoted)}</th>${th('days', e.daysUnquoted, 1)}${th('status', e.status)}
-        ${th('poDate', e.poDate)}${th('price', e.price, 1)}<th>${esc(e.delivery)}</th>
+        ${th('poDate', e.poDate)}${th('cost', e.cost, 1)}${th('price', e.sell, 1)}
+        ${th('margin', e.margin, 1)}${th('marginPct', e.marginPct, 1)}
+        <th>${esc(e.delivery)}</th><th>${esc(e.paid)}</th>
       </tr></thead>
       <tbody>${body}</tbody>
       <tfoot><tr class="totals">
         <td class="pf-id">${esc(e.total)}</td><td></td><td></td><td></td><td></td><td></td><td></td>
-        <td class="num">${totalDays}</td><td></td><td></td>
-        <td class="num">${fmt(total)}</td><td></td>
+        <td class="num">${T.days}</td><td></td><td></td>
+        <td class="num">${T.costed ? fmt(T.cost) : '&mdash;'}</td>
+        <td class="num">${fmt(T.sell)}</td>
+        <td class="num">${T.costed ? fmt(T.margin) : '&mdash;'}</td>
+        <td class="num">${T.pct == null || !T.costed ? '&mdash;' : pct(T.pct)}</td>
+        <td></td><td></td>
       </tr></tfoot>
     </table></div>
   </div>
@@ -2893,6 +3011,7 @@ function wireEnquiries(){
   on('enqStatus',     'change', ev => set('status', ev.target.value));
   on('enqToSupplier', 'change', ev => set('toSupplier', ev.target.value));
   on('enqQuoted',     'change', ev => set('quoted', ev.target.value));
+  on('enqPaid',       'change', ev => set('paid', ev.target.value));
   on('enqYear',       'change', ev => set('year', ev.target.value));
   on('enqClear', 'click', () => {
     state.enq = null; render();
@@ -2920,7 +3039,8 @@ function enqEdit(row){
   const isNew = !row;
   const r = row || { number:'', client:'', description:'', enquiry_date:'',
                      sent_to_supplier:false, supplier:'', quoted_to_client:false,
-                     status:'Vykdoma', po_date:'', price_ex_vat:0, delivered:false,
+                     status:'Vykdoma', po_date:'', cost_ex_vat:null, price_ex_vat:0,
+                     delivered:false, paid:false, paid_date:'', invoice_no:'',
                      owner:'', note:'' };
   const val = v => esc(v == null ? '' : v);
   const dlg = document.createElement('dialog');
@@ -2939,8 +3059,14 @@ function enqEdit(row){
           `<option value="${esc(v)}"${v === r.status ? ' selected' : ''}>${esc(e.st[v] || v)}</option>`
         ).join('')}</select></label>
         <label>${esc(e.poDate)}<input type="date" name="po_date" value="${val(r.po_date)}"></label>
-        <label>${esc(e.price)}<input type="number" step="0.01" name="price_ex_vat"
+        <label>${esc(e.cost)}<input type="number" step="0.01" name="cost_ex_vat"
+          value="${val(r.cost_ex_vat)}" placeholder="—" title="${esc(e.costHint)}"></label>
+        <label>${esc(e.sell)}<input type="number" step="0.01" name="price_ex_vat"
           value="${val(r.price_ex_vat)}"></label>
+        <label class="wide enq-live"><span>${esc(e.margin)}</span>
+          <output id="enqMargin">&mdash;</output></label>
+        <label>${esc(e.invoice)}<input name="invoice_no" value="${val(r.invoice_no)}"></label>
+        <label>${esc(e.paidDate)}<input type="date" name="paid_date" value="${val(r.paid_date)}"></label>
         <label>${esc(e.owner)}<input name="owner" value="${val(r.owner)}"></label>
         <label class="check"><input type="checkbox" name="sent_to_supplier"${
           r.sent_to_supplier ? ' checked' : ''}> ${esc(e.toSupplier)}</label>
@@ -2948,6 +3074,8 @@ function enqEdit(row){
           r.quoted_to_client ? ' checked' : ''}> ${esc(e.quoted)}</label>
         <label class="check"><input type="checkbox" name="delivered"${
           r.delivered ? ' checked' : ''}> ${esc(e.delivered)}</label>
+        <label class="check"><input type="checkbox" name="paid"${
+          r.paid ? ' checked' : ''}> ${esc(e.paid)}</label>
         <label class="wide">${esc(e.note)}<input name="note" value="${val(r.note)}"></label>
       </div>
       <div class="enq-actions">
@@ -2985,8 +3113,15 @@ function enqEdit(row){
       quoted_to_client: !!d.get('quoted_to_client'),
       status: d.get('status'),
       po_date: d.get('po_date') || null,
+      /* Sent as a string so an empty box arrives as '' and the function's
+         nullif keeps it unknown. Number('') is 0, which would silently claim
+         the part cost nothing and the whole sale was margin. */
+      cost_ex_vat: (d.get('cost_ex_vat') || '').toString().trim(),
       price_ex_vat: Number(d.get('price_ex_vat') || 0),
       delivered: !!d.get('delivered'),
+      paid: !!d.get('paid'),
+      paid_date: d.get('paid_date') || null,
+      invoice_no: (d.get('invoice_no') || '').toString().trim(),
       owner: (d.get('owner') || '').toString().trim(),
       note: (d.get('note') || '').toString().trim()
     };
@@ -3005,6 +3140,20 @@ function enqEdit(row){
     } catch(err){ toast(err.message); }
   });
 
+  /* The point of the two boxes is the difference between them, so it is shown
+     while they are being typed rather than after a save and a re-render. */
+  const live = () => {
+    const c = form.cost_ex_vat.value.trim(), p = Number(form.price_ex_vat.value || 0);
+    const out = dlg.querySelector('#enqMargin');
+    if(c === '' || isNaN(Number(c))){ out.textContent = '—'; out.className = ''; return; }
+    const m = p - Number(c);
+    out.textContent = fmt(m) + (p ? '   ' + pct(m / p) : '');
+    out.className = m >= 0 ? 'pos' : 'neg';
+  };
+  form.cost_ex_vat.addEventListener('input', live);
+  form.price_ex_vat.addEventListener('input', live);
+  live();
+
   dlg.addEventListener('cancel', close);
   dlg.showModal();
   const first = dlg.querySelector('input');
@@ -3014,7 +3163,8 @@ function enqEdit(row){
 function enqCsv(){
   const t = tr(), e = t.enq;
   const head = [e.number, e.client, e.description, e.date, e.toSupplier, e.supplier,
-                e.quoted, e.daysUnquoted, e.status, e.poDate, e.price, e.delivery, e.owner];
+                e.quoted, e.daysUnquoted, e.status, e.poDate, e.cost, e.sell, e.margin,
+                e.marginPct, e.delivery, e.paid, e.paidDate, e.invoice, e.owner];
   const cell = v => {
     const s = v == null ? '' : String(v);
     return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
@@ -3024,8 +3174,13 @@ function enqCsv(){
     r.number, r.client, r.description, r.enquiry_date,
     r.sent_to_supplier ? t.yes : t.no, r.supplier,
     r.quoted_to_client ? t.yes : t.no, r.days_unquoted, e.st[r.status] || r.status,
-    r.po_date, (Number(r.price_ex_vat) || 0).toFixed(2),
-    r.delivered ? e.delivered : e.undelivered, r.owner
+    r.po_date,
+    r.cost_ex_vat == null ? '' : Number(r.cost_ex_vat).toFixed(2),
+    (Number(r.price_ex_vat) || 0).toFixed(2),
+    r.margin_eur == null ? '' : Number(r.margin_eur).toFixed(2),
+    r.margin_pct == null ? '' : (Number(r.margin_pct) * 100).toFixed(1),
+    r.delivered ? e.delivered : e.undelivered,
+    r.paid ? e.paid : e.unpaid, r.paid_date, r.invoice_no, r.owner
   ].map(cell).join(';')));
   /* BOM: Excel opens a UTF-8 csv as Latin-1 without it, and this register is
      full of Lithuanian names and euro signs */
@@ -3356,6 +3511,8 @@ const MENU_ACTS = {
   },
   printProject(){ printProjectReport(); return 'noop'; },
   printCompany(){ printCompanyReport(); return 'noop'; },
+  enquiries(){ state.tab = 'enquiries'; render(); return 'noop'; },
+  enqReport(){ printEnquiryReport(); return 'noop'; },
   /* these three change no state, so they neither save nor re-render */
   csv(){ exportCsv(); return 'noop'; },
   json(){ exportJson(); return 'noop'; },
@@ -3371,7 +3528,10 @@ $('#projMenu').addEventListener('click', async e=>{
   const act = b.dataset.act;
   const changes = !(act === 'csv' || act === 'json' || act === 'import'
                     || act === 'signout' || act === 'refresh'
-                    || act === 'printProject' || act === 'printCompany');
+                    || act === 'printProject' || act === 'printCompany'
+                    /* neither of these touches a project, so neither should
+                       push an undo point for one */
+                    || act === 'enquiries' || act === 'enqReport');
   if(changes) pushUndo(null);
   lastDeleted = null;
   const r = await MENU_ACTS[act]();
@@ -3887,6 +4047,112 @@ function printCompanyReport(){
     ${reportFoot(t)}`;
   printAs(['Litprofit', t.printCompany,
            new Date().toISOString().slice(0,10)].join(' \u2014 '));
+}
+
+/* The register on paper. Landscape, because fifteen columns on a portrait A4
+   is a column of confetti -- the detail sheets already use @page detail for
+   the same reason.
+
+   It prints what is on screen: the same filtered, sorted rows, so the paper
+   and the display can never disagree about what is in scope. The filter state
+   is spelled out under the heading, because a report that says "2,610,716 EUR"
+   without saying "Danfoss only, 2026 only" is worse than no report. */
+function printEnquiryReport(){
+  if(!canMoney()) return;
+  const t = tr(), e = t.enq, L = LOCALES[state.lang], dash = '&mdash;';
+  const rows = enqSorted(enqRows());
+  const T = enqTotals(rows);
+  const f = enqState();
+  const m = v => v == null ? dash : fmt(v);
+  const d = v => v ? new Date(v).toLocaleDateString(L) : dash;
+
+  const scope = [];
+  const add = (label, v) => { if(v) scope.push(esc(label) + ': ' + esc(v)); };
+  add(e.search, f.q); add(e.client, f.client); add(e.supplier, f.supplier);
+  add(e.status, f.status ? (e.st[f.status] || f.status) : '');
+  add(e.toSupplier, f.toSupplier === 'true' ? t.yes : f.toSupplier === 'false' ? t.no : '');
+  add(e.quoted, f.quoted === 'true' ? t.yes : f.quoted === 'false' ? t.no : '');
+  add(e.paid, f.paid === 'true' ? e.paid : f.paid === 'false' ? e.unpaid : '');
+  add(e.date, f.year);
+
+  const kpi = (label, big, note) =>
+    `<div class="rp-kpi"><span>${esc(label)}</span><b>${big}</b><i>${note || '&nbsp;'}</i></div>`;
+
+  /* Top ten and a remainder, not sixty-three rows of two-euro clients. */
+  const table10 = (title, key) => {
+    const g = enqGroup(rows, key, 10);
+    if(!g.length) return '';
+    return `<h3>${esc(title)}</h3><table class="rp-narrow"><tbody>${g.map(x =>
+      `<tr><td>${esc(x.l)}</td><td class="num">${fmt(x.v)}</td>
+       <td class="num">${T.sell ? pct(x.v / T.sell) : dash}</td></tr>`).join('')}</tbody></table>`;
+  };
+
+  /* Sorted by how long the money has been waiting, which is the only order
+     anybody chases in. */
+  const ageing = rows.filter(r => r.days_unquoted > 0)
+    .sort((a, b) => b.days_unquoted - a.days_unquoted).slice(0, 12);
+
+  const body = rows.map(r => `<tr>
+      <td>${esc(r.number)}</td>
+      <td>${esc(r.client) || dash}</td>
+      <td>${esc(r.description) || dash}</td>
+      <td>${d(r.enquiry_date)}</td>
+      <td>${esc(r.supplier) || dash}</td>
+      <td><span class="rp-chip ${r.status === 'Gautas PO' ? 'rp-good'
+            : r.status === 'Atmesta užklausa' ? 'rp-bad' : ''}">${esc(e.st[r.status] || r.status)}</span></td>
+      <td class="num">${m(r.cost_ex_vat)}</td>
+      <td class="num">${fmt(Number(r.price_ex_vat) || 0)}</td>
+      <td class="num">${m(r.margin_eur)}</td>
+      <td class="num">${r.margin_pct == null ? dash : pct(Number(r.margin_pct))}</td>
+      <td>${r.paid ? esc(e.paid) : `<span class="rp-chip ${
+            r.status === 'Gautas PO' ? 'rp-bad' : ''}">${esc(e.unpaid)}</span>`}</td>
+    </tr>`).join('');
+
+  $('#print-area').innerHTML = `
+    <div class="rp-band">
+      <div><img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT">
+        <h1>${esc(e.title)}</h1>
+        <p class="rp-sub">${esc(e.reportSub)}</p></div>
+      <div class="rp-id"><b>${rows.length}</b>${esc(e.kReceived)}</div>
+    </div>
+    ${scope.length ? `<p class="rp-scope">${scope.join(' &nbsp;&middot;&nbsp; ')}</p>` : ''}
+
+    <div class="rp-kpis">
+      ${kpi(e.kTurnover, fmt(T.sell), rows.length + ' ' + esc(e.kReceived.toLowerCase()))}
+      ${kpi(e.kCost, T.costed ? fmt(T.cost) : dash,
+            T.costed < rows.length
+              ? `${T.costed}/${rows.length} ${esc(e.cost.toLowerCase())}` : '&nbsp;')}
+      ${kpi(e.kMargin, T.costed ? fmt(T.margin) : dash,
+            T.pct == null ? esc(e.noCost) : pct(T.pct))}
+      ${kpi(e.kUnpaid, fmt(T.unpaid), esc(e.kPO))}
+    </div>
+
+    ${table10(e.topClients, 'client')}
+    ${table10(e.topSuppliers, 'supplier')}
+
+    ${ageing.length ? `<h3>${esc(e.ageing)}</h3>
+      <table class="rp-narrow"><tbody>${ageing.map(r =>
+        `<tr><td>${esc(r.number)}</td><td>${esc(r.client) || dash}</td>
+         <td class="num">${r.days_unquoted}</td></tr>`).join('')}</tbody></table>` : ''}
+
+    <div class="rp-page"></div>
+    <h3>${esc(e.title)}</h3>
+    <table class="rp-landscape"><thead><tr>
+      <th>${esc(e.number)}</th><th>${esc(e.client)}</th><th>${esc(e.description)}</th>
+      <th>${esc(e.date)}</th><th>${esc(e.supplier)}</th><th>${esc(e.status)}</th>
+      <th class="num">${esc(e.cost)}</th><th class="num">${esc(e.sell)}</th>
+      <th class="num">${esc(e.margin)}</th><th class="num">${esc(e.marginPct)}</th>
+      <th>${esc(e.paid)}</th></tr></thead>
+      <tbody>${body || `<tr><td colspan="11">${esc(e.none)}</td></tr>`}
+      <tr class="rp-tot"><td>${esc(e.total)}</td><td></td><td></td><td></td><td></td><td></td>
+        <td class="num">${T.costed ? fmt(T.cost) : dash}</td>
+        <td class="num">${fmt(T.sell)}</td>
+        <td class="num">${T.costed ? fmt(T.margin) : dash}</td>
+        <td class="num">${T.pct == null ? dash : pct(T.pct)}</td><td></td></tr>
+      </tbody></table>
+
+    ${reportFoot(t)}`;
+  printAs(['Litprofit', e.title, new Date().toISOString().slice(0,10)].join(' — '));
 }
 
 /* The button prints what you are looking at: the portfolio is the company,
