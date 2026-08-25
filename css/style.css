@@ -357,12 +357,18 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 }
 
 .section { padding-block: clamp(66px, 9vw, 150px); }
-/* Translucent, so the page's own field shows through.
-   Opaque, this covered both body layers completely -- sampling the About page
-   found not one pixel anywhere that was actually background, which means the
-   ambient field was invisible and the glass panels on top of it were
-   refracting a flat section colour. A section is a band of tone, not a lid. */
-.section-alt { background: color-mix(in srgb, var(--bg-2) 62%, transparent); }
+/* No ground of its own at all.
+   Alternating .section and .section-alt banded the page. Sampled down the left
+   gutter it stepped (7,8,36) -> (10,11,50) -> back, in hard jumps of 14 and 22
+   with delta ZERO for hundreds of pixels between them: not a gradient, stripes
+   of two different navies. And they drowned the drifting field completely.
+
+   One continuous ground now. The sections are still separated -- by the rivet
+   seams and by their own heads, which is separation you read rather than
+   separation you notice. With nothing painted over it, the field and its
+   moving light are finally the only variation on the page, which is what they
+   were built to be. */
+.section-alt { background: transparent; }
 .section-tight { padding-block: clamp(48px, 6vw, 96px); }
 
 /* 30ch here was a mistake worth naming: the cap applies to the whole
@@ -731,9 +737,10 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .partners-band {
   position: relative;
   overflow: hidden;
+  /* the glow only. var(--bg-2) under it made this the last hard band left on
+     the page -- a step of 22 going in and 22 coming out */
   background:
-    radial-gradient(62% 70% at 88% 10%, rgba(45, 53, 190, 0.30), transparent 66%),
-    var(--bg-2);
+    radial-gradient(62% 70% at 88% 10%, rgba(45, 53, 190, 0.30), transparent 66%);
 }
 .partners-band > * { position: relative; z-index: 1; }
 
