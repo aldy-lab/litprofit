@@ -1011,11 +1011,11 @@ def home():
         <p class="eyebrow eyebrow-plain">{he} <span class="sep">//</span> {hs} {founded}</p>
         <h1>{h1}</h1>
         <p class="lead">{hlead}</p>
-        <ul class="promise">
-          <li><a href="#consult"><span class="step-num">01</span><span class="step-label">{s1}</span></a></li>
-          <li><a href="#organise"><span class="step-num">02</span><span class="step-label">{s2}</span></a></li>
-          <li><a href="#ensure"><span class="step-num">03</span><span class="step-label">{s3}</span></a></li>
-        </ul>
+        <!-- The three steps used to sit here. They are gone because section 04
+             is those same three words with a paragraph under each -- the hero
+             was announcing a heading that arrives in full two screens later,
+             and it was the least specific thing on the busiest screen. The
+             promise strip and its links go with them. -->
         <div class="btn-row">
           <a class="btn btn-solid" href="{book}"{book_attrs}>{book_label}</a>
           <a class="btn btn-outline" href="{services}">{hsvc}</a>
@@ -1039,6 +1039,23 @@ def home():
             </svg>
             <span>{fh}</span>
             <span class="visually-hidden">{fha}</span>
+          </button>
+          <!-- The work lamp had no affordance at all: it was double-click on
+               the hero, which nobody discovers and which a touchscreen cannot
+               perform. Same control as FROST, and the double-click still
+               works for anyone who already knew. -->
+          <button type="button" class="frost-note lamp-note" id="lampToggle"
+                  aria-pressed="false" data-on="{lha}" data-off="{lho}" title="{lha}">
+            <span class="frost-lead" aria-hidden="true"></span>
+            <svg class="frost-flake" viewBox="0 0 16 16" aria-hidden="true">
+              <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none">
+                <circle cx="8" cy="8" r="2.6"/>
+                <path d="M8 1.4v1.8M8 12.8v1.8M1.4 8h1.8M12.8 8h1.8"/>
+                <path d="M3.4 3.4l1.3 1.3M11.3 11.3l1.3 1.3M12.6 3.4l-1.3 1.3M4.7 11.3l-1.3 1.3"/>
+              </g>
+            </svg>
+            <span>{lh}</span>
+            <span class="visually-hidden">{lha}</span>
           </button>
         </p>
         <span class="scroll-cue" aria-hidden="true"></span>
@@ -1188,6 +1205,8 @@ def home():
                 tr=T("role_danfoss"), tc=T("trust_cert"),
                 fh=text(T("frost_hint")), fha=attr(T("frost_hint_a11y")),
                 fho=attr(T("frost_hint_off")),
+                lh=text(T("lamp_hint")), lha=attr(T("lamp_hint_a11y")),
+                lho=attr(T("lamp_hint_off")),
                 rep_e=T("rep_eyebrow"),
                 rep_h=T("rep_h2"), rep_l=T("rep_lead"), rep_b=T("rep_bitzer"),
                 rep_d=T("rep_danfoss"), f1=T("fact_years"), f2=T("fact_service"),

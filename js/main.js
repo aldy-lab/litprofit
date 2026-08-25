@@ -448,6 +448,33 @@
 
     on(hero, "pointermove", function (e) { if (lampOn) track(e); });
 
+    /* The visible control. Same toggle the double-click drives, so the two
+       cannot disagree; when it turns the lamp on from a button press there is
+       no pointer position yet, so it starts under the button itself and then
+       follows the pointer as usual. */
+    var lampBtn = doc.getElementById("lampToggle");
+    var paintLamp = function () {
+      hero.classList.toggle("is-lamp", lampOn);
+      if (lampBtn) {
+        lampBtn.setAttribute("aria-pressed", lampOn ? "true" : "false");
+        var t = lampBtn.getAttribute(lampOn ? "data-off" : "data-on");
+        if (t) lampBtn.setAttribute("title", t);
+      }
+    };
+    if (lampBtn) {
+      on(lampBtn, "click", function (e) {
+        lampOn = !lampOn;
+        if (lampOn) {
+          var b = lampBtn.getBoundingClientRect(), r = hero.getBoundingClientRect();
+          lx = Math.round(b.left + b.width / 2 - r.left);
+          ly = Math.round(b.top + b.height / 2 - r.top);
+          place();
+        }
+        paintLamp();
+        e.stopPropagation();
+      });
+    }
+
     on(hero, "dblclick", function (e) {
       /* never swallow a double-click meant for a link or a button */
       if (e.target.closest && e.target.closest("a, button")) return;
@@ -456,7 +483,7 @@
       e.preventDefault();
       if (window.getSelection) window.getSelection().removeAllRanges();
       lampOn = !lampOn;
-      hero.classList.toggle("is-lamp", lampOn);
+      paintLamp();
       if (lampOn) track(e);
     });
 
@@ -464,7 +491,7 @@
     on(hero, "pointerleave", function () {
       if (!lampOn) return;
       lampOn = false;
-      hero.classList.remove("is-lamp");
+      paintLamp();
     });
   }
 

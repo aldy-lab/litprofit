@@ -37,8 +37,14 @@ BASE_PATHS = ["/", "/about/", "/services/", "/services/ship-engine-repair/",
 
 # Every page in every language. A translation that only half-renders is still a
 # broken page, so they all get the same structural and mobile checks.
+#
+# The languages come from i18n rather than a list of their own. They were
+# written out here as ("", "/lt", "/ru"), and the moment Russian was switched
+# off the audit spent its run reporting 404s for pages the site had correctly
+# stopped building -- a second copy of a fact is a second thing to forget.
+import i18n as _i18n
 PATHS = []
-for _lang in ("", "/lt", "/ru"):
+for _lang in [""] + ["/" + lg for lg in _i18n.LANGS if lg != "en"]:
     PATHS += [_lang + p for p in BASE_PATHS]
 PATHS.append("/404.html")
 

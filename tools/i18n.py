@@ -15,7 +15,12 @@ in each language rather than translated word for word.
 reviewed by whoever signs it off before launch.
 """
 
-LANGS = ("en", "lt", "ru")
+# Russian is off. The translations below are left in place rather than
+# deleted: nothing outside LANGS reads them, so they cost nothing at build
+# time, and putting the language back is a one-word change rather than a
+# retranslation. Every page, the switcher, hreflang and the sitemap all
+# follow this tuple.
+LANGS = ("en", "lt")
 
 # <html lang>, og:locale, and the label in the switcher
 LOCALE = {"en": ("en", "en_GB"), "lt": ("lt", "lt_LT"), "ru": ("ru", "ru_RU")}
@@ -71,12 +76,13 @@ S["en"] = dict(
     # take the reader's language.
     addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lithuania",
     # The frost easter egg, annotated on the drawing the way a note is.
+    lamp_hint="Lamp", lamp_hint_a11y="Light the drawing under the cursor. Double-clicking the hero does the same.",
+    lamp_hint_off="Put the lamp away.",
     frost_hint="Frost", frost_hint_a11y="Frost the page over. You can also just type FROST.",
     frost_hint_off="Thaw the page.",
     hero_h1="Ship repair and maintenance all over the world",
     hero_lead='%(legal)s overhauls marine engines, refrigeration plant and piping '
-              'systems for fishing fleets, shipowners and shore installations — '
-              'wherever the vessel happens to be.',
+              'systems for fishing fleets, shipowners and shore installations.',
     step1="We consult", step2="We organise", step3="We ensure",
     hero_services="Our services",
     role_bitzer="Authorised marine service partner",
@@ -162,12 +168,14 @@ S["lt"] = dict(
     vsl_wl="Vaterlinija", vsl_tb="Tipinis žvejybos laivas",
     vsl_tb2="Išdėstymas // ne mastelyje",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Klaipėda", addr_country="Lietuva",
+    lamp_hint="Lempa", lamp_hint_a11y="Apšviesti brėžinį po žymekliu. Tą patį daro dvigubas spustelėjimas.",
+    lamp_hint_off="Padėti lempą.",
     frost_hint="Šerkšnas", frost_hint_a11y="Apšerkšnyti puslapį. Taip pat galite tiesiog įvesti FROST.",
     frost_hint_off="Atitirpdyti puslapį.",
     hero_h1="Laivų remontas ir aptarnavimas visame pasaulyje",
     hero_lead='%(legal)s remontuoja laivų variklius, šaldymo įrangą ir '
               'vamzdynų sistemas žvejybos laivynams, laivų savininkams ir kranto '
-              'įrenginiams — kad ir kur būtų laivas.',
+              'įrenginiams.',
     step1="Konsultuojame", step2="Organizuojame", step3="Užtikriname",
     hero_services="Mūsų paslaugos",
     role_bitzer="Autorizuoti jūrinio serviso partneriai",
@@ -253,12 +261,14 @@ S["ru"] = dict(
     vsl_wl="Ватерлиния", vsl_tb="Типовое рыболовное судно",
     vsl_tb2="Схема // вне масштаба",
     addr_street="Svajonės g. 30", addr_city="LT-94101 Клайпеда", addr_country="Литва",
+    lamp_hint="Фонарь", lamp_hint_a11y="Подсветить чертёж под курсором. Двойной щелчок делает то же самое.",
+    lamp_hint_off="Убрать фонарь.",
     frost_hint="Иней", frost_hint_a11y="Покрыть страницу инеем. Можно и просто ввести FROST.",
     frost_hint_off="Растопить иней.",
     hero_h1="Ремонт и обслуживание судов в любой точке земного шара",
     hero_lead='%(legal)s ремонтирует судовые двигатели, холодильное '
               'оборудование и трубопроводные системы для рыболовных флотов, '
-              'судовладельцев и береговых установок — где бы ни находилось судно.',
+              'судовладельцев и береговых установок.',
     step1="Консультируем", step2="Организовываем", step3="Обеспечиваем",
     hero_services="Наши услуги",
     role_bitzer="Авторизованный партнёр по морскому сервису",
