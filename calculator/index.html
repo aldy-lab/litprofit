@@ -906,6 +906,11 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 .sections button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
 .tabrow{display:flex;align-items:center;gap:14px;padding-left:22px;background:var(--surface-1)}
+/* The `hidden` attribute hides an element by way of display:none in the user
+   agent stylesheet, and ANY author display wins over that. So .tabrow[hidden]
+   stayed on screen at display:flex, and a test that read the attribute rather
+   than the rendered box reported it hidden. Both of these need the override. */
+.tabrow[hidden],.pulse[hidden]{display:none!important}
 .tabrow > #projectSel{flex:0 0 auto;max-width:280px;min-width:0}
 .tabrow > nav.tabs{flex:1 1 auto;min-width:0;padding-left:0}
 @media(max-width:760px){
@@ -2350,6 +2355,7 @@ function renderSections(){
   /* The picker and the tab strip are the project subject's own row. */
   const row = $('#tabrow');
   if(row) row.hidden = cur !== 'projects';
+
 }
 
 function renderChrome(){
@@ -2453,7 +2459,13 @@ const ICON = {
 
 /* Hidden on the portfolio, which is every project at once, and on the
    dashboard, which already says all of this in full. */
-const PULSE_OFF = {portfolio:1, dashboard:1};
+/* The strip reads PLAN MARGIN / ACTUAL MARGIN / BELOW TARGET for the selected
+   job. On the portfolio and the dashboard those figures are already on the
+   page; on the register it is answering a question nobody asked, about a
+   project that is not on screen. paintPulse decides this, so the section
+   switch does not also get a say -- render() calls paintPulse afterwards and
+   the second opinion would simply be overwritten. */
+const PULSE_OFF = {portfolio:1, dashboard:1, enquiries:1};
 
 function paintPulse(){
   const el = $('#pulse');
