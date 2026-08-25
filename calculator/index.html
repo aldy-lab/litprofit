@@ -381,20 +381,25 @@ html.is-locked .card table.grid input:disabled{opacity:1}
   .tablewrap{overflow:visible;max-height:none;border:0}
   table[data-sheet],table[data-sheet] tbody,table[data-sheet] tfoot,
   table[data-sheet] tr,table[data-sheet] td,
-  #pfTable,#pfTable tbody,#pfTable tr,#pfTable td{
+  /* The register was not in this list, so on a phone its fifteen columns
+     pushed the document sideways by 1,600px -- the one thing this project
+     treats as always a bug. It carries data-label on every cell already, so
+     it stacks the same way the portfolio does. */
+  #pfTable,#pfTable tbody,#pfTable tr,#pfTable td,
+  #enqTable,#enqTable tbody,#enqTable tfoot,#enqTable tr,#enqTable td{
     display:block;width:auto
   }
-  table[data-sheet] thead,#pfTable thead{display:none}
-  table[data-sheet] tr,#pfTable tbody tr{
+  table[data-sheet] thead,#pfTable thead,#enqTable thead{display:none}
+  table[data-sheet] tr,#pfTable tbody tr,#enqTable tbody tr,#enqTable tfoot tr{
     border:1px solid var(--grid);border-radius:2px;padding:4px 12px 10px;
     margin-bottom:10px;background:var(--surface-1)
   }
-  table[data-sheet] td,#pfTable td{
+  table[data-sheet] td,#pfTable td,#enqTable td{
     display:flex;align-items:center;gap:12px;
     padding:5px 0;border:0;border-bottom:1px solid var(--grid);text-align:left
   }
-  table[data-sheet] td:last-child,#pfTable td:last-child{border-bottom:0}
-  table[data-sheet] td::before,#pfTable td::before{
+  table[data-sheet] td:last-child,#pfTable td:last-child,#enqTable td:last-child{border-bottom:0}
+  table[data-sheet] td::before,#pfTable td::before,#enqTable td::before{
     content:attr(data-label);flex:0 0 42%;
     font-family:var(--mono);font-size:9.5px;line-height:1.4;letter-spacing:.12em;
     text-transform:uppercase;color:var(--ink-3)
