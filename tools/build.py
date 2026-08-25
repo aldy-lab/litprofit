@@ -1905,6 +1905,55 @@ def capacity_chart():
         </div>""".format(alt=attr(T("cap_chart_h2")), p="".join(P))
 
 
+def recip_3d():
+    """The compressor as a live object, above its own elevation.
+
+    Same machine, same numbers: the geometry in js/compressor.js is authored in
+    the elevation's units, so the drawing below this is literally this thing
+    seen from the side. The callout labels are emitted here rather than in the
+    script because the script is not translated and the site is.
+
+    Anchors are model coordinates -- x along the length from the motor end, y
+    up from the mounting feet, z across. The renderer projects them every
+    frame, so a label follows the casting it points at.
+    """
+    tags = [("01", T("rec_motor"), "190,252,0"),
+            ("02", T("rec_crank"), "470,110,152"),
+            ("03", T("rec_head"),  "520,336,0"),
+            ("04", T("rec_c2"),    "768,195,0"),
+            ("05", T("rec_c1"),    "150,312,0")]
+    marks = "".join(
+        '<span class="cmp-tag" data-tag data-at="%s"><b>%s</b><span>%s</span></span>'
+        % (at, n, text(label)) for n, label, at in tags)
+
+    return """
+    <section class="section section-alt cmp-section seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{e}</p>
+          <h2>{h}</h2>
+          <p class="lead">{l}</p>
+        </div>
+        <figure class="cmp bleed reveal" data-compressor>
+          <div class="cmp-stage">
+            <canvas class="cmp-canvas" role="img" aria-label="{alt}"></canvas>
+            <span class="cmp-corner cmp-corner--tl"></span>
+            <span class="cmp-corner cmp-corner--tr"></span>
+            <span class="cmp-corner cmp-corner--bl"></span>
+            <span class="cmp-corner cmp-corner--br"></span>
+            <p class="cmp-hint">{hint}</p>
+          </div>
+          <p class="cmp-legend">{marks}</p>
+          <figcaption class="cmp-tb"><span>{tb}</span><b>{tb2}</b></figcaption>
+        </figure>
+      </div>
+    </section>
+    <script src="{js}" defer></script>""".format(
+        e=text(T("cmp_eyebrow")), h=text(T("cmp_h2")), l=text(T("cmp_lead")),
+        alt=attr(T("cmp_alt")), hint=text(T("cmp_hint")), marks=marks,
+        tb=text(T("cmp_tb")), tb2=text(T("cmp_tb2")), js=u("/js/compressor.js"))
+
+
 def recip_drawing():
     """Semi-hermetic four-cylinder reciprocating compressor, side elevation.
 
@@ -2074,7 +2123,7 @@ def service_page(s):
                 blocks="\n\n".join(blocks), more=more,
                 # The compressor plate belongs to one page: it is that page's
                 # machine. Putting a drawing on all four would make it wallpaper.
-                recip=recip_drawing() if s["slug"] == "refrigeration-systems" else "",
+                recip=(recip_3d() + recip_drawing()) if s["slug"] == "refrigeration-systems" else "",
                 other_e=T("svc_eyebrow"), other_h=PT("svc_h1"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 

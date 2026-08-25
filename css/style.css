@@ -1903,6 +1903,132 @@ html.is-frost #frostToggle {
 }
 
 /* ============================================================
+   THE COMPRESSOR, LIVE
+   The canvas is the only pixel-shaded thing on this site. Everything around
+   it stays line work -- corner ticks, a rule, mono callouts -- so the object
+   reads as a part sitting on a sheet rather than a render dropped on a page.
+   ============================================================ */
+.cmp { margin: 0; }
+.cmp-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  /* A pale pool under the machine, so it is standing on something. Radial and
+     off-centre, matched to where the key light comes from in the renderer --
+     a centred glow behind an off-centre light reads as two light sources. */
+  background:
+    radial-gradient(58% 62% at 38% 78%, rgba(45, 53, 190, 0.22), transparent 70%),
+    radial-gradient(80% 90% at 50% 40%, rgba(255, 255, 255, 0.035), transparent 72%);
+}
+@media (max-width: 700px) { .cmp-stage { aspect-ratio: 5 / 4; } }
+
+.cmp-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* the drag has to win over the page scroll, or a turn of the machine
+     scrolls the section away underneath it */
+  touch-action: none;
+  cursor: grab;
+}
+.cmp.is-held .cmp-canvas { cursor: grabbing; }
+
+/* ---------- callouts ----------
+   Positioned by the renderer with transform only, so the browser never
+   reflows: left/top stay at 0 and every frame writes a translate. */
+/* The visible callouts are painted on the canvas, where they can be led out
+   to the margin instead of sitting on the casting. These stay in the markup so
+   the parts are still named for a screen reader, and so the renderer can read
+   its labels out of them rather than carrying a copy of both languages. */
+.cmp-legend { margin: 0; }
+.cmp-tag {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+/* Wide enough for the leaders, and the drawing names its own parts. Narrow,
+   and two columns of labels either side of a 340px machine land on top of it,
+   so the canvas keeps only the numbered dots and the names come down here. */
+@media (max-width: 620px) {
+  .cmp-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin-top: 14px;
+  }
+  .cmp-tag {
+    position: static;
+    width: auto; height: auto;
+    margin: 0;
+    clip-path: none;
+    overflow: visible;
+    display: flex;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: var(--label);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .cmp-tag b { color: var(--accent); font-weight: 600; }
+}
+
+/* ---------- the sheet it sits on ---------- */
+.cmp-corner {
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 0 solid var(--line-2);
+  pointer-events: none;
+}
+.cmp-corner--tl { top: 10px; left: 10px; border-top-width: 1px; border-left-width: 1px; }
+.cmp-corner--tr { top: 10px; right: 10px; border-top-width: 1px; border-right-width: 1px; }
+.cmp-corner--bl { bottom: 10px; left: 10px; border-bottom-width: 1px; border-left-width: 1px; }
+.cmp-corner--br { bottom: 10px; right: 10px; border-bottom-width: 1px; border-right-width: 1px; }
+
+.cmp-hint {
+  position: absolute;
+  left: 32px; bottom: 22px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+  pointer-events: none;
+}
+.cmp.is-live .cmp-hint { opacity: 1; }
+.cmp.is-held .cmp-hint { opacity: 0; }
+/* Nothing to drag with a finger-free pointer, and nothing to say about it. */
+@media (hover: none) { .cmp-hint { letter-spacing: 0.14em; } }
+
+.cmp-tb {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 12px;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.cmp-tb b { color: var(--muted); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cmp-canvas { cursor: default; }
+}
+
+/* ============================================================
    COMPLETED PROJECTS
    A job is a record, so it is set as one: the facts in a ruled block, the
    scope as a list, the photographs underneath. Same glass and the same rules

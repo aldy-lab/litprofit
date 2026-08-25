@@ -75,6 +75,15 @@ S["en"] = dict(
                    "deciding whether a machine will hold a hold.",
     cap_chart_x="Evaporating temperature", cap_chart_y="Cooling capacity",
     cap_chart_tb="Six-cylinder // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C suction gas",
+    # the live 3D of the same machine, above the elevation
+    cmp_eyebrow="The machine", cmp_h2="The compressor, in the round",
+    cmp_lead="The same four-cylinder as the elevation below, built from the same "
+             "numbers and shaded live in the browser. Drag it round.",
+    cmp_hint="Drag to turn",
+    cmp_tb="Semi-hermetic reciprocating", cmp_tb2="Built to the published envelope",
+    cmp_alt="A semi-hermetic four-cylinder reciprocating compressor seen in three "
+            "quarters: ribbed motor housing, crankcase, two banks of cylinders in a V, "
+            "and the suction and discharge connections.",
     rec_eyebrow="On the bench", rec_h2="A semi-hermetic four-cylinder, in section",
     rec_lead="The size we overhaul most: four cylinders, 55 mm bore, 34 mm stroke, "
              "28.11 m\u00b3/h at 1450 rpm. Drawn to the connection schedule a "
@@ -196,6 +205,14 @@ S["lt"] = dict(
                    "žiūri prieš spręsdamas, ar mašina išlaikys triumą.",
     cap_chart_x="Garavimo temperatūra", cap_chart_y="Šaldymo galia",
     cap_chart_tb="Šešiacilindris // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C siurbimo dujos",
+    cmp_eyebrow="Mašina", cmp_h2="Kompresorius \u2014 erdvėje",
+    cmp_lead="Tas pats keturių cilindrų kompresorius kaip ir brėžinyje žemiau, "
+             "sudėtas iš tų pačių matmenų ir šešėliuojamas naršyklėje. Pasukite jį.",
+    cmp_hint="Vilkite, kad pasuktumėte",
+    cmp_tb="Pusiau hermetiškas stūmoklinis", cmp_tb2="Pagal skelbiamus gabaritus",
+    cmp_alt="Pusiau hermetiškas keturių cilindrų stūmoklinis kompresorius trijų "
+            "ketvirčių rakurse: briaunotas variklio korpusas, karteris, du cilindrų "
+            "blokai V raide, siurbimo ir slėgio jungtys.",
     rec_eyebrow="Ant stalo", rec_h2="Pusiau hermetiškas keturcilindris, pjūvyje",
     rec_lead="Dydis, kurį remontuojame dažniausiai: keturi cilindrai, 55 mm skersmuo, "
              "34 mm eiga, 28,11 m\u00b3/h esant 1450 aps./min. Nubraižyta pagal "
