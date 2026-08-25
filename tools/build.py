@@ -1007,21 +1007,36 @@ def home():
 {hero_drawing_lit}
         </span>
       </div>
-      <!-- Icon only, and up beside the drawing rather than down in the trust
-           rule: this lights the drawing, so it belongs next to it. No label --
-           a chip reading LAMP next to a chip reading FROST made the strip a
-           row of buttons instead of a line of proof. -->
-      <button type="button" class="lamp-btn" id="lampToggle"
-              aria-pressed="false" data-on="{lha}" data-off="{lho}" title="{lha}">
-        <svg viewBox="0 0 20 20" aria-hidden="true">
-          <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none">
-            <circle cx="10" cy="10" r="3.2"/>
-            <path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4"/>
-            <path d="M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M15.8 4.2l-1.7 1.7M5.9 14.1l-1.7 1.7"/>
-          </g>
-        </svg>
-        <span class="visually-hidden">{lha}</span>
-      </button>
+      <!-- Both controls, icon only, above the drawing they act on. They were a
+           pair of labelled chips at the end of the trust rule, which turned a
+           line of proof -- BITZER, DANFOSS, RINA, PRS -- into a toolbar. Here
+           they are instruments beside the instrument diagram, and the strip is
+           only what the company can show. -->
+      <div class="hero-tools">
+        <button type="button" class="hero-tool" id="lampToggle"
+                aria-pressed="false" data-on="{lha}" data-off="{lho}" title="{lha}">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none">
+              <circle cx="10" cy="10" r="3.2"/>
+              <path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4"/>
+              <path d="M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M15.8 4.2l-1.7 1.7M5.9 14.1l-1.7 1.7"/>
+            </g>
+          </svg>
+          <span class="visually-hidden">{lha}</span>
+        </button>
+        <button type="button" class="hero-tool" id="frostToggle"
+                aria-pressed="false" data-on="{fha}" data-off="{fho}" title="{fha}">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none">
+              <path d="M10 2v16M3.1 6l13.8 8M3.1 14l13.8-8"/>
+              <path d="M7.4 3.9 10 5.6l2.6-1.7M7.4 16.1 10 14.4l2.6 1.7"/>
+              <path d="M4.6 8.7 4.2 5.7l-2.6-.6M15.4 11.3l.4 3 2.6.6"/>
+              <path d="M4.6 11.3 4.2 14.3l-2.6.6M15.4 8.7l.4-3 2.6-.6"/>
+            </g>
+          </svg>
+          <span class="visually-hidden">{fha}</span>
+        </button>
+      </div>
 
       <div class="container hero-inner">
         <p class="eyebrow eyebrow-plain">{he} <span class="sep">//</span> {hs} {founded}</p>
@@ -1040,22 +1055,6 @@ def home():
           <span>{tp} <b>BITZER</b></span>
           <span>{tr} <b>DANFOSS</b></span>
           <span>{tc} <b>RINA</b> <span class="sep">//</span> <b>PRS</b></span>
-          <!-- Rides at the end of the trust rule rather than floating over the
-               hero's bottom edge: absolutely positioned, it collided with this
-               strip the moment the hero was tightened to fit a laptop. In the
-               flow it costs no height at all and cannot collide with anything. -->
-          <button type="button" class="frost-note" id="frostToggle"
-                  aria-pressed="false" data-on="{fha}" data-off="{fho}" title="{fha}">
-            <span class="frost-lead" aria-hidden="true"></span>
-            <svg class="frost-flake" viewBox="0 0 16 16" aria-hidden="true">
-              <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
-                <path d="M8 1.6v12.8M2.5 4.8l11 6.4M2.5 11.2l11-6.4"/>
-                <path d="M5.9 3.1 8 4.5l2.1-1.4M5.9 12.9 8 11.5l2.1 1.4"/>
-              </g>
-            </svg>
-            <span>{fh}</span>
-            <span class="visually-hidden">{fha}</span>
-          </button>
         </p>
         <span class="scroll-cue" aria-hidden="true"></span>
       </div>
@@ -1202,7 +1201,8 @@ def home():
                 hlead=T("hero_lead", legal=LEGAL), s1=T("step1"), s2=T("step2"),
                 s3=T("step3"), hsvc=T("hero_services"), tp=T("role_bitzer"),
                 tr=T("role_danfoss"), tc=T("trust_cert"),
-                fh=text(T("frost_hint")), fha=attr(T("frost_hint_a11y")),
+                # frost_hint is no longer rendered -- icon only, like the lamp.
+                fha=attr(T("frost_hint_a11y")),
                 fho=attr(T("frost_hint_off")),
                 # lamp_hint is no longer rendered -- the control is icon-only.
                 # The string stays in i18n in case it ever carries a label again.

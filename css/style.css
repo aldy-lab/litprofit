@@ -1487,19 +1487,25 @@ a.card { position: relative; }
 
 .footer-brand p { font-size: var(--text-m); color: var(--muted-2); max-width: 30ch; }
 
-/* ---------- the work lamp control ----------
-   Icon only, top right of the hero, directly over the drawing it lights. It
-   was a labelled chip in the trust rule, which put a button reading LAMP next
-   to a button reading FROST and turned a line of proof -- BITZER, DANFOSS,
-   RINA, PRS -- into a row of controls.
+/* ---------- the two hero controls ----------
+   The work lamp and FROST, icon only, top right of the hero and directly over
+   the drawing they act on. Both were labelled chips at the end of the trust
+   rule, which turned a line of proof -- BITZER, DANFOSS, RINA, PRS -- into a
+   toolbar.
 
    Below the header rather than under it, and on the hero's own padding edge so
-   it lines up with what the drawing already respects. */
-.lamp-btn {
+   they line up with what the drawing already respects. Each carries the state
+   it put the page into: dim at rest, brighter under the cursor, lit while its
+   effect is running, so neither is a button pressed into the dark. */
+.hero-tools {
   position: absolute;
   top: calc(var(--nav-h) + clamp(14px, 2.4vh, 30px));
   right: var(--pad);
   z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+.hero-tool {
   width: 44px;
   height: 44px;
   display: grid;
@@ -1513,101 +1519,19 @@ a.card { position: relative; }
   transition: color 0.25s var(--ease), border-color 0.25s var(--ease),
               background 0.25s var(--ease);
 }
-.lamp-btn svg { width: 20px; height: 20px; display: block; }
+.hero-tool svg { width: 20px; height: 20px; display: block; }
 @media (hover: hover) and (pointer: fine) {
-  .lamp-btn:hover { color: var(--white); border-color: var(--line-2); }
+  .hero-tool:hover { color: var(--white); border-color: var(--line-2); }
 }
-.lamp-btn:focus-visible { color: var(--white); border-color: var(--line-2); }
+.hero-tool:focus-visible { color: var(--white); border-color: var(--line-2); }
 /* lit: the control shows the state it put the page into */
-.hero.is-lamp .lamp-btn {
+.hero.is-lamp #lampToggle,
+html.is-frost #frostToggle {
   color: var(--white);
   border-color: var(--line-2);
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* ============================================================
-   FROST NOTE
-   The easter egg is typed, so a hint only helps someone with a
-   keyboard — it stands down on touch, where there is nothing to
-   type on and the label would be clutter with no payoff.
-
-   Written at the drawing's own weight and colour so it reads as
-   one of the drawing's annotations rather than as interface. The
-   brief was that the hidden things stay invisible until sought:
-   this is sought by looking at the drawing, and it brightens when
-   the pointer is anywhere near the hero.
-   ============================================================ */
-.frost-note {
-  /* In the flow, at the end of the trust rule. It used to be absolutely
-     positioned against the hero's bottom edge, which worked only while the
-     hero had room to spare -- tightening it to fit a laptop pushed the two
-     straight through each other. */
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted-2);
-  opacity: 0.55;
-  transition: opacity 0.4s var(--ease), color 0.4s var(--ease);
-  /* it is a button now, so it takes the pointer and none of the chrome */
-  appearance: none;
-  background: none;
-  border: 0;
-  padding: 3px 0;
-  cursor: pointer;
-  user-select: none;
-}
-.frost-flake { width: 12px; height: 12px; flex: none; fill: none; }
-.frost-note span:not(.frost-lead):not(.visually-hidden) {
-  color: var(--white);
-  font-weight: 600;
-  letter-spacing: 0.2em;
-}
-/* the leader line of a drawing note, drawn to the label */
-.frost-lead {
-  display: block;
-  width: 34px;
-  height: 1px;
-  background: currentColor;
-}
-.frost-lead::before {
-  content: "";
-  display: block;
-  width: 3px;
-  height: 3px;
-  background: currentColor;
-  transform: translate(-1px, -1px);
-}
-.hero:hover .frost-note { opacity: 0.8; }
-.frost-note:hover,
-.frost-note:focus-visible { opacity: 1; color: var(--accent); }
-.frost-note:focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: 3px;
-}
-/* pressed reads as running, because it is: the effect times out on its own */
-.frost-note[aria-pressed="true"] { color: var(--accent); }
-/* While the page is iced there is nothing left to hint at. Both selectors,
-   because `.hero:hover .frost-note` is (0,3,0) and `html.is-frost .frost-note`
-   is only (0,2,1) — the hover rule won and the note stayed lit through the
-   whole effect. */
-html.is-frost .frost-note,
-html.is-frost .hero:hover .frost-note { opacity: 0; }
-/* It used to stand down on touch, when it was only a caption saying "type
-   FROST" -- advice you cannot follow without a keyboard. As a button it is the
-   only way in on a phone, so it stays, with a tap target that can be hit. */
-@media (hover: none) {
-  .frost-note { opacity: 0.8; padding: 12px 0; min-height: 44px; }
-  .frost-lead { width: 20px; }
-}
-/* on a narrow screen it wraps onto its own line and leads from the left */
-@media (max-width: 860px) { .frost-note { margin-left: 0; } }
-@media (prefers-reduced-motion: reduce) { .frost-note { transition: none; } }
 
 .footer-bottom {
   display: flex;
@@ -2289,10 +2213,10 @@ a.pg-cell:hover .pg-name { color: var(--accent); }
   input, textarea, select { cursor: auto; }
   input[type="checkbox"], input[type="radio"], input[type="file"] { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23000' stroke-opacity='.5' stroke-width='3'/%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 13 13, crosshair; }
   /* Five components set cursor:pointer on a class, and a class beats a bare
-     element selector -- so .btn, .burger, .rail-btn, .frost-note and .part all
+     element selector -- so .btn, .burger, .rail-btn, .hero-tool and .part all
      kept the hand while everything around them had the cross. Named here
      rather than chased with !important. */
-  .btn, .burger, .rail-btn, .frost-note, .part { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23000' stroke-opacity='.5' stroke-width='3'/%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 13 13, crosshair; }
+  .btn, .burger, .rail-btn, .hero-tool, .part { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23000' stroke-opacity='.5' stroke-width='3'/%3E%3Cpath d='M13 1v24M1 13h24' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 13 13, crosshair; }
 }
 
 /* ============================================================
@@ -2859,7 +2783,7 @@ a.card:active,
 .cc > a:active,
 .doc-get:active,
 .lang a:active,
-.frost-note:active {
+.hero-tool:active { transform: scale(0.94); }
   transform: scale(0.97);
   transition-duration: 0.14s;
 }
@@ -2868,5 +2792,5 @@ a.card:active,
    to look like. */
 @media (prefers-reduced-motion: reduce) {
   .btn:active, a.card:active, .cc > a:active,
-  .doc-get:active, .lang a:active, .frost-note:active { transform: none; }
+  .doc-get:active, .lang a:active, .hero-tool:active { transform: none; }
 }
