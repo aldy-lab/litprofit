@@ -215,7 +215,7 @@
   }
 
   /* ---------- projection ---------- */
-  var yaw = -0.62, pitch = 0.30, autoYaw = true;
+  var yaw = -1.22, pitch = 0.30, autoYaw = true;
   var CX = 422, CY = 168, CZ = 0;          // model centre, in model units
   var DIST = 1750, FOCAL = 2140;
   /* FOCAL was a constant, which is only ever right at one canvas width: the
@@ -224,7 +224,16 @@
      the same fraction of the frame everywhere; the narrow case backs off a
      little further to leave the callout columns somewhere to live. */
   function refocus() {
-    FOCAL = W * (W < 620 ? 1.60 : 1.86);
+    // Width alone was enough while the stage was 16/9. It is sized off the
+    // viewport now, so on a short screen the width term asks for a machine
+    // taller than the canvas and the cylinder heads leave the top of it. The
+    // model stands about 360 units tall; the height term keeps that inside
+    // four fifths of the frame whatever the shape of the box.
+    FOCAL = Math.min(W * (W < 620 ? 1.60 : 1.86), H * 3.15);
+    // 3.42 put the deep three-quarter at 97% of the canvas height: not
+    // clipped, but one rounding away from it, and the cylinder heads are the
+    // first thing to go. The projected height changes as it turns, so the
+    // limit has to hold at the tallest angle, not the one on screen now.
   }
 
   function project(out) {
@@ -240,6 +249,7 @@
     }
   }
 
+  var OFFX = 0, OFFY = 0;
   var P = new Float64Array(V.length);
   var S = new Float64Array((V.length / 3) * 2);
 
@@ -273,9 +283,25 @@
     }
     order.sort(function (a, b) { return depth[b] - depth[a]; });
 
+    /* Centre on what is actually on screen, not on the model origin. A long
+       object rotating about a fixed point does not stay put: side-on it is
+       widest and sits one way, three-quarter it is narrower and sits the
+       other, so across a scroll the machine wandered from the right of the
+       frame to the left and the composition never settled. Measuring the
+       projected bounds costs one pass over points already computed. */
+    var minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity;
+    for (j = 0; j < S.length; j += 2) {
+      if (S[j] < minx) minx = S[j];
+      if (S[j] > maxx) maxx = S[j];
+      if (S[j + 1] < miny) miny = S[j + 1];
+      if (S[j + 1] > maxy) maxy = S[j + 1];
+    }
+    OFFX = w / 2 - (minx + maxx) / 2;
+    OFFY = h / 2 - (miny + maxy) / 2;
+
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    ctx.translate(w / 2, h / 2 + h * 0.02);
+    ctx.translate(OFFX, OFFY);
     ctx.lineJoin = "round";
 
     for (var o = 0; o < order.length; o++) {
@@ -344,8 +370,8 @@
       var y2 = y * cp - z1 * sp, z2 = y * sp + z1 * cp + DIST;
       live.push({
         t: t,
-        sx: w / 2 + x1 * FOCAL / z2,
-        sy: h / 2 + h * 0.02 - y2 * FOCAL / z2,
+        sx: OFFX + x1 * FOCAL / z2,
+        sy: OFFY - y2 * FOCAL / z2,
         behind: z1 > 0,
         left: x1 < 0
       });
@@ -427,12 +453,34 @@
     refocus();
   }
 
-  var last = 0;
+  /* The reference site turns its camera on scroll, and that is the half of it
+     worth having: the machine answers the page rather than spinning at its
+     own pace regardless of the reader. Progress is measured over the span
+     where the section is crossing the screen, so a full pass turns it about
+     a third of a revolution; the idle drift continues on top, so it is never
+     dead when the page is still. Drag takes over from both. */
+  /* The sweep stays in three-quarter the whole way. Running it from -0.62
+     through to +1.48 put the machine exactly side-on at the middle of the
+     section -- the one angle at which a compressor reads as a rectangle --
+     and that is where a reader spends longest. A shorter arc from a deeper
+     three-quarter shows the same amount of turning and never flattens. */
+  var YAW0 = -1.22, YAW_SWEEP = 1.02, scrollYaw = 0;
+
+  function readScroll() {
+    var r = root.getBoundingClientRect();
+    var span = r.height + window.innerHeight;
+    if (span <= 0) return;
+    var t = (window.innerHeight - r.top) / span;   // 0 entering, 1 leaving
+    scrollYaw = Math.max(0, Math.min(1, t)) * YAW_SWEEP;
+  }
+
+  var last = 0, drift = 0;
   function frame(now) {
     raf = 0;
     if (autoYaw && !reduce.matches) {
       var dt = last ? Math.min(64, now - last) : 16;
-      yaw += dt * 0.000085;
+      drift += dt * 0.000055;
+      yaw = YAW0 + scrollYaw + drift;
     }
     last = now;
     draw(W, H, DPR);
@@ -465,6 +513,9 @@
   canvas.addEventListener("pointermove", function (e) {
     if (!down) return;
     yaw += (e.clientX - lx) * 0.008;
+    // Rebase, or the moment the drift resumes the machine jumps back to
+    // wherever the scroll said it should have been.
+    YAW0 = yaw - scrollYaw - drift;
     pitch = Math.max(-0.12, Math.min(0.62, pitch + (e.clientY - ly) * 0.005));
     lx = e.clientX; ly = e.clientY;
     if (!running) { draw(W, H, DPR); drawTags(W, H); }
@@ -479,11 +530,22 @@
   canvas.addEventListener("pointerup", release);
   canvas.addEventListener("pointercancel", release);
 
-  window.addEventListener("resize", function () { size(); if (!running) { draw(W, H, DPR); drawTags(W, H); } });
+  window.addEventListener("resize", function () {
+    size(); readScroll();
+    if (!running) { draw(W, H, DPR); drawTags(W, H); }
+  });
+  // passive: this only reads, and a non-passive scroll listener on the main
+  // thread is the classic way to make a page feel heavy under the finger
+  window.addEventListener("scroll", function () {
+    readScroll();
+    if (!running && !reduce.matches) { draw(W, H, DPR); drawTags(W, H); }
+  }, { passive: true });
 
   // Only runs while it is on screen. A render loop left going behind three
   // screens of scroll is a flat battery and nothing to show for it.
   size();
+  readScroll();
+  yaw = YAW0 + scrollYaw;
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(function (es) {
       es.forEach(function (e) { e.isIntersecting ? start() : stop(); });

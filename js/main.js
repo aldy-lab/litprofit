@@ -98,13 +98,26 @@
     if (!("IntersectionObserver" in window)) {
       reveals.forEach(function (el) { el.classList.add("is-in"); });
     } else {
+      /* Siblings that come into view together are stepped rather than
+         landed at once. Enumerating :nth-child delays in the stylesheet would
+         mean naming every grid on the site and re-naming them whenever one
+         changes; grouping by parent here covers the cards, the pillars, the
+         job records and anything added later, without the stylesheet knowing
+         they exist. Capped, because a ten-item grid stepped at 70ms each ends
+         a full second after it started, which is a queue, not a stagger. */
       var io = new IntersectionObserver(function (entries) {
+        var byParent = {};
         entries.forEach(function (entry) {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-in");
+          var el = entry.target;
+          var key = el.parentNode ? (el.parentNode.className || "root") : "root";
+          byParent[key] = (byParent[key] || 0) + 1;
+          var step = Math.min(byParent[key] - 1, 5) * 70;
+          if (step) el.style.transitionDelay = step + "ms";
+          el.classList.add("is-in");
           io.unobserve(entry.target);
         });
-      }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+      }, { rootMargin: "0px 0px -4% 0px", threshold: 0.02 });
       reveals.forEach(function (el) { io.observe(el); });
     }
   }

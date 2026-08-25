@@ -1658,8 +1658,14 @@ html.is-frost #frostToggle {
    the rest of the session. */
 .js .reveal {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transform: translateY(14px);
+  /* 0.7s on the shared --ease landed the whole section at once and read as a
+     switch being thrown. Longer, and on a curve that leaves quickly and
+     arrives slowly, so the last third of the travel is almost still -- that
+     tail is what makes one section hand over to the next instead of snapping
+     into place. The stagger between siblings is set from the observer. */
+  transition: opacity 0.9s cubic-bezier(0.16, 0.84, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 0.84, 0.3, 1);
   will-change: opacity, transform;
 }
 .js .reveal.is-in { opacity: 1; transform: none; will-change: auto; }
@@ -1909,9 +1915,16 @@ html.is-frost #frostToggle {
    reads as a part sitting on a sheet rather than a render dropped on a page.
    ============================================================ */
 .cmp { margin: 0; }
+/* The section is meant to sit in one screenful, so the stage is sized off the
+   viewport and not off an aspect ratio: at 16/9 it was 783px inside a 900px
+   screen and the section came to 147% of it. vh alone would be wrong the other
+   way -- on a short wide laptop the stage would go letterbox-thin -- so the
+   width term caps it. */
+.cmp-section { padding-top: clamp(34px, 4vw, 56px); padding-bottom: clamp(28px, 3vw, 44px); }
 .cmp-stage {
   position: relative;
-  aspect-ratio: 16 / 9;
+  height: min(53vh, 38vw);
+  min-height: 260px;
   /* A pale pool under the machine, so it is standing on something. Radial and
      off-centre, matched to where the key light comes from in the renderer --
      a centred glow behind an off-centre light reads as two light sources. */
@@ -1919,7 +1932,7 @@ html.is-frost #frostToggle {
     radial-gradient(58% 62% at 38% 78%, rgba(45, 53, 190, 0.22), transparent 70%),
     radial-gradient(80% 90% at 50% 40%, rgba(255, 255, 255, 0.035), transparent 72%);
 }
-@media (max-width: 700px) { .cmp-stage { aspect-ratio: 5 / 4; } }
+@media (max-width: 700px) { .cmp-stage { height: min(46vh, 84vw); } }
 
 .cmp-canvas {
   position: absolute;
