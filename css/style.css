@@ -2488,7 +2488,45 @@ html.is-frost::after {
    homepage — dumping a reader back at the top is the usual way these
    get it wrong.
    ============================================================ */
-.langs { display: flex; align-items: center; gap: 2px; flex: none; }
+/* A segmented control with a sliding indicator rather than two bordered
+   boxes. The pill rests under the current language and follows the cursor to
+   the other one, sliding back when the pointer leaves -- so the control shows
+   where you are and previews where you would go.
+
+   It is glass: the same colourless tint and rim as the panels elsewhere, but
+   no backdrop-filter. The header already carries one, which makes it a
+   backdrop root, and a filter on a child of it samples the header's output
+   rather than the page -- the same trap that made the mobile menu render the
+   hero at full contrast. The rim does the work here and costs nothing.
+
+   Width and travel are computed from --n, written by the builder, so this is
+   still correct if a third language comes back. */
+.langs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: none;
+  position: relative;
+  isolation: isolate;
+}
+.langs::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  width: calc(100% / var(--n, 2));
+  transform: translateX(calc(var(--i, 0) * 100%));
+  border-radius: 2px;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-top),
+    inset 0 0 0 1px var(--glass-rim-hairline),
+    inset 0 -1px 0 var(--glass-rim-bottom);
+  transition: transform 0.34s var(--ease);
+}
 .langs a {
   display: grid;
   place-items: center;
@@ -2511,17 +2549,29 @@ html.is-frost::after {
   transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
 }
 .langs a:hover { color: var(--white); }
-.langs a[aria-current="true"] { color: var(--white); border-color: var(--line-2); }
+/* the pill is the indicator now, so the current item needs no border of its own */
+.langs a[aria-current="true"] { color: var(--white); }
+
+/* The cursor moves the pill. Written per index rather than with a general
+   rule because :has() cannot count siblings, and stated after the resting
+   position so hover wins. Three covered, which is one more than there are. */
+@media (hover: hover) and (pointer: fine) {
+  .langs:has(a:nth-child(1):hover)::before { transform: translateX(0); }
+  .langs:has(a:nth-child(2):hover)::before { transform: translateX(100%); }
+  .langs:has(a:nth-child(3):hover)::before { transform: translateX(200%); }
+}
+@media (prefers-reduced-motion: reduce) { .langs::before { transition: none; } }
 
 /* In the mobile menu it becomes a full-width row of three, below the CTA. */
 @media (max-width: 980px) {
   .nav-links .langs {
     justify-content: center;
-    gap: 8px;
+    gap: 0;
     margin-top: 18px;
     padding-top: 4px;
   }
-  .nav-links .langs a { min-width: 56px; min-height: 44px; border-color: var(--line); }
+  /* equal widths, or the pill's share of the row stops matching the items */
+  .nav-links .langs a { flex: 1 1 0; min-width: 56px; min-height: 44px; }
   .nav-actions .langs { display: none; }
 }
 @media (min-width: 981px) { .nav-links .langs { display: none; } }

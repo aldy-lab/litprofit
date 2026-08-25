@@ -234,8 +234,13 @@ def lang_switch(path):
         href = lang_url(lg, path).replace(ORIGIN, "") or "/"
         out.append('<a href="%s" hreflang="%s" lang="%s"%s>%s</a>'
                    % (href, i18n.LOCALE[lg][0], i18n.LOCALE[lg][0], cur, i18n.LABEL[lg]))
-    return ('<div class="langs" role="group" aria-label="%s">%s</div>'
-            % (attr(T("lang_label")), "".join(out)))
+    # --n so the sliding indicator's width and travel are arithmetic on the
+    # number of languages rather than a hard-coded half. Switch Russian back on
+    # and the pill becomes a third the width and moves in thirds; nothing in the
+    # stylesheet has to be found and changed.
+    idx = list(i18n.LANGS).index(LANG)
+    return ('<div class="langs" role="group" aria-label="%s" style="--n:%d;--i:%d">%s</div>'
+            % (attr(T("lang_label")), len(i18n.LANGS), idx, "".join(out)))
 
 
 def header(active, path="/"):
