@@ -3655,7 +3655,7 @@ function viewEnquiries(){
       ? new Date(r.updated_at).toLocaleDateString(L) +
         (PEOPLE[r.updated_by] ? ' \u2014 ' + PEOPLE[r.updated_by] : '')
       : '';
-    return `<tr data-enq="${esc(r.id)}" style="cursor:pointer"${
+    return `<tr data-enq="${esc(r.id)}" tabindex="-1" style="cursor:pointer"${
       who ? ` title="${esc(e.lastChanged)}: ${esc(who)}"` : ''}>
       <td class="pf-id"><b>${esc(r.number)}</b></td>
       <td data-label="${esc(e.client)}">${esc(r.client) || '—'}</td>
@@ -3945,7 +3945,20 @@ function enqEdit(row){
   document.body.appendChild(dlg);
 
   const form = dlg.querySelector('form');
-  const close = () => { dlg.close(); dlg.remove(); };
+  /* Where the keyboard was before this opened. Without it focus lands on
+     <body> when the dialog closes, and in a 216-row table that means starting
+     from the top again. */
+  const returnTo = document.activeElement;
+  const close = () => {
+    dlg.close(); dlg.remove();
+    if(returnTo && returnTo.isConnected && returnTo.focus) returnTo.focus();
+    else {
+      /* the row was re-rendered out from under us; the table itself will do */
+      const again = document.querySelector(`tr[data-enq="${CSS.escape(r.id || '')}"]`)
+                 || document.querySelector('#enqTable');
+      if(again && again.focus) again.focus();
+    }
+  };
   dlg.querySelector('[value=cancel]').addEventListener('click', close);
   const delBtn = dlg.querySelector('[value=del]');
   if(delBtn) delBtn.addEventListener('click', async () => {
@@ -4806,7 +4819,15 @@ function exportCsv(){
 
 /* ================= JSON backup / import ================= */
 function exportJson(){
-  download('LITPROFIT_backup.json', JSON.stringify(state, null, 1), 'application/json');
+  /* The register is left out, for the same reason it is left out of
+     localStorage -- and for one more: import reads only `projects` and drops
+     enquiries on the floor, so every backup written 216 client names and every
+     price into a plaintext file that could never put them back. Data going out
+     with no way in is not a backup, it is a copy nobody is guarding. The
+     register lives in Supabase and is backed up there. */
+  download('LITPROFIT_backup.json',
+           JSON.stringify(state, (k, v) => k === 'enquiries' ? undefined : v, 1),
+           'application/json');
 }
 $('#importFile').addEventListener('change', e=>{
   const f = e.target.files[0]; if(!f) return;
