@@ -356,7 +356,11 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   line-height: 1.6;
 }
 
-.section { padding-block: clamp(66px, 9vw, 150px); }
+/* 9vw came to 130px top and bottom on a 1440px screen -- 260px of a 900px
+   screen spent before any content, which is what put most of this site's
+   sections over one screenful. Tightened so a section is a screen; the rhythm
+   is still generous, it is just no longer the largest thing in it. */
+.section { padding-block: clamp(50px, 6.2vw, 104px); }
 /* No ground of its own at all.
    Alternating .section and .section-alt banded the page. Sampled down the left
    gutter it stepped (7,8,36) -> (10,11,50) -> back, in hard jumps of 14 and 22
@@ -369,13 +373,13 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
    moving light are finally the only variation on the page, which is what they
    were built to be. */
 .section-alt { background: transparent; }
-.section-tight { padding-block: clamp(48px, 6vw, 96px); }
+.section-tight { padding-block: clamp(38px, 4.4vw, 72px); }
 
 /* 30ch here was a mistake worth naming: the cap applies to the whole
    section-head, so it squeezed 62px headings into four-line wraps AND
    narrowed the lead inside it. Constrain the heading and the lead
    separately, and let text-wrap:balance even out the last line. */
-.section-head { margin-bottom: clamp(38px, 5vw, 72px); max-width: 68ch; }
+.section-head { margin-bottom: clamp(28px, 3.4vw, 50px); max-width: 68ch; }
 .section-head h2 { max-width: 20ch; }
 .section-head .lead { max-width: 54ch; }
 .section-head h2 { margin-bottom: 22px; }
@@ -462,8 +466,8 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
      the rendered page, the language links fell to 3.14:1 against a print on
      the about page. Darkening the backdrop keeps the bar see-through -- shapes
      still move through it -- while guaranteeing the ground beneath the type. */
-  -webkit-backdrop-filter: blur(18px) saturate(150%) brightness(0.42);
-  backdrop-filter: blur(18px) saturate(150%) brightness(0.42);
+  -webkit-backdrop-filter: blur(18px) saturate(150%) brightness(0.52);
+  backdrop-filter: blur(18px) saturate(150%) brightness(0.52);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
@@ -475,7 +479,7 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
      but 0.96 was not glass at all -- it was a solid plate with a blur behind
      it doing nothing. This keeps the page visible through it. */
   background: linear-gradient(180deg,
-    rgba(10, 11, 34, 0.62), rgba(10, 11, 34, 0.50));
+    rgba(10, 11, 34, 0.06), rgba(10, 11, 34, 0.03));
   border-bottom-color: var(--line);
 }
 /* Safari's Lockdown Mode and older engines drop backdrop-filter entirely, and
@@ -528,7 +532,12 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .nav-links a {
   position: relative;
   font-size: var(--text-m);
-  color: var(--muted);
+  /* Brighter than --muted, and the reason is the glass. The bar is now
+     see-through enough that a workshop photograph passes under the nav, and
+     the contrast the type has to hold is against that, not against a plate.
+     Buying it back in the ink rather than in the tint is what lets the bar
+     stay transparent -- muted grey needed nearly twice the tint to clear AA. */
+  color: rgba(255, 255, 255, 0.88);
   padding-block: 12px;
   transition: color 0.25s var(--ease);
   white-space: nowrap;
@@ -947,35 +956,37 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 /* ============================================================
    SERVICE CARDS — with media
    ============================================================ */
-/* One feature card beside a stack of compact ones, rather than four equal
-   boxes. Four equal cards give every service the same weight, which is not
-   true — refrigeration is the company's deepest discipline and the page
-   should say so. Falls back to a plain responsive grid wherever no card is
-   marked as the feature. */
+/* Four equal cards, one row.
+   This was a feature card beside a stack of compact ones, and what that made
+   on the page was three thumbnails beside three paragraphs -- a directory
+   listing under a heading that says "four disciplines, one contractor". The
+   depth argument for singling out refrigeration is answered elsewhere: there
+   is a live compressor two sections further down. */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
 }
-@media (min-width: 900px) {
-  .card-grid:has(.card--feature) {
-    grid-template-columns: 1.08fr 1fr;
-    align-items: stretch;
-  }
-  .card--feature { grid-row: span 3; }
-}
+@media (max-width: 1080px) { .card-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px)  { .card-grid { grid-template-columns: 1fr; } }
+/* No frame of its own and no radius: the grid's 1px gap over a ruled ground
+   is the frame, so four cards read as one instrument divided, not as four
+   boxes lying next to each other. A rounded panel with a fill was the single
+   most catalogue-looking thing on the page. */
 .card {
   display: flex;
   flex-direction: column;
   min-width: 0;                 /* grid children default to min-width:auto */
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 2px;
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
   overflow: hidden;
   transition: background 0.35s var(--ease), border-color 0.35s var(--ease),
               transform 0.35s var(--ease);
 }
-a.card:hover { border-color: var(--line-2); }
+@media (hover: hover) and (pointer: fine) {
+  a.card:hover { background: rgba(255, 255, 255, 0.055); }
+}
 /* There was a white glare sweeping 460% across the card over 850ms here,
    skewed to the monogram's diagonal. It is gone. A shine wiping across a card
    is the single most template-looking effect on the web, it ran at nearly
@@ -993,23 +1004,6 @@ a.card { position: relative; }
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background: var(--navy-700);
-}
-.card--feature .card-media { aspect-ratio: 4 / 3; }
-.card--feature .card-body { padding: 34px 34px 32px; }
-.card--feature h2, .card--feature h3 { font-size: var(--h3); }
-.card--feature p { font-size: var(--text-l); }
-
-/* compact: thumbnail beside the text, so three of them stack neatly */
-@media (min-width: 900px) {
-  .card--compact { flex-direction: row; }
-  .card--compact .card-media {
-    width: 148px;
-    flex: none;
-    aspect-ratio: auto;
-    align-self: stretch;
-  }
-  .card--compact .card-body { padding: 22px 24px 20px; }
-  .card--compact .card-more { padding-top: 16px; }
 }
 .card-media img {
   width: 100%; height: 100%;
@@ -1031,18 +1025,17 @@ a.card { position: relative; }
   inset: 0;
   background: linear-gradient(180deg, rgba(8,8,31,0.15), rgba(8,8,31,0.85));
 }
+/* The number used to be a solid brand chip with a diagonal cut, pinned to the
+   corner of the photograph. That is a sticker on a stock image, and it is the
+   detail that made the block read as cheap. It is a mono eyebrow above the
+   title now -- the same device as every other numbered thing on this site. */
 .card-num {
-  position: absolute;
-  left: 0; top: 14px;
-  z-index: 1;
-  padding: 5px 14px 5px 18px;
-  background: var(--brand);
+  display: block;
+  font-family: var(--mono);
   font-size: var(--label);
-  font-weight: 600;
   letter-spacing: 0.18em;
-  color: var(--white);
-  /* the trailing edge is cut on the monogram's diagonal */
-  clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+  color: var(--muted-2);
+  margin-bottom: 10px;
 }
 
 .card-body { display: flex; flex-direction: column; flex: 1; padding: 26px 26px 24px; }
@@ -1779,10 +1772,14 @@ html.is-frost #frostToggle {
       transition: none;
       animation: reveal-in linear both;
       animation-timeline: view();
-      animation-range: entry 4% cover 22%;
+      /* A longer range and a shorter move. Over 18% of cover the block was
+         still arriving faster than the page scrolls past it, which reads as a
+         snap even when it is tied to the scroll. Spread over 38% the travel
+         per pixel of scroll is a third of what it was. */
+      animation-range: entry 0% cover 38%;
     }
     @keyframes reveal-in {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(11px); }
       to   { opacity: 1; transform: none; }
     }
     /* Not in the hero. A view timeline is a function of how far the block has
@@ -2161,6 +2158,37 @@ html.is-frost #frostToggle {
   .cmp-canvas { cursor: default; }
 }
 
+/* ---------- a document to take away ----------
+   One ruled row, not a card: it is a file, and a file on this site should look
+   like a line on a schedule. Renders only when the file is actually in
+   assets/docs/ -- see PRESENTATION in build.py. */
+.doc-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 34px);
+  padding: clamp(20px, 2.4vw, 30px) clamp(18px, 2.2vw, 28px);
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  transition: background 0.3s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .doc-row:hover { background: rgba(255, 255, 255, 0.055); }
+}
+.doc-row-num, .doc-row-size {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  color: var(--muted-2);
+  white-space: nowrap;
+}
+.doc-row-title { display: block; font-size: var(--h4); font-weight: 600; color: var(--white); }
+.doc-row-note { display: block; color: var(--muted); font-size: var(--text-m); margin-top: 6px; }
+@media (max-width: 620px) {
+  .doc-row { grid-template-columns: auto 1fr; }
+  .doc-row-size { grid-column: 2; justify-self: start; }
+}
+
 /* ============================================================
    COMPLETED PROJECTS
    A job is a record, so it is set as one: the facts in a ruled block, the
@@ -2311,7 +2339,14 @@ html.is-frost #frostToggle {
    Same conventions as the other two drawings: hairline geometry, a dash-dot
    axis, ticked dimensions, numbered balloons on leaders, a title block.
    ============================================================ */
+/* The elevation is a wide drawing bled to 2160px, so on a 1440px screen it
+   was 1392 wide and over 900 tall on its own -- the section came to 241% of a
+   screenful. Capped by height and centred: the drawing keeps its proportions,
+   it just stops being taller than the screen it is drawn on. */
 .recip { margin-top: clamp(24px, 3vw, 44px); }
+.recip svg { max-height: min(52vh, 460px); width: 100%; height: auto; display: block; margin-inline: auto; }
+/* same for the capacity curve: 851px of chart is not a slide, it is a poster */
+.capchart svg { max-height: min(54vh, 480px); width: 100%; height: auto; display: block; margin-inline: auto; }
 .rc { width: 100%; height: auto; overflow: visible; }
 .rc-body { fill: none; stroke: rgba(255,255,255,0.62); stroke-width: 1.6; stroke-linejoin: round; }
 .rc-thin { fill: none; stroke: rgba(255,255,255,0.26); stroke-width: 1; }

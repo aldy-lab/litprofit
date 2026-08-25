@@ -58,6 +58,14 @@ COMPANY_ID = "302568798"
 VAT = "LT100005766815"
 FOUNDED = "2010"
 
+# The company presentation. Drop the file in assets/docs/ and put its filename
+# here; leave it "" and nothing renders -- no block on the about page, no
+# footer link, no empty container. Same rule as every other pending value on
+# this site: the worst case is a missing link, never a broken one. The file is
+# also checked for on disk, so a filename typed here that is not there behaves
+# exactly like a blank.
+PRESENTATION = ""
+
 # The lockup is the supplied monogram plus the supplied wordmark, both as
 # outlined paths — so no font is loaded, no web licence is needed, and the
 # lettering is pixel-identical everywhere. Set LOGO_LOCKUP to "" to fall back
@@ -759,16 +767,17 @@ def card(s, level="h3", variant=""):
     srcset = ""
     if os.path.exists(os.path.join(ROOT, card_rel)):
         cw, _ = img_size(card_rel)
-        slot = "690px" if variant == "feature" else "150px"
+        # one row of four in a 1392px container
+        slot = "330px"
         srcset = (' srcset="%s %dw, %s %dw" sizes="(min-width: 900px) %s, 100vw"'
                   % (u("/" + card_rel), cw, u("/assets/photos/" + f), w, slot))
 
     return """          <a class="{cls}" href="{href}">
             <span class="card-media">
-              <span class="card-num">{num}</span>
               <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy"{srcset}>
             </span>
             <span class="card-body">
+              <span class="card-num">{num}</span>
               <{lv}>{title}</{lv}>
               <p>{short}</p>
               <span class="card-more">{more}</span>
@@ -787,11 +796,52 @@ FEATURE_SLUG = "refrigeration-systems"
 
 
 
+
+def presentation():
+    """(url, size in MB) for the company presentation, or None."""
+    if not PRESENTATION:
+        return None
+    rel = "assets/docs/" + PRESENTATION
+    full = os.path.join(ROOT, rel)
+    if not os.path.exists(full):
+        return None
+    return u("/" + rel), os.path.getsize(full) / 1e6
+
+
+def presentation_block():
+    """A download row for the presentation, or nothing at all."""
+    pr = presentation()
+    if not pr:
+        return ""
+    href, mb = pr
+    return """
+    <section class="section section-tight">
+      <div class="container">
+        <a class="doc-row reveal" href="{href}" download>
+          <span class="doc-row-num">PDF</span>
+          <span class="doc-row-body">
+            <span class="doc-row-title">{title}</span>
+            <span class="doc-row-note">{note}</span>
+          </span>
+          <span class="doc-row-size">{mb} MB</span>
+        </a>
+      </div>
+    </section>""".format(href=href, mb=("%.1f" % mb).rstrip("0").rstrip("."),
+                         title=text(T("pres_title")), note=text(T("pres_note")))
+
+
 def service_cards(level="h3"):
-    sv = services()
-    out = [card(sv[0], level, "feature")]
-    out += [card(x, level, "compact") for x in sv[1:]]
-    return "\n".join(out)
+    """Four cards, all the same.
+
+    This was one feature card beside a stack of compact ones, on the argument
+    that refrigeration is the deepest discipline and the page should say so.
+    The page does say so -- it has a whole live compressor two sections down.
+    What the mixed sizes actually produced was three thumbnails beside three
+    paragraphs, which is a directory listing, and the heading over it says
+    "four disciplines, one contractor". Four equal cards is what that sentence
+    looks like.
+    """
+    return "\n".join(card(x, level) for x in services())
 
 
 def client_tile(c):
@@ -1202,8 +1252,15 @@ def home():
                  width="800" height="555" loading="lazy">
           </a>
         </div>
+      </div>
+    </section>
 
-        <div class="section-head reveal" style="margin-top: clamp(56px, 7vw, 104px)">
+    <!-- The clients were the second half of the section above: a statement
+         with a photograph, then a rail of logos, 1162px of one screenful. Two
+         statements, so two sections. -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
           <p class="eyebrow"><span class="eyebrow-num">08</span><span class="sep">//</span>{cl_e}</p>
           <h2>{cl_h}</h2>
         </div>
@@ -1496,6 +1553,7 @@ def about():
       <p>{legal}<br>{street}<br>{city}<br>{country}<br>
       {l_cid}: {cid}<br>{l_vat}: {vat}</p>
     </section>
+{pres}
 {cta}""".format(spec=spec, h_spec=PT("a_spec"), h_people=PT("a_people"),
                 shot=u("/assets/photos/workshop-bench.webp"),
                 shot_alt=attr(PT("shot_bench")),
@@ -1509,6 +1567,7 @@ def about():
                 p_more=PT("p_eyebrow").lower(), h_details=PT("a_details"),
                 legal=LEGAL, street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
                 l_cid=T("company_no"), cid=COMPANY_ID, l_vat=T("vat"), vat=VAT,
+                pres=presentation_block(),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
 
@@ -2103,6 +2162,15 @@ def recip_drawing():
           <svg class="rc" viewBox="0 0 980 590" role="img" aria-label="{alt}">{p}</svg>
         </div>
         <ol class="rc-legend reveal">{lg}</ol>
+      </div>
+    </section>
+
+    <!-- The chart used to sit inside the section above. Two full drawings
+         under one heading made that section 241% of a screen, and they are two
+         different statements anyway: this is the machine, that is what it
+         delivers. One section, one thing. -->
+    <section class="section">
+      <div class="container">
 {chart}
       </div>
     </section>""".format(e=T("rec_eyebrow"), h=T("rec_h2"), l=T("rec_lead"),

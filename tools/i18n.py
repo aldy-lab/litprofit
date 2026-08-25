@@ -139,6 +139,8 @@ S["en"] = dict(
                 "components for refrigeration and engine room systems, specified and "
                 "supplied for vessels rather than adapted from shore equipment.",
 
+    pres_title="Company presentation",
+    pres_note="Everything on this site, in one document to forward.",
     fact_years="Years in refrigeration", fact_service="Service response",
     fact_certs="Class certificates", fact_insured="Liability insured",
 
@@ -263,6 +265,8 @@ S["lt"] = dict(
                 "ir komponentai šaldymo bei mašinų skyriaus sistemoms, parinkti ir "
                 "tiekiami laivams, o ne pritaikyti iš kranto įrangos.",
 
+    pres_title="Įmonės pristatymas",
+    pres_note="Viskas, kas yra šioje svetainėje, viename dokumente.",
     fact_years="Metai šaldymo rinkoje", fact_service="Serviso atsakas",
     # "Klasifikacijos sertifikatai" is the one label in either language that
     # will not sit on a single line of the hero rule. "Klasės sertifikatai"
