@@ -883,6 +883,38 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 .enq-rate b{font-size:17px;color:var(--ink-1);font-variant-numeric:tabular-nums}
 /* the enquiry number is an identifier; wrapping it makes two of one */
 #enqTable td.pf-id{white-space:nowrap}
+
+/* ---------- two levels of navigation ----------
+   The top row is the subject; the row under it belongs to it. Same weight of
+   type in both would make them read as one strip of ten buttons again, so the
+   sections are larger and carry the underline, and the tabs stay quiet. */
+.sections{
+  display:flex;gap:2px;align-items:stretch;
+  padding:0 22px;background:var(--surface-1);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:19
+}
+.sections button{
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  padding:11px 18px;font-size:13px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .18s var(--ease),border-color .18s var(--ease)
+}
+.sections button:hover{color:var(--ink-2)}
+.sections button.active{color:var(--ink-1);border-bottom-color:var(--accent)}
+.sections button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+.tabrow{display:flex;align-items:center;gap:14px;padding-left:22px;background:var(--surface-1)}
+.tabrow > #projectSel{flex:0 0 auto;max-width:280px;min-width:0}
+.tabrow > nav.tabs{flex:1 1 auto;min-width:0;padding-left:0}
+@media(max-width:760px){
+  .sections{padding:0 12px}
+  .sections button{padding:10px 12px;font-size:12px}
+  /* the picker takes its own line rather than squeezing the strip to nothing */
+  .tabrow{flex-wrap:wrap;gap:0;padding:0 12px}
+  .tabrow > #projectSel{flex:1 1 100%;max-width:none;margin:8px 0}
+}
 </style>
 </head>
 <body>
@@ -892,7 +924,6 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
     <img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT">
     <small data-i18n="appSub"></small>
   </div>
-  <select id="projectSel" title="Project"></select>
   <span class="savetag" id="saveTag" role="status" aria-live="polite"></span>
   <span class="spacer"></span>
   <button id="btnPrint" class="primary"></button>
@@ -906,7 +937,16 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
   <select id="langSel"><option value="en">EN</option><option value="lt">LT</option><option value="ru">RU</option></select>
   <input type="file" id="importFile" accept=".json" style="display:none">
 </header>
-<nav class="tabs" id="tabs"></nav>
+<!-- Two subjects, and until now they were pretending to be one. The top row
+     says which of them you are in; the row under it belongs to that subject.
+     The project picker sits with the project tabs because it scopes exactly
+     those and nothing else -- in the header it looked like it scoped the whole
+     application, including a register that has no project. -->
+<nav class="sections" id="sections" role="tablist"></nav>
+<div class="tabrow" id="tabrow">
+  <select id="projectSel" title="Project"></select>
+  <nav class="tabs" id="tabs"></nav>
+</div>
 <div class="pulse" id="pulse" role="status" aria-live="off" hidden></div>
 <div class="seam" aria-hidden="true"></div>
 </div>
@@ -949,6 +989,8 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 /* ================= i18n ================= */
 const T = {
 en: {
+  secEnquiries:'Enquiries',
+  secProjects:'Projects',reportPdf:'PDF report',
   /* ---- enquiry register (was a Power BI report) ---- */
   enq:{title:'Enquiry register',lead:'Every enquiry, from the day it came in to the day it was delivered.',
     kReceived:'Enquiries received',kPO:'PO received',kProgress:'In progress',kRejected:'Rejected',
@@ -1050,6 +1092,8 @@ en: {
   undo:'Undo',rowDeleted:'Row deleted.',dupRow:'Duplicate row',delRow:'Delete row',gotIt:'Got it',saveFailed:'Could not save — browser storage is full or blocked.',notice1:'This data lives in this browser only.',notice2:'There is no server and no account: another device, another browser, or clearing site data will not have it. Use Backup JSON regularly — it is the only backup that exists, and Import restores it anywhere.'
 },
 lt: {
+  secEnquiries:'Užklausos',
+  secProjects:'Projektai',reportPdf:'PDF ataskaita',
   /* ---- užklausų registras ---- */
   enq:{title:'Užklausų registras',lead:'Kiekviena užklausa nuo gavimo dienos iki pristatymo.',
     kReceived:'Gauta užklausų',kPO:'Gauti',kProgress:'Vykdomi',kRejected:'Atmesti',
@@ -1151,6 +1195,8 @@ lt: {
   undo:'Atšaukti',rowDeleted:'Eilutė ištrinta.',dupRow:'Kopijuoti eilutę',delRow:'Ištrinti eilutę',gotIt:'Supratau',saveFailed:'Nepavyko išsaugoti — naršyklės atmintis pilna arba užblokuota.',notice1:'Šie duomenys saugomi tik šioje naršyklėje.',notice2:'Nėra nei serverio, nei paskyros: kitame įrenginyje, kitoje naršyklėje ar išvalius svetainės duomenis jų nebus. Reguliariai naudokite „Atsarginė kopija“ — tai vienintelė kopija, o „Importuoti“ ją atkuria bet kur.'
 },
 ru: {
+  secEnquiries:'Запросы',
+  secProjects:'Проекты',reportPdf:'Отчёт PDF',
   /* ---- реестр запросов ---- */
   enq:{title:'Реестр запросов',lead:'Каждый запрос — от дня поступления до дня поставки.',
     kReceived:'Получено запросов',kPO:'Получен PO',kProgress:'В работе',kRejected:'Отклонены',
@@ -2281,6 +2327,31 @@ const ALL_TABS = ['portfolio','dashboard','card','revenue','labor','subs','trave
 const COST_TABS = ['card','labor','subs','travel','materials','logistics'];
 function tabList(){ return canMoney() ? ALL_TABS : COST_TABS; }
 
+/* Which of the two subjects is on screen. Derived from the tab rather than
+   stored beside it: two pieces of state that must agree is two pieces of state
+   that eventually will not. */
+function section(){ return state.tab === 'enquiries' ? 'enquiries' : 'projects'; }
+
+function renderSections(){
+  const t = tr(), el = $('#sections');
+  if(!el) return;
+  /* An employee has no register and no company figures, so there is no choice
+     to offer and a switch with one option is furniture. */
+  if(!canMoney()){ el.hidden = true; return; }
+  el.hidden = false;
+  const cur = section();
+  const item = (k, label) =>
+    `<button role="tab" data-section="${k}" aria-selected="${cur === k}"
+       class="${cur === k ? 'active' : ''}">${esc(label)}</button>`;
+  /* "Enquiry register" is the screen's own heading and too long to sit in a
+     switch beside one word. The switch names the subject; the page names
+     itself. */
+  el.innerHTML = item('projects', t.secProjects) + item('enquiries', t.secEnquiries);
+  /* The picker and the tab strip are the project subject's own row. */
+  const row = $('#tabrow');
+  if(row) row.hidden = cur !== 'projects';
+}
+
 function renderChrome(){
   const t = tr();
   document.documentElement.lang = state.lang;
@@ -2288,8 +2359,14 @@ function renderChrome(){
   const lk = !!(proj() && proj().locked);
   document.documentElement.classList.toggle('is-locked', lk);
   /* the button prints what is on screen: the portfolio is the company */
+  /* One button with one name. It printed "Project report" or "Company report"
+     depending on the tab, which meant the label changed under the cursor and
+     still could not say "register". What it prints is whatever is on screen;
+     what it is called is what it produces. */
   $('#btnPrint').hidden = !canMoney();
-  $('#btnPrint').textContent = state.tab === 'portfolio' ? t.printCompany : t.printProject;
+  $('#btnPrint').textContent = t.reportPdf;
+  $('#btnPrint').title = state.tab === 'enquiries' ? t.enq.report
+                        : state.tab === 'portfolio' ? t.printCompany : t.printProject;
   $('#langSel').value = state.lang;
 
   const dark = currentTheme()==='dark';
@@ -2306,12 +2383,12 @@ function renderChrome(){
   /* A tab that is gone cannot stay selected -- a staff member whose last
      session ended on the dashboard would open to a blank main. */
   const tabs = tabList();
-  /* The register is reached from the menu and has no button in this strip, so
-     it must not be treated as an unknown tab and thrown back to Portfolio --
-     which is what happened the moment it left ALL_TABS. It is still gated on
-     canMoney(), the same as every tab that carries a figure. */
+  /* The register has no button in this strip -- it is the other section -- so
+     it must not be treated as an unknown tab and thrown back to Portfolio.
+     It is still gated on canMoney(), the same as every tab carrying a figure. */
   const off = tabs.indexOf(state.tab) === -1 && !(state.tab === 'enquiries' && canMoney());
   if(off) state.tab = tabs[0];
+  renderSections();
   $('#tabs').innerHTML = tabs.map(k=>`<button data-tab="${k}" class="${state.tab===k?'active':''}">${t.tabs[k]}</button>`).join('');
   /* Ten sheets, and on a 390px screen three of them fit. Nothing ever scrolled
      the strip, so opening Materials left the strip sitting at Portfolio and
@@ -2359,10 +2436,7 @@ function menuItems(t, locked){
     `<div class="menu-head">${esc(t.grpData)}</div>`,
     item('printProject', t.printProject),
     item('printCompany', t.printCompany),
-    '<div class="menu-sep"></div>',
-    `<div class="menu-head">${esc(t.enq.title)}</div>`,
-    item('enquiries', t.enq.open),
-    item('enqReport', t.enq.report),
+
     item('csv', t.csv),
     item('json', t.json),
     item('import', t.importJson + '\u2026'),   /* the ellipsis says a file dialog follows */
@@ -3682,6 +3756,28 @@ $('#tabs').addEventListener('click', e=>{
   const b = e.target.closest('button[data-tab]'); if(!b) return;
   state.tab = b.dataset.tab; saveState(); render();
 });
+/* Coming back to Projects lands on the tab you were last on, not on
+   Portfolio: the switch is a way between two subjects, not a reset. */
+var lastProjectTab = 'portfolio';
+$('#sections').addEventListener('click', e => {
+  const b = e.target.closest('button[data-section]'); if(!b) return;
+  const want = b.dataset.section;
+  if(want === section()) return;
+  if(want === 'enquiries'){ lastProjectTab = state.tab; state.tab = 'enquiries'; }
+  else { state.tab = lastProjectTab && lastProjectTab !== 'enquiries' ? lastProjectTab : 'portfolio'; }
+  persist(); render();
+});
+
+/* Left and right along the section row, as a tablist should. */
+$('#sections').addEventListener('keydown', e => {
+  const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+  if(!dir) return;
+  e.preventDefault();
+  const items = [...$('#sections').querySelectorAll('button')];
+  const i = items.indexOf(document.activeElement);
+  items[(i + dir + items.length) % items.length].focus();
+});
+
 $('#projectSel').addEventListener('change', e=>{
   if(!confirmDiscard()){ e.target.value = state.currentId; return; }   /* put the picker back */
   state.currentId = e.target.value; saveState(); render();
@@ -3767,8 +3863,6 @@ const MENU_ACTS = {
   },
   printProject(){ printProjectReport(); return 'noop'; },
   printCompany(){ printCompanyReport(); return 'noop'; },
-  enquiries(){ state.tab = 'enquiries'; render(); return 'noop'; },
-  enqReport(){ printEnquiryReport(); return 'noop'; },
   /* these three change no state, so they neither save nor re-render */
   csv(){ exportCsv(); return 'noop'; },
   json(){ exportJson(); return 'noop'; },
@@ -3784,10 +3878,7 @@ $('#projMenu').addEventListener('click', async e=>{
   const act = b.dataset.act;
   const changes = !(act === 'csv' || act === 'json' || act === 'import'
                     || act === 'signout' || act === 'refresh'
-                    || act === 'printProject' || act === 'printCompany'
-                    /* neither of these touches a project, so neither should
-                       push an undo point for one */
-                    || act === 'enquiries' || act === 'enqReport');
+                    || act === 'printProject' || act === 'printCompany');
   if(changes) pushUndo(null);
   lastDeleted = null;
   const r = await MENU_ACTS[act]();
@@ -4415,7 +4506,9 @@ function printEnquiryReport(){
    anything else is the job in front of you. Both sit in the menu as well, so
    neither is ever only reachable by being on the right tab. */
 $('#btnPrint').addEventListener('click', ()=>{
-  if(state.tab === 'portfolio') printCompanyReport(); else printProjectReport();
+  if(state.tab === 'enquiries') printEnquiryReport();
+  else if(state.tab === 'portfolio') printCompanyReport();
+  else printProjectReport();
 });
 
 /* ================= sync =================
