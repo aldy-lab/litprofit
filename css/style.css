@@ -610,7 +610,16 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
    rivet seam instead (`.seam-bottom` in the markup), so the section boundary
    reads as a plate joint. */
 
-.hero-inner { width: 100%; }
+.hero-inner {
+  width: 100%;
+  /* Nudged below centre. Centring alone put the block slightly high -- 258px
+     of screen above it against 163 below at 1440x900 -- because the hero's own
+     padding-top already carries the header and the optical centre of a block
+     whose largest element is at the top sits lower than its geometric one.
+     Scaled to viewport height and capped, so a short laptop gets a smaller
+     push and the buttons keep their air underneath. */
+  margin-top: clamp(0px, 4vh, 52px);
+}
 .hero h1 { max-width: 15ch; margin-bottom: clamp(14px, min(2.4vw, 3vh), 30px); }
 .hero .lead { max-width: 52ch; }
 
