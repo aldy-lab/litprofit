@@ -55,9 +55,12 @@ header.app{
   display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:14px 22px;background:var(--surface-1);
   border-bottom:1px solid var(--grid);
-  /* stack above .seam so the project menu, which hangs out of this box, is
-     not painted over by it */
-  position:relative;z-index:2;
+  /* Stack above everything that comes after it. The menu hangs out of this box
+     and is only as high as the box it hangs from: at z-index 2 the section row
+     (19) and the tab strip (20) both painted straight over the open menu,
+     because a sticky element makes its own stacking context and the menu's own
+     z-index of 40 is measured inside this one, not against theirs. */
+  position:relative;z-index:30;
 }
 /* There was a backdrop-filter:blur(12px) here. --surface-1 is #ffffff and
    #0c0e30 -- both fully opaque -- so it could never show through and cost
@@ -276,18 +279,23 @@ html.is-locked .card table.grid input:disabled{opacity:1}
    confirm it happened, and only turns amber if a write actually failed. */
 .savetag{
   font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--ink-3);opacity:0;transition:opacity .3s var(--ease),color .3s var(--ease);
+  /* Saved is good news and reads as good news. Grey it was the same weight as
+     the subtitle beside it, which is what made it easy to miss. */
+  color:var(--good-text);opacity:0;transition:opacity .3s var(--ease),color .3s var(--ease);
   white-space:nowrap;flex:none
+}
+.savetag::before{
+  content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:currentColor;margin-right:7px;vertical-align:1px
 }
 .savetag.on{opacity:1}
 .savetag.warn{color:var(--warning);opacity:1}
 .savetag.flash{color:var(--good-text)}
 /* the dot pulses only while a write is pending, which is a few hundred ms */
-.savetag.busy::before{
-  content:'';display:inline-block;width:5px;height:5px;margin-right:7px;
-  vertical-align:middle;border-radius:50%;background:currentColor;
-  animation:savePulse 1s ease-in-out infinite
-}
+/* the dot is defined once, above; this only makes it breathe while a write is
+   in flight -- declaring it twice meant two rules drawing the same circle at
+   two sizes, and whichever won was an accident of file order */
+.savetag.busy::before{ animation:savePulse 1s ease-in-out infinite }
 @keyframes savePulse{0%,100%{opacity:.25}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){.savetag.busy::before{animation:none;opacity:.6}}
 
@@ -1457,6 +1465,32 @@ function normaliseProjects(){
   state.projects = state.projects.map(normaliseProject);
 }
 
+/* Litprofit invoices in euros. This was a per-project text field and nothing
+   converts between currencies here, so all it ever did was label the same
+   arithmetic differently -- and mislabel it, when somebody typed USD. */
+const CURRENCY = 'EUR';
+
+/* Runs on every load, not gated on a version number: a project imported from
+   somebody's old backup arrives with whatever it was saved with. Only the
+   LABEL changes -- no figure is touched, because there is no rate here to
+   touch it with. */
+function migrateCurrency(){
+  let changed = 0;
+  (state.projects || []).forEach(p => {
+    if(!p.settings) return;
+    /* Assigned outright, not only when it differs case-insensitively. Written
+       that way, a project stored as "eur" passed the test and kept its
+       lowercase spelling -- and portfolioTotals groups by the exact string, so
+       the same currency came out as two columns of totals. Which is the bug
+       this was written to fix. */
+    if(p.settings.currency !== CURRENCY){
+      p.settings.currency = CURRENCY;
+      changed++;
+    }
+  });
+  return changed;
+}
+
 function migrateDefaults(){
   if(state.v >= 2) return;
   Object.keys(DEF_FIELDS).forEach(sheet=>{
@@ -1905,7 +1939,7 @@ document.addEventListener('focusout', endUndoGroup);
 function uid(){ return 'p' + Math.random().toString(36).slice(2,9); }
 
 function defaultSettings(){
-  return { currency:'EUR', burden:0.35, allowance:60, contingency:0.05, admin:0.08, targetMargin:0.20 };
+  return { currency:CURRENCY, burden:0.35, allowance:60, contingency:0.05, admin:0.08, targetMargin:0.20 };
 }
 function newProject(lang, seq){
   const D = T[lang].defaults;
@@ -2898,7 +2932,13 @@ function viewSettings(){
       <thead><tr><th>${esc(t.set.param)}</th><th>${esc(t.set.value)}</th>
         <th>${esc(t.set.unit)}</th></tr></thead>
       <tbody>
-        ${row(t.set.currency,    text('currency', s.currency),        t.set.currencyN)}
+        <!-- The currency is no longer a per-project field. It was a free text
+             box, so a book of jobs could hold EUR, eur, USD and a typo at the
+             same time, and the portfolio grouped its totals by whatever
+             string it found -- which is how a company that invoices in euros
+             ended up with a "TOTAL REVENUE USD" card on its own dashboard.
+             Read-only here so the row still says what the figures are in. -->
+        ${row(t.set.currency, `<b>${esc(CURRENCY)}</b>`, t.set.currencyN)}
         ${row(t.set.burden,      pctIn('burden', s.burden),           t.set.burdenN)}
         ${row(t.set.allowance,   money('allowance', s.allowance),     t.set.allowanceN)}
         ${row(t.set.contingency, pctIn('contingency', s.contingency), t.set.contingencyN)}
@@ -4429,6 +4469,7 @@ $('#importFile').addEventListener('change', e=>{
     state = s;
     if(!state.projects.find(p=>p.id===state.currentId)) state.currentId = state.projects[0]?.id;
     migrateDefaults();          /* a backup can predate keyed defaults too */
+    migrateCurrency();          /* and can carry a currency this app no longer has */
     saveState(); applyTheme(); render();
   };
   rd.readAsText(f); e.target.value='';
@@ -5066,6 +5107,7 @@ async function cloudPull(){
   if(!state.projects.some(p=>p.id === state.currentId)) state.currentId = state.projects[0].id;
   normaliseProjects();
   migrateDefaults();
+  migrateCurrency();
   persist();
 }
 
@@ -5163,6 +5205,7 @@ async function bootCloud(){
 /* ================= init ================= */
 normaliseProjects();
 migrateDefaults();
+migrateCurrency();
 migrateTheme();
 applyTheme();
 render();
