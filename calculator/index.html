@@ -1611,6 +1611,19 @@ const CLOUD = (function(){
     return r.status === 204 ? null : r.json();
   }
 
+  /* PostgREST answers a function declared `returns setof x` with an ARRAY and
+     one declared `returns x` with a single OBJECT. Reading rows[0] against an
+     object gives undefined, which every caller here treats as "no row came
+     back" -- and for a save, "no row came back" means somebody else saved
+     first. So a save_enquiry that had committed perfectly well reported a
+     conflict, every single time. The signature is fixed in migration 3; this
+     is so the same declaration change can never quietly do it again. */
+  function firstRow(reply){
+    if(!reply) return null;
+    if(Array.isArray(reply)) return reply[0] || null;
+    return typeof reply === 'object' ? reply : null;
+  }
+
   /* projects_v, never public.projects: the table is revoked from the app, and
      the view hands back a row with the money keys already removed for anyone
      who is not a manager. `money` says which kind of row this is. */
@@ -1695,19 +1708,17 @@ const CLOUD = (function(){
     },
 
     async enquiryInsert(row){
-      const rows = await rest('rpc/create_enquiry', {
+      return firstRow(await rest('rpc/create_enquiry', {
         method: 'POST', body: JSON.stringify({ p_row: row })
-      });
-      return rows && rows[0];
+      }));
     },
 
     /* Same optimistic-concurrency contract as update(): an empty result means
        somebody saved first, not that the call failed. */
     async enquirySave(id, rev, row){
-      const rows = await rest('rpc/save_enquiry', {
+      return firstRow(await rest('rpc/save_enquiry', {
         method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
-      });
-      return (rows && rows[0]) || null;
+      }));
     },
 
     async enquiryRemove(id){
