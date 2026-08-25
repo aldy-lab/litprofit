@@ -765,6 +765,69 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
     scroll-padding-inline-end:56px
   }
 }
+
+/* ---------- enquiry register ----------
+   The Power BI report leaned on colour to be read at all: green for the thing
+   that went right, red for the thing that did not, amber for the thing still
+   moving. That is kept, because it is how the register is actually used --
+   people scan the colour and read only the rows that are the wrong one. Both
+   themes get their own values; the dark set is not the light set dimmed. */
+.enq-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 16px}
+.enq-kpi{border:1px solid var(--border);border-radius:3px;padding:12px 14px;background:var(--surface-1)}
+.enq-kpi b{display:block;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.enq-kpi span{display:block;margin-top:2px;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);font-family:var(--mono)}
+.enq-kpi.ok  b{color:var(--good)}
+.enq-kpi.wip b{color:var(--warning)}
+.enq-kpi.bad b{color:var(--critical)}
+
+.enq-flag{display:inline-block;padding:2px 8px;border-radius:2px;font-size:11.5px;
+  white-space:nowrap;border:1px solid transparent}
+.enq-flag.ok {background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good-text);
+  border-color:color-mix(in srgb,var(--good) 34%,transparent)}
+.enq-flag.bad{background:color-mix(in srgb,var(--critical) 16%,transparent);color:var(--critical);
+  border-color:color-mix(in srgb,var(--critical) 34%,transparent)}
+.enq-flag.wip{background:color-mix(in srgb,var(--warning) 18%,transparent);color:var(--warning);
+  border-color:color-mix(in srgb,var(--warning) 36%,transparent)}
+/* an enquiry with no quote out is the one number here worth chasing */
+.enq-age{color:var(--critical);font-variant-numeric:tabular-nums}
+
+/* .grid-2 did not exist -- it was written here from memory of some other
+   project, so the four analytics stacked one per row down the page instead of
+   sitting two by two. Nothing errors when a class is undefined, which is why
+   it took a screenshot to notice. */
+.enq-charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.enq-charts > .card{margin-bottom:0}
+@media(max-width:900px){ .enq-charts{grid-template-columns:1fr} }
+/* The viewBox is 560 wide with no width attribute, so left alone the chart
+   grows to the card and a 150-unit-tall drawing renders 375px tall. */
+.enq-charts figure.chart svg{max-width:560px;width:100%;height:auto;display:block}
+.enq-charts .legend{max-width:560px}
+.enq-filters{flex-wrap:wrap}
+.enq-filters select{min-width:130px;max-width:190px}
+
+.enq-dialog{border:1px solid var(--border);border-radius:4px;background:var(--surface-1);
+  color:var(--ink-1);padding:0;max-width:760px;width:calc(100vw - 32px)}
+.enq-dialog::backdrop{background:rgba(4,4,13,.55)}
+.enq-form{padding:22px 24px 18px}
+.enq-form h2{margin:0 0 16px;font-size:18px}
+.enq-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.enq-grid label{display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);font-family:var(--mono);min-width:0}
+.enq-grid label.wide{grid-column:1/-1}
+.enq-grid label.check{flex-direction:row;align-items:center;gap:8px;text-transform:none;
+  letter-spacing:0;font-family:var(--font);font-size:13px;color:var(--ink-2)}
+.enq-grid input:not([type=checkbox]),.enq-grid select{
+  border:1px solid var(--border);border-radius:2px;background:var(--page);padding:8px 10px;
+  /* 16px on a phone: anything smaller and iOS Safari zooms the page on focus */
+  font-size:14px;min-width:0;width:100%}
+.enq-actions{display:flex;align-items:center;gap:10px;margin-top:18px}
+.enq-actions .spacer{flex:1}
+.enq-actions .danger{color:var(--critical)}
+@media(max-width:640px){
+  .enq-grid{grid-template-columns:1fr}
+  .enq-grid input:not([type=checkbox]),.enq-grid select{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -831,8 +894,25 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 /* ================= i18n ================= */
 const T = {
 en: {
+  /* ---- enquiry register (was a Power BI report) ---- */
+  enq:{title:'Enquiry register',lead:'Every enquiry, from the day it came in to the day it was delivered.',
+    kReceived:'Enquiries received',kPO:'PO received',kProgress:'In progress',kRejected:'Rejected',
+    number:'No.',client:'Client',description:'Description',date:'Enquiry date',
+    toSupplier:'Sent to supplier',supplier:'Supplier',quoted:'Quoted to client',
+    daysUnquoted:'Days unquoted',status:'Status',poDate:'PO date',price:'Price ex VAT',
+    delivery:'Delivery',owner:'Owner',note:'Note',
+    st:{'Vykdoma':'In progress','Gautas PO':'PO received','Atmesta užklausa':'Rejected'},
+    delivered:'Delivered',undelivered:'Not delivered',
+    add:'+ New enquiry',edit:'Edit enquiry',save:'Save',cancel:'Cancel',del:'Delete',
+    confirmDel:'Delete this enquiry? This cannot be undone.',
+    none:'No enquiries match these filters.',all:'All',search:'Search',
+    searchPh:'Number, client, description or supplier',
+    byClient:'Value by client',bySupplier:'Value by supplier',byMonth:'Enquiries per month',
+    byStatus:'By status',csv:'Export CSV',total:'Total',
+    conflict:'Somebody else saved this enquiry while you had it open. Reload and try again.',
+    staffOnly:'The enquiry register is not part of your access.'},
   appSub:'Project Profitability Calculator',themeDark:'Dark',themeLight:'Light',
-  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',settings:'Settings'},
+  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',enquiries:'Enquiries',settings:'Settings'},
   newProj:'+ New project',dupProj:'Duplicate',delProj:'Delete',csv:'Export CSV',json:'Backup JSON',importJson:'Import',print:'Print report',
   addRow:'+ Add row',total:'Total',yes:'Yes',no:'No',
   confirmDel:'Delete this project? This cannot be undone.',
@@ -901,8 +981,25 @@ en: {
   undo:'Undo',rowDeleted:'Row deleted.',dupRow:'Duplicate row',delRow:'Delete row',gotIt:'Got it',saveFailed:'Could not save — browser storage is full or blocked.',notice1:'This data lives in this browser only.',notice2:'There is no server and no account: another device, another browser, or clearing site data will not have it. Use Backup JSON regularly — it is the only backup that exists, and Import restores it anywhere.'
 },
 lt: {
+  /* ---- užklausų registras ---- */
+  enq:{title:'Užklausų registras',lead:'Kiekviena užklausa nuo gavimo dienos iki pristatymo.',
+    kReceived:'Gauta užklausų',kPO:'Gauti',kProgress:'Vykdomi',kRejected:'Atmesti',
+    number:'Numeris',client:'Klientas',description:'Aprašymas',date:'Užklausos data',
+    toSupplier:'Užklausa tiekėjams',supplier:'Tiekėjas',quoted:'Pasiūlymas klientui',
+    daysUnquoted:'Neišsiųstas pasiūlymas, dienos',status:'Užklausos būsena',poDate:'PO data',
+    price:'Kaina be PVM',delivery:'Pristatymas',owner:'Atsakingas',note:'Pastaba',
+    st:{'Vykdoma':'Vykdoma','Gautas PO':'Gautas PO','Atmesta užklausa':'Atmesta užklausa'},
+    delivered:'Pristatyta',undelivered:'Nepristatyta',
+    add:'+ Nauja užklausa',edit:'Redaguoti užklausą',save:'Išsaugoti',cancel:'Atšaukti',del:'Ištrinti',
+    confirmDel:'Ištrinti šią užklausą? Šio veiksmo atšaukti negalima.',
+    none:'Pagal šiuos filtrus užklausų nėra.',all:'Visi',search:'Paieška',
+    searchPh:'Numeris, klientas, aprašymas ar tiekėjas',
+    byClient:'Suma pagal klientą',bySupplier:'Suma pagal tiekėją',byMonth:'Užklausų kiekis per mėnesį',
+    byStatus:'Pagal būseną',csv:'Eksportuoti CSV',total:'Iš viso',
+    conflict:'Kitas naudotojas išsaugojo šią užklausą, kol ji buvo atidaryta. Perkraukite ir bandykite dar kartą.',
+    staffOnly:'Užklausų registras nepriklauso jūsų prieigai.'},
   appSub:'Projektų pelningumo skaičiuoklė',themeDark:'Tamsi',themeLight:'Šviesi',
-  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',settings:'Nustatymai'},
+  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',enquiries:'Užklausos',settings:'Nustatymai'},
   newProj:'+ Naujas projektas',dupProj:'Kopijuoti',delProj:'Ištrinti',csv:'Eksportuoti CSV',json:'Atsarginė kopija',importJson:'Importuoti',print:'Spausdinti ataskaitą',
   addRow:'+ Pridėti eilutę',total:'Iš viso',yes:'Taip',no:'Ne',
   confirmDel:'Ištrinti šį projektą? Veiksmo atšaukti negalima.',
@@ -971,8 +1068,25 @@ lt: {
   undo:'Atšaukti',rowDeleted:'Eilutė ištrinta.',dupRow:'Kopijuoti eilutę',delRow:'Ištrinti eilutę',gotIt:'Supratau',saveFailed:'Nepavyko išsaugoti — naršyklės atmintis pilna arba užblokuota.',notice1:'Šie duomenys saugomi tik šioje naršyklėje.',notice2:'Nėra nei serverio, nei paskyros: kitame įrenginyje, kitoje naršyklėje ar išvalius svetainės duomenis jų nebus. Reguliariai naudokite „Atsarginė kopija“ — tai vienintelė kopija, o „Importuoti“ ją atkuria bet kur.'
 },
 ru: {
+  /* ---- реестр запросов ---- */
+  enq:{title:'Реестр запросов',lead:'Каждый запрос — от дня поступления до дня поставки.',
+    kReceived:'Получено запросов',kPO:'Получен PO',kProgress:'В работе',kRejected:'Отклонены',
+    number:'Номер',client:'Клиент',description:'Описание',date:'Дата запроса',
+    toSupplier:'Запрос поставщику',supplier:'Поставщик',quoted:'Предложение клиенту',
+    daysUnquoted:'Дней без предложения',status:'Статус',poDate:'Дата PO',
+    price:'Цена без НДС',delivery:'Поставка',owner:'Ответственный',note:'Примечание',
+    st:{'Vykdoma':'В работе','Gautas PO':'Получен PO','Atmesta užklausa':'Отклонён'},
+    delivered:'Поставлено',undelivered:'Не поставлено',
+    add:'+ Новый запрос',edit:'Изменить запрос',save:'Сохранить',cancel:'Отмена',del:'Удалить',
+    confirmDel:'Удалить этот запрос? Действие необратимо.',
+    none:'По этим фильтрам запросов нет.',all:'Все',search:'Поиск',
+    searchPh:'Номер, клиент, описание или поставщик',
+    byClient:'Сумма по клиентам',bySupplier:'Сумма по поставщикам',byMonth:'Запросов по месяцам',
+    byStatus:'По статусу',csv:'Экспорт CSV',total:'Итого',
+    conflict:'Кто-то сохранил этот запрос, пока он был открыт. Обновите страницу и повторите.',
+    staffOnly:'Реестр запросов не входит в ваш доступ.'},
   appSub:'Калькулятор рентабельности проектов',themeDark:'Тёмная',themeLight:'Светлая',
-  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',settings:'Настройки'},
+  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',enquiries:'Запросы',settings:'Настройки'},
   newProj:'+ Новый проект',dupProj:'Дублировать',delProj:'Удалить',csv:'Экспорт CSV',json:'Резервная копия',importJson:'Импорт',print:'Печать отчёта',
   addRow:'+ Добавить строку',total:'Итого',yes:'Да',no:'Нет',
   confirmDel:'Удалить этот проект? Действие необратимо.',
@@ -1296,6 +1410,35 @@ const CLOUD = (function(){
 
     async remove(id){
       await rest('rpc/delete_project', { method: 'POST', body: JSON.stringify({ p_id: id }) });
+    },
+
+    /* ---- the enquiry register ----
+       enquiries_v has a `where public.sees_money()` on it, so for a staff
+       member it is not a redacted register, it is an empty one. That is
+       deliberate: an enquiry list with the prices blanked is still the client
+       list and the supplier list. The app never sees the table itself. */
+    async enquiries(){
+      return await rest('enquiries_v?select=*&order=enquiry_date.desc.nullslast') || [];
+    },
+
+    async enquiryInsert(row){
+      const rows = await rest('rpc/create_enquiry', {
+        method: 'POST', body: JSON.stringify({ p_row: row })
+      });
+      return rows && rows[0];
+    },
+
+    /* Same optimistic-concurrency contract as update(): an empty result means
+       somebody saved first, not that the call failed. */
+    async enquirySave(id, rev, row){
+      const rows = await rest('rpc/save_enquiry', {
+        method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
+      });
+      return (rows && rows[0]) || null;
+    },
+
+    async enquiryRemove(id){
+      await rest('rpc/delete_enquiry', { method: 'POST', body: JSON.stringify({ p_id: id }) });
     }
   };
 })();
@@ -2015,7 +2158,7 @@ function canMoney(){ return !CLOUD.on || CAN_MONEY; }
 
 /* ================= rendering ================= */
 const $ = sel => document.querySelector(sel);
-const ALL_TABS = ['portfolio','dashboard','card','revenue','labor','subs','travel','materials','logistics','settings'];
+const ALL_TABS = ['portfolio','dashboard','enquiries','card','revenue','labor','subs','travel','materials','logistics','settings'];
 /* Portfolio and Dashboard are the company's position, Revenue is the company's
    income, and Settings holds the target margin. None of them is an employee's
    business, and all four would be blank or misleading with the figures gone. */
@@ -2163,6 +2306,16 @@ function paintPulse(){
 function render(){
   renderChrome();
   const m = $('#main');
+  /* The register is company-wide, not project-scoped, so it is dispatched
+     before the guard below: it has something to show on an account with no
+     projects at all, and every other view here would throw on that account. */
+  if(state.tab === 'enquiries'){
+    m.innerHTML = viewEnquiries();
+    m.dataset.view = 'sheet';
+    wireEnquiries();
+    paintPulse(); measureChrome();
+    return;
+  }
   /* Nothing to show and nothing this person may do about it. Every view below
      dereferences proj(), so without this the page throws rather than saying so. */
   if(!proj()){
@@ -2485,6 +2638,398 @@ function waterfallSteps(t, d){
     { l: t.dash.adminOh, v: -d.adminActual },
     { l: t.dash.profit, v: 0, total: true }
   ];
+}
+
+/* ============================================================
+   ENQUIRY REGISTER
+   ------------------------------------------------------------
+   This screen replaces a Power BI report that was published to the web. Two
+   things it does that the report could not: it is behind the same login and
+   the same roles as the rest of the calculator, and it is writable, so the
+   register stops being a spreadsheet that somebody has to remember to refresh.
+
+   Both report pages are here on one screen -- the KPI cards and the register
+   from page 1, the four analytics from page 2 -- because they answer the same
+   question and flipping between two pages to read one number was the report's
+   own worst habit.
+   ============================================================ */
+const ENQ_STATUSES = ['Vykdoma', 'Gautas PO', 'Atmesta užklausa'];
+
+function enqState(){
+  if(!state.enq) state.enq = {
+    q:'', client:'', supplier:'', status:'', owner:'',
+    toSupplier:'', quoted:'', from:'', to:'', year:'',
+    sort:'date', dir:-1
+  };
+  return state.enq;
+}
+
+/* The report's own conditional formatting, kept: green for the thing that
+   went right, red for the thing that did not, amber for the thing still
+   moving. Reading it as colour is how this register is actually used. */
+function enqTone(v){
+  return v === 'Gautas PO' ? 'ok'
+       : v === 'Atmesta užklausa' ? 'bad'
+       : v === 'Vykdoma' ? 'wip' : '';
+}
+
+function enqRows(){
+  const f = enqState();
+  const q = f.q.trim().toLowerCase();
+  return (state.enquiries || []).filter(r => {
+    if(q){
+      const hay = [r.number, r.client, r.description, r.supplier, r.owner]
+        .map(x => (x || '').toLowerCase()).join(' ');
+      if(hay.indexOf(q) < 0) return false;
+    }
+    if(f.client   && r.client   !== f.client)   return false;
+    if(f.supplier && r.supplier !== f.supplier) return false;
+    if(f.status   && r.status   !== f.status)   return false;
+    if(f.owner    && (r.owner || '') !== f.owner) return false;
+    if(f.toSupplier && String(!!r.sent_to_supplier) !== f.toSupplier) return false;
+    if(f.quoted     && String(!!r.quoted_to_client) !== f.quoted)     return false;
+    if(f.year && (r.enquiry_date || '').slice(0,4) !== f.year) return false;
+    if(f.from && (!r.enquiry_date || r.enquiry_date < f.from)) return false;
+    if(f.to   && (!r.enquiry_date || r.enquiry_date > f.to))   return false;
+    return true;
+  });
+}
+
+function enqSorted(rows){
+  const f = enqState();
+  const KEY = {
+    number: r => r.number || '', client: r => r.client || '',
+    description: r => r.description || '', date: r => r.enquiry_date || '',
+    supplier: r => r.supplier || '', days: r => r.days_unquoted || 0,
+    status: r => r.status || '', poDate: r => r.po_date || '',
+    price: r => Number(r.price_ex_vat) || 0
+  };
+  const get = KEY[f.sort] || KEY.date;
+  return rows.slice().sort((a, b) => {
+    const x = get(a), y = get(b);
+    const c = (typeof x === 'number' && typeof y === 'number')
+      ? x - y : String(x).localeCompare(String(y));
+    return c * f.dir;
+  });
+}
+
+function enqDistinct(key){
+  const seen = new Set();
+  (state.enquiries || []).forEach(r => { if(r[key]) seen.add(r[key]); });
+  return [...seen].sort((a, b) => a.localeCompare(b));
+}
+
+/* Sum by a dimension, biggest first, with a long tail folded into one slice.
+   The report drew 63 clients as 63 pie wedges, most of them a hairline, and a
+   wedge you cannot see or read is not information. */
+function enqGroup(rows, key, keep){
+  const by = new Map();
+  rows.forEach(r => {
+    const k = r[key] || '—';
+    by.set(k, (by.get(k) || 0) + (Number(r.price_ex_vat) || 0));
+  });
+  const all = [...by.entries()].map(([l, v]) => ({ l, v })).sort((a, b) => b.v - a.v);
+  if(all.length <= keep) return all;
+  const rest = all.slice(keep).reduce((a, x) => a + x.v, 0);
+  return all.slice(0, keep).concat([{ l: '+' + (all.length - keep), v: rest }]);
+}
+
+function enqMonths(rows){
+  const by = new Map();
+  rows.forEach(r => {
+    if(!r.enquiry_date) return;
+    const k = r.enquiry_date.slice(0, 7);
+    by.set(k, (by.get(k) || 0) + 1);
+  });
+  return [...by.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([l, v]) => ({ l, v }));
+}
+
+/* A plain column chart. The dashboard's helpers all draw money against a
+   plan, which is not what a count per month is. */
+function enqBars(items, opt){
+  const o = opt || {};
+  if(!items.length) return `<p class="chart-empty">${esc(o.empty || '')}</p>`;
+  const W = 560, H = 150, padL = 30, padB = 26, padT = 14;
+  const max = Math.max(1, ...items.map(i => i.v));
+  const bw = (W - padL - 10) / items.length;
+  const bars = items.map((it, i) => {
+    const h = (it.v / max) * (H - padT - padB);
+    const x = padL + i * bw, y = H - padB - h;
+    return `<rect x="${(x + bw * 0.18).toFixed(1)}" y="${y.toFixed(1)}"
+        width="${(bw * 0.64).toFixed(1)}" height="${Math.max(1, h).toFixed(1)}"
+        fill="var(--series-2)" rx="1"/>
+      <text x="${(x + bw / 2).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="9.5"
+        fill="var(--ink-2)" text-anchor="middle">${it.v}</text>
+      <text x="${(x + bw / 2).toFixed(1)}" y="${H - 8}" font-size="9.5"
+        fill="var(--ink-3)" text-anchor="middle">${esc(o.short ? it.l.slice(-2) : it.l)}</text>`;
+  }).join('');
+  return `<figure class="chart"><figcaption>${esc(o.title || '')}</figcaption>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.title || '')}">
+      <line x1="${padL}" y1="${H - padB}" x2="${W - 6}" y2="${H - padB}"
+        stroke="var(--grid)" stroke-width="1"/>${bars}</svg></figure>`;
+}
+
+function viewEnquiries(){
+  const t = tr(), e = t.enq, L = LOCALES[state.lang];
+  const all = (state.enquiries || []).length;
+  const rows = enqSorted(enqRows());
+
+  const kpi = (label, n, tone) =>
+    `<div class="enq-kpi${tone ? ' ' + tone : ''}"><b>${n}</b><span>${esc(label)}</span></div>`;
+  const count = st => rows.filter(r => r.status === st).length;
+
+  const th = (key, label, num) =>
+    `<th class="${num ? 'num' : ''} pf-sort${enqState().sort === key ? ' on' : ''}"
+       data-esort="${key}">${esc(label)}${enqState().sort === key
+        ? `<span class="pf-arr">${enqState().dir > 0 ? '↑' : '↓'}</span>` : ''}</th>`;
+
+  const flag = (on, yes, no) =>
+    `<span class="enq-flag ${on ? 'ok' : 'bad'}">${esc(on ? yes : no)}</span>`;
+
+  const body = rows.length ? rows.map(r => `<tr data-enq="${esc(r.id)}" style="cursor:pointer">
+      <td class="pf-id"><b>${esc(r.number)}</b></td>
+      <td data-label="${esc(e.client)}">${esc(r.client) || '—'}</td>
+      <td data-label="${esc(e.description)}">${esc(r.description) || '—'}</td>
+      <td class="muted" data-label="${esc(e.date)}">${
+        r.enquiry_date ? new Date(r.enquiry_date).toLocaleDateString(L) : '—'}</td>
+      <td data-label="${esc(e.toSupplier)}">${flag(r.sent_to_supplier, t.yes, t.no)}</td>
+      <td data-label="${esc(e.supplier)}">${esc(r.supplier) || '—'}</td>
+      <td data-label="${esc(e.quoted)}">${flag(r.quoted_to_client, t.yes, t.no)}</td>
+      <td class="num" data-label="${esc(e.daysUnquoted)}">${
+        r.days_unquoted ? `<b class="enq-age">${r.days_unquoted}</b>` : '0'}</td>
+      <td data-label="${esc(e.status)}"><span class="enq-flag ${enqTone(r.status)}">${
+        esc(e.st[r.status] || r.status)}</span></td>
+      <td class="muted" data-label="${esc(e.poDate)}">${
+        r.po_date ? new Date(r.po_date).toLocaleDateString(L) : '—'}</td>
+      <td class="num" data-label="${esc(e.price)}">${fmt(Number(r.price_ex_vat) || 0)}</td>
+      <td data-label="${esc(e.delivery)}">${flag(r.delivered, e.delivered, e.undelivered)}</td>
+    </tr>`).join('')
+    : `<tr><td colspan="12" style="padding:26px;text-align:center" class="muted">${esc(e.none)}</td></tr>`;
+
+  const total = rows.reduce((a, r) => a + (Number(r.price_ex_vat) || 0), 0);
+  const totalDays = rows.reduce((a, r) => a + (r.days_unquoted || 0), 0);
+
+  const sel = (id, label, opts, val) =>
+    `<label>${esc(label)}<select id="${id}"><option value="">${esc(e.all)}</option>${
+      opts.map(o => `<option value="${esc(o.v)}"${o.v === val ? ' selected' : ''}>${esc(o.l)}</option>`).join('')
+    }</select></label>`;
+
+  const years = [...new Set((state.enquiries || [])
+    .map(r => (r.enquiry_date || '').slice(0, 4)).filter(Boolean))].sort().reverse();
+
+  return `${noticeBar()}<div class="card">
+    <h2 class="sheet">${esc(e.title)} <span class="muted" style="font-weight:400">// ${
+      t.showing} ${rows.length} ${t.of} ${all}</span></h2>
+    <p class="hint" style="margin:-8px 0 14px">${esc(e.lead)}</p>
+
+    <div class="enq-kpis">
+      ${kpi(e.kReceived, rows.length, '')}
+      ${kpi(e.kPO, count('Gautas PO'), 'ok')}
+      ${kpi(e.kProgress, count('Vykdoma'), 'wip')}
+      ${kpi(e.kRejected, count('Atmesta užklausa'), 'bad')}
+    </div>
+
+    <div class="pf-filters enq-filters">
+      <label>${esc(e.search)}<input type="search" id="enqQ" value="${esc(enqState().q)}"
+        placeholder="${esc(e.searchPh)}"></label>
+      ${sel('enqClient', e.client, enqDistinct('client').map(v => ({v, l: v})), enqState().client)}
+      ${sel('enqSupplier', e.supplier, enqDistinct('supplier').map(v => ({v, l: v})), enqState().supplier)}
+      ${sel('enqStatus', e.status, ENQ_STATUSES.map(v => ({v, l: e.st[v] || v})), enqState().status)}
+      ${sel('enqToSupplier', e.toSupplier, [{v:'true',l:t.yes},{v:'false',l:t.no}], enqState().toSupplier)}
+      ${sel('enqQuoted', e.quoted, [{v:'true',l:t.yes},{v:'false',l:t.no}], enqState().quoted)}
+      ${sel('enqYear', e.date, years.map(v => ({v, l: v})), enqState().year)}
+      <button id="enqClear" class="ghost">${t.clearF}</button>
+      <button id="enqCsv">${esc(e.csv)}</button>
+      <button id="enqAdd" class="primary">${esc(e.add)}</button>
+    </div>
+
+    <div class="tablewrap"><table class="grid" id="enqTable">
+      <thead><tr>
+        ${th('number', e.number)}${th('client', e.client)}${th('description', e.description)}
+        ${th('date', e.date)}<th>${esc(e.toSupplier)}</th>${th('supplier', e.supplier)}
+        <th>${esc(e.quoted)}</th>${th('days', e.daysUnquoted, 1)}${th('status', e.status)}
+        ${th('poDate', e.poDate)}${th('price', e.price, 1)}<th>${esc(e.delivery)}</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot><tr class="totals">
+        <td class="pf-id">${esc(e.total)}</td><td></td><td></td><td></td><td></td><td></td><td></td>
+        <td class="num">${totalDays}</td><td></td><td></td>
+        <td class="num">${fmt(total)}</td><td></td>
+      </tr></tfoot>
+    </table></div>
+  </div>
+
+  <div class="enq-charts">
+    <div class="card">${chartComposition(enqGroup(rows, 'client', 8), PAL_SCREEN,
+      {title: e.byClient, empty: e.none})}</div>
+    <div class="card">${chartComposition(enqGroup(rows, 'supplier', 8), PAL_SCREEN,
+      {title: e.bySupplier, empty: e.none})}</div>
+  </div>
+  <div class="enq-charts">
+    <div class="card">${enqBars(enqMonths(rows), {title: e.byMonth, empty: e.none, short: true})}</div>
+    <div class="card">${enqBars(ENQ_STATUSES.map(st => ({l: e.st[st] || st, v: count(st)})),
+      {title: e.byStatus, empty: e.none})}</div>
+  </div>`;
+}
+
+/* ---- enquiry register: events, editing, export ---- */
+function wireEnquiries(){
+  const t = tr(), e = t.enq, f = enqState();
+  const on = (id, ev, fn) => { const el = $('#' + id); if(el) el.addEventListener(ev, fn); };
+  const set = (k, v) => { f[k] = v; render(); };
+
+  /* typing re-renders the whole table, so the caret has to be put back --
+     without this the field loses focus on the first keystroke and the second
+     one goes to the document */
+  on('enqQ', 'input', ev => {
+    const pos = ev.target.selectionStart;
+    f.q = ev.target.value;
+    render();
+    const again = $('#enqQ');
+    if(again){ again.focus(); try { again.setSelectionRange(pos, pos); } catch(_){} }
+  });
+  on('enqClient',     'change', ev => set('client', ev.target.value));
+  on('enqSupplier',   'change', ev => set('supplier', ev.target.value));
+  on('enqStatus',     'change', ev => set('status', ev.target.value));
+  on('enqToSupplier', 'change', ev => set('toSupplier', ev.target.value));
+  on('enqQuoted',     'change', ev => set('quoted', ev.target.value));
+  on('enqYear',       'change', ev => set('year', ev.target.value));
+  on('enqClear', 'click', () => {
+    state.enq = null; render();
+  });
+  on('enqAdd', 'click', () => enqEdit(null));
+  on('enqCsv', 'click', () => enqCsv());
+
+  const table = $('#enqTable');
+  if(table){
+    table.querySelectorAll('[data-esort]').forEach(th => th.addEventListener('click', () => {
+      const k = th.dataset.esort;
+      if(f.sort === k) f.dir = -f.dir; else { f.sort = k; f.dir = 1; }
+      render();
+    }));
+    table.querySelectorAll('tr[data-enq]').forEach(tr_ => tr_.addEventListener('click', () => {
+      const row = (state.enquiries || []).find(r => r.id === tr_.dataset.enq);
+      if(row) enqEdit(row);
+    }));
+  }
+}
+
+/* One dialog for both new and existing. `row` null means new. */
+function enqEdit(row){
+  const t = tr(), e = t.enq;
+  const isNew = !row;
+  const r = row || { number:'', client:'', description:'', enquiry_date:'',
+                     sent_to_supplier:false, supplier:'', quoted_to_client:false,
+                     status:'Vykdoma', po_date:'', price_ex_vat:0, delivered:false,
+                     owner:'', note:'' };
+  const val = v => esc(v == null ? '' : v);
+  const dlg = document.createElement('dialog');
+  dlg.className = 'enq-dialog';
+  dlg.innerHTML = `<form method="dialog" class="enq-form">
+      <h2>${esc(isNew ? e.add.replace(/^\+\s*/, '') : e.edit)}</h2>
+      <div class="enq-grid">
+        <label>${esc(e.number)}<input name="number" required value="${val(r.number)}"></label>
+        <label>${esc(e.client)}<input name="client" value="${val(r.client)}"></label>
+        <label class="wide">${esc(e.description)}<input name="description" value="${val(r.description)}"></label>
+        <label>${esc(e.date)}<input type="date" name="enquiry_date" value="${val(r.enquiry_date)}"></label>
+        <label>${esc(e.supplier)}<input name="supplier" value="${val(r.supplier)}" list="enqSupList"></label>
+        <datalist id="enqSupList">${enqDistinct('supplier').map(v =>
+          `<option value="${esc(v)}">`).join('')}</datalist>
+        <label>${esc(e.status)}<select name="status">${ENQ_STATUSES.map(v =>
+          `<option value="${esc(v)}"${v === r.status ? ' selected' : ''}>${esc(e.st[v] || v)}</option>`
+        ).join('')}</select></label>
+        <label>${esc(e.poDate)}<input type="date" name="po_date" value="${val(r.po_date)}"></label>
+        <label>${esc(e.price)}<input type="number" step="0.01" name="price_ex_vat"
+          value="${val(r.price_ex_vat)}"></label>
+        <label>${esc(e.owner)}<input name="owner" value="${val(r.owner)}"></label>
+        <label class="check"><input type="checkbox" name="sent_to_supplier"${
+          r.sent_to_supplier ? ' checked' : ''}> ${esc(e.toSupplier)}</label>
+        <label class="check"><input type="checkbox" name="quoted_to_client"${
+          r.quoted_to_client ? ' checked' : ''}> ${esc(e.quoted)}</label>
+        <label class="check"><input type="checkbox" name="delivered"${
+          r.delivered ? ' checked' : ''}> ${esc(e.delivered)}</label>
+        <label class="wide">${esc(e.note)}<input name="note" value="${val(r.note)}"></label>
+      </div>
+      <div class="enq-actions">
+        ${isNew ? '' : `<button type="button" value="del" class="ghost danger">${esc(e.del)}</button>`}
+        <span class="spacer"></span>
+        <button type="button" value="cancel" class="ghost">${esc(e.cancel)}</button>
+        <button type="submit" class="primary">${esc(e.save)}</button>
+      </div>
+    </form>`;
+  document.body.appendChild(dlg);
+
+  const form = dlg.querySelector('form');
+  const close = () => { dlg.close(); dlg.remove(); };
+  dlg.querySelector('[value=cancel]').addEventListener('click', close);
+  const delBtn = dlg.querySelector('[value=del]');
+  if(delBtn) delBtn.addEventListener('click', async () => {
+    if(!confirm(e.confirmDel)) return;
+    try {
+      await CLOUD.enquiryRemove(r.id);
+      state.enquiries = (state.enquiries || []).filter(x => x.id !== r.id);
+      close(); render();
+    } catch(err){ toast(err.message); }
+  });
+
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const d = new FormData(form);
+    const payload = {
+      number: (d.get('number') || '').toString().trim(),
+      client: (d.get('client') || '').toString().trim(),
+      description: (d.get('description') || '').toString().trim(),
+      enquiry_date: d.get('enquiry_date') || null,
+      sent_to_supplier: !!d.get('sent_to_supplier'),
+      supplier: (d.get('supplier') || '').toString().trim(),
+      quoted_to_client: !!d.get('quoted_to_client'),
+      status: d.get('status'),
+      po_date: d.get('po_date') || null,
+      price_ex_vat: Number(d.get('price_ex_vat') || 0),
+      delivered: !!d.get('delivered'),
+      owner: (d.get('owner') || '').toString().trim(),
+      note: (d.get('note') || '').toString().trim()
+    };
+    try {
+      if(isNew){
+        const saved = await CLOUD.enquiryInsert(payload);
+        if(saved) state.enquiries = [saved].concat(state.enquiries || []);
+      } else {
+        const saved = await CLOUD.enquirySave(r.id, r.rev, payload);
+        /* null is the optimistic-concurrency answer, not a failure: somebody
+           saved between this row being read and this form being submitted */
+        if(!saved){ toast(e.conflict); return; }
+        state.enquiries = (state.enquiries || []).map(x => x.id === saved.id ? saved : x);
+      }
+      close(); render();
+    } catch(err){ toast(err.message); }
+  });
+
+  dlg.addEventListener('cancel', close);
+  dlg.showModal();
+  const first = dlg.querySelector('input');
+  if(first) first.focus();
+}
+
+function enqCsv(){
+  const t = tr(), e = t.enq;
+  const head = [e.number, e.client, e.description, e.date, e.toSupplier, e.supplier,
+                e.quoted, e.daysUnquoted, e.status, e.poDate, e.price, e.delivery, e.owner];
+  const cell = v => {
+    const s = v == null ? '' : String(v);
+    return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const lines = [head.map(cell).join(';')];
+  enqSorted(enqRows()).forEach(r => lines.push([
+    r.number, r.client, r.description, r.enquiry_date,
+    r.sent_to_supplier ? t.yes : t.no, r.supplier,
+    r.quoted_to_client ? t.yes : t.no, r.days_unquoted, e.st[r.status] || r.status,
+    r.po_date, (Number(r.price_ex_vat) || 0).toFixed(2),
+    r.delivered ? e.delivered : e.undelivered, r.owner
+  ].map(cell).join(';')));
+  /* BOM: Excel opens a UTF-8 csv as Latin-1 without it, and this register is
+     full of Lithuanian names and euro signs */
+  download('enquiries.csv', '﻿' + lines.join('\r\n'), 'text/csv;charset=utf-8');
 }
 
 function viewDashboard(){
@@ -3567,6 +4112,15 @@ document.addEventListener('visibilitychange', ()=>{
 async function cloudPull(){
   const rows = await CLOUD.pull();
   CLOUD.people().then(m=>{ PEOPLE = m; }).catch(()=>{});
+  /* Not awaited with the projects: the register is one screen out of eleven,
+     and a slow or missing enquiries table must not hold up the whole app.
+     For a staff member the view returns an empty list by design, so an empty
+     register and no register look the same here -- which is the point. */
+  if(canMoney()){
+    CLOUD.enquiries()
+      .then(list => { state.enquiries = list; if(state.tab === 'enquiries') render(); })
+      .catch(() => { state.enquiries = []; });
+  }
   state.projects = rows.map(r=>{
     const p = r.data || {};
     adopt(p, r);
