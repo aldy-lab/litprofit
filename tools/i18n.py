@@ -84,6 +84,7 @@ S["en"] = dict(
              "as glass because the casing is the least interesting part of it. "
              "Drag it round.",
     scr_male="Male rotor, 4 lobes", scr_female="Female rotor, 6 flutes",
+    scr_suction="Suction, cold", scr_discharge="Discharge, hot",
     scr_casing="Casing", scr_slide="Slide valve", scr_bearing="Rotor bearings",
     scr_tb="Twin-screw, oil-flooded", scr_tb2="Arrangement // not a rotor profile",
     scr_alt="A twin-screw compressor with the casing drawn transparent: two meshing "
@@ -230,6 +231,7 @@ S["lt"] = dict(
              "Korpusas nupieštas kaip stiklas, nes korpusas čia \u2014 mažiausiai "
              "įdomi dalis. Pasukite jį.",
     scr_male="Varantysis rotorius, 4 iškyšos", scr_female="Varomasis rotorius, 6 grioveliai",
+    scr_suction="Siurbimas, šaltas", scr_discharge="Slėgis, karštas",
     scr_casing="Korpusas", scr_slide="Slankioji sklendė", scr_bearing="Rotorių guoliai",
     scr_tb="Sraigtinis, alyva užlietas", scr_tb2="Išdėstymas // ne rotoriaus profilis",
     scr_alt="Sraigtinis kompresorius permatomu korpusu: du susikabinę sraigtiniai "

@@ -2021,7 +2021,10 @@ def recip_3d(machine="recip"):
                 ("02", T("scr_female"), "380,-70,0"),
                 ("03", T("scr_casing"), "380,250,0"),
                 ("04", T("scr_slide"),  "370,-178,0"),
-                ("05", T("scr_bearing"), "112,96,0")]
+                ("05", T("scr_bearing"), "112,96,0"),
+                # the two ends of the same thing, so the colour explains itself
+                ("06", T("scr_suction"), "120,170,0"),
+                ("07", T("scr_discharge"), "640,170,0")]
     else:
         tags = [("01", T("rec_motor"), "190,252,0"),
                 ("02", T("rec_crank"), "470,110,152"),

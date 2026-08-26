@@ -42,6 +42,16 @@
 
   function vert(x, y, z) { V.push(x, y, z); return V.length / 3 - 1; }
 
+  /* A moving part is a range of vertices plus the rule for moving it. The
+     originals are kept, because a transform applied to already-transformed
+     coordinates compounds: rotate by a degree sixty times a second and after a
+     minute the rotor is a smear. Every frame starts from the same geometry. */
+  var PARTS = [];
+  function movable(from, rule){
+    var orig = V.slice(from * 3);
+    PARTS.push({ from: from * 3, orig: orig, rule: rule });
+  }
+
   function quad(a, b, c, d, t) { F.push({ i: [a, b, c, d], t: t }); }
 
   /* Winding decided the cull, and the two builders below did not agree about
@@ -130,7 +140,7 @@
   /* ---------- the machines ----------
      A tone is an index into TONE below. GHOST is drawn translucent, which is
      what makes a casing something you can see the works through. */
-  var STEEL = 0, DARK = 1, PIPE = 2, GHOST = 3, ROTOR = 4;
+  var STEEL = 0, DARK = 1, PIPE = 2, GHOST = 3, ROTOR = 4, GAS = 5;
 
   function buildRecip(){
   // mounting feet and the rail they sit on
@@ -297,8 +307,23 @@
        and no amount of shading makes that read. */
     var male   = lobeProfile(4, 100, 58, 0.58);
     var female = lobeProfile(6,  92, 54, 0.34);
+    /* Four lobes driving six, so the female turns at four sixths of the male's
+       speed and the other way about. That ratio is not decoration: it is why
+       the two mesh at all, and getting it wrong makes a pair of screws that
+       grind rather than turn. */
+    var mFrom = V.length / 3;
     screwRotor(96, 664, MY, 0, male,   Math.PI * 1.05, 0,    seg, ROTOR);
+    movable(mFrom, { spin: 1, cy: MY, cz: 0 });
+    var fFrom = V.length / 3;
     screwRotor(96, 664, FY, 0, female, -Math.PI * 0.70, 0.4, seg, ROTOR);
+    movable(fFrom, { spin: -4 / 6, cy: FY, cz: 0 });
+
+    // the gas, carried in the pockets between the rotors
+    for (var gi = 0; gi < 6; gi++) {
+      var gFrom = V.length / 3;
+      gasThread(112, 648, MY, 0, 15, Math.PI * 1.05, (gi / 6) * Math.PI * 2, 30);
+      movable(gFrom, { spin: 1, cy: MY, cz: 0 });
+    }
 
     // shafts out of both ends, and the bearings they run in
     tubeX(40, 100, MY, 0, 34, 20, DARK);
@@ -311,13 +336,50 @@
     tubeX(632, 664, FY, 0, 58, 22, DARK);
 
     // ---- slide valve: the capacity control, under the bores ----
+    /* The slide valve is how a screw compressor is turned down: it opens a
+       path back to suction, so part of each pocket is returned instead of
+       compressed. It moves, slowly, because that is what it does. */
+    var sFrom = V.length / 3;
     box(180, 560, -196, -160, -46, 46, PIPE);
     tubeX(560, 740, -178, 0, 16, 16, PIPE);          // its rod
-    tubeX(740, 790, -178, 0, 44, 22, DARK);          // and the actuator
+    movable(sFrom, { slide: 130 });
+    tubeX(740, 790, -178, 0, 44, 22, DARK);          // and the actuator, fixed
 
     // suction and discharge branches
     box(60, 84, 150, 250, -120, 120, PIPE);
     box(676, 700, -150, -60, -90, 90, PIPE);
+  }
+
+  /* A slender helix following the flute, drawn between the rotors where the
+     pocket actually is. Six threads, phased around, so the flow reads as
+     continuous rather than as one wire. */
+  function gasThread(x0, x1, cy, cz, r, wrap, phase, seg){
+    var start = F.length, rings = [], i, k, ringPts = 7;
+    for (i = 0; i <= seg; i++) {
+      var f = i / seg;
+      var x = x0 + (x1 - x0) * f;
+      var a = phase + wrap * f;
+      /* the pocket shrinks towards the discharge end, which is the whole
+         story of the machine and the reason this tapers */
+      var rr = r * (1 - 0.55 * f);
+      var oy = cy + Math.cos(a) * 74, oz = cz + Math.sin(a) * 74, ring = [];
+      for (k = 0; k < ringPts; k++) {
+        var b = (k / ringPts) * Math.PI * 2;
+        ring.push(vert(x, oy + Math.cos(b) * rr, oz + Math.sin(b) * rr));
+      }
+      rings.push({ ring: ring, u: f });
+    }
+    for (i = 0; i < seg; i++) {
+      for (k = 0; k < ringPts; k++) {
+        var n2 = (k + 1) % ringPts;
+        F.push({ i: [rings[i].ring[k], rings[i].ring[n2],
+                     rings[i + 1].ring[n2], rings[i + 1].ring[k]],
+                 t: GAS, u: rings[i].u });
+      }
+    }
+    orient(start, (x0 + x1) / 2, cy, cz);
+    /* the threads travel with the rotor they sit in */
+    return start;
   }
 
   var MACHINES = { recip: buildRecip, screw: buildScrew };
@@ -346,8 +408,21 @@
        show the works through a shell that reads as glass, and the whole point
        of a cutaway is that the shell is the least interesting thing in it.
        alpha is what makes it a cutaway rather than a barrel. */
-    { base: [ 96, 132, 176], hi: [176, 214, 255], alpha: 0.20 }, // GHOST
-    { base: [ 56,  59,  68], hi: [243, 244, 247], smooth: true } // ROTOR
+    /* 0.20 was right for one pane and wrong for a casing: a barrel, its ribs,
+       two end covers and a foot stack up to six layers of glass between the eye
+       and the rotors, and six times 0.20 is a fog. The shell still reads --
+       there is enough of it, from enough angles -- and the works behind it are
+       now the brightest thing in the frame, which is the point of a cutaway. */
+    { base: [ 96, 132, 176], hi: [176, 214, 255], alpha: 0.10 }, // GHOST
+    { base: [ 74,  78,  92], hi: [255, 255, 255], smooth: true }, // ROTOR
+    /* GAS. Not a colour on a part -- a colour along the LENGTH of one. In a
+       screw compressor the pocket between the rotors gets smaller as it
+       travels from the suction end to the discharge end, and everything that
+       matters about the machine is in that one fact. Cold blue where the gas
+       comes in, hot magenta where it leaves, which is the convention every
+       manufacturer's cutaway uses and the one a refrigeration engineer reads
+       without being told. */
+    { grad: [[112, 176, 255], [255, 64, 150]], smooth: true }    // GAS
   ];
   var LIGHT = norm([-0.42, 0.78, 0.46]);
   var FILL  = norm([0.6, -0.2, -0.7]);
@@ -461,6 +536,33 @@
     return Math.min(w * 1.02 / maxW, h * 1.06 / maxH);
   }
 
+  /* Written straight into V from the stored originals. The projection reads V
+     and knows nothing about any of this. */
+  function animateParts(t){
+    if (!PARTS.length) return;
+    for (var p = 0; p < PARTS.length; p++) {
+      var part = PARTS[p], o = part.orig, base = part.from, k;
+      if (part.rule.spin != null) {
+        var a = t * part.rule.spin, c = Math.cos(a), sn = Math.sin(a);
+        var cy = part.rule.cy, cz = part.rule.cz;
+        for (k = 0; k < o.length; k += 3) {
+          var y = o[k + 1] - cy, z = o[k + 2] - cz;
+          V[base + k]     = o[k];
+          V[base + k + 1] = cy + y * c - z * sn;
+          V[base + k + 2] = cz + y * sn + z * c;
+        }
+      } else if (part.rule.slide != null) {
+        /* eased, not linear: a hydraulic ram does not start and stop dead */
+        var d = part.rule.slide * (0.5 - 0.5 * Math.cos(t * 0.22));
+        for (k = 0; k < o.length; k += 3) {
+          V[base + k]     = o[k] + d;
+          V[base + k + 1] = o[k + 1];
+          V[base + k + 2] = o[k + 2];
+        }
+      }
+    }
+  }
+
   var P = new Float64Array(V.length);
   var S = new Float64Array((V.length / 3) * 2);
 
@@ -477,6 +579,7 @@
   for (var fi = 0; fi < F.length; fi++) order.push(fi);
 
   function draw(w, h, dpr) {
+    animateParts(SPIN_T);
     project(P);
     var scale = FOCAL, k, j;
     for (k = 0, j = 0; k < P.length; k += 3, j += 2) {
@@ -530,9 +633,29 @@
           nn[0] * P[p0] + nn[1] * P[p0 + 1] + nn[2] * P[p0 + 2] >= 0) continue;
       var ax = S[ix[0] * 2], ay = S[ix[0] * 2 + 1];
       var t = TONE[f.t], L = shade(nn);
-      var r = Math.round(t.base[0] + (t.hi[0] - t.base[0]) * L);
-      var g = Math.round(t.base[1] + (t.hi[1] - t.base[1]) * L);
-      var b = Math.round(t.base[2] + (t.hi[2] - t.base[2]) * L);
+      var lo, hi;
+      if (t.grad) {
+        /* f.u is where along the machine this face was built, 0 at the suction
+           end and 1 at the discharge end -- stored once, because the vertex it
+           came from moves every frame and the colour must not. */
+        var u = f.u || 0;
+        lo = [
+          t.grad[0][0] + (t.grad[1][0] - t.grad[0][0]) * u,
+          t.grad[0][1] + (t.grad[1][1] - t.grad[0][1]) * u,
+          t.grad[0][2] + (t.grad[1][2] - t.grad[0][2]) * u
+        ];
+        hi = [255, 255, 255];
+      } else { lo = t.base; hi = t.hi; }
+      /* The gas is lit at about half, so it keeps its colour: a stream run all
+         the way to white at the highlight stops being blue or magenta exactly
+         where it is brightest, which is where you were looking. Everything
+         else takes the full range -- applied to all of them, as it was at
+         first, this dimmed the entire machine by nearly half and the rotors
+         went from steel to slate. */
+      var k = t.grad ? 0.55 : 1;
+      var r = Math.round(lo[0] + (hi[0] - lo[0]) * L * k);
+      var g = Math.round(lo[1] + (hi[1] - lo[1]) * L * k);
+      var b = Math.round(lo[2] + (hi[2] - lo[2]) * L * k);
 
       ctx.beginPath();
       ctx.moveTo(ax, ay);
@@ -706,9 +829,16 @@
     scrollYaw = Math.max(0, Math.min(1, t)) * YAW_SWEEP;
   }
 
-  var last = 0, drift = 0;
+  var last = 0, drift = 0, SPIN_T = 0;
   function frame(now) {
     raf = 0;
+    if (!reduce.matches) {
+      var dts = last ? Math.min(64, now - last) : 16;
+      /* slow enough to follow a single lobe round, which is the whole point of
+         watching it: a rotor spun at anything like its real 3,000 rpm is a
+         blur, and a blur teaches nobody how a screw compressor works */
+      SPIN_T += dts * 0.00075;
+    }
     if (autoYaw && !reduce.matches) {
       var dt = last ? Math.min(64, now - last) : 16;
       drift += dt * 0.000055;
