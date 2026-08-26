@@ -2965,9 +2965,20 @@ document.addEventListener('click', e => {
   if(NICE_OPEN && !e.target.closest('.nice-pop') && !e.target.closest('.nice')) niceClose(false);
 });
 window.addEventListener('resize', () => niceClose(false));
-/* capture: a scroll inside a table does not bubble, and the popup is fixed, so
-   it would otherwise sit still while the control it belongs to slides away */
-window.addEventListener('scroll', () => niceClose(false), true);
+/* Capture, because a scroll inside a table does not bubble and the popup is
+   fixed -- without it the list sits still while the control it belongs to
+   slides away underneath.
+
+   And that is exactly why it has to ignore scrolls that come FROM the list.
+   Written without this test, capture caught the popup's own scroll event and
+   closed it on the first wheel notch: a sixty-four-item list that could not
+   be scrolled at all, because scrolling it was the one thing that dismissed
+   it. The list is the only scroller here that must not close it. */
+window.addEventListener('scroll', e => {
+  const t = e.target;
+  if(t && t.closest && t.closest('.nice-pop')) return;
+  niceClose(false);
+}, true);
 
 function render(){
   renderChrome();
