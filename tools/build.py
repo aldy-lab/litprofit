@@ -1531,11 +1531,11 @@ def about():
                      PT("about_lead", legal=LEGAL, founded=FOUNDED),
                      [(T("home"), "/"), (PT("about_eyebrow"), None)],
                      path="/about/") + """
-    <div class="container">
-      <div class="page-media page-media--low cornered reveal">
-        <img src="{shot}" alt="{shot_alt}" width="1320" height="968">
-      </div>
-    </div>
+    <!-- A photograph of a bench said "we have a workshop". The machine says
+         which machine, and it is the one this company is actually known for
+         overhauling: SAB 128, SAB 163, Grasso S3-900, CSH8563, OSKA 8591 are
+         all twin-screw, and all of them are in the order book. -->
+{screw}
 
     <section class="container prose">
       <h2>{h_spec}</h2>
@@ -1577,6 +1577,7 @@ def about():
                 p_more=PT("p_eyebrow").lower(), h_details=PT("a_details"),
                 legal=LEGAL, street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
                 l_cid=T("company_no"), cid=COMPANY_ID, l_vat=T("vat"), vat=VAT,
+                screw=recip_3d("screw"),
                 pres=presentation_block(),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
@@ -2000,7 +2001,7 @@ def capacity_chart():
         </div>""".format(alt=attr(T("cap_chart_h2")), p="".join(P))
 
 
-def recip_3d():
+def recip_3d(machine="recip"):
     """The compressor as a live object, above its own elevation.
 
     Same machine, same numbers: the geometry in js/compressor.js is authored in
@@ -2012,11 +2013,21 @@ def recip_3d():
     up from the mounting feet, z across. The renderer projects them every
     frame, so a label follows the casting it points at.
     """
-    tags = [("01", T("rec_motor"), "190,252,0"),
-            ("02", T("rec_crank"), "470,110,152"),
-            ("03", T("rec_head"),  "520,336,0"),
-            ("04", T("rec_c2"),    "768,195,0"),
-            ("05", T("rec_c1"),    "150,312,0")]
+    # Anchors are model coordinates, so they belong to the machine, not to the
+    # page. A screw compressor has nothing at 470,110,152 and a reciprocating
+    # one has no slide valve.
+    if machine == "screw":
+        tags = [("01", T("scr_male"),   "380,96,0"),
+                ("02", T("scr_female"), "380,-70,0"),
+                ("03", T("scr_casing"), "380,250,0"),
+                ("04", T("scr_slide"),  "370,-178,0"),
+                ("05", T("scr_bearing"), "112,96,0")]
+    else:
+        tags = [("01", T("rec_motor"), "190,252,0"),
+                ("02", T("rec_crank"), "470,110,152"),
+                ("03", T("rec_head"),  "520,336,0"),
+                ("04", T("rec_c2"),    "768,195,0"),
+                ("05", T("rec_c1"),    "150,312,0")]
     marks = "".join(
         '<span class="cmp-tag" data-tag data-at="%s"><b>%s</b><span>%s</span></span>'
         % (at, n, text(label)) for n, label, at in tags)
@@ -2025,11 +2036,11 @@ def recip_3d():
     <section class="section section-alt cmp-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
           <h2>{h}</h2>
           <p class="lead">{l}</p>
         </div>
-        <figure class="cmp bleed reveal" data-compressor>
+        <figure class="cmp bleed reveal" data-compressor data-machine="{machine}">
           <div class="cmp-stage">
             <canvas class="cmp-canvas" role="img" aria-label="{alt}"></canvas>
             <span class="cmp-corner cmp-corner--tl"></span>
@@ -2044,9 +2055,15 @@ def recip_3d():
       </div>
     </section>
     <script src="{js}" defer></script>""".format(
-        e=text(T("cmp_eyebrow")), h=text(T("cmp_h2")), l=text(T("cmp_lead")),
-        alt=attr(T("cmp_alt")), hint=text(T("cmp_hint")), marks=marks,
-        tb=text(T("cmp_tb")), tb2=text(T("cmp_tb2")), js=asset("/js/compressor.js"))
+        machine=machine, num=("01" if machine == "screw" else "05"),
+        e=text(T("scr_eyebrow" if machine == "screw" else "cmp_eyebrow")),
+        h=text(T("scr_h2" if machine == "screw" else "cmp_h2")),
+        l=text(T("scr_lead" if machine == "screw" else "cmp_lead")),
+        alt=attr(T("scr_alt" if machine == "screw" else "cmp_alt")),
+        hint=text(T("cmp_hint")), marks=marks,
+        tb=text(T("scr_tb" if machine == "screw" else "cmp_tb")),
+        tb2=text(T("scr_tb2" if machine == "screw" else "cmp_tb2")),
+        js=asset("/js/compressor.js"))
 
 
 def recip_drawing():

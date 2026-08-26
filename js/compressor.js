@@ -21,8 +21,13 @@
 (function () {
   "use strict";
 
+  /* One engine, more than one machine. The alternative was a second file with
+     its own copy of project/cull/sort/shade, and two copies of a renderer are
+     two renderers that drift: a fix to the culling in one is a bug that
+     survives in the other. The geometry is the only part that differs. */
   var root = document.querySelector("[data-compressor]");
   if (!root) return;
+  var MACHINE = root.getAttribute("data-machine") || "recip";
   var canvas = root.querySelector("canvas");
   if (!canvas || !canvas.getContext) return;
   var ctx = canvas.getContext("2d");
@@ -122,9 +127,12 @@
     }
   }
 
-  /* ---------- the machine ---------- */
-  var STEEL = 0, DARK = 1, PIPE = 2;
+  /* ---------- the machines ----------
+     A tone is an index into TONE below. GHOST is drawn translucent, which is
+     what makes a casing something you can see the works through. */
+  var STEEL = 0, DARK = 1, PIPE = 2, GHOST = 3, ROTOR = 4;
 
+  function buildRecip(){
   // mounting feet and the rail they sit on
   for (var bx = 110; bx < 740; bx += 105) {
     box(bx, Math.min(bx + 105, 740), -8, 0, -128, 128, DARK);
@@ -191,6 +199,130 @@
   tubeX(700, 772, 195, 0, 26, 18, PIPE);
   box(278, 302, 208, 322, -22, 22, PIPE);
   tubeX(136, 292, 310, 0, 22, 18, PIPE);
+  }
+
+  /* ---------- twin-screw compressor, casing ghosted ----------
+     The machine Litprofit overhauls under the SABROE, GRASSO and BITZER names:
+     SAB 128, SAB 163, Grasso S3-900, CSH8563, OSKA 8591. A pair of helical
+     rotors turning in a figure-of-eight bore -- four lobes on the male, six
+     flutes on the female, which is the ratio nearly every marine screw uses --
+     and gas carried from the suction end to the discharge end in the pockets
+     between them.
+
+     Drawn, not traced. The reference films for this are Howden's and BITZER's
+     and are their copyright; what is reused is the arrangement, which is the
+     same on every screw compressor ever built and belongs to nobody.
+
+     Nothing here is a section through a real rotor profile: a true SRM or
+     asymmetric profile is a manufacturer's own curve and not something to
+     guess at. This is a generic lobe swept along a helix -- right in count,
+     wrap and direction, and honest about being a diagram. */
+  function lobeProfile(n, rTip, rRoot, lobeWidth){
+    /* One turn of the profile as a closed polygon: a rounded tip, a flank
+       down to the root, a rounded root, and back up. */
+    var pts = [], i, k, a;
+    for (i = 0; i < n; i++) {
+      var base = (i / n) * Math.PI * 2;
+      for (k = 0; k <= 8; k++) {
+        a = base + (k / 8) * lobeWidth;
+        pts.push([Math.cos(a) * rTip, Math.sin(a) * rTip]);
+      }
+      for (k = 0; k <= 8; k++) {
+        a = base + lobeWidth + (k / 8) * ((Math.PI * 2 / n) - lobeWidth);
+        pts.push([Math.cos(a) * rRoot, Math.sin(a) * rRoot]);
+      }
+    }
+    return pts;
+  }
+
+  /* Sweep a profile along X, rotating it as it goes. That rotation IS the
+     helix, and its sign is what makes the two rotors mesh rather than collide:
+     they turn opposite ways, so they wrap opposite ways. */
+  function screwRotor(x0, x1, cy, cz, prof, wrap, phase, seg, t){
+    var start = F.length, rings = [], i, k;
+    for (i = 0; i <= seg; i++) {
+      var x = x0 + (x1 - x0) * (i / seg);
+      var a = phase + wrap * (i / seg);
+      var c = Math.cos(a), s2 = Math.sin(a), ring = [];
+      for (k = 0; k < prof.length; k++) {
+        var py = prof[k][0], pz = prof[k][1];
+        ring.push(vert(x, cy + py * c - pz * s2, cz + py * s2 + pz * c));
+      }
+      rings.push(ring);
+    }
+    for (i = 0; i < seg; i++) {
+      for (k = 0; k < prof.length; k++) {
+        var n2 = (k + 1) % prof.length;
+        quad(rings[i][k], rings[i][n2], rings[i + 1][n2], rings[i + 1][k], t);
+      }
+    }
+    F.push({ i: rings[0].slice().reverse(), t: t });
+    F.push({ i: rings[seg].slice(), t: t });
+    orient(start, (x0 + x1) / 2, cy, cz);
+    return rings;
+  }
+
+  function buildScrew(){
+    /* ---- the bore: two overlapping cylinders, which is the shape of the
+       casing and the reason a screw compressor looks like a figure of eight
+       from the end ---- */
+    /* 96 and -70 is 166 apart, and with 100 and 92 of tip radius the pair
+       overlaps by 26 -- tips into roots, which is meshing. */
+    var MY = 96, FY = -70;          // rotor centres, male above female
+    var seg = 46;
+
+    // the casing, ghosted -- barrel, both end covers and the flanges
+    tubeX(70, 690, MY, 0, 112, 34, GHOST, false, false);
+    tubeX(70, 690, FY, 0, 104, 34, GHOST, false, false);
+    box(60, 84, -240, 250, -172, 172, GHOST);        // suction end cover
+    box(676, 700, -240, 250, -172, 172, GHOST);      // discharge end cover
+    box(84, 676, -236, -214, -160, 160, GHOST);      // the foot it stands on
+    for (var fx = 150; fx < 640; fx += 240) {        // casing ribs
+      tubeX(fx, fx + 14, MY, 0, 120, 30, GHOST, false, false);
+      tubeX(fx, fx + 14, FY, 0, 112, 30, GHOST, false, false);
+    }
+
+    // ---- the rotors ----
+    // four lobes driving six flutes: the 4/6 pair nearly every marine screw
+    // uses, and the reason the two turn at different speeds
+    /* A flute is a notch cut into a land, so the female's tip radius is the
+       LARGE one and its root the small one. Written the other way round the
+       profile turns inside out, and what came back was a heap of grey wedges
+       rather than a rotor -- which is what a polygon does when its outline
+       crosses itself.
+
+       And the tips have to reach past the centre line into the other rotor's
+       roots, which is what meshing IS -- but only just. Radii that overlap by
+       more than the roots are deep leaves two solids occupying the same space,
+       and no amount of shading makes that read. */
+    var male   = lobeProfile(4, 100, 58, 0.58);
+    var female = lobeProfile(6,  92, 54, 0.34);
+    screwRotor(96, 664, MY, 0, male,   Math.PI * 1.05, 0,    seg, ROTOR);
+    screwRotor(96, 664, FY, 0, female, -Math.PI * 0.70, 0.4, seg, ROTOR);
+
+    // shafts out of both ends, and the bearings they run in
+    tubeX(40, 100, MY, 0, 34, 20, DARK);
+    tubeX(660, 760, MY, 0, 34, 20, DARK);
+    tubeX(40, 100, FY, 0, 30, 20, DARK);
+    tubeX(660, 700, FY, 0, 30, 20, DARK);
+    tubeX(96, 128, MY, 0, 64, 22, DARK);             // suction-end bearing
+    tubeX(632, 664, MY, 0, 64, 22, DARK);            // discharge-end bearing
+    tubeX(96, 128, FY, 0, 58, 22, DARK);
+    tubeX(632, 664, FY, 0, 58, 22, DARK);
+
+    // ---- slide valve: the capacity control, under the bores ----
+    box(180, 560, -196, -160, -46, 46, PIPE);
+    tubeX(560, 740, -178, 0, 16, 16, PIPE);          // its rod
+    tubeX(740, 790, -178, 0, 44, 22, DARK);          // and the actuator
+
+    // suction and discharge branches
+    box(60, 84, 150, 250, -120, 120, PIPE);
+    box(676, 700, -150, -60, -90, 90, PIPE);
+  }
+
+  var MACHINES = { recip: buildRecip, screw: buildScrew };
+  (MACHINES[MACHINE] || buildRecip)();
+  measureModel();
 
   /* ---------- shading ----------
      Flat per-face lambert with a cool fill and a rim term. The palette is the
@@ -202,9 +334,20 @@
      kept in the shadows -- fully neutral greys go muddy against this ground --
      and the highlight runs almost to white so the lit edges catch. */
   var TONE = [
-    { base: [ 56,  59,  68], hi: [243, 244, 247] },   // STEEL
-    { base: [ 28,  30,  37], hi: [146, 149, 158] },   // DARK
-    { base: [ 46,  49,  58], hi: [219, 221, 227] }    // PIPE
+    { base: [ 56,  59,  68], hi: [243, 244, 247] },              // STEEL
+    /* Same steel, but no edge stroked. A rotor is 46 rings of 72 points, and
+       outlining every quad of that draws the mesh instead of the surface --
+       the flutes came out looking like netting stretched over a cone. Flat
+       shading alone gives the form; the wireframe was only ever helping on
+       boxes, where the edges are real. */
+    { base: [ 28,  30,  37], hi: [146, 149, 158] },              // DARK
+    { base: [ 46,  49,  58], hi: [219, 221, 227] },              // PIPE
+    /* The casing. Pale and cold and mostly not there -- the reference films
+       show the works through a shell that reads as glass, and the whole point
+       of a cutaway is that the shell is the least interesting thing in it.
+       alpha is what makes it a cutaway rather than a barrel. */
+    { base: [ 96, 132, 176], hi: [176, 214, 255], alpha: 0.20 }, // GHOST
+    { base: [ 56,  59,  68], hi: [243, 244, 247], smooth: true } // ROTOR
   ];
   var LIGHT = norm([-0.42, 0.78, 0.46]);
   var FILL  = norm([0.6, -0.2, -0.7]);
@@ -216,8 +359,27 @@
 
   /* ---------- projection ---------- */
   var yaw = -1.22, pitch = 0.30, autoYaw = true;
-  var CX = 422, CY = 168, CZ = 0;          // model centre, in model units
+  /* Measured off the vertices rather than typed in. As constants they were the
+     reciprocating machine's centre and size, so the screw compressor -- longer,
+     twice as deep and with its axis somewhere else entirely -- was framed for a
+     machine it is not, and came out over the edges on all four sides. */
+  var CX = 0, CY = 0, CZ = 0, SPAN = 700;
+  function measureModel(){
+    var lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity], k, a;
+    for (k = 0; k < V.length; k += 3) {
+      for (a = 0; a < 3; a++) {
+        if (V[k + a] < lo[a]) lo[a] = V[k + a];
+        if (V[k + a] > hi[a]) hi[a] = V[k + a];
+      }
+    }
+    CX = (lo[0] + hi[0]) / 2; CY = (lo[1] + hi[1]) / 2; CZ = (lo[2] + hi[2]) / 2;
+    DX = hi[0] - lo[0]; DY = hi[1] - lo[1]; DZ = hi[2] - lo[2];
+    SPAN = Math.max(1, Math.hypot(DX, DY, DZ));
+  }
+  var DX = 700, DY = 360, DZ = 330;
   var DIST = 1750, FOCAL = 2140;
+  /* the steepest the drag is allowed to reach; the fit has to survive it */
+  var PITCH_MAX = 0.62;
   /* FOCAL was a constant, which is only ever right at one canvas width: the
      machine sat well in a 1392px stage and on a phone it was three times the
      canvas and ran off every edge. Tying it to the width keeps the machine at
@@ -229,7 +391,17 @@
     // taller than the canvas and the cylinder heads leave the top of it. The
     // model stands about 360 units tall; the height term keeps that inside
     // four fifths of the frame whatever the shape of the box.
-    FOCAL = Math.min(W * (W < 620 ? 1.60 : 1.86), H * 3.15);
+    /* Measured, not derived. Two closed-form attempts were both wrong in the
+       same direction: the bounding sphere reserved the 895-unit diagonal for a
+       shape 360 tall, and the axis version then counted the footprint diagonal
+       twice, once as width and again as the depth the pitch tips into view.
+       Each made the machine about half the size it should be.
+
+       Projection is linear in FOCAL, so the extents can be measured once at
+       FOCAL = 1 across the orientations this thing can actually reach, and the
+       answer read off. Exact, no tuning, and it cannot be wrong about a
+       machine it has never seen. */
+    FOCAL = fitFocal(W, H);
     // 3.42 put the deep three-quarter at 97% of the canvas height: not
     // clipped, but one rounding away from it, and the cylinder heads are the
     // first thing to go. The projected height changes as it turns, so the
@@ -250,6 +422,45 @@
   }
 
   var OFFX = 0, OFFY = 0;
+  var YAW0 = -1.22, YAW_SWEEP = 1.02, scrollYaw = 0;
+
+  /* Sampled across the orientations this machine actually presents, not all of
+     them. Sampling the full turn was tried and it fits for the end-on view,
+     which the scroll never reaches and a drag reaches only if somebody works
+     at it -- the machine came out at a third of the frame for a case that does
+     not happen. This covers the scroll sweep with 35 degrees of margin either
+     side; drag past that and an edge may cross the frame, which is a fair
+     price for the machine being the size it should be the rest of the time. */
+  function fitFocal(w, h){
+    var maxW = 1e-6, maxH = 1e-6, i, j, k;
+    var from = YAW0 - 0.6, to = YAW0 + YAW_SWEEP + 0.6;
+    for (i = 0; i <= 12; i++) {
+      var y = from + (to - from) * (i / 12);
+      for (j = 0; j < 2; j++) {
+        var pch = j ? PITCH_MAX : -0.12;
+        var cy = Math.cos(y), sy = Math.sin(y), cp = Math.cos(pch), sp = Math.sin(pch);
+        var lox = Infinity, hix = -Infinity, loy = Infinity, hiy = -Infinity;
+        for (k = 0; k < V.length; k += 3) {
+          var x = V[k] - CX, yy = V[k + 1] - CY, z = V[k + 2] - CZ;
+          var x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+          var y2 = yy * cp - z1 * sp, z2 = yy * sp + z1 * cp + DIST;
+          /* at FOCAL = 1; the real value is a multiplier on both */
+          var sx = x1 / z2, syv = -y2 / z2;
+          if (sx < lox) lox = sx; if (sx > hix) hix = sx;
+          if (syv < loy) loy = syv; if (syv > hiy) hiy = syv;
+        }
+        if (hix - lox > maxW) maxW = hix - lox;
+        if (hiy - loy > maxH) maxH = hiy - loy;
+      }
+    }
+    /* The fit is already conservative -- it reserves room for the steepest
+       pitch a drag can reach, while the machine sits at a gentler one almost
+       all the time -- so the fill factors can be generous without the worst
+       case crossing the frame. At 0.92/0.88 the machine sat at two thirds of
+       the height it had room for and looked lost in a wide stage. */
+    return Math.min(w * 1.02 / maxW, h * 1.06 / maxH);
+  }
+
   var P = new Float64Array(V.length);
   var S = new Float64Array((V.length / 3) * 2);
 
@@ -312,7 +523,11 @@
       var ux = P[p1] - P[p0], uy = P[p1 + 1] - P[p0 + 1], uz = P[p1 + 2] - P[p0 + 2];
       var vx = P[p2] - P[p0], vy = P[p2 + 1] - P[p0 + 1], vz = P[p2 + 2] - P[p0 + 2];
       var nn = norm([uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx]);
-      if (nn[0] * P[p0] + nn[1] * P[p0 + 1] + nn[2] * P[p0 + 2] >= 0) continue;
+      /* A solid part hides its own far side; glass does not, and culling the
+         back of the casing left the shell looking like a shell only on the
+         side facing you. */
+      if (!TONE[f.t].alpha &&
+          nn[0] * P[p0] + nn[1] * P[p0 + 1] + nn[2] * P[p0 + 2] >= 0) continue;
       var ax = S[ix[0] * 2], ay = S[ix[0] * 2 + 1];
       var t = TONE[f.t], L = shade(nn);
       var r = Math.round(t.base[0] + (t.hi[0] - t.base[0]) * L);
@@ -323,13 +538,31 @@
       ctx.moveTo(ax, ay);
       for (j = 1; j < n; j++) ctx.lineTo(S[ix[j] * 2], S[ix[j] * 2 + 1]);
       ctx.closePath();
-      ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+      /* Back-to-front sorting is already what this renderer does, so a
+         translucent face blends over whatever was painted before it and the
+         casing simply works -- provided the shell really is sorted behind and
+         in front of the rotors rather than drawn as one lump, which is why
+         each panel of it is its own box. */
+      ctx.fillStyle = t.alpha
+        ? "rgba(" + r + "," + g + "," + b + "," + t.alpha + ")"
+        : "rgb(" + r + "," + g + "," + b + ")";
       ctx.fill();
       // The edge is what makes it read as a machined part rather than a blob.
       // Stroking every face at low alpha gives the creases for free.
-      ctx.strokeStyle = "rgba(238,240,244," + (0.05 + L * 0.22).toFixed(3) + ")";
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      if (!t.smooth) {
+        ctx.strokeStyle = t.alpha
+          ? "rgba(150,196,255," + (0.05 + L * 0.14).toFixed(3) + ")"
+          : "rgba(238,240,244," + (0.05 + L * 0.22).toFixed(3) + ")";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      } else {
+        /* A hairline of its own fill closes the seam between neighbouring
+           quads -- without it a swept surface shows a pale grid of gaps where
+           the antialiasing of two adjacent fills does not quite meet. */
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -464,7 +697,6 @@
      section -- the one angle at which a compressor reads as a rectangle --
      and that is where a reader spends longest. A shorter arc from a deeper
      three-quarter shows the same amount of turning and never flattens. */
-  var YAW0 = -1.22, YAW_SWEEP = 1.02, scrollYaw = 0;
 
   function readScroll() {
     var r = root.getBoundingClientRect();

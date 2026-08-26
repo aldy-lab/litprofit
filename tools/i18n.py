@@ -76,6 +76,19 @@ S["en"] = dict(
     cap_chart_x="Evaporating temperature", cap_chart_y="Cooling capacity",
     cap_chart_tb="Six-cylinder // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C suction gas",
     # the live 3D of the same machine, above the elevation
+    # the twin-screw cutaway on the about page. Site languages are en and lt
+    # only -- Russian lives in the calculator, which carries its own strings.
+    scr_eyebrow="On the bench", scr_h2="A twin-screw compressor, opened up",
+    scr_lead="Four lobes driving six, in a figure-of-eight bore \u2014 the size that "
+             "comes off a reefer and onto our bench most often. The casing is drawn "
+             "as glass because the casing is the least interesting part of it. "
+             "Drag it round.",
+    scr_male="Male rotor, 4 lobes", scr_female="Female rotor, 6 flutes",
+    scr_casing="Casing", scr_slide="Slide valve", scr_bearing="Rotor bearings",
+    scr_tb="Twin-screw, oil-flooded", scr_tb2="Arrangement // not a rotor profile",
+    scr_alt="A twin-screw compressor with the casing drawn transparent: two meshing "
+            "helical rotors, their bearings at both ends, and the slide valve that "
+            "controls capacity running beneath them.",
     cmp_eyebrow="The machine", cmp_h2="The compressor, in the round",
     # "the elevation below" was true while this sat above the side elevation on
     # the refrigeration page. It is on the home page now and the elevation is
@@ -211,6 +224,17 @@ S["lt"] = dict(
                    "žiūri prieš spręsdamas, ar mašina išlaikys triumą.",
     cap_chart_x="Garavimo temperatūra", cap_chart_y="Šaldymo galia",
     cap_chart_tb="Šešiacilindris // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C siurbimo dujos",
+    scr_eyebrow="Ant stalo", scr_h2="Sraigtinis kompresorius \u2014 iš vidaus",
+    scr_lead="Keturios iškyšos suka šešias, aštuoniukės formos ertmėje \u2014 tokio "
+             "dydžio mašinos dažniausiai atkeliauja nuo šaldymo laivo ant mūsų stalo. "
+             "Korpusas nupieštas kaip stiklas, nes korpusas čia \u2014 mažiausiai "
+             "įdomi dalis. Pasukite jį.",
+    scr_male="Varantysis rotorius, 4 iškyšos", scr_female="Varomasis rotorius, 6 grioveliai",
+    scr_casing="Korpusas", scr_slide="Slankioji sklendė", scr_bearing="Rotorių guoliai",
+    scr_tb="Sraigtinis, alyva užlietas", scr_tb2="Išdėstymas // ne rotoriaus profilis",
+    scr_alt="Sraigtinis kompresorius permatomu korpusu: du susikabinę sraigtiniai "
+            "rotoriai, jų guoliai abiejuose galuose ir po jais einanti našumą "
+            "reguliuojanti slankioji sklendė.",
     cmp_eyebrow="Mašina", cmp_h2="Kompresorius \u2014 erdvėje",
     cmp_lead="Dažniausiai remontuojamas dydis: keturi cilindrai, 55 mm skersmuo, "
              "34 mm eiga. Sudėtas pagal skelbiamus gabaritus ir šešėliuojamas "

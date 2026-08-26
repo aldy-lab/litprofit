@@ -77,11 +77,33 @@
   {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://aldy-lab.github.io/litprofit/"}, {"@type": "ListItem", "position": 2, "name": "About us", "item": "https://aldy-lab.github.io/litprofit/about/"}]}
   </script>
 
-    <div class="container">
-      <div class="page-media page-media--low cornered reveal">
-        <img src="/litprofit/assets/photos/workshop-bench.webp" alt="Compressor housing, rotors and bearing pedestals on the bench." width="1320" height="968">
+    <!-- A photograph of a bench said "we have a workshop". The machine says
+         which machine, and it is the one this company is actually known for
+         overhauling: SAB 128, SAB 163, Grasso S3-900, CSH8563, OSKA 8591 are
+         all twin-screw, and all of them are in the order book. -->
+
+    <section class="section section-alt cmp-section seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>On the bench</p>
+          <h2>A twin-screw compressor, opened up</h2>
+          <p class="lead">Four lobes driving six, in a figure-of-eight bore — the size that comes off a reefer and onto our bench most often. The casing is drawn as glass because the casing is the least interesting part of it. Drag it round.</p>
+        </div>
+        <figure class="cmp bleed reveal" data-compressor data-machine="screw">
+          <div class="cmp-stage">
+            <canvas class="cmp-canvas" role="img" aria-label="A twin-screw compressor with the casing drawn transparent: two meshing helical rotors, their bearings at both ends, and the slide valve that controls capacity running beneath them."></canvas>
+            <span class="cmp-corner cmp-corner--tl"></span>
+            <span class="cmp-corner cmp-corner--tr"></span>
+            <span class="cmp-corner cmp-corner--bl"></span>
+            <span class="cmp-corner cmp-corner--br"></span>
+            <p class="cmp-hint">Drag to turn</p>
+          </div>
+          <p class="cmp-legend"><span class="cmp-tag" data-tag data-at="380,96,0"><b>01</b><span>Male rotor, 4 lobes</span></span><span class="cmp-tag" data-tag data-at="380,-70,0"><b>02</b><span>Female rotor, 6 flutes</span></span><span class="cmp-tag" data-tag data-at="380,250,0"><b>03</b><span>Casing</span></span><span class="cmp-tag" data-tag data-at="370,-178,0"><b>04</b><span>Slide valve</span></span><span class="cmp-tag" data-tag data-at="112,96,0"><b>05</b><span>Rotor bearings</span></span></p>
+          <figcaption class="cmp-tb"><span>Twin-screw, oil-flooded</span><b>Arrangement // not a rotor profile</b></figcaption>
+        </figure>
       </div>
-    </div>
+    </section>
+    <script src="/litprofit/js/compressor.js?v=d92efab907" defer></script>
 
     <section class="container prose">
       <h2>What we specialise in</h2>
