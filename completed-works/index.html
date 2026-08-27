@@ -27,7 +27,7 @@
   <link rel="icon" href="/litprofit/assets/brand/favicon.svg">
   <link rel="preload" as="font" type="font/woff2" href="/litprofit/assets/fonts/montserrat-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/litprofit/css/fonts.css?v=70e42e8ab0">
-  <link rel="stylesheet" href="/litprofit/css/style.css?v=3349589860">
+  <link rel="stylesheet" href="/litprofit/css/style.css?v=96162c5d53">
   <!-- Marks the document as scripted BEFORE the stylesheet paints, so the
        scroll-reveal rules only ever hide content that JS can bring back.
        Inline and synchronous on purpose: an external file would race. -->
@@ -77,46 +77,78 @@
   {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://aldy-lab.github.io/litprofit/"}, {"@type": "ListItem", "position": 2, "name": "Completed works", "item": "https://aldy-lab.github.io/litprofit/completed-works/"}]}
   </script>
 
-    <section class="container prose">
-      <!-- NOTE(LITPROFIT): the old site's version of this page was two headings and
-           two stock photographs. To make it genuinely useful we need, per project:
-           vessel or plant name, year, port, scope of work, and a photograph. That is
-           the single highest-value thing the client can supply. -->
-      <h2>Ship equipment and engine repair</h2>
-      <p>Overhauls of main and auxiliary engines carried out on fishing vessels and commercial ships, covering both 4-stroke and 2-stroke plant, alongside the engine room and deck equipment that surrounds them.</p>
-      <ul class="tags">
-        <li>MAN</li>
-        <li>Wartsila</li>
-        <li>Yanmar</li>
-        <li>Hyundai Himsen</li>
-        <li>MAK</li>
-        <li>Caterpillar</li>
-        <li>Deutz</li>
-        <li>Daihatsu</li>
-      </ul>
-
-      <h2>Refrigeration equipment</h2>
-      <p>The company's longest-running line of work: modernisation and repair of refrigeration systems on fishing boats and shore installations, compressor overhauls, class-approved design documentation, installation of plant and refrigerant piping, and commissioning through to handover.</p>
-      <ul class="tags">
-        <li>GRASSO / KUHLAUTOMAT</li>
-        <li>HOWDEN</li>
-        <li>MYCOM</li>
-        <li>SABROE</li>
-        <li>STAL</li>
-        <li>AERZEN</li>
-        <li>YORK DYKIN</li>
-        <li>HITACHI</li>
-      </ul>
-
-      <h2>Who the work was for</h2>
-      <p>Sealord, Limarko Group, Ocean Whale Company, Baltreids &mdash;
-      <a href="/litprofit/partners/">companies we have worked for</a>.</p>
+    <div class="cw-body">
+    <!-- NOTE(LITPROFIT): what this page still wants, per project, is vessel or
+         plant name, year, port, scope of work and a photograph. That is the
+         single highest-value thing the client can supply; until it arrives the
+         page states the two strands and the plant behind them, and states
+         nothing it cannot evidence. -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>Engines</p>
+          <h2>Ship equipment and engine repair</h2>
+          <p class="lead">Overhauls of main and auxiliary engines carried out on fishing vessels and commercial ships, covering both 4-stroke and 2-stroke plant, alongside the engine room and deck equipment that surrounds them.</p>
+        </div>
+        <ol class="mx">
+            <li class="mx-cell reveal"><span class="mx-num">01</span><span class="mx-name">MAN</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">02</span><span class="mx-name">Wartsila</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">03</span><span class="mx-name">Yanmar</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">04</span><span class="mx-name">Hyundai Himsen</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">05</span><span class="mx-name">MAK</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">06</span><span class="mx-name">Caterpillar</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">07</span><span class="mx-name">Deutz</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">08</span><span class="mx-name">Daihatsu</span></li>
+        </ol>
+      </div>
     </section>
+
+    <section class="section section-alt seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>Refrigeration</p>
+          <h2>Refrigeration equipment</h2>
+          <p class="lead">The company's longest-running line of work: modernisation and repair of refrigeration systems on fishing boats and shore installations, compressor overhauls, class-approved design documentation, installation of plant and refrigerant piping, and commissioning through to handover.</p>
+        </div>
+        <ol class="mx">
+            <li class="mx-cell reveal"><span class="mx-num">01</span><span class="mx-name">GRASSO / KUHLAUTOMAT</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">02</span><span class="mx-name">HOWDEN</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">03</span><span class="mx-name">MYCOM</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">04</span><span class="mx-name">SABROE</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">05</span><span class="mx-name">STAL</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">06</span><span class="mx-name">AERZEN</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">07</span><span class="mx-name">YORK DYKIN</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">08</span><span class="mx-name">HITACHI</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>Clients</p>
+          <h2>Who the work was for</h2>
+        </div>
+        <ol class="mx mx--wide">
+            <li class="mx-cell reveal"><span class="mx-num">01</span><span class="mx-name">Sealord</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">02</span><span class="mx-name">Limarko Group</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">03</span><span class="mx-name">Ocean Whale Company</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">04</span><span class="mx-name">Baltreids</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">05</span><span class="mx-name">Alliance Marine</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">06</span><span class="mx-name">Seafish Trade</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">07</span><span class="mx-name">Santavilte</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">08</span><span class="mx-name">LZK</span></li>
+            <li class="mx-cell reveal"><span class="mx-num">09</span><span class="mx-name">OWH</span></li>
+        </ol>
+        <p class="mx-more reveal"><a href="/litprofit/partners/">companies we have worked for</a></p>
+      </div>
+    </section>
+    </div>
 
     <section class="section shots-band seam-top seam-bottom">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>In the workshop</p>
+          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>In the workshop</p>
           <h2>What an overhaul looks like</h2>
           <p class="lead">Klaipeda, on the bench. Machines come in whole, leave the same way, and everything in between is measured.</p>
         </div>

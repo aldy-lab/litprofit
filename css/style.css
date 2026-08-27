@@ -3843,3 +3843,67 @@ a.card:active,
     }
   }
 }
+
+/* ============================================================
+   COMPLETED WORKS — a schedule of plant, not a wrap of chips
+   ============================================================
+   The page was a prose column half the width of the screen with sixteen
+   manufacturer names set at label size inside it. Those makes are the most
+   checkable thing on the page -- the plant this company has actually had
+   apart -- and they were the smallest type on it. */
+.cw-body .section { padding-block: clamp(30px, 3.6vw, 58px); }
+.mx {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+.mx--wide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mx-cell {
+  display: grid;
+  gap: 8px;
+  align-content: center;
+  min-height: clamp(84px, 8vw, 116px);
+  padding: clamp(14px, 1.5vw, 22px);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.mx-cell:hover { background: var(--panel-2); border-color: var(--line-2); }
+.mx-num {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  color: var(--muted-2);
+  font-variant-numeric: tabular-nums lining;
+}
+.mx-name {
+  font-size: var(--h4);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  /* Wartsila, Hyundai Himsen and GRASSO / KUHLAUTOMAT are all one name; the
+     cell may wrap them but must not let them run out of it. */
+  overflow-wrap: anywhere;
+}
+.mx-more {
+  margin: clamp(18px, 2vw, 28px) 0 0;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.mx-more a {
+  color: var(--accent);
+  /* 14px of label is not a tap target. inline-block rather than block: the
+     parent is a <p>, so there is no flex gap here to collapse the way a
+     block display once merged two menu labels. */
+  display: inline-block;
+  padding-block: 12px;
+  margin-block: -12px;
+}
+.mx-more a:hover { color: var(--white); }
+
+@media (max-width: 900px) { .mx, .mx--wide { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .mx, .mx--wide { grid-template-columns: minmax(0, 1fr); } }

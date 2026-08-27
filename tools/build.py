@@ -2465,33 +2465,81 @@ def shots(num="02"):
                          lead=PT("shots_lead"), figs="\n".join(figs))
 
 
+def cw_matrix(items):
+    """A schedule of makes, one cell each, rather than a wrap of chips.
+
+    The chips were correct and unreadable: sixteen makes across two lines of
+    tags, at label size, in a column half the width of the page. These are the
+    manufacturers whose plant this company has actually had apart, which is the
+    most checkable thing on the page, and they were the smallest type on it.
+
+    Each cell reveals on its own view timeline, so a grid entering the screen
+    fills in from the top rather than all at once -- the stagger is where the
+    cells are, not a delay counted off a clock.
+    """
+    return "\n".join(
+        '            <li class="mx-cell reveal"><span class="mx-num">%02d</span>'
+        '<span class="mx-name">%s</span></li>' % (i, text(x))
+        for i, x in enumerate(items, 1))
+
 def completed_works():
     return page_head(PT("cw_eyebrow"), PT("cw_h1"), PT("cw_lead", founded=FOUNDED),
                      [(T("home"), "/"), (PT("cw_eyebrow"), None)],
                      path="/completed-works/") + """
-    <section class="container prose">
-      <!-- NOTE(LITPROFIT): the old site's version of this page was two headings and
-           two stock photographs. To make it genuinely useful we need, per project:
-           vessel or plant name, year, port, scope of work, and a photograph. That is
-           the single highest-value thing the client can supply. -->
-      <h2>{h1}</h2>
-      <p>{p1}</p>
-      {tags1}
-
-      <h2>{h2}</h2>
-      <p>{p2}</p>
-      {tags2}
-
-      <h2>{h3}</h2>
-      <p>Sealord, Limarko Group, Ocean Whale Company, Baltreids &mdash;
-      <a href="{partners}">{p_more}</a>.</p>
+    <div class="cw-body">
+    <!-- NOTE(LITPROFIT): what this page still wants, per project, is vessel or
+         plant name, year, port, scope of work and a photograph. That is the
+         single highest-value thing the client can supply; until it arrives the
+         page states the two strands and the plant behind them, and states
+         nothing it cannot evidence. -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>{e1}</p>
+          <h2>{h1}</h2>
+          <p class="lead">{p1}</p>
+        </div>
+        <ol class="mx">
+{mx1}
+        </ol>
+      </div>
     </section>
+
+    <section class="section section-alt seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{e2}</p>
+          <h2>{h2}</h2>
+          <p class="lead">{p2}</p>
+        </div>
+        <ol class="mx">
+{mx2}
+        </ol>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{e3}</p>
+          <h2>{h3}</h2>
+        </div>
+        <ol class="mx mx--wide">
+{mx3}
+        </ol>
+        <p class="mx-more reveal"><a href="{partners}">{p_more}</a></p>
+      </div>
+    </section>
+    </div>
 {gallery}{projects}
-{cta}""".format(h1=PT("cw_engines"), p1=PT("cw_engines_p"), tags1=tags(i18n.ENGINES),
-                h2=PT("cw_refrig"), p2=PT("cw_refrig_p"), tags2=tags(i18n.SYSTEMS),
+{cta}""".format(h1=PT("cw_engines"), p1=PT("cw_engines_p"), mx1=cw_matrix(i18n.ENGINES),
+                h2=PT("cw_refrig"), p2=PT("cw_refrig_p"), mx2=cw_matrix(i18n.SYSTEMS),
                 h3=PT("cw_who"), partners=u("/partners/"),
+                e1=PT("cw_engines_e"), e2=PT("cw_refrig_e"), e3=T("clients_eyebrow"),
+                mx3=cw_matrix([c[0] for c in CLIENTS]),
                 p_more=PT("p_clients_h2").lower(),
-                gallery=shots("03"),
+                # 03 is the client schedule above; the gallery follows it
+                gallery=shots("04"),
                 projects=projects_band(),
                 cta=cta(T("cta_h2"), T("cta_p")))
 

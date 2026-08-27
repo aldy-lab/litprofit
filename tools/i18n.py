@@ -899,6 +899,10 @@ P["en"] = dict(
             "%(founded)s: engines, and refrigeration.",
     cw_meta="Engine overhauls and refrigeration projects delivered by %(legal)s for "
             "fishing fleets, shipowners and shore installations.",
+    # Two one-word section labels, the two strands the page is about. Worth
+    # the client's eye in LT before launch, like a_people_h.
+    cw_engines_e="Engines",
+    cw_refrig_e="Refrigeration",
     cw_engines="Ship equipment and engine repair",
     cw_engines_p="Overhauls of main and auxiliary engines carried out on fishing vessels "
                  "and commercial ships, covering both 4-stroke and 2-stroke plant, "
@@ -1038,6 +1042,8 @@ P["lt"] = dict(
             "ir šaldymas.",
     cw_meta="Variklių kapitalinis remontas ir šaldymo projektai, kuriuos %(legal)s atliko "
             "žvejybos laivynams, laivų savininkams ir kranto įrenginiams.",
+    cw_engines_e="Varikliai",
+    cw_refrig_e="Šaldymas",
     cw_engines="Laivų įrangos ir variklių remontas",
     cw_engines_p="Pagrindinių ir pagalbinių variklių kapitalinis remontas žvejybiniuose ir "
                  "komerciniuose laivuose, tiek 4-takčių, tiek 2-takčių, kartu su mašinų "
@@ -1176,6 +1182,8 @@ P["ru"] = dict(
             "и холод.",
     cw_meta="Капитальный ремонт двигателей и холодильные проекты, выполненные %(legal)s для "
             "рыболовных флотов, судовладельцев и береговых установок.",
+    cw_engines_e="Двигатели",
+    cw_refrig_e="Холод",
     cw_engines="Ремонт судового оборудования и двигателей",
     cw_engines_p="Капитальный ремонт главных и вспомогательных двигателей на рыболовных и "
                  "коммерческих судах, как 4-х тактных, так и 2-х тактных, вместе с механизмами "
