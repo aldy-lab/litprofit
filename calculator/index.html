@@ -6344,15 +6344,28 @@ function exportCsv(){
 }
 
 /* ================= JSON backup / import ================= */
+/* Everything that lives in Postgres is left out of this file.
+
+   The register was already excluded, and the reasoning applied word for word
+   to the three tables added since -- I just did not go back and add them.
+   Import reads only `projects`, so people, overheads and documents went out
+   and could never come back: data leaving with no way in is not a backup, it
+   is a copy nobody is guarding.
+
+   For payroll it is worse than that. A button labelled "Backup JSON" was
+   writing every salary in the company, by name, in plain text, to whatever
+   folder the browser downloads into -- while the same figures were behind a
+   row level security policy, a security definer function and an owner-only
+   gate on the way out of the database. The API was careful and the download
+   button undid all of it.
+
+   These four live in Supabase and are backed up there. What this file is for
+   is the browser-only copy of the PROJECTS, which has no server behind it. */
+const NOT_IN_BACKUP = { enquiries: 1, people: 1, overheads: 1, documents: 1 };
+
 function exportJson(){
-  /* The register is left out, for the same reason it is left out of
-     localStorage -- and for one more: import reads only `projects` and drops
-     enquiries on the floor, so every backup written 216 client names and every
-     price into a plaintext file that could never put them back. Data going out
-     with no way in is not a backup, it is a copy nobody is guarding. The
-     register lives in Supabase and is backed up there. */
   download('LITPROFIT_backup.json',
-           JSON.stringify(state, (k, v) => k === 'enquiries' ? undefined : v, 1),
+           JSON.stringify(state, (k, v) => NOT_IN_BACKUP[k] ? undefined : v, 1),
            'application/json');
 }
 $('#importFile').addEventListener('change', e=>{
