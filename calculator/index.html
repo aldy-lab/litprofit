@@ -5640,13 +5640,26 @@ $('#tabs').addEventListener('click', e=>{
 });
 /* Coming back to Projects lands on the tab you were last on, not on
    Portfolio: the switch is a way between two subjects, not a reset. */
-var lastProjectTab = 'portfolio';
+/* Where each section was left, so coming back returns you to the sheet you
+   were on rather than to the top of it. */
+var LAST_TAB = { projects: 'portfolio', enquiries: 'enquiries', company: 'people' };
 $('#sections').addEventListener('click', e => {
   const b = e.target.closest('button[data-section]'); if(!b) return;
   const want = b.dataset.section;
   if(want === section()) return;
-  if(want === 'enquiries'){ lastProjectTab = state.tab; state.tab = 'enquiries'; }
-  else { state.tab = lastProjectTab && lastProjectTab !== 'enquiries' ? lastProjectTab : 'portfolio'; }
+  /* One remembered tab PER SECTION, not one for projects and an else. The
+     original had two branches -- enquiries, and everything that is not
+     enquiries -- so the moment a third section existed its button fell into
+     the else and took you to Projects. It rendered perfectly and could not be
+     reached, which is why driving state.tab straight from a test found
+     nothing: that tests the screen, not the way in. */
+  LAST_TAB[section()] = state.tab;
+  const back = LAST_TAB[want];
+  if(want === 'enquiries') state.tab = 'enquiries';
+  else if(want === 'company')
+    state.tab = COMPANY_TABS.indexOf(back) !== -1 ? back : 'people';
+  else
+    state.tab = ALL_TABS.indexOf(back) !== -1 ? back : 'portfolio';
   persist(); render();
 });
 
