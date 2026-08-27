@@ -1556,8 +1556,72 @@ def compressor_drawing():
 # INTERIOR PAGES
 # All prose comes from tools/i18n.py; the markup lives here once.
 # ============================================================
+# ============================================================
+# ABOUT — the page below the machine
+# It was one prose column: six h2s, a bare <ul> and a paragraph of company
+# details, all at the same weight, so nothing in it had a shape. Each block
+# below is the shape its own content already has -- a scope of work is a
+# numbered register, three ordered steps are a deck you go through one at a
+# time, and company details are a title block, which is what a title block is
+# for. No new copy except one heading, lifted from the sentence under it.
+# ============================================================
+def a_scope(items):
+    """Scope of work as a numbered register, the way a drawing lists parts."""
+    return "\n".join(
+        '            <li class="scope-row"><span class="scope-num">%02d</span>'
+        '<span class="scope-text">%s</span></li>' % (i + 1, x)
+        for i, x in enumerate(items))
+
+
+def a_stack():
+    """Consult / organise / ensure as a deck that advances with the scroll.
+
+    Sticky rather than scripted: each card pins under the header and the next
+    rides over it, so the reader takes the three steps in order instead of
+    scanning three boxes at once -- which is the whole claim the section makes
+    about the company. Nothing moves for anyone who asked for reduced motion;
+    there the cards simply stack down the page.
+    """
+    steps = ((T("step1"), T("how1")), (T("step2"), T("how2")), (T("step3"), T("how3")))
+    # Direct children of .stack, with no wrapper. A sticky element can only
+    # stick inside its own containing block, so wrapping each card in a slot
+    # pinned it to that slot and it unpinned again the moment the slot passed
+    # -- three cards that each stuck briefly and never once overlapped. They
+    # share one containing block now, and the distance between them is a
+    # margin rather than a box.
+    return "\n".join(
+        """            <article class="stack-card">
+              <p class="stack-num">%02d</p>
+              <h3>%s</h3>
+              <p>%s</p>
+            </article>""" % (i + 1, text(h), text(b))
+        for i, (h, b) in enumerate(steps))
+
+
+def a_titleblock(num):
+    """Company details in a title block -- the field on a drawing that carries
+    exactly this: who made it, where they are, and their registration."""
+    cells = [(T("f_address"), "%s<br>%s<br>%s" % (text(T("addr_street")),
+                                                  text(T("addr_city")),
+                                                  text(T("addr_country")))),
+             (T("company_no"), text(COMPANY_ID)),
+             (T("vat"), text(VAT))]
+    return """        <div class="tblock reveal">
+          <div class="tblock-head">
+            <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{legal}</p>
+            <h2>{h}</h2>
+          </div>
+          <div class="tblock-grid">
+{cells}
+          </div>
+        </div>""".format(
+        num=num, legal=text(LEGAL), h=text(PT("a_details")),
+        cells="\n".join(
+            '            <div class="tblock-cell"><p class="tblock-k">%s</p>'
+            '<p class="tblock-v">%s</p></div>' % (text(k), v) for k, v in cells))
+
+
 def about():
-    spec = "\n".join("        <li>%s</li>" % x for x in i18n.P[LANG]["a_spec_list"])
     return page_head(PT("about_eyebrow"), PT("about_h1"),
                      PT("about_lead", legal=LEGAL, founded=FOUNDED),
                      [(T("home"), "/"), (PT("about_eyebrow"), None)],
@@ -1570,36 +1634,82 @@ def about():
 {screw}
     </div>
 
-    <section class="container prose">
-      <h2>{h_spec}</h2>
-      <ul>
-{spec}
-      </ul>
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{cap_e}</p>
+          <h2>{h_spec}</h2>
+        </div>
+        <ol class="scope">
+{scope}
+        </ol>
+      </div>
+    </section>
 
-      <h2>{h_people}</h2>
-      <p>{people1}</p>
-      <p>{people2}</p>
+    <section class="section section-alt seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{ppl_e}</p>
+          <h2>{ppl_h}</h2>
+        </div>
+        <div class="statement reveal">
+          <p class="statement-lead">{people1}</p>
+          <p>{people2}</p>
+        </div>
+      </div>
+    </section>
 
-      <h2>{h_how}</h2>
-      <h3>{s1}</h3><p>{how1}</p>
-      <h3>{s2}</h3><p>{how2}</p>
-      <h3>{s3}</h3><p>{how3}</p>
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>{how_e}</p>
+          <h2>{h_how}</h2>
+          <p class="lead">{how_l}</p>
+        </div>
+        <div class="stack">
+{stack}
+        </div>
+      </div>
+    </section>
 
-      <h2>{h_cert}</h2>
-      <p>{cert1} <a href="{certs}">{c_more}</a></p>
-      <p>{cert2}</p>
+    <section class="section section-alt seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{c_e}</p>
+          <h2>{h_cert}</h2>
+        </div>
+        <div class="asr reveal">
+          <div class="asr-item">
+            <p class="asr-label">{f_certs}</p>
+            <p>{cert1}</p>
+            <a class="asr-more" href="{certs}">{c_more}</a>
+          </div>
+          <div class="asr-item">
+            <p class="asr-label">{f_insured}</p>
+            <p>{cert2}</p>
+          </div>
+          <div class="asr-item">
+            <p class="asr-label">{rep_e}</p>
+            <p>{rep_l}</p>
+            <a class="asr-more" href="{partners}">{p_more}</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <h2>{h_rep}</h2>
-      <p>{rep_l} <a href="{partners}">{p_more}</a></p>
-
-      <h2>{h_details}</h2>
-      <p>{legal}<br>{street}<br>{city}<br>{country}<br>
-      {l_cid}: {cid}<br>{l_vat}: {vat}</p>
+    <section class="section">
+      <div class="container">
+{tblock}
+      </div>
     </section>
 {pres}
-{cta}""".format(spec=spec, h_spec=PT("a_spec"), h_people=PT("a_people"),
-                shot=u("/assets/photos/workshop-bench.webp"),
-                shot_alt=attr(PT("shot_bench")),
+{cta}""".format(scope=a_scope(i18n.P[LANG]["a_spec_list"]),
+                stack=a_stack(), tblock=a_titleblock("06"),
+                cap_e=T("cap_eyebrow"), ppl_e=PT("a_people"), ppl_h=PT("a_people_h"),
+                how_e=T("how_eyebrow"), how_l=T("how_lead"),
+                c_e=PT("c_eyebrow"), f_certs=T("fact_certs"), f_insured=T("fact_insured"),
+                rep_e=T("rep_eyebrow"),
+                h_spec=PT("a_spec"),
                 people1=PT("a_people_1"), people2=PT("a_people_2"),
                 h_how=T("how_h2"), s1=T("step1"), s2=T("step2"), s3=T("step3"),
                 how1=T("how1"), how2=T("how2"), how3=T("how3"),
@@ -1607,9 +1717,7 @@ def about():
                 cert2=PT("a_cert_2"), certs=u("/certificates/"),
                 c_more=PT("c_eyebrow").lower(), h_rep=T("rep_eyebrow"),
                 rep_l=T("rep_lead"), partners=u("/partners/"),
-                p_more=PT("p_eyebrow").lower(), h_details=PT("a_details"),
-                legal=LEGAL, street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
-                l_cid=T("company_no"), cid=COMPANY_ID, l_vat=T("vat"), vat=VAT,
+                p_more=PT("p_eyebrow").lower(),
                 screw=recip_3d("screw", hero=True),
                 pres=presentation_block(),
                 cta=cta(T("cta_h2"), T("cta_p")))

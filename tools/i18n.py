@@ -861,6 +861,10 @@ P["en"] = dict(
                  "Overhaul of main and auxiliary engines.",
                  "Positioning of ships in the port of Klaipeda, Lithuania, for repair works."],
     a_people="The people",
+    # Not new copy: the three words a_people_1 already uses about the team,
+    # promoted to a heading so the section has one. Worth the client's eye
+    # in LT before launch.
+    a_people_h="Reliable, qualified, time-tested",
     a_people_1="We have a team of reliable, qualified and time-tested professionals, and "
                "we provide a <strong>warranty on all works and equipment</strong>.",
     a_people_2="We are committed to continuous improvement and pay close attention to "
@@ -1003,6 +1007,7 @@ P["lt"] = dict(
                  "pagrindinių bei pagalbinių variklių kapitalinis remontas;",
                  "laivų pastatymas Klaipėdos uoste remonto darbams atlikti."],
     a_people="Komanda",
+    a_people_h="Patikimi, kvalifikuoti, laiko patikrinti",
     a_people_1="Mūsų įmonėje dirba patikimų, kvalifikuotų ir laiko patikrintų specialistų "
                "komanda. <strong>Visiems darbams ir įrangai suteikiama garantija</strong>.",
     a_people_2="Nuolat tobulėjame, domimės rinkos naujovėmis, įdėmiai išklausome klientų "
@@ -1139,6 +1144,7 @@ P["ru"] = dict(
                  "капитальный ремонт главных и вспомогательных двигателей;",
                  "постановка судов в порту Клайпеды для выполнения ремонтных работ."],
     a_people="Команда",
+    a_people_h="Надёжные, квалифицированные, проверенные временем",
     a_people_1="В нашей компании работает команда надёжных, квалифицированных и проверенных "
                "временем специалистов. <strong>На все работы и оборудование предоставляется "
                "гарантия</strong>.",
