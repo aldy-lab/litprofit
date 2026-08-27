@@ -3907,3 +3907,54 @@ a.card:active,
 
 @media (max-width: 900px) { .mx, .mx--wide { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .mx, .mx--wide { grid-template-columns: minmax(0, 1fr); } }
+
+/* ============================================================
+   CONTACTS — dial code, and a calendar that is asked for
+   ============================================================ */
+/* Two controls, one field. The select sizes to its own content so the number
+   keeps the rest, and both are the same height so the pair reads as one box
+   rather than as a control with a badge stuck on it. */
+.field-phone { display: flex; gap: 6px; align-items: stretch; }
+.field-phone .dial {
+  flex: 0 0 auto;
+  width: auto;
+  /* 16px, like every other input here: anything smaller and iOS Safari zooms
+     the page on focus, which on a form is the whole layout jumping. */
+  font-size: 16px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 0 34px 0 14px;
+  min-height: 48px;
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  /* the chevron, drawn rather than fetched */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%238d90a6' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+}
+.field-phone .dial:focus-visible { border-color: var(--line-2); outline: none; }
+.field-phone input { flex: 1 1 auto; min-width: 0; }
+/* The option list is painted by the platform, so it takes the platform's
+   colours -- on a dark page that means white-on-white unless it is said. */
+.field-phone .dial option { background: var(--navy-800); color: var(--text); }
+
+.booking { display: grid; gap: 18px; }
+.booking-ask {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+  max-width: 62ch;
+  padding: clamp(22px, 2.6vw, 38px);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.booking-note { margin: 0; color: var(--muted); font-size: var(--text-m); }
+.booking-alt { margin: 0; font-size: var(--text-s); }
+.booking-alt a { color: var(--muted-2); padding-block: 10px; display: inline-block; }
+.booking-alt a:hover { color: var(--white); }
+.booking-alt.is-error a { color: var(--white); }
+.booking-mount { border: 1px solid var(--line); background: var(--bg-2); }

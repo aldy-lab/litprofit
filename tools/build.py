@@ -2667,6 +2667,81 @@ def certificates():
 # ============================================================
 # CONTACTS
 # ============================================================
+# Dial codes as ISO code plus number -- "LT +370", not "Lithuania +370".
+# Deliberate: it needs no translation, it cannot be got wrong in a language
+# nobody on the team reads, and a two-letter code beside a number is the
+# register the rest of this site is written in. Extend by adding a pair.
+DIAL_CODES = [
+    ("LT", "+370"), ("LV", "+371"), ("EE", "+372"), ("PL", "+48"),
+    ("DE", "+49"), ("NL", "+31"), ("BE", "+32"), ("DK", "+45"),
+    ("NO", "+47"), ("SE", "+46"), ("FI", "+358"), ("IS", "+354"),
+    ("GB", "+44"), ("IE", "+353"), ("FR", "+33"), ("ES", "+34"),
+    ("PT", "+351"), ("IT", "+39"), ("GR", "+30"), ("CY", "+357"),
+    ("MT", "+356"), ("HR", "+385"), ("SI", "+386"), ("AT", "+43"),
+    ("CH", "+41"), ("CZ", "+420"), ("SK", "+421"), ("HU", "+36"),
+    ("RO", "+40"), ("BG", "+359"), ("UA", "+380"), ("TR", "+90"),
+    ("GE", "+995"), ("IL", "+972"), ("AE", "+971"), ("SA", "+966"),
+    ("QA", "+974"), ("EG", "+20"), ("MA", "+212"), ("NG", "+234"),
+    ("ZA", "+27"), ("US", "+1"), ("CA", "+1"), ("BR", "+55"),
+    ("PA", "+507"), ("CL", "+56"), ("PE", "+51"), ("IN", "+91"),
+    ("CN", "+86"), ("JP", "+81"), ("KR", "+82"), ("SG", "+65"),
+    ("PH", "+63"), ("VN", "+84"), ("ID", "+62"), ("AU", "+61"),
+    ("NZ", "+64"),
+]
+
+
+def dial_select(fid):
+    """The country code beside a phone field.
+
+    A native select, not a scripted list: it is one control, it works before
+    any script runs, and on a phone the platform picker is better than
+    anything drawn in a page. LT is first and selected, because that is where
+    the yard is."""
+    opts = "\n".join(
+        '                <option value="%s"%s>%s %s</option>'
+        % (d, ' selected' if i == 0 else '', c, d)
+        for i, (c, d) in enumerate(DIAL_CODES))
+    return """            <div class="field-phone">
+              <select class="dial" name="dial" aria-label="%s" id="%sDial">
+%s
+              </select>
+              <input id="%s" name="phone" type="tel" autocomplete="tel"
+                     inputmode="tel" placeholder="600 00000">
+            </div>""" % (attr(T("form_dial")), fid, opts, fid)
+
+
+def booking_block(num):
+    """Book a call, loaded only when asked for.
+
+    Nothing is requested from Calendly until the button is pressed: no script,
+    no frame, no cookie, no IP handed over. That is what keeps this page free
+    of a consent banner, and it is why the panel says what pressing it does
+    before it does it rather than after. Blank BOOKING_URL and the whole
+    section is gone -- no dead panel, no half-wired widget.
+    """
+    if not BOOKING_URL:
+        return ""
+    return """
+    <section class="section section-alt seam-top" id="book">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
+          <h2>{h}</h2>
+          <p class="lead">{lead}</p>
+        </div>
+        <div class="booking reveal" data-booking="{url}">
+          <div class="booking-ask">
+            <p class="booking-note">{note}</p>
+            <button type="button" class="btn btn-solid" data-booking-load>{load}</button>
+            <p class="booking-alt"><a href="{url}" target="_blank" rel="noopener">{newtab}</a></p>
+          </div>
+        </div>
+      </div>
+    </section>""".format(num=num, url=attr(BOOKING_URL), e=text(T("book_eyebrow")),
+                         h=text(T("book_h2")), lead=text(T("book_lead")),
+                         note=text(T("book_note")), load=text(T("book_load")),
+                         newtab=text(T("book_newtab")))
+
 def contacts():
     return page_head(PT("k_eyebrow"), PT("k_h1"), PT("k_lead"),
                      [(T("home"), "/"), (PT("k_eyebrow"), None)],
@@ -2711,7 +2786,7 @@ def contacts():
             </div>
             <div class="field">
               <label for="fPhone">{f_phone} <span class="opt">{f_opt}</span></label>
-              <input id="fPhone" name="phone" type="tel" autocomplete="tel">
+{dial}
             </div>
             <div class="field">
               <label for="fEmail">{f_email}</label>
@@ -2734,7 +2809,9 @@ def contacts():
         </div>
       </div>
     </section>
-""".format(l_addr=T("f_address"), legal=LEGAL, street=T("addr_street"), city=T("addr_city"),
+{booking}
+""".format(dial=dial_select("fPhone"), booking=booking_block("01"),
+           l_addr=T("f_address"), legal=LEGAL, street=T("addr_street"), city=T("addr_city"),
            country=COUNTRY, l_phone=T("form_phone"), phone=PHONE,
            phone_href=PHONE_HREF, l_email=T("form_email"), email=EMAIL,
            l_details=T("f_details"), l_cid=T("company_no"), cid=COMPANY_ID,

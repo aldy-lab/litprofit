@@ -342,6 +342,16 @@
       var data = new FormData(form);
       var get = function (k) { return (data.get(k) || "").toString().trim(); };
 
+      /* The country code is a second control but it is not a second field:
+         whoever reads the enquiry wants one phone number. Composed here, once,
+         for both delivery paths -- doing it only in the mailto branch would
+         have dropped the code silently the day an endpoint is configured. */
+      if (data.has("dial")) {
+        var num = get("phone");
+        data.set("phone", num ? (get("dial") + " " + num) : "");
+        data.delete("dial");
+      }
+
       if (FORM_ENDPOINT) {
         say("Sending\u2026");
         fetch(FORM_ENDPOINT, {
@@ -367,6 +377,48 @@
         "&body=" + encodeURIComponent(lines.join("\n"));
 
       say("Your mail client is opening with everything ready to send.", "is-ok");
+    });
+  });
+
+  /* ---------- book a call ----------
+     Click to load. Calendly is not contacted at all -- no script, no frame,
+     no cookie, no IP -- until the visitor presses the button, which is what
+     keeps this site free of a consent banner: there is nothing to consent to
+     until they ask for it. The panel says so before the press rather than
+     after.
+
+     If the script fails or is blocked, the link to open the calendar in a new
+     tab is still sitting there, so the worst case is one extra click rather
+     than a dead panel. */
+  all("[data-booking]").forEach(function (box) {
+    var url = box.getAttribute("data-booking");
+    var btn = box.querySelector("[data-booking-load]");
+    if (!url || !btn) return;
+
+    on(btn, "click", function () {
+      var ask = box.querySelector(".booking-ask");
+      btn.disabled = true;
+      btn.textContent = btn.getAttribute("data-loading") || btn.textContent;
+
+      var mount = doc.createElement("div");
+      mount.className = "calendly-inline-widget booking-mount";
+      mount.setAttribute("data-url", url + "?hide_gdpr_banner=1&background_color=0b0d3a"
+                                        + "&text_color=ffffff&primary_color=d6d8e2");
+      mount.style.minWidth = "320px";
+      mount.style.height = "700px";
+      box.appendChild(mount);
+
+      var sc = doc.createElement("script");
+      sc.src = "https://assets.calendly.com/assets/external/widget.js";
+      sc.async = true;
+      sc.onload = function () { if (ask) ask.hidden = true; };
+      sc.onerror = function () {
+        box.removeChild(mount);
+        btn.disabled = false;
+        var alt = box.querySelector(".booking-alt");
+        if (alt) alt.classList.add("is-error");
+      };
+      doc.head.appendChild(sc);
     });
   });
 

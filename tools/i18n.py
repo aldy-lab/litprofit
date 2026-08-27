@@ -200,6 +200,19 @@ S["en"] = dict(
           "vessel, the equipment and the port, and we will come back with a plan.",
     cta_enquiry="Send an enquiry", cta_call="Call",
 
+    # Booking and the dial code. The booking copy says what pressing the
+    # button does BEFORE it does it, which is the whole point of loading the
+    # widget on request: until then nothing has been sent anywhere.
+    form_dial="Country code",
+    book_eyebrow="Book a call",
+    book_h2="Fifteen minutes with an engineer",
+    book_load="Load the booking calendar",
+    book_newtab="Open the calendar in a new tab instead",
+    book_lead="Pick a slot and we will call you. If it is urgent, the phone "
+              "number above is answered around the clock.",
+    book_note="The calendar is hosted by Calendly. Nothing is requested from "
+              "them until you press this button \u2014 press it and your "
+              "browser will connect to Calendly and their terms apply.",
     form_name="Name", form_company="Company", form_phone="Phone",
     form_email="Email", form_message="Message", form_optional="(optional)",
     form_send="Send enquiry",
@@ -351,6 +364,16 @@ S["lt"] = dict(
           "nurodykite laivą, įrangą ir uostą, o mes pateiksime planą.",
     cta_enquiry="Siųsti užklausą", cta_call="Skambinti",
 
+    form_dial="Šalies kodas",
+    book_eyebrow="Rezervuoti pokalbį",
+    book_h2="Penkiolika minučių su inžinieriumi",
+    book_load="Įkelti rezervacijos kalendorių",
+    book_newtab="Atidaryti kalendorių naujame lange",
+    book_lead="Pasirinkite laiką ir mes paskambinsime. Jei skubu \u2014 "
+              "aukščiau nurodytu numeriu atsiliepiame visą parą.",
+    book_note="Kalendorių talpina „Calendly“. Kol nepaspausite šio mygtuko, "
+              "jiems nesiunčiama jokia užklausa \u2014 paspaudus naršyklė "
+              "prisijungs prie „Calendly“ ir galios jų sąlygos.",
     form_name="Vardas", form_company="Įmonė", form_phone="Telefonas",
     form_email="El. paštas", form_message="Žinutė", form_optional="(nebūtina)",
     form_send="Siųsti užklausą",
@@ -442,6 +465,16 @@ S["ru"] = dict(
           "сообщите судно, оборудование и порт, а мы предложим план.",
     cta_enquiry="Отправить запрос", cta_call="Позвонить",
 
+    form_dial="Код страны",
+    book_eyebrow="Записаться на звонок",
+    book_h2="Пятнадцать минут с инженером",
+    book_load="Загрузить календарь записи",
+    book_newtab="Открыть календарь в новой вкладке",
+    book_lead="Выберите время, и мы позвоним. Если срочно \u2014 по номеру "
+              "выше отвечаем круглосуточно.",
+    book_note="Календарь размещён на Calendly. Пока вы не нажмёте эту кнопку, "
+              "им не отправляется ни одного запроса \u2014 после нажатия "
+              "браузер соединится с Calendly и начнут действовать их условия.",
     form_name="Имя", form_company="Компания", form_phone="Телефон",
     form_email="Эл. почта", form_message="Сообщение", form_optional="(необязательно)",
     form_send="Отправить запрос",
