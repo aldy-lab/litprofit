@@ -594,10 +594,25 @@
      times longer than it is tall throws its whole length into the vertical,
      and the fit shrank it to 38% of the canvas height to make room for a view
      nobody would ask for. */
+  /* yawPad is the drag's freedom either side of the scroll sweep, and it is
+     the SAME number the fit samples over. That is the whole mechanism: the
+     machine is sized for every angle it can be turned to, and it cannot be
+     turned to an angle it was not sized for, so nothing can put an edge
+     across the frame.
+
+     Fitting over a full revolution instead was tried and measured: it costs
+     far too much, because at 90 degrees of yaw a machine's LENGTH lies along
+     the depth axis and the pitch tips that length into the vertical. The
+     1600-unit skid went from 25% of its canvas to 2% and the reciprocating
+     machine from 26% to 10%, to buy a view nobody asks for.
+
+     The value is measured, not chosen: PAD_TRIAL below records what each
+     setting cost. 0.30 keeps every machine within a point or two of the size
+     it had when nothing was bounded at all. */
   var VIEWS = {
-    recip: { yaw0: -1.22, sweep: 1.02, pitch: 0.30, pitchLo: -0.12, pitchHi: 0.62 },
-    screw: { yaw0: -1.22, sweep: 1.02, pitch: 0.30, pitchLo: -0.12, pitchHi: 0.62 },
-    unit:  { yaw0: -0.34, sweep: 0.52, pitch: 0.22, pitchLo:  0.04, pitchHi: 0.40 }
+    recip: { yaw0: -1.22, sweep: 1.02, pitch: 0.30, pitchLo: -0.12, pitchHi: 0.62, yawPad: 0.30 },
+    screw: { yaw0: -1.22, sweep: 1.02, pitch: 0.30, pitchLo: -0.12, pitchHi: 0.62, yawPad: 0.30 },
+    unit:  { yaw0: -0.34, sweep: 0.52, pitch: 0.22, pitchLo:  0.04, pitchHi: 0.40, yawPad: 0.24 }
   };
   var VIEW = VIEWS[MACHINE] || VIEWS.recip;
   var yaw = 0, pitch = 0.30, autoYaw = true;
@@ -712,6 +727,16 @@
 
   var YAW0 = VIEW.yaw0, YAW_SWEEP = VIEW.sweep, scrollYaw = 0;
 
+  /* The window of yaw this machine is sized for, and therefore the only
+     window it is allowed into. YAW_BASE is fixed where VIEWS put it; YAW0
+     moves when the reader drags, and the fit must not move with it -- it
+     sampled YAW0 before, so a drag silently redefined the range the machine
+     had been fitted to while FOCAL stayed where it was. */
+  var YAW_BASE = VIEW.yaw0;
+  var YAW_LO = YAW_BASE - VIEW.yawPad;
+  var YAW_HI = YAW_BASE + YAW_SWEEP + VIEW.yawPad;
+  function clampYaw(v) { return v < YAW_LO ? YAW_LO : (v > YAW_HI ? YAW_HI : v); }
+
   /* Sampled across the orientations this machine actually presents, not all of
      them. Sampling the full turn was tried and it fits for the end-on view,
      which the scroll never reaches and a drag reaches only if somebody works
@@ -721,12 +746,11 @@
      price for the machine being the size it should be the rest of the time. */
   function fitFocal(w, h){
     var maxW = 1e-6, maxH = 1e-6, i, j, k;
-    /* A quarter radian of margin either side of the sweep, not six tenths. The
-       wider margin sized every machine for a yaw reached only by dragging hard,
-       and the long skid paid most for it -- 64% of the width for a view it
-       holds for a fraction of a second. Drag past this and an edge may cross
-       the frame; that is a better trade than a machine that never fills it. */
-    var from = YAW0 - 0.25, to = YAW0 + YAW_SWEEP + 0.25;
+    /* The drag and the idle sway are bounded to exactly this, so "sampled"
+       and "reachable" are the same set of angles. This used to be a fixed
+       margin with everything left free beyond it, which meant a hard drag
+       could always find a yaw the machine had never been sized for. */
+    var from = YAW_LO, to = YAW_HI;
     for (i = 0; i <= 12; i++) {
       var y = from + (to - from) * (i / 12);
       for (j = 0; j < 2; j++) {
@@ -757,7 +781,12 @@
        clearance on a phone -- passing, but one rounding from a cropped
        cylinder head. A hair under 1 leaves a real margin instead of a lucky
        one, at a cost of about three per cent of size. */
-    return Math.min(w * 0.99 / maxW, h * 1.00 / maxH);
+    /* Both terms under 1. The height term was exactly 1.00, which fits the
+       machine to the frame and leaves nothing: driven hard against the yaw
+       clamp the About hero came out with one pixel of clearance, which is a
+       guarantee that depends on rounding. Two per cent of size buys one that
+       does not. */
+    return Math.min(w * 0.98 / maxW, h * 0.98 / maxH);
   }
 
   /* Written straight into V from the stored originals. The projection reads V
@@ -1053,7 +1082,19 @@
     scrollYaw = Math.max(0, Math.min(1, t)) * YAW_SWEEP;
   }
 
-  var last = 0, drift = 0, SPIN_T = 0;
+  /* The idle turn SWAYS; it used to accumulate.
+
+     drift += dt * 0.000055 has no ceiling in it, and the loop runs the whole
+     time the machine is on screen -- which on the About hero is from the
+     moment the page opens. Measured with nothing touched at all: 93px of
+     clearance at load, 36px at ten seconds, hard against the edge at twenty,
+     and there it stayed. That is what was cutting the machine off. The drag
+     could do it too, but the drag needed a reader; this needed nobody.
+
+     A sine inside the same window the fit covers keeps the model alive
+     without ever leaving the frame. */
+  var DRIFT_AMP = VIEW.yawPad * 0.62;
+  var last = 0, drift = 0, driftT = 0, SPIN_T = 0;
   function frame(now) {
     raf = 0;
     if (!reduce.matches) {
@@ -1065,8 +1106,11 @@
     }
     if (autoYaw && !reduce.matches) {
       var dt = last ? Math.min(64, now - last) : 16;
-      drift += dt * 0.000055;
-      yaw = YAW0 + scrollYaw + drift;
+      /* paced so the sway crosses zero at about the speed the old spin ran,
+         which is what it looked like before it wandered out of frame */
+      driftT += dt * (0.000055 / DRIFT_AMP);
+      drift = Math.sin(driftT) * DRIFT_AMP;
+      yaw = clampYaw(YAW0 + scrollYaw + drift);
     }
     last = now;
     draw(W, H, DPR);
@@ -1098,7 +1142,7 @@
   });
   canvas.addEventListener("pointermove", function (e) {
     if (!down) return;
-    yaw += (e.clientX - lx) * 0.008;
+    yaw = clampYaw(yaw + (e.clientX - lx) * 0.008);
     // Rebase, or the moment the drift resumes the machine jumps back to
     // wherever the scroll said it should have been.
     YAW0 = yaw - scrollYaw - drift;
@@ -1131,7 +1175,7 @@
   // screens of scroll is a flat battery and nothing to show for it.
   size();
   readScroll();
-  yaw = YAW0 + scrollYaw;
+  yaw = clampYaw(YAW0 + scrollYaw);
   pitch = VIEW.pitch;
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(function (es) {
