@@ -2909,6 +2909,21 @@ try { if(localStorage.getItem(ROLE_KEY) === 'admin') CAN_PAYROLL = true; } catch
 
 var ROLE_UNKNOWN = false;   /* the lookup failed -- say so rather than restrict silently */
 
+/* What projects_v reports is ONE BIT: may this person see money. It does not
+   say which role, and it must not be made to guess. adopt() used to turn that
+   bit into rememberRole('manager'), which was harmless while the only
+   question was money -- admin and manager answer it the same way -- and
+   became a bug the moment payroll needed the exact role: every pull of the
+   projects overwrote a confirmed 'admin' with 'manager' and took the Company
+   section off the screen with it. Corroborate the bit, do not invent a role. */
+function confirmMoney(canSee){
+  CAN_MONEY = !!canSee;
+  if(!CAN_MONEY){
+    CAN_PAYROLL = false;
+    try { localStorage.removeItem(ROLE_KEY); } catch(e){}
+  }
+}
+
 function rememberRole(role){
   CAN_MONEY = role === 'admin' || role === 'manager';
   CAN_PAYROLL = role === 'admin';
@@ -6409,9 +6424,9 @@ function adopt(p, row){
   p.id = row.id; p.rev = row.rev;
   p.updatedAt = row.updated_at; p.updatedBy = row.updated_by;
   /* projects_v returns sees_money() as `money` -- the same question asked of
-     the same database, so it corroborates the role lookup and keeps the
-     remembered value in step with it. */
-  if(row.money !== undefined) rememberRole(row.money ? 'manager' : 'staff');
+     the same database, so it corroborates the role lookup. It corroborates
+     the ANSWER, not the role: see confirmMoney. */
+  if(row.money !== undefined) confirmMoney(row.money);
 }
 
 function pushSoon(delay){
