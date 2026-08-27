@@ -2051,6 +2051,122 @@ html.is-frost #frostToggle {
 }
 @media (max-width: 700px) { .cmp-stage { height: min(46vh, 84vw); } }
 
+/* ============================================================
+   ABOUT: the machine IS the first screen
+   ============================================================
+   The page head measured 610px and the stage began at 945, so on desktop,
+   laptop and phone alike not one pixel of the compressor was above the fold:
+   the page opened on a paragraph about a machine, and you had to take its
+   word for it.
+
+   Stacking them and trimming paddings does not work, and the numbers say why
+   rather than the eye: an 81px h1 and a 58px h2 are 388px of type before
+   anything is drawn, and putting the head in two columns made it WORSE -- the
+   h1 went from two lines to four in the narrower column and the head grew
+   from 485px to 538px. Height is the axis with nothing spare on it.
+
+   Width is the axis with plenty. Side by side, the head takes a column it can
+   wrap comfortably in and the machine takes the full height of the screen,
+   which also suits it: a stage around 740 by 660 is a better frame for a
+   compressor than the 1392 by 340 letterbox stacking would have left. */
+.about-hero .page-head { padding-top: calc(var(--nav-h) + clamp(22px, 4vw, 56px)); }
+.lead--sub { color: var(--muted-2); }
+
+/* The machine's lead is printed twice and shown once. Above the breakpoint it
+   belongs in the head's second column, beside the title; below it, where there
+   is no second column, it would read as a second page lead about nothing in
+   particular, so the copy in the section takes over. Hiding it in the head and
+   NOT printing it in the section left it nowhere at all on a phone. */
+.cmp-lead-alt { display: block; }
+@media (max-width: 1079px), (max-height: 619px) {
+  .about-hero .page-head-aside .lead--sub { display: none; }
+}
+@media (min-width: 1080px) and (min-height: 620px) {
+  .about-hero .cmp-lead-alt { display: none; }
+}
+
+@media (min-width: 1080px) and (min-height: 620px) {
+  .about-hero {
+    display: grid;
+    /* The machine gets the larger share: below 620px of stage the callout
+       leaders collapse to a list under the drawing, and the leaders are the
+       whole point of this view. */
+    grid-template-columns: minmax(0, 0.66fr) minmax(0, 1.34fr);
+    column-gap: clamp(24px, 3vw, 56px);
+    align-items: center;
+    /* svh, not vh: on mobile Safari vh is the tallest the viewport ever gets,
+       so a 100vh hero stands taller than the screen while the toolbar is up. */
+    min-height: 100svh;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--pad);
+  }
+  /* The gutter belongs to the wrapper now, so the two columns line up with
+     the prose further down the page instead of each keeping its own. */
+  .about-hero > .container { max-width: none; padding-inline: 0; margin-inline: 0; }
+
+  .about-hero .page-head {
+    padding-block: calc(var(--nav-h) + clamp(16px, 3vh, 40px)) clamp(16px, 3vh, 40px);
+  }
+  .about-hero .page-head--split { display: block; }   /* one column again */
+  .about-hero .page-head h1 {
+    font-size: clamp(38px, 3.4vw, 54px);
+    margin-bottom: clamp(14px, 2vh, 24px);
+  }
+  .about-hero .page-head .lead { font-size: clamp(16px, 1.15vw, 18px); }
+  .about-hero .page-head-aside .lead { margin-bottom: clamp(10px, 1.4vh, 18px); }
+  .about-hero .page-head-aside .lead:last-child { margin-bottom: 0; }
+
+  /* Every box between the wrapper and the canvas has to pass the free height
+     down, and each one needs min-height:0 or it refuses to shrink below its
+     content -- that min-content floor is why a nested flex column silently
+     overflows instead of fitting. */
+  .about-hero .cmp-section {
+    align-self: stretch;
+    display: flex;
+    min-height: 0;
+    padding-block: calc(var(--nav-h) + clamp(16px, 3vh, 40px)) clamp(16px, 3vh, 40px);
+  }
+  .about-hero .cmp-section > .container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .about-hero .cmp-section .section-head {
+    margin-bottom: clamp(8px, 1.4vh, 18px);
+    max-width: none;
+  }
+  /* Caption scale. At 58px the heading was 180px of type introducing a
+     machine directly beside it that already carries its own title block and
+     seven named callouts. */
+  .about-hero .cmp-section .section-head h2 {
+    font-size: clamp(19px, 1.5vw, 23px);
+    line-height: 1.3;
+    letter-spacing: 0;
+    margin-bottom: 0;
+    max-width: none;
+  }
+  .about-hero .cmp {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-bottom: 0;
+    /* undo .bleed: in a column, escaping to the viewport width is exactly
+       what must not happen */
+    width: auto;
+    left: auto;
+    translate: none;
+  }
+  .about-hero .cmp-stage {
+    flex: 1 1 auto;
+    height: auto;      /* beats the min(53vh, 38vw) above, which is the job of
+                          the flex row here rather than of a guess */
+    min-height: 260px;
+  }
+}
+
 .cmp-canvas {
   position: absolute;
   inset: 0;
@@ -2082,8 +2198,35 @@ html.is-frost #frostToggle {
   border: 0;
 }
 /* Wide enough for the leaders, and the drawing names its own parts. Narrow,
-   and two columns of labels either side of a 340px machine land on top of it,
-   so the canvas keeps only the numbered dots and the names come down here. */
+   and two columns of labels either side of the machine land on top of it, so
+   the canvas keeps only the numbered balloons and the names come down here.
+
+   The renderer decides which it is -- it is the only party that knows how
+   wide the words come out in the font it is about to draw them in -- and
+   stamps .is-keyed on the figure, so the canvas and the stylesheet cannot
+   disagree. The media query stays as the no-script floor, where nothing is
+   drawn at all and the names are the whole of it. */
+.cmp.is-keyed .cmp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 14px;
+}
+.cmp.is-keyed .cmp-tag {
+  position: static;
+  width: auto; height: auto;
+  margin: 0;
+  clip-path: none;
+  overflow: visible;
+  display: flex;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cmp.is-keyed .cmp-tag b { color: var(--accent); font-weight: 600; }
 @media (max-width: 620px) {
   .cmp-legend {
     display: flex;
@@ -2107,6 +2250,7 @@ html.is-frost #frostToggle {
   }
   .cmp-tag b { color: var(--accent); font-weight: 600; }
 }
+
 
 /* ---------- the sheet it sits on ---------- */
 .cmp-corner {

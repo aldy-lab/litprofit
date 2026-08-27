@@ -630,15 +630,46 @@ def crumb_ld(trail, path=None):
                           "itemListElement": items}, ensure_ascii=False))
 
 
-def page_head(eyebrow, h1, lead, trail=None, path=None):
-    return """
-    <section class="container page-head">
+def page_head(eyebrow, h1, lead, trail=None, path=None, wrap=None, aside=None):
+    """wrap opens a div the caller closes itself; aside adds a second column.
+
+    Only About uses either, and only so the page title and the compressor can
+    be one first screen rather than two. The head measured 610px and the stage
+    began at 945, so on desktop, laptop and phone alike not one pixel of the
+    machine was above the fold: the page opened on a paragraph about a machine
+    and you had to take its word for it.
+
+    Trimming paddings would only have fitted the viewport I measured. What
+    actually costs the height is that the page and the section each brought a
+    full head -- an 81px h1 and a 58px h2, 388px of type before anything is
+    drawn. So the machine's own lead moves up here into a second column beside
+    the page lead, where there was empty space anyway, and the section keeps
+    its heading at caption scale. Then the head and the stage are one flex
+    column of exactly one screen, and the stage takes whatever is left over at
+    any height rather than a guess that happens to add up.
+    """
+    body = """
       {crumb}
       <p class="eyebrow">{sheet}{eyebrow}</p>
       <h1>{h1}</h1>
-      <p class="lead">{lead}</p>
+      <p class="lead">{lead}</p>"""
+    if aside:
+        body = """
+      <div class="page-head-main">
+        {crumb}
+        <p class="eyebrow">{sheet}{eyebrow}</p>
+        <h1>{h1}</h1>
+      </div>
+      <div class="page-head-aside">
+        <p class="lead">{lead}</p>
+        <p class="lead lead--sub">%s</p>
+      </div>""" % aside
+    return ("""
+    %s<section class="container page-head%s">""" % (
+        '<div class="%s">\n    ' % wrap if wrap else "",
+        " page-head--split" if aside else "") + body + """
     </section>
-{ld}""".format(crumb=crumb(trail) if trail else "", eyebrow=eyebrow, h1=h1, lead=lead,
+{ld}""").format(crumb=crumb(trail) if trail else "", eyebrow=eyebrow, h1=h1, lead=lead,
            sheet=sheet_tag(path) if path else "", ld=crumb_ld(trail, path))
 
 
@@ -1530,12 +1561,14 @@ def about():
     return page_head(PT("about_eyebrow"), PT("about_h1"),
                      PT("about_lead", legal=LEGAL, founded=FOUNDED),
                      [(T("home"), "/"), (PT("about_eyebrow"), None)],
-                     path="/about/") + """
+                     path="/about/", wrap="about-hero",
+                     aside=text(T("scr_lead"))) + """
     <!-- A photograph of a bench said "we have a workshop". The machine says
          which machine, and it is the one this company is actually known for
          overhauling: SAB 128, SAB 163, Grasso S3-900, CSH8563, OSKA 8591 are
          all twin-screw, and all of them are in the order book. -->
 {screw}
+    </div>
 
     <section class="container prose">
       <h2>{h_spec}</h2>
@@ -1577,7 +1610,7 @@ def about():
                 p_more=PT("p_eyebrow").lower(), h_details=PT("a_details"),
                 legal=LEGAL, street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
                 l_cid=T("company_no"), cid=COMPANY_ID, l_vat=T("vat"), vat=VAT,
-                screw=recip_3d("screw"),
+                screw=recip_3d("screw", hero=True),
                 pres=presentation_block(),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
@@ -2001,7 +2034,7 @@ def capacity_chart():
         </div>""".format(alt=attr(T("cap_chart_h2")), p="".join(P))
 
 
-def recip_3d(machine="recip"):
+def recip_3d(machine="recip", hero=False):
     """The compressor as a live object, above its own elevation.
 
     Same machine, same numbers: the geometry in js/compressor.js is authored in
@@ -2053,12 +2086,12 @@ def recip_3d(machine="recip"):
         % (at, n, text(label)) for n, label, at in tags)
 
     return """
-    <section class="section section-alt cmp-section seam-top">
+    <section class="section section-alt cmp-section{hero}">
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
           <h2>{h}</h2>
-          <p class="lead">{l}</p>
+          {lead}
         </div>
         <figure class="cmp bleed reveal" data-compressor data-machine="{machine}">
           <div class="cmp-stage">
@@ -2075,10 +2108,19 @@ def recip_3d(machine="recip"):
       </div>
     </section>
     <script src="{js}" defer></script>""".format(
-        machine=machine, num=("01" if machine in ("screw", "unit") else "05"),
+        machine=machine, hero=(" cmp-section--hero" if hero else " seam-top"),
+        # In hero mode the lead ALSO sits in the page head's second column,
+        # and exactly one of the two is shown. Printing it in both places is
+        # what makes that possible: the head column only exists at the grid
+        # breakpoint, and dropping it here left the paragraph nowhere at all
+        # on a phone -- the copy silently vanished below 1080px.
+        lead='<p class="lead%s">%s</p>' % (
+            " cmp-lead-alt" if hero else "",
+            text(T("unit_lead" if machine == "unit" else
+                   ("scr_lead" if machine == "screw" else "cmp_lead")))),
+        num=("01" if machine in ("screw", "unit") else "05"),
         e=text(T("unit_eyebrow" if machine == "unit" else ("scr_eyebrow" if machine == "screw" else "cmp_eyebrow"))),
         h=text(T("unit_h2" if machine == "unit" else ("scr_h2" if machine == "screw" else "cmp_h2"))),
-        l=text(T("unit_lead" if machine == "unit" else ("scr_lead" if machine == "screw" else "cmp_lead"))),
         alt=attr(T("unit_alt" if machine == "unit" else ("scr_alt" if machine == "screw" else "cmp_alt"))),
         hint=text(T("cmp_hint")), marks=marks,
         tb=text(T("unit_tb" if machine == "unit" else ("scr_tb" if machine == "screw" else "cmp_tb"))),

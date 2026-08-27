@@ -27,7 +27,7 @@
   <link rel="icon" href="/litprofit/assets/brand/favicon.svg">
   <link rel="preload" as="font" type="font/woff2" href="/litprofit/assets/fonts/montserrat-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/litprofit/css/fonts.css?v=70e42e8ab0">
-  <link rel="stylesheet" href="/litprofit/css/style.css?v=3d5132c408">
+  <link rel="stylesheet" href="/litprofit/css/style.css?v=41ada28bc1">
   <!-- Marks the document as scripted BEFORE the stylesheet paints, so the
        scroll-reveal rules only ever hide content that JS can bring back.
        Inline and synchronous on purpose: an external file would race. -->
@@ -67,11 +67,17 @@
 
   <main id="main">
 
-    <section class="container page-head">
-      <p class="crumb"><a href="/litprofit/">Home</a><span class="sep">//</span><span>About us</span></p>
-      <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>About us</p>
-      <h1>A Klaipeda ship repair company, working worldwide</h1>
-      <p class="lead">UAB "Litprofit" was established in 2010. More than a decade in the refrigeration equipment market, a long list of completed projects, and business partners who have stayed.</p>
+    <div class="about-hero">
+    <section class="container page-head page-head--split">
+      <div class="page-head-main">
+        <p class="crumb"><a href="/litprofit/">Home</a><span class="sep">//</span><span>About us</span></p>
+        <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>About us</p>
+        <h1>A Klaipeda ship repair company, working worldwide</h1>
+      </div>
+      <div class="page-head-aside">
+        <p class="lead">UAB "Litprofit" was established in 2010. More than a decade in the refrigeration equipment market, a long list of completed projects, and business partners who have stayed.</p>
+        <p class="lead lead--sub">Four lobes driving six, in a figure-of-eight bore — the size that comes off a reefer and onto our bench most often. The casing is drawn as glass because the casing is the least interesting part of it. Drag it round.</p>
+      </div>
     </section>
   <script type="application/ld+json">
   {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://aldy-lab.github.io/litprofit/"}, {"@type": "ListItem", "position": 2, "name": "About us", "item": "https://aldy-lab.github.io/litprofit/about/"}]}
@@ -82,12 +88,12 @@
          overhauling: SAB 128, SAB 163, Grasso S3-900, CSH8563, OSKA 8591 are
          all twin-screw, and all of them are in the order book. -->
 
-    <section class="section section-alt cmp-section seam-top">
+    <section class="section section-alt cmp-section cmp-section--hero">
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>On the bench</p>
           <h2>A twin-screw compressor, opened up</h2>
-          <p class="lead">Four lobes driving six, in a figure-of-eight bore — the size that comes off a reefer and onto our bench most often. The casing is drawn as glass because the casing is the least interesting part of it. Drag it round.</p>
+          <p class="lead cmp-lead-alt">Four lobes driving six, in a figure-of-eight bore — the size that comes off a reefer and onto our bench most often. The casing is drawn as glass because the casing is the least interesting part of it. Drag it round.</p>
         </div>
         <figure class="cmp bleed reveal" data-compressor data-machine="screw">
           <div class="cmp-stage">
@@ -103,7 +109,8 @@
         </figure>
       </div>
     </section>
-    <script src="/litprofit/js/compressor.js?v=bd8f3c84fa" defer></script>
+    <script src="/litprofit/js/compressor.js?v=ab192f8823" defer></script>
+    </div>
 
     <section class="container prose">
       <h2>What we specialise in</h2>

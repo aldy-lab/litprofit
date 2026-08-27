@@ -641,6 +641,20 @@
        FOCAL = 1 across the orientations this thing can actually reach, and the
        answer read off. Exact, no tuning, and it cannot be wrong about a
        machine it has never seen. */
+    /* Reserve the callout columns only if the machine would actually reach
+       them. Reserving unconditionally cost the wide pages a fifth of their
+       machine to fix a collision they never had: at 1392 the height term is
+       what binds, the drawing stops well short of the labels, and shrinking
+       it bought nothing. fitFocal records the widest projected extent it
+       sampled, so the collision can simply be asked about. */
+    /* Reserving a strip for the callout columns was tried here and removed.
+       It cost the wide pages a fifth of their machine to prevent a collision
+       they do not have: the fit's width term is about the WIDEST angle in the
+       sweep, so any long machine trips a worst-case test while the drawing on
+       screen stops 50px clear of the labels. Where the words genuinely will
+       not fit beside the drawing, isKeyed() has already moved them underneath
+       it -- which is the same problem solved without taking anything away. */
+    root.classList.toggle("is-keyed", isKeyed(W));
     FOCAL = fitFocal(W, H);
     // 3.42 put the deep three-quarter at 97% of the canvas height: not
     // clipped, but one rounding away from it, and the cylinder heads are the
@@ -662,6 +676,40 @@
   }
 
   var OFFX = 0, OFFY = 0;
+
+  /* One decision, asked once, so the canvas and the stylesheet cannot
+     disagree about it: is there room at the sheet edge for names, or do the
+     names go underneath and the drawing keep only numbered balloons?
+
+     Both are real drawing conventions. Which one applies is arithmetic: two
+     columns of "02 FEMALE ROTOR, 6 FLUTES" are 450px, and in the 744px stage
+     the About hero gives the machine that is nearly two thirds of the width
+     spent on words. Below the threshold the key goes under the drawing and
+     the machine gets the whole stage -- which is how it ends up LARGER in
+     half a screen than it was across a full one. */
+  function bandWidth(w) {
+    if (!tags.length) return 0;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.font = monoFont(w);
+    var textW = 0, i;
+    for (i = 0; i < tags.length; i++) {
+      var wid = ctx.measureText(tags[i].n).width + 10
+              + ctx.measureText(tags[i].label.toUpperCase()).width + 10;
+      if (wid > textW) textW = wid;
+    }
+    ctx.restore();
+    /* The text, not the leader. An earlier version added the elbow reach to
+       the band, which reserved the strip the leader lines run through -- but
+       a leader crossing the drawing is what a leader is for. Only the words
+       have to stay off the machine. */
+    return Math.min(w * 0.32, Math.max(12, Math.min(30, w * 0.035)) + textW + 14);
+  }
+
+  function isKeyed(w) {
+    return w < 620 || bandWidth(w) * 2 > w * 0.38;
+  }
+
   var YAW0 = VIEW.yaw0, YAW_SWEEP = VIEW.sweep, scrollYaw = 0;
 
   /* Sampled across the orientations this machine actually presents, not all of
@@ -911,7 +959,7 @@
 
     // Two columns at the sheet edge, each entry keeping its own vertical order
     // and never closer than a line to its neighbour.
-    var narrow = w < 620;
+    var narrow = isKeyed(w);
     var GUTTER = Math.max(12, Math.min(30, w * 0.035)), STEP = 26;
     [true, false].forEach(function (side) {
       var col = live.filter(function (o) { return o.left === side; })
