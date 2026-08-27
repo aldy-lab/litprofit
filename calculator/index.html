@@ -857,8 +857,14 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .co-check input[type=checkbox]{width:15px;height:15px;min-width:0;margin:0;flex:0 0 auto}
 .co-table input,.co-table select{width:100%;min-width:0}
 .co-table td.num input{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.co-table td.co-strong{color:var(--ink-1);font-weight:600}
+/* Two money columns side by side with nothing between them read as one
+   number: "40.71 2,340.71". They need room of their own and a rule to sit
+   against. */
+.co-table td.co-derived,.co-table th.num{white-space:nowrap}
 .co-table td.co-derived{font-family:var(--mono);font-variant-numeric:tabular-nums;
-  text-align:right;color:var(--ink-3)}
+  text-align:right;color:var(--ink-3);min-width:82px;padding-left:14px}
+.co-table td.co-strong{border-left:1px solid var(--baseline)}
 .co-del{padding:2px 8px;line-height:1.2}
 .co-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
@@ -1247,10 +1253,18 @@ en: {
     confirmDel:'Delete {name}? The file goes with it and there is no undo.',
     foot:'Every file is stored privately. Opening one mints a link that stops working after a minute, so a copied link is not a way in.'},
   co:{people:'People',overheads:'Fixed costs',burn:'What it costs to exist',
-    peopleLead:'The full monthly cost of each person to the company \u2014 gross pay plus employer taxes, not take-home.',
+    peopleLead:'The salary you agreed, what the company pays on top of it, and what each person therefore costs a month.',
     overheadsLead:'Everything the company pays every month whether or not a single job is sold.',
     burnLead:'Payroll and fixed costs together, and how much work has to be sold to cover them.',
-    hName:'Name',hRole:'Role',hDept:'Department',hCost:'Cost / month',hHours:'Hours / month',
+    hName:'Name',hRole:'Role',hDept:'Department',
+    hGross:'Salary, gross',hContract:'Contract',hEmployer:'We pay on top',
+    hCost:'Costs us',hHours:'Hours / month',
+    contractName:{permanent:'Indefinite',fixed:'Fixed-term'},
+    rateNote:'The employer contribution is 1.77% of gross on an indefinite contract and 2.49% on a fixed-term one (Lithuania, 2026). What the employee pays out of the same gross \u2014 Sodra and income tax \u2014 is not the company\u2019s cost and is not shown here.',
+    perPerson:'Per person',
+    kPerHead:'Won work per head',perYear:'over twelve months',
+    kMultiplier:'Labour multiplier',multNote:'turnover per euro of wages',
+    multRead:'Every euro of wages brought in {n} euros of won work. Around 2.5 is the figure a service firm is usually run at; under 2 the wage bill is not being covered by what it produces.',
     hRate:'Per hour',hFrom:'From',hTo:'Until',hCat:'Category',hAmount:'Per month',hNote:'Note',
     addPerson:'Add a person',addOverhead:'Add a cost',
     newPerson:'New person',newOverhead:'New cost',
@@ -1272,6 +1286,7 @@ en: {
     impEmpty:'That file has no rows this screen can read.',
     impConfirm:'Add {n} rows, {sum} a month in total?',
     impDone:'Added {n} of {of}.',
+    impHidden:'{n} of them are dated as having ended, so they are hidden. Tick \u201cInclude ended\u201d to see them.',
     kOwed:'Owed to us',coverNote:'{n} months of burn',
     beTitle:'Did the month pay for itself',
     beOver:'Covered',beUnder:'Short',beLine:'Break-even',
@@ -1429,10 +1444,18 @@ lt: {
     confirmDel:'Ištrinti {name}? Failas dings kartu, atkurti nebus galima.',
     foot:'Visi failai saugomi privačiai. Atidarant sukuriama nuoroda, nustojanti veikti po minutės \u2014 nukopijuota nuoroda nėra būdas patekti.'},
   co:{people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Kiek kainuoja egzistuoti',
-    peopleLead:'Visa mėnesio darbuotojo kaina įmonei \u2014 bruto plius darbdavio mokesčiai, ne į rankas.',
+    peopleLead:'Sutartas atlyginimas, kiek įmonė moka papildomai ir kiek dėl to kainuoja kiekvienas žmogus per mėnesį.',
     overheadsLead:'Viskas, ką įmonė moka kas mėnesį, nesvarbu, ar parduotas nors vienas darbas.',
     burnLead:'Atlyginimai ir pastovios išlaidos kartu bei kiek reikia parduoti, kad jos būtų padengtos.',
-    hName:'Vardas',hRole:'Pareigos',hDept:'Padalinys',hCost:'Kaina / mėn.',hHours:'Val. / mėn.',
+    hName:'Vardas',hRole:'Pareigos',hDept:'Padalinys',
+    hGross:'Atlyginimas bruto',hContract:'Sutartis',hEmployer:'Mokame papildomai',
+    hCost:'Mums kainuoja',hHours:'Val. / mėn.',
+    contractName:{permanent:'Neterminuota',fixed:'Terminuota'},
+    rateNote:'Darbdavio įmoka \u2014 1,77 % nuo bruto pagal neterminuotą sutartį ir 2,49 % pagal terminuotą (Lietuva, 2026). Tai, ką iš to paties bruto moka darbuotojas \u2014 Sodra ir GPM \u2014 nėra įmonės sąnaudos ir čia nerodoma.',
+    perPerson:'Vienam žmogui',
+    kPerHead:'Laimėta darbų vienam',perYear:'per dvylika mėnesių',
+    kMultiplier:'Darbo daugiklis',multNote:'apyvarta vienam atlyginimų eurui',
+    multRead:'Kiekvienas atlyginimų euras atnešė {n} eurus laimėtų darbų. Paslaugų įmonėje įprasta apie 2,5; mažiau nei 2 reiškia, kad atlyginimų sąnaudos nepadengiamos.',
     hRate:'Už valandą',hFrom:'Nuo',hTo:'Iki',hCat:'Kategorija',hAmount:'Per mėn.',hNote:'Pastaba',
     addPerson:'Pridėti žmogų',addOverhead:'Pridėti išlaidą',
     newPerson:'Naujas darbuotojas',newOverhead:'Nauja išlaida',
@@ -1454,6 +1477,7 @@ lt: {
     impEmpty:'Šiame faile nėra eilučių, kurias šis ekranas galėtų perskaityti.',
     impConfirm:'Pridėti {n} eilutes, iš viso {sum} per mėnesį?',
     impDone:'Pridėta {n} iš {of}.',
+    impHidden:'{n} iš jų pažymėti kaip pasibaigę, todėl nerodomi. Pažymėkite \u201eRodyti pasibaigusius\u201c.',
     kOwed:'Mums skolingi',coverNote:'{n} mėn. išlaidų',
     beTitle:'Ar mėnuo pats save padengė',
     beOver:'Padengta',beUnder:'Trūko',beLine:'Nenuostolingumas',
@@ -1611,10 +1635,18 @@ ru: {
     confirmDel:'Удалить {name}? Файл исчезнет вместе с записью, отменить нельзя.',
     foot:'Все файлы хранятся приватно. При открытии создаётся ссылка, которая перестаёт работать через минуту \u2014 скопированная ссылка не даёт доступа.'},
   co:{people:'Люди',overheads:'Постоянные расходы',burn:'Во что обходится существовать',
-    peopleLead:'Полная месячная стоимость сотрудника для компании \u2014 брутто плюс налоги работодателя, а не на руки.',
+    peopleLead:'Оговорённая зарплата, сколько компания платит сверху и во сколько из-за этого обходится каждый человек в месяц.',
     overheadsLead:'Всё, что компания платит каждый месяц независимо от того, продан ли хоть один заказ.',
     burnLead:'Зарплаты и постоянные расходы вместе и сколько нужно продать, чтобы их покрыть.',
-    hName:'Имя',hRole:'Должность',hDept:'Подразделение',hCost:'Стоимость / мес.',hHours:'Часов / мес.',
+    hName:'Имя',hRole:'Должность',hDept:'Подразделение',
+    hGross:'Зарплата брутто',hContract:'Договор',hEmployer:'Платим сверху',
+    hCost:'Обходится нам',hHours:'Часов / мес.',
+    contractName:{permanent:'Бессрочный',fixed:'Срочный'},
+    rateNote:'Взнос работодателя \u2014 1,77 % от брутто по бессрочному договору и 2,49 % по срочному (Литва, 2026). То, что из того же брутто платит сам работник \u2014 Sodra и подоходный, \u2014 не является расходом компании и здесь не показано.',
+    perPerson:'На человека',
+    kPerHead:'Выиграно работ на человека',perYear:'за двенадцать месяцев',
+    kMultiplier:'Трудовой множитель',multNote:'оборот на евро зарплат',
+    multRead:'Каждый евро зарплат принёс {n} евро выигранных работ. В сервисной компании ориентир около 2,5; ниже 2 фонд оплаты труда не окупается тем, что производит.',
     hRate:'В час',hFrom:'С',hTo:'По',hCat:'Категория',hAmount:'В месяц',hNote:'Примечание',
     addPerson:'Добавить человека',addOverhead:'Добавить расход',
     newPerson:'Новый сотрудник',newOverhead:'Новый расход',
@@ -1636,6 +1668,7 @@ ru: {
     impEmpty:'В этом файле нет строк, которые экран может прочитать.',
     impConfirm:'Добавить {n} строк, всего {sum} в месяц?',
     impDone:'Добавлено {n} из {of}.',
+    impHidden:'{n} из них помечены как завершённые и потому скрыты. Включите \u00abПоказывать завершённые\u00bb.',
     kOwed:'Нам должны',coverNote:'{n} мес. расходов',
     beTitle:'Окупил ли себя месяц',
     beOver:'Покрыто',beUnder:'Не хватило',beLine:'Безубыточность',
@@ -5070,6 +5103,34 @@ function niceStep(raw){
 const OH_CATEGORIES = ['premises','vehicles','insurance','software',
                        'utilities','finance','tools','other'];
 
+/* Lithuania, checked August 2026. The employer's Sodra contribution sits ON
+   TOP of the gross salary: 1.77% on an indefinite contract, 2.49% on a
+   fixed-term one.
+
+   The database is the source of truth -- employer_rate() in
+   migrate-payroll.sql computes every stored figure, and this copy exists only
+   so the browser-only build, and the moment before the server answers, show
+   the same numbers. If the law changes, change it there and re-run the file:
+   every cost is recomputed from the salaries and nothing is retyped.
+
+   What the EMPLOYEE pays out of that same gross -- Sodra 19.5%, GPM at 20/25/
+   32% -- is not the company's cost and is deliberately not modelled. A net
+   figure would also need the NPD allowance, whose formula changes every year,
+   and a net number quietly a year out of date is worse on an owner's screen
+   than no net number at all. */
+const CONTRACTS = ['permanent', 'fixed'];
+function employerRate(contract){ return contract === 'fixed' ? 0.0249 : 0.0177; }
+function grossOf(p){
+  /* a row written before the salary column existed carries only the total */
+  if(p.gross_salary != null) return Number(p.gross_salary) || 0;
+  return (Number(p.monthly_cost) || 0) / (1 + employerRate(p.contract));
+}
+function employerCostOf(p){ return grossOf(p) * employerRate(p.contract); }
+function totalCostOf(p){
+  return p.monthly_cost != null ? (Number(p.monthly_cost) || 0)
+                                : grossOf(p) + employerCostOf(p);
+}
+
 function coState(){
   if(!state.co) state.co = { showEnded:false };
   return state.co;
@@ -5228,7 +5289,8 @@ function coToolbar(t){
 function coFoot(rows, kind, t){
   const c = t.co;
   if(!rows.length) return '';
-  const money = r => Number(kind === 'person' ? r.monthly_cost : r.amount_month) || 0;
+  const money = r => kind === 'person' ? totalCostOf(r) : (Number(r.amount_month) || 0);
+  const gross = rows.reduce((a, r) => a + (kind === 'person' ? grossOf(r) : 0), 0);
   const total = rows.reduce((a, r) => a + money(r), 0);
   const span = kind === 'person' ? 3 : 1;
   const tail = kind === 'person' ? 4 : 4;
@@ -5243,8 +5305,18 @@ function coFoot(rows, kind, t){
     if(by.size > 1){
       groups = [...by.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) =>
         `<tr class="co-sub"><td colspan="${span}">${esc(k)}</td>
-          <td class="num">${fmt(v, 0)}</td><td colspan="${tail}"></td></tr>`).join('');
+          <td colspan="4" class="num">${fmt(v, 0)}</td><td colspan="${tail}"></td></tr>`).join('');
     }
+  }
+  if(kind === 'person'){
+    /* Salaries and what they cost side by side, because the gap between those
+       two columns is the whole reason this screen was asked for. */
+    return `<tfoot>${groups}<tr class="co-total">
+      <td colspan="${span}">${esc(c.total)}</td>
+      <td class="num">${fmt(gross, 0)}</td><td></td>
+      <td class="num">${fmt(total - gross, 0)}</td>
+      <td class="num">${fmt(total, 0)}</td><td colspan="${tail}"></td>
+    </tr></tfoot>`;
   }
   return `<tfoot>${groups}<tr class="co-total">
     <td colspan="${span}">${esc(c.total)}</td>
@@ -5264,12 +5336,14 @@ function coCell(v){
 function coCsvOut(kind){
   const t = tr(), c = t.co;
   const head = kind === 'person'
-    ? [c.hName, c.hRole, c.hDept, c.hCost, c.hHours, c.hFrom, c.hTo]
+    ? [c.hName, c.hRole, c.hDept, c.hGross, c.hContract, c.hEmployer, c.hCost,
+       c.hHours, c.hFrom, c.hTo]
     : [c.hName, c.hCat, c.hAmount, c.hFrom, c.hTo, c.hNote];
   const rows = kind === 'person' ? coPeople() : coOverheads();
   const lines = [head.map(coCell).join(';')];
   rows.forEach(r => lines.push((kind === 'person'
-    ? [r.name, r.job_title, r.department, Number(r.monthly_cost || 0).toFixed(2),
+    ? [r.name, r.job_title, r.department, grossOf(r).toFixed(2), r.contract || 'permanent',
+       employerCostOf(r).toFixed(2), totalCostOf(r).toFixed(2),
        r.hours_month, r.start_date, r.end_date]
     : [r.name, r.category, Number(r.amount_month || 0).toFixed(2),
        r.start_date, r.end_date, r.note]).map(coCell).join(';')));
@@ -5310,33 +5384,124 @@ function coDate(v){
   return '';
 }
 
+/* Columns are matched by HEADER, not by position.
+
+   The first version counted: salary is column four, hours is column eight,
+   dates are nine and ten -- with a fallback to an older, shorter layout when
+   those were empty. Handed a perfectly ordinary eight-column file it read the
+   START date as the END date, so both imported people were filed as having
+   left and vanished from the screen. They were in the data. Nothing errored.
+   The count said "Added 2 of 2" and the table was empty.
+
+   A header is what a spreadsheet exports, so the header is what gets read.
+   The names are matched in all three languages plus the obvious English
+   aliases, accents and punctuation ignored. A file with no header falls back
+   to the documented order, and that order is the one this app exports. */
+const CO_FIELDS = {
+  person: {
+    name:         ['name', 'vardas', 'employee', 'darbuotojas',
+                   'имя', 'фио', 'сотрудник'],
+    job_title:    ['role', 'position', 'jobtitle', 'title', 'pareigos',
+                   'должность'],
+    department:   ['department', 'dept', 'padalinys', 'skyrius',
+                   'подразделение', 'отдел'],
+    gross_salary: ['salarygross', 'gross', 'salary', 'atlyginimasbruto', 'bruto',
+                   'atlyginimas', 'зарплатабрутто', 'брутто', 'зарплата', 'оклад'],
+    contract:     ['contract', 'sutartis', 'договор'],
+    hours_month:  ['hoursmonth', 'hours', 'valmen', 'val', 'часовмес', 'часов', 'часы'],
+    start_date:   ['from', 'nuo', 'start', 'startdate', 'pradzia', 'с', 'начало'],
+    end_date:     ['until', 'iki', 'end', 'enddate', 'pabaiga', 'по', 'до', 'окончание']
+  },
+  overhead: {
+    name:         ['name', 'pavadinimas', 'название', 'наименование'],
+    category:     ['category', 'kategorija', 'категория'],
+    amount_month: ['permonth', 'amount', 'permen', 'suma', 'вмесяц', 'сумма'],
+    start_date:   ['from', 'nuo', 'start', 'startdate', 'с', 'начало'],
+    end_date:     ['until', 'iki', 'end', 'enddate', 'по', 'до'],
+    note:         ['note', 'pastaba', 'comment', 'примечание', 'комментарий']
+  }
+};
+/* The derived columns are written on export and ignored on import: reading
+   them back would let a stale total overwrite one computed from the salary
+   sitting next to it. */
+const CO_DERIVED = ['wepayontop', 'costsus', 'mokamepapildomai', 'mumskainuoja',
+                    'платимсверху', 'обходитсянам', 'perhour', 'uzvalanda', 'вчас'];
+
+/* Lowercase, strip accents and everything that is not a letter or a digit, so
+   "Val. / mėn." and "val men" and "VAL/MĖN" are one key.
+
+   Cyrillic is KEPT. Stripping to [a-z0-9] threw away every Russian heading
+   whole: coKey('Имя') came out empty, no column matched, the header was not
+   recognised as one, and it was imported as an employee named "Имя" earning
+   nothing. The app has three languages and the matcher has to read all
+   three. */
+function coKey(x){
+  return String(x || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\u0400-\u04ff]/g, '');
+}
+
+function coMapHeader(cols, kind){
+  const spec = CO_FIELDS[kind], map = {};
+  cols.forEach((raw, i) => {
+    const k = coKey(raw);
+    if(!k || CO_DERIVED.indexOf(k) !== -1) return;
+    for(const field in spec){
+      if(map[field] !== undefined) continue;
+      if(spec[field].indexOf(k) !== -1){ map[field] = i; return; }
+    }
+  });
+  /* A header is only a header if it named at least the two columns without
+     which a row means nothing. */
+  return (map.name !== undefined
+          && (map.gross_salary !== undefined || map.amount_month !== undefined))
+         ? map : null;
+}
+
+const CO_ORDER = {
+  person:   ['name','job_title','department','gross_salary','contract',
+             'hours_month','start_date','end_date'],
+  overhead: ['name','category','amount_month','start_date','end_date','note']
+};
+
 async function coCsvIn(kind, file){
   const t = tr(), c = t.co;
   const text = await file.text();
   const body = text.replace(/^\ufeff/, '').split(/\r?\n/).filter(l => l.trim());
-  if(body.length < 2){ alert(c.impEmpty); return; }
+  /* One line, not two. A file with no header and one row is a perfectly good
+     file, and requiring two threw it away with "no rows this screen can read"
+     -- which was true only because the check had already decided it wasn't. */
+  if(!body.length){ alert(c.impEmpty); return; }
   const sep = (body[0].split(';').length > body[0].split(',').length) ? ';' : ',';
 
-  /* The header is read, not assumed. A file whose first line is a header gets
-     it skipped; one that starts straight into data keeps the first row. */
-  const first = coSplit(body[0], sep);
-  const looksLikeHeader = first.some(x => /[a-zA-Z\u00c0-\u024f]/.test(x))
-                          && coNum(first[kind === 'person' ? 3 : 2]) === 0;
-  const rows = body.slice(looksLikeHeader ? 1 : 0)
+  const map = coMapHeader(coSplit(body[0], sep), kind);
+  const at = (cols, field) => {
+    const i = map ? map[field] : CO_ORDER[kind].indexOf(field);
+    return (i === undefined || i < 0) ? '' : (cols[i] || '');
+  };
+
+  const rows = body.slice(map ? 1 : 0)
     .map(l => coSplit(l, sep))
-    .filter(cols => (cols[0] || '').trim())
+    .filter(cols => at(cols, 'name').trim())
     .map(cols => kind === 'person'
-      ? { name: cols[0], job_title: cols[1] || '', department: cols[2] || '',
-          monthly_cost: coNum(cols[3]), hours_month: coNum(cols[4]) || 130,
-          start_date: coDate(cols[5]), end_date: coDate(cols[6]) }
-      : { name: cols[0],
-          category: OH_CATEGORIES.indexOf((cols[1] || '').toLowerCase()) !== -1
-                    ? cols[1].toLowerCase() : 'other',
-          amount_month: coNum(cols[2]),
-          start_date: coDate(cols[3]), end_date: coDate(cols[4]), note: cols[5] || '' });
+      ? { name: at(cols, 'name'), job_title: at(cols, 'job_title'),
+          department: at(cols, 'department'),
+          gross_salary: coNum(at(cols, 'gross_salary')),
+          contract: /fix|termin|sroch/i.test(at(cols, 'contract')) ? 'fixed' : 'permanent',
+          hours_month: coNum(at(cols, 'hours_month')) || 130,
+          start_date: coDate(at(cols, 'start_date')),
+          end_date: coDate(at(cols, 'end_date')) }
+      : { name: at(cols, 'name'),
+          category: OH_CATEGORIES.indexOf(coKey(at(cols, 'category'))) !== -1
+                    ? coKey(at(cols, 'category')) : 'other',
+          amount_month: coNum(at(cols, 'amount_month')),
+          start_date: coDate(at(cols, 'start_date')),
+          end_date: coDate(at(cols, 'end_date')),
+          note: at(cols, 'note') });
 
   if(!rows.length){ alert(c.impEmpty); return; }
-  const sum = rows.reduce((a, r) => a + (kind === 'person' ? r.monthly_cost : r.amount_month), 0);
+  const sum = rows.reduce((a, r) => a + (kind === 'person'
+    ? r.gross_salary * (1 + employerRate(r.contract)) : r.amount_month), 0);
   if(!confirm(c.impConfirm.replace('{n}', rows.length).replace('{sum}', fmt(sum, 0)))) return;
 
   let ok = 0;
@@ -5345,8 +5510,15 @@ async function coCsvIn(kind, file){
     catch(e){ /* keep going: one bad line must not lose the other eleven */ }
   }
   persist(); render();
-  alert(c.impDone.replace('{n}', ok).replace('{of}', rows.length));
+
+  /* Say if any of them landed outside the filter, because "Added 12 of 12"
+     over an empty table is exactly the report that hid the last bug. */
+  const hidden = rows.length - (kind === 'person' ? coPeople() : coOverheads())
+                                 .filter(x => String(x.id).slice(0, 6) === 'local-').length;
+  alert(c.impDone.replace('{n}', ok).replace('{of}', rows.length)
+        + (ok && hidden > 0 && !coState().showEnded ? '\n' + c.impHidden.replace('{n}', hidden) : ''));
 }
+
 
 function coPeopleView(){
   const t = tr(), c = t.co, rows = coPeople();
@@ -5354,17 +5526,21 @@ function coPeopleView(){
       <td><input data-f="name" value="${esc(p.name || '')}"></td>
       <td><input data-f="job_title" value="${esc(p.job_title || '')}"></td>
       <td><input data-f="department" value="${esc(p.department || '')}"></td>
-      <td class="num"><input data-f="monthly_cost" type="number" step="1"
-          value="${p.monthly_cost == null ? '' : p.monthly_cost}"></td>
+      <td class="num"><input data-f="gross_salary" type="number" step="1"
+          value="${p.gross_salary == null ? '' : p.gross_salary}"></td>
+      <td><select data-f="contract">${CONTRACTS.map(k =>
+          `<option value="${k}"${(p.contract || 'permanent') === k ? ' selected' : ''}>${
+            esc(c.contractName[k])}</option>`).join('')}</select></td>
+      <td class="num co-derived">${fmt(employerCostOf(p), 2)}</td>
+      <td class="num co-derived co-strong">${fmt(totalCostOf(p), 2)}</td>
       <td class="num"><input data-f="hours_month" type="number" step="1"
           value="${p.hours_month == null ? '' : p.hours_month}"></td>
-      <td class="num co-derived">${p.hour_cost == null
-          ? (Number(p.hours_month) > 0 ? fmt(p.monthly_cost / p.hours_month, 2) : '—')
-          : fmt(p.hour_cost, 2)}</td>
+      <td class="num co-derived">${
+          Number(p.hours_month) > 0 ? fmt(totalCostOf(p) / p.hours_month, 2) : '—'}</td>
       <td><input data-f="start_date" type="date" value="${esc(p.start_date || '')}"></td>
       <td><input data-f="end_date" type="date" value="${esc(p.end_date || '')}"></td>
       <td><button class="ghost co-del" data-co-del="person" title="${esc(t.remove)}">×</button></td>
-    </tr>`).join('') : `<tr><td colspan="9" class="muted">${esc(c.noPeople)}</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="12" class="muted">${esc(c.noPeople)}</td></tr>`;
 
   return `${noticeBar()}<div class="card">
     <h2 class="sheet">${esc(c.people)}</h2>
@@ -5373,8 +5549,9 @@ function coPeopleView(){
     <div class="tablewrap"><table class="sheet-table co-table">
       <thead><tr>
         <th>${esc(c.hName)}</th><th>${esc(c.hRole)}</th><th>${esc(c.hDept)}</th>
-        <th class="num">${esc(c.hCost)}</th><th class="num">${esc(c.hHours)}</th>
-        <th class="num">${esc(c.hRate)}</th>
+        <th class="num">${esc(c.hGross)}</th><th>${esc(c.hContract)}</th>
+        <th class="num">${esc(c.hEmployer)}</th><th class="num">${esc(c.hCost)}</th>
+        <th class="num">${esc(c.hHours)}</th><th class="num">${esc(c.hRate)}</th>
         <th>${esc(c.hFrom)}</th><th>${esc(c.hTo)}</th><th></th>
       </tr></thead>
       <tbody>${body}</tbody>
@@ -5386,6 +5563,7 @@ function coPeopleView(){
       <button id="coImpPeopleBtn">${esc(c.importCsv)}</button>
       <input type="file" id="coImpPeople" accept=".csv,text/csv" hidden>
     </div>
+    <p class="hint co-foot">${esc(c.rateNote)}</p>
     <p class="hint co-foot">${esc(c.costNote)}</p>
   </div>`;
 }
@@ -5631,6 +5809,34 @@ function coBurnView(){
                  cover == null ? '' : c.coverNote.replace('{n}', cover.toFixed(1)),
                  cover != null && cover < 1 ? 'bad' : '')}
         </div>`}
+
+    ${(() => {
+      /* Two figures a service business is measured by, both computable from
+         what is already here.
+
+         Revenue per head is the plain one. The labour multiplier -- turnover
+         divided by the wage bill -- is the one professional-services firms
+         actually run on: it says how many euros of work each euro of salary
+         brings in, and around 2.5 is the number quoted as healthy. Below 2 a
+         firm is usually paying people to be busy rather than to earn.
+
+         Both are annualised from the last twelve months of WON work, and both
+         are withheld rather than guessed when there is not a year of it. */
+      const won = coWonByMonth();
+      const year = coMonths(12).reduce((a, m) => a + ((won.get(m) || {}).sell || 0), 0);
+      if(!(year > 0) || !b.headcount) return '';
+      const perHead = year / b.headcount;
+      const payYear = b.payroll * 12;
+      const mult = payYear > 0 ? year / payYear : null;
+      return `<h3 class="an-h">${esc(c.perPerson)}</h3>
+        <div class="an-stats co-stats">
+          ${stat(c.kPerHead, fmt(perHead, 0), c.perYear)}
+          ${stat(c.kMultiplier, mult == null ? '\u2014' : mult.toFixed(2) + '\u00d7',
+                 c.multNote, mult != null && mult < 2 ? 'bad' : '')}
+        </div>
+        ${mult == null ? '' : `<p class="an-read ${mult >= 2.5 ? 'ok' : mult >= 2 ? 'warn' : 'bad'}">${
+          esc(c.multRead.replace('{n}', mult.toFixed(2)))}</p>`}`;
+    })()}
   </div>
 
   <div class="enq-charts">
@@ -5649,7 +5855,7 @@ function wireCompany(){
 
   on('coAddPerson', 'click', async () => {
     const row = { name: tr().co.newPerson, job_title: '', department: '',
-                  monthly_cost: 0, hours_month: 130,
+                  gross_salary: 0, contract: 'permanent', hours_month: 130,
                   start_date: new Date().toISOString().slice(0, 10) };
     await coCreate('person', row);
   });
@@ -5863,6 +6069,9 @@ async function coCreate(kind, row, quiet){
        the same before anyone has connected a database. */
     row.id = 'local-' + Math.random().toString(36).slice(2, 10);
     row.rev = 1;
+    /* The server derives the total from the salary; with no server, this does.
+       Without it a browser-only copy shows salaries and a burn of nothing. */
+    if(kind === 'person') row.monthly_cost = grossOf(row) + employerCostOf(row);
     coSetList(kind, [row].concat(coList(kind)));
     if(!quiet){ persist(); render(); }
     return;
@@ -5908,16 +6117,10 @@ async function coFieldChanged(rowEl, inp){
      third saved and the second back at zero, because the redraw between them
      put the stale value back. The derived cell is patched in place instead --
      it is the only thing on screen that follows from the edit. */
-  const paintRate = () => {
-    const cell = rowEl.querySelector('.co-derived');
-    if(!cell) return;
-    const c = Number(patch.monthly_cost) || 0, hh = Number(patch.hours_month) || 0;
-    cell.textContent = hh > 0 ? fmt(c / hh, 2) : '\u2014';
-  };
-
   if(!CLOUD.on){
     Object.assign(cur, patch);
-    paintRate(); persist(); return;
+    if(kind === 'person') cur.monthly_cost = grossOf(cur) + employerCostOf(cur);
+    persist(); render(); return;
   }
   try {
     const saved = kind === 'person'
@@ -5926,7 +6129,11 @@ async function coFieldChanged(rowEl, inp){
     if(!saved){ toast(tr().co.conflict, 'bad'); return; }
     coSetList(kind, coList(kind).map(x => x.id === id ? saved : x));
     await coRefreshBurn();
-    paintRate(); persist();
+    persist();
+    /* The three derived cells and the foot all follow from this edit, so the
+       screen is redrawn -- after the save, not on every keystroke, and the
+       control that was just left is not the one being typed into. */
+    render();
     toast(tr().co.saved, 'ok');
   } catch(e){ toast(tr().co.saveFailed, 'bad'); }
 }
