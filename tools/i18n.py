@@ -203,6 +203,15 @@ S["en"] = dict(
     # Booking and the dial code. The booking copy says what pressing the
     # button does BEFORE it does it, which is the whole point of loading the
     # widget on request: until then nothing has been sent anywhere.
+    # What the form says back. These lived in main.js as English literals, so
+    # a Lithuanian visitor filled in a Lithuanian form and was answered in
+    # English -- and once the CV note was translated the reply came out half
+    # and half, which is how it was noticed at all.
+    form_msg_required="Please complete the required fields.",
+    form_msg_sending="Sending\u2026",
+    form_msg_ok="Thank you \u2014 we will come back to you shortly.",
+    form_msg_fail="Something went wrong. Please email %(email)s directly.",
+    form_msg_mail="Your mail client is opening with everything ready to send.",
     form_dial="Country code",
     book_eyebrow="Book a call",
     book_h2="Fifteen minutes with an engineer",
@@ -364,6 +373,11 @@ S["lt"] = dict(
           "nurodykite laivą, įrangą ir uostą, o mes pateiksime planą.",
     cta_enquiry="Siųsti užklausą", cta_call="Skambinti",
 
+    form_msg_required="Užpildykite privalomus laukus.",
+    form_msg_sending="Siunčiama\u2026",
+    form_msg_ok="Ačiū \u2014 netrukus su jumis susisieksime.",
+    form_msg_fail="Kažkas nepavyko. Parašykite tiesiai adresu %(email)s.",
+    form_msg_mail="Atsidaro jūsų pašto programa su paruoštu laišku.",
     form_dial="Šalies kodas",
     book_eyebrow="Rezervuoti pokalbį",
     book_h2="Penkiolika minučių su inžinieriumi",
@@ -465,6 +479,11 @@ S["ru"] = dict(
           "сообщите судно, оборудование и порт, а мы предложим план.",
     cta_enquiry="Отправить запрос", cta_call="Позвонить",
 
+    form_msg_required="Заполните обязательные поля.",
+    form_msg_sending="Отправляется\u2026",
+    form_msg_ok="Спасибо \u2014 мы скоро свяжемся с вами.",
+    form_msg_fail="Что-то пошло не так. Напишите напрямую на %(email)s.",
+    form_msg_mail="Открывается ваша почтовая программа с готовым письмом.",
     form_dial="Код страны",
     book_eyebrow="Записаться на звонок",
     book_h2="Пятнадцать минут с инженером",
@@ -1395,9 +1414,28 @@ CAR = {
             "A serious approach to safety in machinery spaces and confined areas.",
             "Working English; Lithuanian or Russian are useful additions."],
    apply_h2="Send an application",
-   apply_p="Tell us your trade, your experience and when you could start. Attach "
-           "your CV and certificates to the email that opens when you submit — we "
-           "do not accept file uploads through this page.",
+   # Rewritten when the CV field went in: the old copy said uploads were not
+   # accepted through this page, which the drop zone directly under it now
+   # contradicts. Where the file actually goes depends on whether a form
+   # endpoint is configured, and the form itself says so at the moment it
+   # matters rather than in advance.
+   apply_p="Tell us your trade, your experience and when you could start, and "
+           "attach a CV if you have one to hand.",
+   # The apply flow. f_cv_attach is the honest half of it: a browser cannot
+   # put a file into a mail client, so when no form endpoint is configured the
+   # applicant is told to attach it, and the filename goes into the message so
+   # nothing is lost quietly.
+   apply_cta="Apply for this role",
+   f_cv="CV",
+   f_cv_hint="PDF, Word or plain text, up to 10 MB.",
+   f_cv_drop="Drop a file here, or choose one",
+   f_cv_choose="Choose a file",
+   f_cv_clear="Remove",
+   f_cv_big="That file is over 10 MB. Please send a smaller one, or a link to it.",
+   f_cv_type="Please attach a PDF, a Word document or plain text.",
+   f_cv_attach="Attach your CV to the email that opens \u2014 a browser cannot "
+               "attach it for you.",
+   f_role_other="Another role, or a speculative application",
    f_role="Trade or position", f_exp="Experience and availability",
    f_exp_ph="Your trade, years of experience, certifications, and when you could start.",
    sample="Example",
@@ -1427,9 +1465,19 @@ CAR = {
             "Rimtas požiūris į saugą mašinų skyriuose ir uždarose erdvėse.",
             "Anglų kalba; lietuvių ar rusų — privalumas."],
    apply_h2="Siųsti kandidatūrą",
-   apply_p="Nurodykite specialybę, patirtį ir kada galėtumėte pradėti. CV ir "
-           "sertifikatus prisekite prie el. laiško, kuris atsidarys paspaudus siųsti — "
-           "failų per šį puslapį nepriimame.",
+   apply_p="Nurodykite specialybę, patirtį ir kada galėtumėte pradėti, ir prisekite "
+           "gyvenimo aprašymą, jei jį turite po ranka.",
+   apply_cta="Kandidatuoti į šią poziciją",
+   f_cv="Gyvenimo aprašymas",
+   f_cv_hint="PDF, Word arba tekstas, iki 10 MB.",
+   f_cv_drop="Nutempkite failą čia arba pasirinkite",
+   f_cv_choose="Pasirinkti failą",
+   f_cv_clear="Pašalinti",
+   f_cv_big="Failas didesnis nei 10 MB. Atsiųskite mažesnį arba nuorodą į jį.",
+   f_cv_type="Prisekite PDF, Word dokumentą arba tekstinį failą.",
+   f_cv_attach="Prisekite gyvenimo aprašymą prie atsidariusio laiško \u2014 "
+               "naršyklė to padaryti už jus negali.",
+   f_role_other="Kita pozicija arba atvira kandidatūra",
    f_role="Specialybė ar pareigos", f_exp="Patirtis ir galimybės",
    f_exp_ph="Specialybė, patirtis metais, sertifikatai ir kada galėtumėte pradėti.",
    sample="Pavyzdys",
@@ -1460,9 +1508,19 @@ CAR = {
             "Серьёзное отношение к безопасности в машинных отделениях и замкнутых пространствах.",
             "Рабочий английский; литовский или русский — преимущество."],
    apply_h2="Отправить заявку",
-   apply_p="Укажите специальность, опыт и когда могли бы приступить. Резюме и "
-           "сертификаты приложите к письму, которое откроется при отправке — загрузку "
-           "файлов через эту страницу мы не принимаем.",
+   apply_p="Укажите специальность, опыт и когда могли бы приступить, и приложите "
+           "резюме, если оно под рукой.",
+   apply_cta="Откликнуться на вакансию",
+   f_cv="Резюме",
+   f_cv_hint="PDF, Word или текст, до 10 МБ.",
+   f_cv_drop="Перетащите файл сюда или выберите",
+   f_cv_choose="Выбрать файл",
+   f_cv_clear="Убрать",
+   f_cv_big="Файл больше 10 МБ. Пришлите меньше или ссылку на него.",
+   f_cv_type="Приложите PDF, документ Word или текстовый файл.",
+   f_cv_attach="Приложите резюме к открывшемуся письму \u2014 браузер не может "
+               "сделать это за вас.",
+   f_role_other="Другая позиция или открытая заявка",
    f_role="Специальность или должность", f_exp="Опыт и возможности",
    f_exp_ph="Специальность, стаж, сертификаты и когда могли бы приступить.",
    sample="Пример",

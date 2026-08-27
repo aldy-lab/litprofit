@@ -308,6 +308,14 @@
     else if (el.parentNode) el.parentNode.removeChild(el);
   });
 
+  /* What the forms say back, in the page's own language. The page hands these
+     down on <html data-forms>, positionally: required, sending, ok, fail,
+     mail, cv-too-big, cv-attach. The English below is the fallback for a page
+     that carries no forms, not the source of truth -- keeping the source of
+     truth here is what had a Lithuanian form answering in English. */
+  var MSG = (doc.documentElement.getAttribute("data-forms") || "").split("|");
+  function msg(i, fallback) { return MSG[i] || fallback; }
+
   /* ---------- forms ----------
      Two forms, one behaviour: the enquiry form on /contacts/ and the
      application form on /careers/. Both post to FORM_ENDPOINT when one is
@@ -333,7 +341,7 @@
       e.preventDefault();
 
       if (!form.checkValidity()) {
-        say("Please complete the required fields.", "is-error");
+        say(msg(0, "Please complete the required fields."), "is-error");
         var bad = form.querySelector(":invalid");
         if (bad) bad.focus();
         return;
@@ -353,16 +361,16 @@
       }
 
       if (FORM_ENDPOINT) {
-        say("Sending\u2026");
+        say(msg(1, "Sending\u2026"));
         fetch(FORM_ENDPOINT, {
           method: "POST", body: data, headers: { Accept: "application/json" }
         }).then(function (res) {
           if (!res.ok) throw new Error("bad status " + res.status);
           form.reset();
-          say("Thank you \u2014 we will come back to you shortly.", "is-ok");
+          say(msg(2, "Thank you \u2014 we will come back to you shortly."), "is-ok");
         }).catch(function () {
-          say("Something went wrong. Please email " + CONTACT_EMAIL + " directly.",
-              "is-error");
+          say(msg(3, "Something went wrong. Please email " + CONTACT_EMAIL +
+                    " directly."), "is-error");
         });
         return;
       }
@@ -370,13 +378,89 @@
       var lines = fields.map(function (f) {
         return f.charAt(0).toUpperCase() + f.slice(1) + ": " + get(f);
       });
+
+      /* A browser cannot put a file into a mail client, and pretending
+         otherwise is how an application arrives with no CV and nobody
+         notices. The name goes in the message so the recipient can see one
+         was meant, and the note says who has to attach it. */
+      var cv = form.querySelector("input[type=file]");
+      var picked = cv && cv.files && cv.files[0];
+      var extra = "";
+      if (picked) {
+        lines.push("CV: " + picked.name);
+        extra = " " + msg(6, "Please attach it to the email.");
+      }
       lines.push("", get("message"));
 
       window.location.href = "mailto:" + CONTACT_EMAIL +
         "?subject=" + encodeURIComponent(subject) +
         "&body=" + encodeURIComponent(lines.join("\n"));
 
-      say("Your mail client is opening with everything ready to send.", "is-ok");
+      say(msg(4, "Your mail client is opening with everything ready to send.") + extra,
+          "is-ok");
+    });
+  });
+
+  /* ---------- applying for a role ----------
+     Two small jobs and one honest limitation.
+
+     The apply buttons name their role in a data attribute and the role field
+     is a select of the same roles, so the flow works with no script at all:
+     the link jumps to the form and the applicant picks from the list. The
+     script only saves them the picking. That order matters -- a button that
+     needs JavaScript to say which job it was is a button that quietly applies
+     for the wrong one.
+
+     The drop zone is a <label> around the file input in the markup, so the
+     picker opens natively from mouse and keyboard. Everything here is added
+     on top of that; remove it and the control still works. */
+  var roleSel = doc.getElementById("aRole");
+  all("[data-apply]").forEach(function (btn) {
+    on(btn, "click", function () {
+      if (!roleSel) return;
+      var want = btn.getAttribute("data-apply");
+      for (var i = 0; i < roleSel.options.length; i++) {
+        if (roleSel.options[i].value === want) { roleSel.selectedIndex = i; break; }
+      }
+      // after the browser has done the #apply jump, so focus does not fight it
+      window.setTimeout(function () { roleSel.focus({ preventScroll: true }); }, 320);
+    });
+  });
+
+  var MAX_CV = 10 * 1024 * 1024;
+  all("[data-drop]").forEach(function (zone) {
+    var input = zone.querySelector("input[type=file]");
+    var out = doc.querySelector("[data-drop-file]");
+    if (!input) return;
+    var show = function () {
+      var f = input.files && input.files[0];
+      if (!out) return;
+      if (!f) { out.hidden = true; out.textContent = ""; zone.classList.remove("has-file"); return; }
+      out.hidden = false;
+      out.textContent = f.name + " \u00b7 " + (f.size / 1048576).toFixed(1) + " MB";
+      out.className = "drop-file";
+      zone.classList.add("has-file");
+      if (f.size > MAX_CV) {
+        out.className = "drop-file is-error";
+        out.textContent = msg(5, "That file is over 10 MB.");
+      }
+    };
+    on(input, "change", show);
+
+    ["dragenter", "dragover"].forEach(function (ev) {
+      on(zone, ev, function (e) { e.preventDefault(); zone.classList.add("is-over"); });
+    });
+    ["dragleave", "drop"].forEach(function (ev) {
+      on(zone, ev, function () { zone.classList.remove("is-over"); });
+    });
+    on(zone, "drop", function (e) {
+      e.preventDefault();
+      var dt = e.dataTransfer;
+      if (!dt || !dt.files || !dt.files.length) return;
+      // DataTransfer is the only way to put a dropped file into an <input>;
+      // where it is unavailable the picker is still there.
+      try { input.files = dt.files; } catch (err) { return; }
+      show();
     });
   });
 

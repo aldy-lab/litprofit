@@ -488,8 +488,23 @@ def og_image(path):
 def page(path, title, description, body, head_extra="", noindex=False, active=None):
     full_title = title if title.startswith(NAME) else "%s — %s" % (title, NAME)
     robots = "noindex, follow" if noindex else "index, follow"
+    # Everything the forms say back, handed down from the page rather than kept
+    # in main.js. A script with its own English in it is a script that answers
+    # a Lithuanian form in English, which is exactly what this site did until
+    # the translated CV note made the seam visible.
+    #
+    # Order is the contract: required, sending, ok, fail, mail, cv-too-big,
+    # cv-attach. Positional because it is read once, in one place, and a
+    # delimiter beats a JSON blob in an attribute for something this small.
+    cvmsg = ""
+    if "contacts" in path or "careers" in path:
+        C = i18n.CAR[LANG]
+        cvmsg = ' data-forms="%s"' % attr("|".join([
+            T("form_msg_required"), T("form_msg_sending"), T("form_msg_ok"),
+            T("form_msg_fail", email=EMAIL), T("form_msg_mail"),
+            C["f_cv_big"], C["f_cv_attach"]]))
     return """<!DOCTYPE html>
-<html lang="{htmllang}">
+<html lang="{htmllang}"{cvmsg}>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -533,7 +548,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
   <script src="{js}"></script>
 </body>
 </html>
-""".format(full_title=attr(full_title), full_title_text=text(full_title),
+""".format(cvmsg=cvmsg, full_title=attr(full_title), full_title_text=text(full_title),
            description=attr(description), canon=canonical(path),
            robots=robots, name=NAME, icon=u("/assets/brand/favicon.svg"),
            htmllang=i18n.LOCALE[LANG][0], oglocale=i18n.LOCALE[LANG][1],
@@ -2929,10 +2944,100 @@ POSITIONS = [
                        "Готовность к командировкам в короткие сроки.",
                        "Рабочий английский; литовский или русский — преимущество."]),
     ),
+    dict(
+        id="marine-diesel-fitter",
+        open=True,
+        sample=True,
+        posted="2026-08-27",
+        valid_through="2026-12-31",
+        employment_type="FULL_TIME",
+        en=dict(title="Marine Diesel Engine Fitter",
+                count="2 positions", location="Klaipeda + vessels", contract="Full time",
+                summary="Overhaul of main and auxiliary engines on fishing vessels and "
+                        "commercial ships \u2014 four-stroke and two-stroke \u2014 in the "
+                        "workshop and on board, from measuring clearances to running the "
+                        "plant back up.",
+                needs=["Experience stripping and rebuilding marine or industrial diesel engines.",
+                       "Confident with micrometers, bore gauges and a maker's clearance table.",
+                       "Able to work in an engine room to the vessel's schedule, not to ours.",
+                       "Readiness to travel to the vessel at short notice.",
+                       "Working English; Lithuanian or Russian an advantage."]),
+        lt=dict(title="Laivų dyzelinių variklių šaltkalvis",
+                count="2 pozicijos", location="Klaipėda + laivai", contract="Visa darbo diena",
+                summary="Pagrindinių ir pagalbinių variklių kapitalinis remontas žvejybos "
+                        "ir prekybos laivuose \u2014 keturtakčių ir dvitakčių \u2014 "
+                        "dirbtuvėse ir laive: nuo tarpų matavimo iki įrangos paleidimo.",
+                needs=["Patirtis ardant ir surenkant laivų ar pramoninius dyzelinius variklius.",
+                       "Laisvai naudojatės mikrometru, cilindrų matuokliu ir gamintojo tarpų lentele.",
+                       "Gebate dirbti mašinų skyriuje pagal laivo, o ne mūsų grafiką.",
+                       "Pasirengimas vykti pas laivą trumpu įspėjimu.",
+                       "Anglų kalba; lietuvių ar rusų \u2014 privalumas."]),
+        ru=dict(title="Судовой слесарь по дизельным двигателям",
+                count="2 позиции", location="Клайпеда + суда", contract="Полная занятость",
+                summary="Капитальный ремонт главных и вспомогательных двигателей на "
+                        "рыболовных и торговых судах \u2014 четырёхтактных и двухтактных "
+                        "\u2014 в мастерской и на борту: от замера зазоров до пуска "
+                        "оборудования.",
+                needs=["Опыт разборки и сборки судовых или промышленных дизельных двигателей.",
+                       "Уверенная работа с микрометром, нутромером и таблицей зазоров изготовителя.",
+                       "Умение работать в машинном отделении по графику судна, а не по нашему.",
+                       "Готовность выехать к судну в короткий срок.",
+                       "Рабочий английский; литовский или русский \u2014 преимущество."])),
+    dict(
+        id="pipe-fitter-welder",
+        open=True,
+        sample=True,
+        posted="2026-08-27",
+        valid_through="2026-12-31",
+        employment_type="FULL_TIME",
+        en=dict(title="Pipe Fitter / Welder",
+                count="2 positions", location="Klaipeda + vessels", contract="Full time or contract",
+                summary="Fabrication and installation of steel and stainless steel pipe "
+                        "systems for ship repair and industry \u2014 prefabrication on the "
+                        "bench, fitting on board, and welds that are presented to a class "
+                        "surveyor.",
+                needs=["TIG and MMA welding on steel and stainless steel.",
+                       "Reading isometrics and pipe spool drawings.",
+                       "Work that will be offered for class inspection \u2014 RINA or PRS.",
+                       "Certification to an EN or ISO welding standard, or readiness to be tested.",
+                       "Working English; Lithuanian or Russian an advantage."]),
+        lt=dict(title="Vamzdynų surinkėjas / suvirintojas",
+                count="2 pozicijos", location="Klaipėda + laivai",
+                contract="Visa darbo diena arba pagal sutartį",
+                summary="Plieninių ir nerūdijančio plieno vamzdynų gamyba ir montavimas "
+                        "laivų remonte ir pramonėje \u2014 ruošiniai dirbtuvėse, montavimas "
+                        "laive ir siūlės, kurios pateikiamos klasifikacinės bendrovės "
+                        "inspektoriui.",
+                needs=["TIG ir MMA suvirinimas plienu ir nerūdijančiu plienu.",
+                       "Izometrinių ir vamzdyno mazgų brėžinių skaitymas.",
+                       "Darbai, kurie bus pateikti klasės patikrai \u2014 RINA ar PRS.",
+                       "EN arba ISO suvirinimo standarto pažymėjimas arba pasirengimas laikyti egzaminą.",
+                       "Anglų kalba; lietuvių ar rusų \u2014 privalumas."]),
+        ru=dict(title="Трубопроводчик-сварщик",
+                count="2 позиции", location="Клайпеда + суда",
+                contract="Полная занятость или подряд",
+                summary="Изготовление и монтаж стальных и нержавеющих трубопроводных "
+                        "систем в судоремонте и промышленности \u2014 заготовки в "
+                        "мастерской, монтаж на борту и швы, которые предъявляются "
+                        "инспектору классификационного общества.",
+                needs=["Сварка TIG и MMA по стали и нержавеющей стали.",
+                       "Чтение изометрических чертежей и чертежей трубных узлов.",
+                       "Работы, предъявляемые к классификационной приёмке \u2014 RINA или PRS.",
+                       "Аттестация по стандарту EN или ISO либо готовность её пройти.",
+                       "Рабочий английский; литовский или русский \u2014 преимущество."])),
 ]
 
 
 def positions_html():
+    """Open roles as cards, each with its own way into the form.
+
+    The apply button is a plain link to #apply and the role field is a select
+    listing the same roles, so with no script at all the reader still lands on
+    the form and can pick the role from a list. The script only saves them the
+    picking: it selects the option the button names and moves focus there.
+    That order matters -- a button that needs JavaScript to say which job it
+    was is a button that quietly applies for the wrong one.
+    """
     live = [p for p in POSITIONS if p.get("open")]
     C = i18n.CAR[LANG]
     if not live:
@@ -2940,23 +3045,69 @@ def positions_html():
         <p><strong>%s.</strong> %s</p>
       </div>""" % (C["none_h"], C["none_p"])
     out = []
-    for p in live:
+    for i, p in enumerate(live, 1):
         d = p[LANG] if LANG in p else p["en"]
-        needs = "\n".join("          <li>%s</li>" % n for n in d["needs"])
-        badge = ('<span class="position-sample">%s</span>' % i18n.CAR[LANG]["sample"]
+        needs = "\n".join("            <li>%s</li>" % n for n in d["needs"])
+        badge = ('<span class="job-badge">%s</span>' % text(C["sample"])
                  if p.get("sample") else "")
-        out.append("""      <article class="position" id="{pid}">
-        <div class="position-head">
+        out.append("""      <li class="job reveal" id="{pid}">
+        <div class="job-head">
+          <span class="job-num">{num:02d}</span>
           <h3>{title}</h3>
-          <p class="position-meta">{badge}<span>{count}</span><span>{location}</span><span>{contract}</span></p>
+          {badge}
         </div>
-        <p>{summary}</p>
-        <ul>
+        <p class="job-meta"><span>{count}</span><span>{location}</span><span>{contract}</span></p>
+        <p class="job-summary">{summary}</p>
+        <ul class="job-needs">
 {needs}
         </ul>
-      </article>""".format(pid=p["id"], needs=needs, badge=badge,
-                              **{k: v for k, v in d.items() if k != "needs"}))
+        <a class="job-apply" href="#apply" data-apply="{role}">{cta}</a>
+      </li>""".format(pid=p["id"], num=i, needs=needs, badge=badge,
+                      title=text(d["title"]), count=text(d["count"]),
+                      location=text(d["location"]), contract=text(d["contract"]),
+                      summary=text(d["summary"]), role=attr(d["title"]),
+                      cta=text(C["apply_cta"])))
     return "\n".join(out)
+
+
+def role_options():
+    """The role select: every open position, then the speculative case.
+
+    Values are the job titles as they are printed on the page, in the reader's
+    own language, because the person opening the enquiry wants to read a job
+    title rather than decode a slug."""
+    C = i18n.CAR[LANG]
+    live = [p for p in POSITIONS if p.get("open")]
+    opts = ['                <option value="">%s</option>' % text(C["f_open"])]
+    for p in live:
+        t = (p[LANG] if LANG in p else p["en"])["title"]
+        opts.append('                <option value="%s">%s</option>' % (attr(t), text(t)))
+    opts.append('                <option value="%s">%s</option>'
+                % (attr(C["f_role_other"]), text(C["f_role_other"])))
+    return "\n".join(opts)
+
+
+def cv_field():
+    """The CV control.
+
+    A label wrapping a file input, not a div with a click handler: the picker
+    then opens natively, from the keyboard as well as the mouse, and it opens
+    on the first press rather than the second. Drag and drop is added on top by
+    script, so if the script never runs the control still works."""
+    C = i18n.CAR[LANG]
+    return """            <div class="field">
+              <span class="field-label">{lab} <span class="opt">{opt}</span></span>
+              <label class="drop" data-drop>
+                <input type="file" name="cv" id="aCv" class="drop-input"
+                       accept=".pdf,.doc,.docx,.rtf,.odt,.txt,application/pdf">
+                <span class="drop-face">
+                  <span class="drop-main">{drop}</span>
+                  <span class="drop-hint">{hint}</span>
+                </span>
+              </label>
+              <p class="drop-file" data-drop-file hidden></p>
+            </div>""".format(lab=text(C["f_cv"]), opt=text(T("form_optional")),
+                             drop=text(C["f_cv_drop"]), hint=text(C["f_cv_hint"]))
 
 
 def job_postings_ld():
@@ -3000,20 +3151,31 @@ def careers():
     return page_head(C["nav"], C["h1"], C["lead"],
                      [(T("home"), "/"), (C["nav"], None)],
                      path="/careers/") + """
-    <section class="container prose">
-      <h2>{open_h2}</h2>
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>{nav}</p>
+          <h2>{open_h2}</h2>
+        </div>
+        <ol class="jobs">
 {positions}
+        </ol>
+      </div>
+    </section>
 
-      <h2>{disc_h2}</h2>
-      <p>{disc_p}</p>
-      <ul>
+    <section class="section section-alt seam-top">
+      <div class="container prose">
+        <h2>{disc_h2}</h2>
+        <p>{disc_p}</p>
+        <ul>
 {disc}
-      </ul>
+        </ul>
 
-      <h2>{matters_h2}</h2>
-      <ul>
+        <h2>{matters_h2}</h2>
+        <ul>
 {matters}
-      </ul>
+        </ul>
+      </div>
     </section>
 
     <section class="section section-alt seam-top" id="apply">
@@ -3034,17 +3196,20 @@ def careers():
             </div>
             <div class="field">
               <label for="aPhone">{f_phone} <span class="opt">{f_opt}</span></label>
-              <input id="aPhone" name="phone" type="tel" autocomplete="tel">
+{dial}
             </div>
             <div class="field">
               <label for="aRole">{f_role}</label>
-              <input id="aRole" name="role" type="text" required placeholder="{f_open}">
+              <select id="aRole" name="role" class="select">
+{roles}
+              </select>
             </div>
             <div class="field">
               <label for="aExp">{f_exp}</label>
               <textarea id="aExp" name="message" rows="6" required
                         placeholder="{f_exp_ph}"></textarea>
             </div>
+{cv}
             <div class="field field-check">
               <input id="aConsent" name="consent" type="checkbox" required>
               <label for="aConsent">{consent}</label>
@@ -3058,7 +3223,8 @@ def careers():
       </div>
     </section>
 """.format(positions=positions_html(), disc=disc, matters=matters,
-           open_h2=C["open_h2"], disc_h2=C["disc_h2"], disc_p=C["disc_p"],
+           dial=dial_select("aPhone"), roles=role_options(), cv=cv_field(),
+           nav=C["nav"], open_h2=C["open_h2"], disc_h2=C["disc_h2"], disc_p=C["disc_p"],
            matters_h2=C["matters_h2"], apply_h2=C["apply_h2"], apply_p=C["apply_p"],
            f_name=T("form_name"), f_email=T("form_email"), f_phone=T("form_phone"),
            f_opt=T("form_optional"), f_role=C["f_role"], f_open=attr(C["f_open"]),
