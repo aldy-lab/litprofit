@@ -1396,12 +1396,23 @@ a.card { position: relative; }
 
 .prose ul { margin: 0 0 22px; display: grid; gap: 10px; }
 .prose ul li { position: relative; padding-left: 26px; color: var(--muted); }
+/* One marker, and it is a rule rather than a glyph.
+   Two things were wrong with "//". First it collided: the PRS scope list sets
+   its own dash on the same ::before, and since .prose ul li::before is the
+   more specific selector its content won while the dash's width and colour
+   still applied -- so every item in that list carried a dash AND two slashes,
+   which is not a bullet, it is a bug that looked like a decision. Second, //
+   is the eyebrow's separator. Reusing it as a list marker spends a mark that
+   means "section" on meaning "item", and it read as punctuation dropped in
+   the margin. A short rule is what a specification list uses. */
 .prose ul li::before {
-  content: "//";
+  content: "";
   position: absolute;
   left: 0;
-  color: var(--grey-600);
-  font-size: var(--text-s);
+  top: 0.72em;
+  width: 10px;
+  height: 1px;
+  background: var(--grey-500);
 }
 
 /* Equipment / manufacturer lists — these carry over from the old site
@@ -1645,14 +1656,17 @@ html.is-frost #frostToggle {
   border-bottom: 1px solid var(--line);
   position: relative;
 }
+/* Same rule, drawn from the same place, so a scope list inside .prose cannot
+   end up with one marker from each. */
+.prose .scope-list li::before,
 .scope-list li::before {
   content: "";
   position: absolute;
   left: 2px;
   top: 1.05em;
-  width: 8px;
+  width: 10px;
   height: 1px;
-  background: var(--grey-400);
+  background: var(--grey-500);
 }
 
 /* ============================================================
@@ -3718,4 +3732,114 @@ a.card:active,
   .tblock-cell { border-left: 0; border-top: 1px solid var(--line); }
   .tblock-cell:first-child { border-top: 0; }
   .scope-row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
+
+/* ============================================================
+   SERVICES INDEX — four rows, not four quarters
+   ============================================================
+   The index was the home page's card grid a second time: four cards abreast
+   at 330px, a strip of photograph each, titles wrapping to two lines and the
+   summary cut off. Four services is the whole of what the company does. */
+.srows { display: grid; gap: clamp(4px, 0.6vw, 10px); }
+.srow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  align-items: stretch;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: inherit;
+  /* clip, not hidden. overflow:hidden makes the box a scroll container, and
+     view() resolves against the nearest scroll container -- so the image's
+     own timeline became "how far has the image moved inside this panel",
+     which is never, and the animation sat frozen at exactly 50% progress
+     (scale 1.08, the midpoint of 1.14 and 1.02) at every scroll position.
+     Nothing errored and the page looked deliberate. clip crops without
+     creating a scroll container, so the timeline is the page again. */
+  overflow: clip;
+  transition: background 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+.srow:hover { background: var(--panel-2); border-color: var(--line-2); }
+/* Alternating, so the eye crosses the page instead of running down one edge */
+.srow:nth-child(even) .srow-media { grid-column: 2; grid-row: 1; }
+.srow:nth-child(even) .srow-body  { grid-column: 1; grid-row: 1; }
+
+.srow-media { position: relative; overflow: clip; min-height: clamp(240px, 26vw, 360px); }
+.srow-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* Cool and held back, so four photographs of workshops do not turn the page
+     into a contact sheet -- they are the ground the type stands on. */
+  filter: grayscale(0.34) saturate(0.72) brightness(0.72) contrast(1.06);
+  transition: filter 0.4s var(--ease), transform 0.6s var(--ease);
+}
+.srow:hover .srow-media img { filter: grayscale(0.12) saturate(0.9) brightness(0.86) contrast(1.04); }
+/* a hairline where the photograph meets the text, on the side it meets it */
+.srow-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 55%, rgba(7, 8, 36, 0.55));
+}
+.srow:nth-child(even) .srow-media::after {
+  background: linear-gradient(270deg, transparent 55%, rgba(7, 8, 36, 0.55));
+}
+
+.srow-body {
+  display: grid;
+  align-content: center;
+  gap: clamp(10px, 1.2vw, 18px);
+  padding: clamp(26px, 3vw, 52px);
+  min-width: 0;
+}
+.srow-num {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums lining;
+}
+.srow-body h2 { font-size: var(--h3); margin: 0; max-width: 18ch; text-wrap: balance; }
+.srow-lead { color: var(--muted); max-width: 46ch; }
+.srow-body .tags { margin: 0; }
+.srow-more {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.srow-more::after { content: " \2192"; }
+.srow:hover .srow-more { color: var(--white); }
+
+@media (max-width: 860px) {
+  .srow { grid-template-columns: minmax(0, 1fr); }
+  /* On one column the alternation has nothing to alternate across, and left
+     as it was it put every second photograph BELOW its own text. */
+  .srow:nth-child(even) .srow-media,
+  .srow:nth-child(even) .srow-body { grid-column: 1; grid-row: auto; }
+  .srow-media { min-height: clamp(180px, 52vw, 260px); }
+  .srow-media::after,
+  .srow:nth-child(even) .srow-media::after {
+    background: linear-gradient(0deg, rgba(7, 8, 36, 0.6), transparent 60%);
+  }
+}
+
+/* The scroll effect: the photograph settles as the row crosses the screen.
+   Tied to the view timeline like every other entrance on this site, so it is
+   a function of where the row is rather than of its own clock -- scroll half
+   as far and it is half settled. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .js .srow-media img {
+      animation: srow-settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+    @keyframes srow-settle {
+      from { transform: scale(1.14) translateY(2.5%); }
+      to   { transform: scale(1.02) translateY(-2.5%); }
+    }
+  }
 }

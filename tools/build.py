@@ -2000,18 +2000,56 @@ def project_page(pr):
 # ============================================================
 # SERVICES INDEX + DETAIL
 # ============================================================
+def service_row(s):
+    """One service as a full-width row rather than a quarter of a grid.
+
+    The index was four cards abreast at 330px each: a strip of photograph, a
+    title that wrapped to two lines, a truncated sentence, and a link. Four
+    services is the whole of what this company does and the page gave them one
+    screen between them.
+
+    A row can carry what a card cannot, and the useful part is not more prose
+    -- it is the headings of the page it leads to, so the reader knows what is
+    behind the link before following it. Those come from the page's own block
+    list, so a row cannot advertise a section the page does not have.
+    """
+    f, w, h, alt = s["img"]
+    card_rel = "assets/photos/%s-card.webp" % f.rsplit(".", 1)[0]
+    srcset = ""
+    if os.path.exists(os.path.join(ROOT, card_rel)):
+        cw, _ = img_size(card_rel)
+        srcset = (' srcset="%s %dw, %s %dw" sizes="(min-width: 900px) 46vw, 100vw"'
+                  % (u("/" + card_rel), cw, u("/assets/photos/" + f), w))
+    inside = tags([strip_tags(head) for head, _ in s["blocks"]])
+    return """        <a class="srow reveal" href="{href}">
+          <span class="srow-media">
+            <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy"{srcset}>
+          </span>
+          <span class="srow-body">
+            <span class="srow-num">{num}</span>
+            <h2>{title}</h2>
+            <span class="srow-lead">{lead}</span>
+            {inside}
+            <span class="srow-more">{more}</span>
+          </span>
+        </a>""".format(href=u("/services/%s/" % s["slug"]),
+                       img=u("/assets/photos/" + f), alt=alt, w=w, h=h,
+                       srcset=srcset, num=s["num"], title=s["title"],
+                       lead=s["short"], inside=inside, more=T("read_more"))
+
 def services_index():
     return page_head(T("svc_eyebrow"), PT("svc_h1"), PT("svc_page_lead"),
                      [(T("home"), "/"), (T("svc_eyebrow"), None)],
                      path="/services/") + """
     <section class="section" style="padding-top: 0">
       <div class="container">
-        <div class="card-grid">
-{cards}
+        <div class="srows">
+{rows}
         </div>
       </div>
     </section>
-{cta}""".format(cards=service_cards("h2"), cta=cta(T("cta_h2"), T("cta_p")))
+{cta}""".format(rows="\n".join(service_row(s) for s in services()),
+                cta=cta(T("cta_h2"), T("cta_p")))
 
 
 def service_ld(s):
