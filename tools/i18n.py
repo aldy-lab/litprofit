@@ -78,6 +78,16 @@ S["en"] = dict(
     # the live 3D of the same machine, above the elevation
     # the twin-screw cutaway on the about page. Site languages are en and lt
     # only -- Russian lives in the calculator, which carries its own strings.
+    # the packaged unit on the refrigeration page
+    unit_eyebrow="As it arrives", unit_h2="The whole unit, on its frame",
+    unit_lead="A compressor is not what comes aboard \u2014 a skid is: separator, "
+              "block, coupling, motor and the pipework tying them together, all on "
+              "one frame that has to come out through a hatch. Drag it round.",
+    unit_panel="Control panel", unit_frame="Base frame",
+    unit_tb="Screw package, oil-flooded", unit_tb2="Arrangement // not to scale",
+    unit_alt="A packaged screw compressor unit on its base frame: horizontal oil "
+             "separator, compressor block, coupling guard, electric motor, a control "
+             "panel and the suction, discharge and oil pipework between them.",
     scr_eyebrow="On the bench", scr_h2="A twin-screw compressor, opened up",
     scr_lead="Four lobes driving six, in a figure-of-eight bore \u2014 the size that "
              "comes off a reefer and onto our bench most often. The casing is drawn "
@@ -225,6 +235,15 @@ S["lt"] = dict(
                    "žiūri prieš spręsdamas, ar mašina išlaikys triumą.",
     cap_chart_x="Garavimo temperatūra", cap_chart_y="Šaldymo galia",
     cap_chart_tb="Šešiacilindris // R404A", cap_chart_tb2="EN12900 // 20 \u00b0C siurbimo dujos",
+    unit_eyebrow="Kaip atkeliauja", unit_h2="Visas agregatas ant rėmo",
+    unit_lead="Į laivą patenka ne kompresorius, o agregatas: separatorius, blokas, "
+              "mova, variklis ir juos jungiantys vamzdynai \u2014 viskas ant vieno "
+              "rėmo, kurį reikia iškelti pro liuką. Pasukite jį.",
+    unit_panel="Valdymo skydas", unit_frame="Rėmas",
+    unit_tb="Sraigtinis agregatas, alyva užlietas", unit_tb2="Išdėstymas // ne masteliu",
+    unit_alt="Sraigtinio kompresoriaus agregatas ant rėmo: horizontalus alyvos "
+             "separatorius, kompresoriaus blokas, movos gaubtas, elektros variklis, "
+             "valdymo skydas ir tarp jų einantys vamzdynai.",
     scr_eyebrow="Ant stalo", scr_h2="Sraigtinis kompresorius \u2014 iš vidaus",
     scr_lead="Keturios iškyšos suka šešias, aštuoniukės formos ertmėje \u2014 tokio "
              "dydžio mašinos dažniausiai atkeliauja nuo šaldymo laivo ant mūsų stalo. "

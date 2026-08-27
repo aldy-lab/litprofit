@@ -125,6 +125,23 @@
     orient(start, cx, cy, (z0 + z1) / 2);
   }
 
+  /* Up the way, for the risers a skid is full of. */
+  function tubeY(y0, y1, cx, cz, r, seg, t){
+    var ring0 = [], ring1 = [], k, a, start = F.length;
+    for (k = 0; k < seg; k++) {
+      a = (k / seg) * Math.PI * 2;
+      ring0.push(vert(cx + Math.cos(a) * r, y0, cz + Math.sin(a) * r));
+      ring1.push(vert(cx + Math.cos(a) * r, y1, cz + Math.sin(a) * r));
+    }
+    for (k = 0; k < seg; k++) {
+      var n = (k + 1) % seg;
+      quad(ring0[k], ring0[n], ring1[n], ring1[k], t);
+    }
+    F.push({ i: ring0.slice(), t: t });
+    F.push({ i: ring1.slice().reverse(), t: t });
+    orient(start, cx, (y0 + y1) / 2, cz);
+  }
+
   /* The two cylinder banks stand in a V. Each hinges on its own inner base
      corner -- rotating both about one shared point is what put them through
      each other in an X when the elevation was first drawn. */
@@ -140,7 +157,7 @@
   /* ---------- the machines ----------
      A tone is an index into TONE below. GHOST is drawn translucent, which is
      what makes a casing something you can see the works through. */
-  var STEEL = 0, DARK = 1, PIPE = 2, GHOST = 3, ROTOR = 4, GAS = 5;
+  var STEEL = 0, DARK = 1, PIPE = 2, GHOST = 3, ROTOR = 4, GAS = 5, PAINT = 6;
 
   function buildRecip(){
   // mounting feet and the rail they sit on
@@ -382,7 +399,133 @@
     return start;
   }
 
-  var MACHINES = { recip: buildRecip, screw: buildScrew };
+  /* ---------- the packaged unit ----------
+     What actually arrives on a ship: not a compressor but a skid with one
+     bolted to it. Oil separator, compressor block, coupling, motor, control
+     panel and the pipework tying them together, all on one frame -- which is
+     the thing a chief engineer recognises, and the thing that has to be lifted
+     out through a hatch when it needs work.
+
+     The parts are the site's own: motor, coupling, compressor, separator,
+     piping, which is the list the side elevation on the home page already
+     numbers. Same machine, seen from a different side. */
+  function buildPackage(){
+    var FR = -300;                   // top of the frame; everything stands on it
+
+    // ---- base frame: two channels and the cross members between them ----
+    box(0, 1600, FR - 60, FR, -230, -170, DARK);
+    box(0, 1600, FR - 60, FR,  170,  230, DARK);
+    for (var cx = 60; cx < 1560; cx += 240) box(cx, cx + 50, FR - 52, FR - 8, -170, 170, DARK);
+    for (var fy = 90; fy < 1500; fy += 460) {     // lifting/holding-down lugs
+      box(fy, fy + 90, FR - 78, FR - 60, -250, -230, DARK);
+      box(fy, fy + 90, FR - 78, FR - 60,  230,  250, DARK);
+    }
+
+    // ---- oil separator: the big horizontal vessel, on saddles ----
+    tubeX(70, 700, -60, 0, 168, 30, STEEL);
+    tubeX(52, 70, -60, 0, 150, 26, STEEL);        // dished ends
+    tubeX(700, 718, -60, 0, 150, 26, STEEL);
+    for (var sx = 150; sx < 640; sx += 320) {     // saddles
+      box(sx, sx + 90, FR, -190, -150, 150, DARK);
+    }
+    tubeY(-228, -140, 250, 0, 26, 16, PIPE);      // oil drain to the pump
+    tubeY(108, 190, 560, 0, 30, 16, PIPE);        // oil return riser
+
+    // ---- compressor block, coupling and motor, in line along the skid ----
+    /* The block is the machine the package is named after and it was the
+       hardest thing in the frame to find: 250 long against a 630 separator,
+       with two end covers 40 thick and larger in section than the barrel they
+       close, so what read at this angle was two bright plates with something
+       grey between them. The barrel is longer and fatter now and the covers
+       are flanges rather than slabs. */
+    tubeX(870, 1150, 40, 0, 130, 30, STEEL);      // the block itself
+    /* PIPE, not STEEL. Flat plates facing the light took the highlight almost
+       to white and became the brightest things in the frame -- two covers
+       out-shouting the machine they close. */
+    box(858, 884, -76, 156, -142, 142, PIPE);     // suction end cover
+    box(1136, 1162, -76, 156, -142, 142, PIPE);   // discharge end cover
+    box(930, 1090, -122, -70, -74, 74, PIPE);     // slide valve housing beneath
+    box(890, 1130, 158, 196, -60, 60, DARK);      // the oil lines on top
+
+    tubeX(1162, 1250, 40, 0, 62, 22, DARK);       // coupling guard
+    for (var gx = 1172; gx < 1245; gx += 26)      // its cage bars
+      tubeX(gx, gx + 6, 40, 0, 68, 12, DARK);
+
+    /* Painted, where the vessel and the block are bare. Everything on the skid
+       came out one value and the three machines read as a single grey lump;
+       this is the one tone difference that is also true -- a motor arrives
+       from its maker in enamel and a separator arrives in steel. */
+    tubeX(1250, 1560, 40, 0, 150, 30, PAINT);     // motor
+    for (var mx = 1272; mx < 1540; mx += 32)      // cooling ribs
+      tubeX(mx, mx + 8, 40, 0, 158, 26, PAINT);
+    tubeX(1560, 1590, 40, 0, 96, 24, PAINT);      // fan cowl
+    box(1310, 1420, 190, 250, -60, 60, DARK);     // terminal box
+
+    /* Stools, not slabs. Both machines were standing on solid blocks the full
+       width and depth of themselves, which is not how anything is mounted and
+       read as a shadow rather than a part. A motor sits on a fabricated stool:
+       two side plates, a machined top plate, and daylight through the middle. */
+    box(1290, 1520, FR, -150, -142,  -96, DARK);  // motor stool, near plate
+    box(1290, 1520, FR, -150,   96,  142, DARK);  // and far
+    box(1270, 1540, -150, -110, -150, 150, DARK); // its top plate
+    box(1300, 1330, -150, -118, -96, 96, DARK);   // gussets between the plates
+    box(1480, 1510, -150, -118, -96, 96, DARK);
+
+    /* The compressor had nothing under it at all: between the separator
+       saddles and the motor stool it hung in the air, which the near side-on
+       view puts right at eye level. */
+    box(900, 1120, FR, -150, -132, -104, DARK);
+    box(900, 1120, FR, -150,  104,  132, DARK);
+    box(880, 1140, -150, -118, -140, 140, DARK);
+
+    // ---- control panel, standing off the frame on its own legs ----
+    box(160, 420, 210, 470, 120, 190, STEEL);
+    box(190, 390, 300, 430, 186, 196, DARK);      // the door's window
+    tubeY(FR, 210, 200, 155, 14, 12, DARK);
+    tubeY(FR, 210, 380, 155, 14, 12, DARK);
+
+    /* ---- pipework: what makes a skid look like a skid ----
+       The first routing put the discharge crossover at 470 and the hand-wheels
+       at 556, half the machine's height again above the machine -- two posts
+       with discs on top, reading as a goalpost rather than as pipe. A discharge
+       line rises just clear of the block and drops into the vessel; the valves
+       sit on the run where a hand can reach them. */
+    tubeY(196, 300, 1120, 0, 34, 18, PIPE);       // riser off the block
+    tubeX(560, 1120, 300, 0, 34, 18, PIPE);       // the run across
+    tubeY(108, 300, 560, 0, 34, 18, PIPE);        // down into the separator
+    tubeZ(-42, 42, 560, 300, 46, 16, DARK);       // flanges at each elbow
+    tubeZ(-42, 42, 1120, 300, 46, 16, DARK);
+
+    /* Suction comes from the ship, not from anywhere on the skid, so it wants
+       a flanged end at the edge of the frame -- which is the only thing on the
+       model that says where the package stops and the vessel's system starts. */
+    tubeX(30, 860, 40, -190, 42, 20, PIPE);
+    tubeX(14, 30, 40, -190, 62, 20, DARK);        // the tie-in flange
+    tubeZ(-190, 0, 860, 40, 42, 20, PIPE);        // and into the suction cover
+
+    /* Oil cooler. This was a bare rod crossing under the separator with nothing
+       at either end of it -- the one thing in the frame that was obviously not
+       a part. It is a small shell-and-tube cooler now, on its own saddles, fed
+       from the separator drain and returning into the slide-valve housing, so
+       both ends arrive somewhere. */
+    tubeX(500, 860, -228, -190, 44, 22, STEEL);
+    tubeX(486, 500, -228, -190, 38, 20, STEEL);   // dished ends
+    tubeX(860, 874, -228, -190, 38, 20, STEEL);
+    box(556, 600, FR, -256, -212, -168, DARK);    // saddles
+    box(766, 810, FR, -256, -212, -168, DARK);
+    tubeX(250, 500, -228, 0, 20, 14, PIPE);       // in, off the separator drain
+    tubeZ(0, -190, 500, -228, 20, 14, PIPE);
+    tubeY(-228, -85, 960, -190, 20, 14, PIPE);    // out, back into the block
+    tubeZ(-190, -60, 960, -85, 20, 14, PIPE);
+
+    // hand-wheel valves, on the run rather than above the machine
+    tubeY(300, 344, 760, 0, 16, 12, PIPE);
+    tubeZ(-28, 28, 760, 360, 38, 16, DARK);
+    tubeY(300, 344, 1000, 0, 16, 12, PIPE);
+    tubeZ(-28, 28, 1000, 360, 38, 16, DARK);
+  }
+
+  var MACHINES = { recip: buildRecip, screw: buildScrew, unit: buildPackage };
   (MACHINES[MACHINE] || buildRecip)();
   measureModel();
 
@@ -422,7 +565,13 @@
        comes in, hot magenta where it leaves, which is the convention every
        manufacturer's cutaway uses and the one a refrigeration engineer reads
        without being told. */
-    { grad: [[112, 176, 255], [255, 64, 150]], smooth: true }    // GAS
+    { grad: [[112, 176, 255], [255, 64, 150]], smooth: true },   // GAS
+    /* Enamel over cast iron: DARK's values, none of its outlines. A motor is
+       nine cooling ribs of twenty segments, and stroking that on a dark body
+       drew the mesh instead of the casting -- the same birdcage the rotors
+       came out as, for the same reason. Edges help a box, where they are real;
+       on a turned surface they are just the tessellation showing. */
+    { base: [ 30,  32,  40], hi: [168, 172, 182], smooth: true } // PAINT
   ];
   var LIGHT = norm([-0.42, 0.78, 0.46]);
   var FILL  = norm([0.6, -0.2, -0.7]);
@@ -433,7 +582,25 @@
   }
 
   /* ---------- projection ---------- */
-  var yaw = -1.22, pitch = 0.30, autoYaw = true;
+  /* The view belongs to the machine. A reciprocating compressor is a block and
+     reads best in a deep three-quarter; a skid is four times longer than it is
+     tall and reads best near side-on, which is also how every maker photographs
+     one -- and turned to 45 degrees it projects across the diagonal, so the fit
+     shrinks it to a third of the frame for a view nobody wants anyway. */
+  /* pitchLo/pitchHi bound the drag AND the fit, which is the point of putting
+     them together: the fit reserves room for exactly the angles the machine
+     can be turned to and no others. Sharing one global range meant the skid
+     was sized for a 0.62 pitch it never shows -- at that angle a machine four
+     times longer than it is tall throws its whole length into the vertical,
+     and the fit shrank it to 38% of the canvas height to make room for a view
+     nobody would ask for. */
+  var VIEWS = {
+    recip: { yaw0: -1.22, sweep: 1.02, pitch: 0.30, pitchLo: -0.12, pitchHi: 0.62 },
+    screw: { yaw0: -1.22, sweep: 1.02, pitch: 0.30, pitchLo: -0.12, pitchHi: 0.62 },
+    unit:  { yaw0: -0.34, sweep: 0.52, pitch: 0.22, pitchLo:  0.04, pitchHi: 0.40 }
+  };
+  var VIEW = VIEWS[MACHINE] || VIEWS.recip;
+  var yaw = 0, pitch = 0.30, autoYaw = true;
   /* Measured off the vertices rather than typed in. As constants they were the
      reciprocating machine's centre and size, so the screw compressor -- longer,
      twice as deep and with its axis somewhere else entirely -- was framed for a
@@ -453,8 +620,6 @@
   }
   var DX = 700, DY = 360, DZ = 330;
   var DIST = 1750, FOCAL = 2140;
-  /* the steepest the drag is allowed to reach; the fit has to survive it */
-  var PITCH_MAX = 0.62;
   /* FOCAL was a constant, which is only ever right at one canvas width: the
      machine sat well in a 1392px stage and on a phone it was three times the
      canvas and ran off every edge. Tying it to the width keeps the machine at
@@ -497,7 +662,7 @@
   }
 
   var OFFX = 0, OFFY = 0;
-  var YAW0 = -1.22, YAW_SWEEP = 1.02, scrollYaw = 0;
+  var YAW0 = VIEW.yaw0, YAW_SWEEP = VIEW.sweep, scrollYaw = 0;
 
   /* Sampled across the orientations this machine actually presents, not all of
      them. Sampling the full turn was tried and it fits for the end-on view,
@@ -508,11 +673,16 @@
      price for the machine being the size it should be the rest of the time. */
   function fitFocal(w, h){
     var maxW = 1e-6, maxH = 1e-6, i, j, k;
-    var from = YAW0 - 0.6, to = YAW0 + YAW_SWEEP + 0.6;
+    /* A quarter radian of margin either side of the sweep, not six tenths. The
+       wider margin sized every machine for a yaw reached only by dragging hard,
+       and the long skid paid most for it -- 64% of the width for a view it
+       holds for a fraction of a second. Drag past this and an edge may cross
+       the frame; that is a better trade than a machine that never fills it. */
+    var from = YAW0 - 0.25, to = YAW0 + YAW_SWEEP + 0.25;
     for (i = 0; i <= 12; i++) {
       var y = from + (to - from) * (i / 12);
       for (j = 0; j < 2; j++) {
-        var pch = j ? PITCH_MAX : -0.12;
+        var pch = j ? VIEW.pitchHi : VIEW.pitchLo;
         var cy = Math.cos(y), sy = Math.sin(y), cp = Math.cos(pch), sp = Math.sin(pch);
         var lox = Infinity, hix = -Infinity, loy = Infinity, hiy = -Infinity;
         for (k = 0; k < V.length; k += 3) {
@@ -533,7 +703,13 @@
        all the time -- so the fill factors can be generous without the worst
        case crossing the frame. At 0.92/0.88 the machine sat at two thirds of
        the height it had room for and looked lost in a wide stage. */
-    return Math.min(w * 1.02 / maxW, h * 1.06 / maxH);
+    /* Both terms sat above 1, which asks the machine to overhang the canvas
+       slightly and relies on the widest sampled angle never being the one on
+       screen. It held on desktop and came out to exactly zero pixels of
+       clearance on a phone -- passing, but one rounding from a cropped
+       cylinder head. A hair under 1 leaves a real margin instead of a lucky
+       one, at a cost of about three per cent of size. */
+    return Math.min(w * 0.99 / maxW, h * 1.00 / maxH);
   }
 
   /* Written straight into V from the stored originals. The projection reads V
@@ -878,7 +1054,7 @@
     // Rebase, or the moment the drift resumes the machine jumps back to
     // wherever the scroll said it should have been.
     YAW0 = yaw - scrollYaw - drift;
-    pitch = Math.max(-0.12, Math.min(0.62, pitch + (e.clientY - ly) * 0.005));
+    pitch = Math.max(VIEW.pitchLo, Math.min(VIEW.pitchHi, pitch + (e.clientY - ly) * 0.005));
     lx = e.clientX; ly = e.clientY;
     if (!running) { draw(W, H, DPR); drawTags(W, H); }
   });
@@ -908,6 +1084,7 @@
   size();
   readScroll();
   yaw = YAW0 + scrollYaw;
+  pitch = VIEW.pitch;
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(function (es) {
       es.forEach(function (e) { e.isIntersecting ? start() : stop(); });

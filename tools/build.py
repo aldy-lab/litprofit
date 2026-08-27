@@ -2016,7 +2016,24 @@ def recip_3d(machine="recip"):
     # Anchors are model coordinates, so they belong to the machine, not to the
     # page. A screw compressor has nothing at 470,110,152 and a reciprocating
     # one has no slide valve.
-    if machine == "screw":
+    if machine == "unit":
+        # the same five parts the side elevation on the home page numbers, so
+        # the flat drawing and the solid one name things the same way
+        # Spread over the height, not lined up along the shaft. Compressor,
+        # coupling and motor all sat at y=40 -- true to the machine, useless as
+        # a callout: three anchors within a few pixels of each other put three
+        # labels in one place and their leaders crossed to get there. Each now
+        # points at a different part of its own part.
+        tags = [("01", i18n.PARTS_LABEL[LANG]["separator"], "380,110,0"),
+                ("02", i18n.PARTS_LABEL[LANG]["screw"],     "990,170,0"),
+                ("03", i18n.PARTS_LABEL[LANG]["coupling"],  "1205,40,0"),
+                ("04", i18n.PARTS_LABEL[LANG]["motor"],     "1430,-60,0"),
+                ("05", T("unit_panel"),                     "290,340,190"),
+                # follows the discharge run down from 470 to 300; left where it
+                # was, it pointed at empty sky above the skid
+                ("06", i18n.PARTS_LABEL[LANG]["lines"],     "840,300,0"),
+                ("07", T("unit_frame"),                     "800,-330,0")]
+    elif machine == "screw":
         tags = [("01", T("scr_male"),   "380,96,0"),
                 ("02", T("scr_female"), "380,-70,0"),
                 ("03", T("scr_casing"), "380,250,0"),
@@ -2058,14 +2075,14 @@ def recip_3d(machine="recip"):
       </div>
     </section>
     <script src="{js}" defer></script>""".format(
-        machine=machine, num=("01" if machine == "screw" else "05"),
-        e=text(T("scr_eyebrow" if machine == "screw" else "cmp_eyebrow")),
-        h=text(T("scr_h2" if machine == "screw" else "cmp_h2")),
-        l=text(T("scr_lead" if machine == "screw" else "cmp_lead")),
-        alt=attr(T("scr_alt" if machine == "screw" else "cmp_alt")),
+        machine=machine, num=("01" if machine in ("screw", "unit") else "05"),
+        e=text(T("unit_eyebrow" if machine == "unit" else ("scr_eyebrow" if machine == "screw" else "cmp_eyebrow"))),
+        h=text(T("unit_h2" if machine == "unit" else ("scr_h2" if machine == "screw" else "cmp_h2"))),
+        l=text(T("unit_lead" if machine == "unit" else ("scr_lead" if machine == "screw" else "cmp_lead"))),
+        alt=attr(T("unit_alt" if machine == "unit" else ("scr_alt" if machine == "screw" else "cmp_alt"))),
         hint=text(T("cmp_hint")), marks=marks,
-        tb=text(T("scr_tb" if machine == "screw" else "cmp_tb")),
-        tb2=text(T("scr_tb2" if machine == "screw" else "cmp_tb2")),
+        tb=text(T("unit_tb" if machine == "unit" else ("scr_tb" if machine == "screw" else "cmp_tb"))),
+        tb2=text(T("unit_tb2" if machine == "unit" else ("scr_tb2" if machine == "screw" else "cmp_tb2"))),
         js=asset("/js/compressor.js"))
 
 
@@ -2247,7 +2264,7 @@ def service_page(s):
                 blocks="\n\n".join(blocks), more=more,
                 # The compressor plate belongs to one page: it is that page's
                 # machine. Putting a drawing on all four would make it wallpaper.
-                recip=recip_drawing() if s["slug"] == "refrigeration-systems" else "",
+                recip=(recip_drawing() + recip_3d("unit")) if s["slug"] == "refrigeration-systems" else "",
                 other_e=T("svc_eyebrow"), other_h=PT("svc_h1"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
