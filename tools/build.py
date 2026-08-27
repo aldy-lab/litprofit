@@ -1573,31 +1573,6 @@ def a_scope(items):
         for i, x in enumerate(items))
 
 
-def a_stack():
-    """Consult / organise / ensure as a deck that advances with the scroll.
-
-    Sticky rather than scripted: each card pins under the header and the next
-    rides over it, so the reader takes the three steps in order instead of
-    scanning three boxes at once -- which is the whole claim the section makes
-    about the company. Nothing moves for anyone who asked for reduced motion;
-    there the cards simply stack down the page.
-    """
-    steps = ((T("step1"), T("how1")), (T("step2"), T("how2")), (T("step3"), T("how3")))
-    # Direct children of .stack, with no wrapper. A sticky element can only
-    # stick inside its own containing block, so wrapping each card in a slot
-    # pinned it to that slot and it unpinned again the moment the slot passed
-    # -- three cards that each stuck briefly and never once overlapped. They
-    # share one containing block now, and the distance between them is a
-    # margin rather than a box.
-    return "\n".join(
-        """            <article class="stack-card">
-              <p class="stack-num">%02d</p>
-              <h3>%s</h3>
-              <p>%s</p>
-            </article>""" % (i + 1, text(h), text(b))
-        for i, (h, b) in enumerate(steps))
-
-
 def a_titleblock(num):
     """Company details in a title block -- the field on a drawing that carries
     exactly this: who made it, where they are, and their registration."""
@@ -1634,10 +1609,12 @@ def about():
 {screw}
     </div>
 
+    <div class="about-body">
+{pres}
     <section class="section">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{cap_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>{cap_e}</p>
           <h2>{h_spec}</h2>
         </div>
         <ol class="scope">
@@ -1649,7 +1626,7 @@ def about():
     <section class="section section-alt seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{ppl_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{ppl_e}</p>
           <h2>{ppl_h}</h2>
         </div>
         <div class="statement reveal">
@@ -1662,20 +1639,7 @@ def about():
     <section class="section">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>{how_e}</p>
-          <h2>{h_how}</h2>
-          <p class="lead">{how_l}</p>
-        </div>
-        <div class="stack">
-{stack}
-        </div>
-      </div>
-    </section>
-
-    <section class="section section-alt seam-top">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{c_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{c_e}</p>
           <h2>{h_cert}</h2>
         </div>
         <div class="asr reveal">
@@ -1697,16 +1661,15 @@ def about():
       </div>
     </section>
 
-    <section class="section">
+    <section class="section section-alt seam-top">
       <div class="container">
 {tblock}
       </div>
     </section>
-{pres}
+    </div>
 {cta}""".format(scope=a_scope(i18n.P[LANG]["a_spec_list"]),
-                stack=a_stack(), tblock=a_titleblock("06"),
+tblock=a_titleblock("04"),
                 cap_e=T("cap_eyebrow"), ppl_e=PT("a_people"), ppl_h=PT("a_people_h"),
-                how_e=T("how_eyebrow"), how_l=T("how_lead"),
                 c_e=PT("c_eyebrow"), f_certs=T("fact_certs"), f_insured=T("fact_insured"),
                 rep_e=T("rep_eyebrow"),
                 h_spec=PT("a_spec"),
@@ -2196,11 +2159,7 @@ def recip_3d(machine="recip", hero=False):
     return """
     <section class="section section-alt cmp-section{hero}">
       <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
-          <h2>{h}</h2>
-          {lead}
-        </div>
+{head}
         <figure class="cmp bleed reveal" data-compressor data-machine="{machine}">
           <div class="cmp-stage">
             <canvas class="cmp-canvas" role="img" aria-label="{alt}"></canvas>
@@ -2217,18 +2176,23 @@ def recip_3d(machine="recip", hero=False):
     </section>
     <script src="{js}" defer></script>""".format(
         machine=machine, hero=(" cmp-section--hero" if hero else " seam-top"),
-        # In hero mode the lead ALSO sits in the page head's second column,
-        # and exactly one of the two is shown. Printing it in both places is
-        # what makes that possible: the head column only exists at the grid
-        # breakpoint, and dropping it here left the paragraph nowhere at all
-        # on a phone -- the copy silently vanished below 1080px.
-        lead='<p class="lead%s">%s</p>' % (
-            " cmp-lead-alt" if hero else "",
-            text(T("unit_lead" if machine == "unit" else
-                   ("scr_lead" if machine == "screw" else "cmp_lead")))),
-        num=("01" if machine in ("screw", "unit") else "05"),
-        e=text(T("unit_eyebrow" if machine == "unit" else ("scr_eyebrow" if machine == "screw" else "cmp_eyebrow"))),
-        h=text(T("unit_h2" if machine == "unit" else ("scr_h2" if machine == "screw" else "cmp_h2"))),
+        # In the About hero the head is gone entirely. A numbered eyebrow and a
+        # 58px heading introducing a machine that is right there, already
+        # carrying its own title block and seven named callouts, was the page
+        # explaining its own illustration.
+        head=("" if hero else """        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">%s</span><span class="sep">//</span>%s</p>
+          <h2>%s</h2>
+          %s
+        </div>""" % (
+            ("01" if machine in ("screw", "unit") else "05"),
+            text(T("unit_eyebrow" if machine == "unit" else
+                   ("scr_eyebrow" if machine == "screw" else "cmp_eyebrow"))),
+            text(T("unit_h2" if machine == "unit" else
+                   ("scr_h2" if machine == "screw" else "cmp_h2"))),
+            '<p class="lead">%s</p>' % text(T(
+                "unit_lead" if machine == "unit" else
+                ("scr_lead" if machine == "screw" else "cmp_lead"))))),
         alt=attr(T("unit_alt" if machine == "unit" else ("scr_alt" if machine == "screw" else "cmp_alt"))),
         hint=text(T("cmp_hint")), marks=marks,
         tb=text(T("unit_tb" if machine == "unit" else ("scr_tb" if machine == "screw" else "cmp_tb"))),
