@@ -860,7 +860,13 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .co-table td.co-derived{font-family:var(--mono);font-variant-numeric:tabular-nums;
   text-align:right;color:var(--ink-3)}
 .co-del{padding:2px 8px;line-height:1.2}
-.co-actions{margin-top:12px}
+.co-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
+.co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
+  border-top:2px solid var(--baseline)}
+.co-table tfoot td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.legend i.rule{display:inline-block;width:14px;height:0;border-top:1.5px dashed var(--ink-2);
+  vertical-align:middle}
 .co-foot{margin-top:12px;max-width:78ch}
 .drop-zone{position:relative;display:block;border:1px dashed var(--baseline);
   background:var(--panel,transparent);cursor:pointer;margin-bottom:12px;
@@ -1262,6 +1268,16 @@ en: {
     breakRead:'At the {pct} margin the register actually shows, {eur} of work has to be sold each month before any of it is profit.',
     cat:{premises:'Premises',vehicles:'Vehicles',insurance:'Insurance',software:'Software',
       utilities:'Utilities',finance:'Finance and leasing',tools:'Tools',other:'Other'},
+    total:'Total',exportCsv:'Export CSV',importCsv:'Import CSV',
+    impEmpty:'That file has no rows this screen can read.',
+    impConfirm:'Add {n} rows, {sum} a month in total?',
+    impDone:'Added {n} of {of}.',
+    kOwed:'Owed to us',coverNote:'{n} months of burn',
+    beTitle:'Did the month pay for itself',
+    beOver:'Covered',beUnder:'Short',beLine:'Break-even',
+    beRead:'{below} of the last {of} months did not cover what they cost.',
+    burnTrend:'What it has been costing',
+    burnMove:'The cost base has moved {pct} over these twelve months.',
     saved:'Saved',saveFailed:'Not saved',
     conflict:'Somebody else changed this while you had it open. Reload before saving again.',
     confirmDel:'Remove {name}?'},
@@ -1434,6 +1450,16 @@ lt: {
     breakRead:'Esant faktinei {pct} maržai, kas mėnesį reikia parduoti {eur} darbų, kol atsiranda pelnas.',
     cat:{premises:'Patalpos',vehicles:'Transportas',insurance:'Draudimas',software:'Programinė įranga',
       utilities:'Komunalinės',finance:'Finansai ir lizingas',tools:'Įrankiai',other:'Kita'},
+    total:'Iš viso',exportCsv:'Eksportuoti CSV',importCsv:'Importuoti CSV',
+    impEmpty:'Šiame faile nėra eilučių, kurias šis ekranas galėtų perskaityti.',
+    impConfirm:'Pridėti {n} eilutes, iš viso {sum} per mėnesį?',
+    impDone:'Pridėta {n} iš {of}.',
+    kOwed:'Mums skolingi',coverNote:'{n} mėn. išlaidų',
+    beTitle:'Ar mėnuo pats save padengė',
+    beOver:'Padengta',beUnder:'Trūko',beLine:'Nenuostolingumas',
+    beRead:'{below} iš paskutinių {of} mėnesių nepadengė savo išlaidų.',
+    burnTrend:'Kiek kainavo',
+    burnMove:'Išlaidų bazė per šiuos dvylika mėnesių pasikeitė {pct}.',
     saved:'Išsaugota',saveFailed:'Neišsaugota',
     conflict:'Kažkas pakeitė tai, kol turėjote atidarę. Perkraukite prieš saugodami.',
     confirmDel:'Pašalinti {name}?'},
@@ -1606,6 +1632,16 @@ ru: {
     breakRead:'При фактической марже {pct} каждый месяц нужно продавать работ на {eur}, прежде чем появится прибыль.',
     cat:{premises:'Помещения',vehicles:'Транспорт',insurance:'Страхование',software:'ПО',
       utilities:'Коммунальные',finance:'Финансы и лизинг',tools:'Инструмент',other:'Прочее'},
+    total:'Итого',exportCsv:'Выгрузить CSV',importCsv:'Загрузить CSV',
+    impEmpty:'В этом файле нет строк, которые экран может прочитать.',
+    impConfirm:'Добавить {n} строк, всего {sum} в месяц?',
+    impDone:'Добавлено {n} из {of}.',
+    kOwed:'Нам должны',coverNote:'{n} мес. расходов',
+    beTitle:'Окупил ли себя месяц',
+    beOver:'Покрыто',beUnder:'Не хватило',beLine:'Безубыточность',
+    beRead:'{below} из последних {of} месяцев не покрыли своих расходов.',
+    burnTrend:'Во что обходилось',
+    burnMove:'База расходов за эти двенадцать месяцев изменилась на {pct}.',
     saved:'Сохранено',saveFailed:'Не сохранено',
     conflict:'Кто-то изменил это, пока у вас было открыто. Перезагрузите перед сохранением.',
     confirmDel:'Удалить {name}?'},
@@ -5038,13 +5074,28 @@ function coState(){
   if(!state.co) state.co = { showEnded:false };
   return state.co;
 }
+/* Active is DERIVED here, not taken from the row.
+
+   people_v computes it server-side, and trusting that alone left the two
+   halves of this screen disagreeing: the headline burn counted a fitter who
+   left in June because the local create path had stamped active:true on him,
+   while the month-by-month chart -- which reads the dates -- correctly did
+   not. One number said 11,350 and the chart said 8,900, and neither said why.
+
+   The dates are the fact. The flag is a convenience the server sends, and
+   where they differ the dates win. */
+function coLive(r){
+  const today = new Date().toISOString().slice(0, 10);
+  return (!r.start_date || r.start_date <= today)
+      && (!r.end_date   || r.end_date   >= today);
+}
 function coPeople(){
   const all = state.people || [];
-  return coState().showEnded ? all : all.filter(p => p.active !== false);
+  return coState().showEnded ? all : all.filter(coLive);
 }
 function coOverheads(){
   const all = state.overheads || [];
-  return coState().showEnded ? all : all.filter(o => o.active !== false);
+  return coState().showEnded ? all : all.filter(coLive);
 }
 
 /* Computed here as well as in the database. The server figure is the truth --
@@ -5170,6 +5221,133 @@ function coToolbar(t){
   </div>`;
 }
 
+/* A total under a table people type into. Twelve salaries and no sum is a
+   sheet you have to leave to find out what it says. Departments get their own
+   line because that is where an owner looks first: which part of the company
+   costs what. */
+function coFoot(rows, kind, t){
+  const c = t.co;
+  if(!rows.length) return '';
+  const money = r => Number(kind === 'person' ? r.monthly_cost : r.amount_month) || 0;
+  const total = rows.reduce((a, r) => a + money(r), 0);
+  const span = kind === 'person' ? 3 : 1;
+  const tail = kind === 'person' ? 4 : 4;
+
+  let groups = '';
+  if(kind === 'person'){
+    const by = new Map();
+    rows.forEach(r => {
+      const k = (r.department || '').trim() || '\u2014';
+      by.set(k, (by.get(k) || 0) + money(r));
+    });
+    if(by.size > 1){
+      groups = [...by.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) =>
+        `<tr class="co-sub"><td colspan="${span}">${esc(k)}</td>
+          <td class="num">${fmt(v, 0)}</td><td colspan="${tail}"></td></tr>`).join('');
+    }
+  }
+  return `<tfoot>${groups}<tr class="co-total">
+    <td colspan="${span}">${esc(c.total)}</td>
+    <td class="num">${fmt(total, 0)}</td><td colspan="${tail}"></td>
+  </tr></tfoot>`;
+}
+
+/* CSV in and out, because nobody types twelve people by hand when the payroll
+   is already in a spreadsheet -- and a screen that cannot be filled is a
+   screen that stays empty. Semicolons and a BOM, matching the register: Excel
+   opens a UTF-8 file as Latin-1 without one, and this data is full of
+   Lithuanian names. */
+function coCell(v){
+  const x = v == null ? '' : String(v);
+  return /[",;\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x;
+}
+function coCsvOut(kind){
+  const t = tr(), c = t.co;
+  const head = kind === 'person'
+    ? [c.hName, c.hRole, c.hDept, c.hCost, c.hHours, c.hFrom, c.hTo]
+    : [c.hName, c.hCat, c.hAmount, c.hFrom, c.hTo, c.hNote];
+  const rows = kind === 'person' ? coPeople() : coOverheads();
+  const lines = [head.map(coCell).join(';')];
+  rows.forEach(r => lines.push((kind === 'person'
+    ? [r.name, r.job_title, r.department, Number(r.monthly_cost || 0).toFixed(2),
+       r.hours_month, r.start_date, r.end_date]
+    : [r.name, r.category, Number(r.amount_month || 0).toFixed(2),
+       r.start_date, r.end_date, r.note]).map(coCell).join(';')));
+  download((kind === 'person' ? 'people' : 'fixed-costs') + '.csv',
+           '\ufeff' + lines.join('\r\n'), 'text/csv;charset=utf-8');
+}
+
+/* Split on the separator the file actually uses rather than on the one we
+   would have written. A sheet exported from a comma-locale Excel is still a
+   payroll, and refusing it teaches nobody anything. */
+function coSplit(line, sep){
+  const out = []; let cur = '', q = false;
+  for(let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if(q){
+      if(ch === '"' && line[i + 1] === '"'){ cur += '"'; i++; }
+      else if(ch === '"') q = false;
+      else cur += ch;
+    } else if(ch === '"') q = true;
+    else if(ch === sep){ out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(x => x.trim());
+}
+function coNum(v){
+  /* "3 400,00" and "3400.00" are the same salary typed in two countries. */
+  const x = String(v || '').replace(/\s|\u00a0/g, '').replace(',', '.');
+  const n = parseFloat(x);
+  return isFinite(n) ? n : 0;
+}
+function coDate(v){
+  const x = String(v || '').trim();
+  if(!x) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(x)) return x;
+  const m = x.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);   /* 01.03.2024 */
+  if(m) return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+  return '';
+}
+
+async function coCsvIn(kind, file){
+  const t = tr(), c = t.co;
+  const text = await file.text();
+  const body = text.replace(/^\ufeff/, '').split(/\r?\n/).filter(l => l.trim());
+  if(body.length < 2){ alert(c.impEmpty); return; }
+  const sep = (body[0].split(';').length > body[0].split(',').length) ? ';' : ',';
+
+  /* The header is read, not assumed. A file whose first line is a header gets
+     it skipped; one that starts straight into data keeps the first row. */
+  const first = coSplit(body[0], sep);
+  const looksLikeHeader = first.some(x => /[a-zA-Z\u00c0-\u024f]/.test(x))
+                          && coNum(first[kind === 'person' ? 3 : 2]) === 0;
+  const rows = body.slice(looksLikeHeader ? 1 : 0)
+    .map(l => coSplit(l, sep))
+    .filter(cols => (cols[0] || '').trim())
+    .map(cols => kind === 'person'
+      ? { name: cols[0], job_title: cols[1] || '', department: cols[2] || '',
+          monthly_cost: coNum(cols[3]), hours_month: coNum(cols[4]) || 130,
+          start_date: coDate(cols[5]), end_date: coDate(cols[6]) }
+      : { name: cols[0],
+          category: OH_CATEGORIES.indexOf((cols[1] || '').toLowerCase()) !== -1
+                    ? cols[1].toLowerCase() : 'other',
+          amount_month: coNum(cols[2]),
+          start_date: coDate(cols[3]), end_date: coDate(cols[4]), note: cols[5] || '' });
+
+  if(!rows.length){ alert(c.impEmpty); return; }
+  const sum = rows.reduce((a, r) => a + (kind === 'person' ? r.monthly_cost : r.amount_month), 0);
+  if(!confirm(c.impConfirm.replace('{n}', rows.length).replace('{sum}', fmt(sum, 0)))) return;
+
+  let ok = 0;
+  for(const r of rows){
+    try { await coCreate(kind, r, true); ok++; }
+    catch(e){ /* keep going: one bad line must not lose the other eleven */ }
+  }
+  persist(); render();
+  alert(c.impDone.replace('{n}', ok).replace('{of}', rows.length));
+}
+
 function coPeopleView(){
   const t = tr(), c = t.co, rows = coPeople();
   const body = rows.length ? rows.map(p => `<tr data-person="${esc(p.id)}">
@@ -5200,8 +5378,14 @@ function coPeopleView(){
         <th>${esc(c.hFrom)}</th><th>${esc(c.hTo)}</th><th></th>
       </tr></thead>
       <tbody>${body}</tbody>
+      ${coFoot(rows, 'person', t)}
     </table></div>
-    <div class="co-actions"><button id="coAddPerson" class="primary">${esc(c.addPerson)}</button></div>
+    <div class="co-actions">
+      <button id="coAddPerson" class="primary">${esc(c.addPerson)}</button>
+      <button id="coCsvPeople">${esc(c.exportCsv)}</button>
+      <button id="coImpPeopleBtn">${esc(c.importCsv)}</button>
+      <input type="file" id="coImpPeople" accept=".csv,text/csv" hidden>
+    </div>
     <p class="hint co-foot">${esc(c.costNote)}</p>
   </div>`;
 }
@@ -5237,32 +5421,192 @@ function coOverheadsView(){
         <th>${esc(c.hFrom)}</th><th>${esc(c.hTo)}</th><th>${esc(c.hNote)}</th><th></th>
       </tr></thead>
       <tbody>${body}</tbody>
+      ${coFoot(rows, 'overhead', t)}
     </table></div>
-    <div class="co-actions"><button id="coAddOverhead" class="primary">${esc(c.addOverhead)}</button></div>
+    <div class="co-actions">
+      <button id="coAddOverhead" class="primary">${esc(c.addOverhead)}</button>
+      <button id="coCsvOverheads">${esc(c.exportCsv)}</button>
+      <button id="coImpOverheadsBtn">${esc(c.importCsv)}</button>
+      <input type="file" id="coImpOverheads" accept=".csv,text/csv" hidden>
+    </div>
   </div>
   ${parts.length ? `<div class="card">${chartComposition(parts, PAL_SCREEN,
       {title: c.byCategory, empty: c.noOverheads})}</div>` : ''}`;
 }
 
-/* The screen this was all for. */
-function coBurnView(){
-  const t = tr(), c = t.co, b = coBurn();
-  const live = !!state.burn;   /* whether the server has answered yet */
+/* ================= the company, answered =================
+   Four typed-in numbers were the whole payoff, and a number on its own is not
+   a decision. Everything below turns what is already entered into a verdict:
+   which months paid for themselves, whether the cost base is creeping, and
+   whether the money owed to us covers it.
 
-  /* Break-even needs a margin to divide by, and the honest source is the
-     register: what the company actually earned on won work, not a target
-     somebody typed into settings. If there is not enough of it, the figure is
-     withheld rather than guessed. */
+   None of it asks for a single new field.
+   ============================================================ */
+
+/* The burn as it stood in a given month, not as it stands today. The rows are
+   dated for exactly this: a lease that ended in March is out of April and
+   still in February, and a pay rise is a row that ended and one that began.
+   Without this the history would be today's cost base painted backwards over
+   every month, which is not a history, it is a straight line. */
+function coBurnOn(iso){
+  const on = (r) => (!r.start_date || r.start_date <= iso)
+                 && (!r.end_date   || r.end_date   >= iso);
+  const pay = (state.people || []).filter(on)
+    .reduce((a, r) => a + (Number(r.monthly_cost) || 0), 0);
+  const fix = (state.overheads || []).filter(on)
+    .reduce((a, r) => a + (Number(r.amount_month) || 0), 0);
+  return { payroll: pay, overheads: fix, burn: pay + fix };
+}
+
+/* The last n months, ending with this one. */
+function coMonths(n){
+  const out = [], d = new Date();
+  d.setDate(1);
+  for(let i = n - 1; i >= 0; i--){
+    const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    out.push(m.getFullYear() + '-' + String(m.getMonth() + 1).padStart(2, '0'));
+  }
+  return out;
+}
+
+/* What was WON in each month, by the date of the order rather than the date
+   of the enquiry. An enquiry received in March and ordered in June is June's
+   money; charging it to March would put revenue in a month that never saw
+   any and is the sort of thing that makes a chart lie quietly. */
+function coWonByMonth(){
+  const by = new Map();
+  (state.enquiries || []).forEach(r => {
+    if(r.status !== 'Gautas PO') return;
+    const d = r.po_date || r.enquiry_date;
+    if(!d) return;
+    const k = d.slice(0, 7);
+    const o = by.get(k) || { sell: 0, margin: 0, costed: 0 };
+    o.sell += Number(r.price_ex_vat) || 0;
+    if(r.margin_eur != null){ o.margin += Number(r.margin_eur); o.costed++; }
+    by.set(k, o);
+  });
+  return by;
+}
+
+/* The margin the register actually shows on won and costed work. Returned as
+   null rather than as a plausible-looking number when there is too little of
+   it: a break-even figure divided by a guess is a guess with a decimal point
+   on it. */
+function coRealMargin(){
   const won = (state.enquiries || []).filter(r =>
     r.status === 'Gautas PO' && r.cost_ex_vat != null && Number(r.price_ex_vat) > 0);
   const sell = won.reduce((a, r) => a + Number(r.price_ex_vat), 0);
   const cost = won.reduce((a, r) => a + Number(r.cost_ex_vat), 0);
-  const marg = sell > 0 ? (sell - cost) / sell : null;
-  const breakEven = (marg && marg > 0.02) ? b.burn / marg : null;
+  if(!(sell > 0)) return null;
+  const m = (sell - cost) / sell;
+  return (m > 0.02 && won.length >= 5) ? { pct: m, n: won.length } : null;
+}
+
+/* Money owed to us: won, not paid. The register already holds it. */
+function coOwed(){
+  return (state.enquiries || []).reduce((a, r) =>
+    (r.status === 'Gautas PO' && !r.paid) ? a + (Number(r.price_ex_vat) || 0) : a, 0);
+}
+
+/* The verdict chart: what was sold each month against what that month had to
+   cover. Bars are the sold work; the rule across them is the break-even for
+   that month, computed from THAT month's burn and not from today's. A bar
+   under the rule is a month the company paid to work. */
+function coBreakEvenChart(months, marg, t){
+  const c = t.co;
+  const won = coWonByMonth();
+  const pts = months.map(m => {
+    const w = won.get(m) || { sell: 0 };
+    const b = coBurnOn(m + '-28').burn;
+    return { l: m, sold: w.sell, need: marg ? b / marg.pct : 0 };
+  });
+  const max = Math.max(1, ...pts.flatMap(p => [p.sold, p.need]));
+  const W = 560, H = 190, padL = 46, padB = 30, padT = 14;
+  const bw = (W - padL - 12) / pts.length;
+  const y = v => H - padB - (v / max) * (H - padT - padB);
+
+  let bars = '', rule = '', below = 0;
+  pts.forEach((p, i) => {
+    const x = padL + i * bw;
+    const short = p.sold < p.need;
+    if(short && p.need > 0) below++;
+    bars += `<rect x="${(x + bw * 0.16).toFixed(1)}" y="${y(p.sold).toFixed(1)}"
+        width="${(bw * 0.68).toFixed(1)}" height="${Math.max(1, (H - padB) - y(p.sold)).toFixed(1)}"
+        fill="${short ? 'var(--critical)' : 'var(--good)'}" rx="1"/>
+      <text x="${(x + bw / 2).toFixed(1)}" y="${H - 9}" font-size="9" fill="var(--ink-3)"
+        text-anchor="middle">${esc(p.l.slice(5))}</text>`;
+    if(p.need > 0){
+      rule += `<line x1="${x.toFixed(1)}" y1="${y(p.need).toFixed(1)}"
+          x2="${(x + bw).toFixed(1)}" y2="${y(p.need).toFixed(1)}"
+          stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    }
+  });
+  const legend = `<div class="legend">
+    <span><i style="background:var(--good)"></i>${esc(c.beOver)}</span>
+    <span><i style="background:var(--critical)"></i>${esc(c.beUnder)}</span>
+    <span><i class="rule"></i>${esc(c.beLine)}</span></div>`;
+
+  if(!marg) return `<figure class="chart"><figcaption>${esc(c.beTitle)}</figcaption>
+    <p class="an-read warn">${esc(c.noMargin)}</p></figure>`;
+
+  return `<figure class="chart"><figcaption>${esc(c.beTitle)}</figcaption>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.beTitle)}">
+      <line x1="${padL}" y1="${H - padB}" x2="${W - 6}" y2="${H - padB}"
+        stroke="var(--grid)" stroke-width="1"/>${bars}${rule}</svg>
+    ${legend}
+    <p class="an-read ${below > months.length / 3 ? 'bad' : 'ok'}">${
+      esc(c.beRead.replace('{below}', below).replace('{of}', months.length))}</p></figure>`;
+}
+
+/* Cost creep. Payroll and fixed costs stacked, month by month, from the dates
+   already on the rows. An owner sees the total go up; this says which half. */
+function coBurnChart(months, t){
+  const c = t.co;
+  const pts = months.map(m => Object.assign({ l: m }, coBurnOn(m + '-28')));
+  const max = Math.max(1, ...pts.map(p => p.burn));
+  const W = 560, H = 170, padL = 46, padB = 28, padT = 14;
+  const bw = (W - padL - 12) / pts.length;
+  const y = v => H - padB - (v / max) * (H - padT - padB);
+  const bars = pts.map((p, i) => {
+    const x = padL + i * bw + bw * 0.16, w = bw * 0.68;
+    return `<rect x="${x.toFixed(1)}" y="${y(p.burn).toFixed(1)}" width="${w.toFixed(1)}"
+        height="${Math.max(1, y(p.overheads) - y(p.burn)).toFixed(1)}" fill="var(--series-1)" rx="1"/>
+      <rect x="${x.toFixed(1)}" y="${y(p.overheads).toFixed(1)}" width="${w.toFixed(1)}"
+        height="${Math.max(1, (H - padB) - y(p.overheads)).toFixed(1)}" fill="var(--series-2)" rx="1"/>
+      <text x="${(x + w / 2).toFixed(1)}" y="${H - 8}" font-size="9" fill="var(--ink-3)"
+        text-anchor="middle">${esc(p.l.slice(5))}</text>`;
+  }).join('');
+  const first = pts[0].burn, last = pts[pts.length - 1].burn;
+  const move = first > 0 ? (last - first) / first : null;
+  return `<figure class="chart"><figcaption>${esc(c.burnTrend)}</figcaption>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.burnTrend)}">
+      <line x1="${padL}" y1="${H - padB}" x2="${W - 6}" y2="${H - padB}"
+        stroke="var(--grid)" stroke-width="1"/>${bars}</svg>
+    <div class="legend"><span><i style="background:var(--series-1)"></i>${esc(c.kPayroll)}</span>
+      <span><i style="background:var(--series-2)"></i>${esc(c.kOverheads)}</span></div>
+    ${move == null ? '' : `<p class="an-read ${move > 0.1 ? 'warn' : 'ok'}">${
+      esc(c.burnMove.replace('{pct}', (move >= 0 ? '+' : '') + pct(move)))}</p>`}</figure>`;
+}
+
+/* The screen this was all for. */
+function coBurnView(){
+  const t = tr(), c = t.co, b = coBurn();
+  const live = !!state.burn;
+  const marg = coRealMargin();
+  const breakEven = marg ? b.burn / marg.pct : null;
+  const owed = coOwed();
+  const months = coMonths(12);
 
   const stat = (label, value, note, tone) =>
     `<div class="an-stat${tone ? ' ' + tone : ''}"><span>${esc(label)}</span><b>${value}</b>${
       note ? `<i>${esc(note)}</i>` : ''}</div>`;
+
+  /* Cover, not runway. Runway needs a bank balance, which is one more number
+     to keep fresh and stale the day after it is typed. What the register
+     already knows is what has been won and not paid, and dividing that by the
+     burn answers a question an owner does have: if nothing else were sold,
+     how long would collecting what we are already owed keep the doors open. */
+  const cover = b.burn > 0 ? owed / b.burn : null;
 
   return `${noticeBar()}<div class="card">
     <h2 class="sheet">${esc(c.burn)}</h2>
@@ -5272,7 +5616,7 @@ function coBurnView(){
       ${stat(c.kPayroll, fmt(b.payroll, 0), b.headcount + ' ' + c.people.toLowerCase())}
       ${stat(c.kOverheads, fmt(b.overheads, 0), '')}
       ${stat(c.kBurn, fmt(b.burn, 0), c.perMonth, 'strong')}
-      ${stat(c.kRate, b.hour_cost_avg == null ? '—' : fmt(b.hour_cost_avg, 2), c.perHour)}
+      ${stat(c.kRate, b.hour_cost_avg == null ? '\u2014' : fmt(b.hour_cost_avg, 2), c.perHour)}
     </div>
     ${live ? '' : `<p class="hint co-foot">${esc(c.localOnly)}</p>`}
 
@@ -5280,12 +5624,18 @@ function coBurnView(){
     ${breakEven == null
       ? `<p class="an-read warn">${esc(c.noMargin)}</p>`
       : `<div class="an-stats co-stats">
-          ${stat(c.kMargin, pct(marg), won.length + ' ' + c.wonRows)}
+          ${stat(c.kMargin, pct(marg.pct), marg.n + ' ' + c.wonRows)}
           ${stat(c.kBreakEven, fmt(breakEven, 0), c.perMonth, 'strong')}
           ${stat(c.kBreakDay, fmt(breakEven / 21, 0), c.perWorkday)}
-        </div>
-        <p class="an-read ${marg >= 0.25 ? 'ok' : 'warn'}">${
-          esc(c.breakRead.replace('{eur}', fmt(breakEven, 0)).replace('{pct}', pct(marg)))}</p>`}
+          ${stat(c.kOwed, fmt(owed, 0),
+                 cover == null ? '' : c.coverNote.replace('{n}', cover.toFixed(1)),
+                 cover != null && cover < 1 ? 'bad' : '')}
+        </div>`}
+  </div>
+
+  <div class="enq-charts">
+    <div class="card">${coBreakEvenChart(months, marg, t)}</div>
+    <div class="card">${coBurnChart(months, t)}</div>
   </div>`;
 }
 
@@ -5323,6 +5673,20 @@ function wireCompany(){
         docUpload(e.dataTransfer.files);
     });
   }
+
+  on('coCsvPeople', 'click', () => coCsvOut('person'));
+  on('coCsvOverheads', 'click', () => coCsvOut('overhead'));
+  on('coImpPeopleBtn', 'click', () => $('#coImpPeople').click());
+  on('coImpOverheadsBtn', 'click', () => $('#coImpOverheads').click());
+  /* value cleared, so choosing the same file twice in a row still fires */
+  on('coImpPeople', 'change', ev => {
+    const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+    if(f) coCsvIn('person', f);
+  });
+  on('coImpOverheads', 'change', ev => {
+    const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+    if(f) coCsvIn('overhead', f);
+  });
 
   on('coAddOverhead', 'click', async () => {
     const row = { name: tr().co.newOverhead, category: 'other', amount_month: 0,
@@ -5493,22 +5857,24 @@ async function docFieldChanged(rowEl){
   } catch(e){ toast(tr().co.saveFailed, 'bad'); }
 }
 
-async function coCreate(kind, row){
+async function coCreate(kind, row, quiet){
   if(!CLOUD.on){
     /* Local mode: an id the server would have given, so the screens behave
        the same before anyone has connected a database. */
     row.id = 'local-' + Math.random().toString(36).slice(2, 10);
-    row.rev = 1; row.active = true;
+    row.rev = 1;
     coSetList(kind, [row].concat(coList(kind)));
-    persist(); render(); return;
+    if(!quiet){ persist(); render(); }
+    return;
   }
   try {
     const saved = kind === 'person' ? await CLOUD.personInsert(row)
                                     : await CLOUD.overheadInsert(row);
     if(saved) coSetList(kind, [saved].concat(coList(kind)));
+    if(quiet) return;                 /* an import renders once, at the end */
     await coRefreshBurn();
     persist(); render();
-  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+  } catch(e){ if(quiet) throw e; toast(tr().co.saveFailed, 'bad'); }
 }
 
 async function coDelete(kind, id){
