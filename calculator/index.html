@@ -5330,12 +5330,24 @@ function wireCompany(){
     await coCreate('overhead', row);
   });
 
-  /* One delegated listener per event rather than one per cell. The people
-     sheet is nine controls a row and the register taught this: a listener per
-     input is a listener per re-render to remove, and the ones that are missed
-     fire twice. */
+  /* One delegated listener per event rather than one per cell -- and attached
+     ONCE, which is the half I got wrong.
+
+     #main has its innerHTML replaced on every render but the element itself
+     survives, so binding here bound again on every render. After four visits
+     to a company screen one edit fired four saves: the first succeeded and
+     bumped the revision, the other three sent the revision they had read and
+     came back empty, which the app reports as "somebody else changed this
+     while you had it open". Nobody had. It was this, N times.
+
+     Measured before fixing: 1 render 1 save, 2 renders 2 saves, 4 renders 4
+     saves. The comment I originally wrote here was about avoiding exactly
+     this failure by delegating -- and then delegated onto an element that is
+     never thrown away. */
   const main = $('#main');
-  if(!main) return;
+  if(!main || main.dataset.coWired) return;
+  main.dataset.coWired = '1';
+
   main.addEventListener('change', ev => {
     const doc = ev.target.closest('[data-df]');
     if(doc){
