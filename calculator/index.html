@@ -830,6 +830,56 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
    it took a screenshot to notice. */
 .enq-charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .enq-charts > .card{margin-bottom:0}
+.an-h{margin:26px 0 2px;font-size:15px;letter-spacing:.02em}
+.an-lead{margin:0 0 12px}
+.an-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:10px 0 4px}
+.an-stat{display:grid;gap:3px;padding:12px 14px;border:1px solid var(--baseline);border-radius:2px}
+.an-stat span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.an-stat b{font-size:22px;font-variant-numeric:tabular-nums lining;font-family:var(--mono)}
+.an-stat i{font-style:normal;font-size:11px;color:var(--ink-3)}
+.an-read{margin:10px 0 0;font-size:12px;padding:9px 12px;border-left:2px solid var(--baseline)}
+.an-read.bad{border-left-color:var(--critical);color:var(--critical)}
+.an-read.ok{border-left-color:var(--good);color:var(--ink-2)}
+.an-read.warn{border-left-color:var(--warning);color:var(--ink-2)}
+.an-table{width:100%;border-collapse:collapse;margin-top:8px}
+.an-table th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  text-align:left;border-bottom:1px solid var(--baseline)}
+.an-table td.ok b{color:var(--good-text)}
+.an-table td.bad b{color:var(--critical)}
+.an-table tbody tr:nth-child(even){background:var(--row-alt,transparent)}
+/* An author display always beats the hidden attribute, and this app styles
+   .nice with one. Without this the picker's twin ignores hidden entirely. */
+[hidden]{display:none!important}
+.co-bar{margin-bottom:10px}
+/* The sheets style every input full width, and a checkbox inheriting that
+   became a 40px empty square with its label beside it. */
+.co-check{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2)}
+.co-check input[type=checkbox]{width:15px;height:15px;min-width:0;margin:0;flex:0 0 auto}
+.co-table input,.co-table select{width:100%;min-width:0}
+.co-table td.num input{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.co-table td.co-derived{font-family:var(--mono);font-variant-numeric:tabular-nums;
+  text-align:right;color:var(--ink-3)}
+.co-del{padding:2px 8px;line-height:1.2}
+.co-actions{margin-top:12px}
+.co-foot{margin-top:12px;max-width:78ch}
+.drop-zone{position:relative;display:block;border:1px dashed var(--baseline);
+  background:var(--panel,transparent);cursor:pointer;margin-bottom:12px;
+  transition:border-color .2s,background .2s}
+.drop-zone:hover,.drop-zone.is-over{border-color:var(--series-1)}
+.drop-zone .drop-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.drop-zone .drop-face{display:grid;gap:5px;justify-items:center;text-align:center;
+  padding:26px 18px;pointer-events:none}
+.drop-zone .drop-main{font-size:14px;color:var(--ink-1)}
+.drop-zone .drop-hint{font-size:11.5px;color:var(--ink-3)}
+.doc-status{margin:0 0 10px;font-size:12px;color:var(--ink-3);min-height:1.2em}
+.doc-status.ok{color:var(--good-text)}
+.doc-status.bad{color:var(--critical)}
+.doc-size{margin-left:8px;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.doc-table td:first-child{min-width:220px}
+.doc-open{text-decoration:underline;text-underline-offset:2px}
+.co-stats{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.an-stat.strong b{color:var(--ink-1)}
+.an-stat.strong{border-color:var(--ink-3)}
 @media(max-width:900px){ .enq-charts{grid-template-columns:1fr} }
 /* The viewBox is 560 wide with no width attribute, so left alone the chart
    grows to the card and a 150-unit-tall drawing renders 375px tall. */
@@ -1173,9 +1223,65 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 const T = {
 en: {
   secEnquiries:'Enquiries',
+  secCompany:'Company',
+  doc:{title:'Documents',
+    lead:'Invoices, quotes, contracts and certificates, filed against the job they belong to. Nothing here is read automatically \u2014 the amount and the date are the ones you type.',
+    drop:'Drop files here, or choose them',
+    dropHint:'PDF, images, Word, Excel. Up to 25 MB each.',
+    search:'Search',none:'Nothing filed yet.',
+    hFile:'File',hKind:'Kind',hDate:'Date',hAmount:'Amount',hParty:'Counterparty',
+    hProject:'Project',hEnquiry:'Enquiry',
+    kind:{invoice_in:'Invoice in',invoice_out:'Invoice out',quote:'Quote',contract:'Contract',
+      certificate:'Certificate',report:'Report',photo:'Photo',other:'Other'},
+    uploading:'Uploading {n} of {of}\u2026',uploaded:'{n} filed.',
+    failed:'{name} did not upload. Nothing was filed for it.',
+    tooBig:'{name} is over 25 MB.',
+    needsCloud:'Files need the database. This browser-only copy has nowhere to put them.',
+    linkFailed:'Could not open that file.',
+    confirmDel:'Delete {name}? The file goes with it and there is no undo.',
+    foot:'Every file is stored privately. Opening one mints a link that stops working after a minute, so a copied link is not a way in.'},
+  co:{people:'People',overheads:'Fixed costs',burn:'What it costs to exist',
+    peopleLead:'The full monthly cost of each person to the company \u2014 gross pay plus employer taxes, not take-home.',
+    overheadsLead:'Everything the company pays every month whether or not a single job is sold.',
+    burnLead:'Payroll and fixed costs together, and how much work has to be sold to cover them.',
+    hName:'Name',hRole:'Role',hDept:'Department',hCost:'Cost / month',hHours:'Hours / month',
+    hRate:'Per hour',hFrom:'From',hTo:'Until',hCat:'Category',hAmount:'Per month',hNote:'Note',
+    addPerson:'Add a person',addOverhead:'Add a cost',
+    newPerson:'New person',newOverhead:'New cost',
+    noPeople:'Nobody on the payroll yet.',noOverheads:'No fixed costs recorded yet.',
+    showEnded:'Include ended',
+    costNote:'Hours per month is PRODUCTIVE hours, not calendar hours. Holidays, sickness, travel and workshop downtime are paid for and not sold \u2014 130 is a realistic starting point, and a month of timesheets will give you your own.',
+    byCategory:'Fixed costs by category',
+    kPayroll:'Payroll',kOverheads:'Fixed costs',kBurn:'Every month',kRate:'Average hour',
+    perMonth:'per month',perHour:'per hour',perWorkday:'per working day',
+    localOnly:'Computed from the rows on screen. The company figure is confirmed by the server.',
+    breakEven:'Break-even',
+    kMargin:'Margin actually earned',kBreakEven:'Must be sold',kBreakDay:'Which is',
+    wonRows:'won enquiries',
+    noMargin:'Not enough costed and won enquiries yet to say what margin the company actually earns, so the break-even figure is withheld rather than guessed.',
+    breakRead:'At the {pct} margin the register actually shows, {eur} of work has to be sold each month before any of it is profit.',
+    cat:{premises:'Premises',vehicles:'Vehicles',insurance:'Insurance',software:'Software',
+      utilities:'Utilities',finance:'Finance and leasing',tools:'Tools',other:'Other'},
+    saved:'Saved',saveFailed:'Not saved',
+    conflict:'Somebody else changed this while you had it open. Reload before saving again.',
+    confirmDel:'Remove {name}?'},
   secProjects:'Projects',reportPdf:'PDF report',
   /* ---- enquiry register (was a Power BI report) ---- */
   enq:{title:'Enquiry register',lead:'Every enquiry, from the day it came in to the day it was delivered.',
+    an:{title:'Analysis',
+      lead:'Computed from the register as it stands. Nothing here asks anyone to type anything new.',
+      byOwner:'Who converts',byClient:'Which clients convert',
+      owner:'Owner',client:'Client',wonOf:'Won',rate:'Rate',wonEur:'Won, EUR',open:'Open',
+      cycle:'How long things take',toWin:'Enquiry to order',toPay:'Order to payment',
+      days:'days',median:'median of',noData:'not enough dated rows yet',
+      conc:'Client concentration',
+      concTop1:'Largest client',concTop3:'Largest three',concOf:'of won turnover',
+      concClients:'clients with an order',
+      concRisk:'One client is most of the turnover. That is the largest single risk on the books.',
+      concWatch:'One client is a large share of turnover. Worth knowing before it becomes a dependency.',
+      concOk:'No single client dominates the book.',
+      season:'Season',seasonLead:'Every year stacked, so the month shows rather than the trend.',
+      months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']},
     kReceived:'Enquiries received',kPO:'PO received',kProgress:'In progress',kRejected:'Rejected',
     hDate:'Date',hToSupplier:'To supplier',hQuoted:'Quoted',hDays:'Days',
     hPo:'PO date',hDelivery:'Delivered',
@@ -1219,7 +1325,7 @@ en: {
     conflict:'Somebody else saved this enquiry while you had it open. Reload and try again.',
     staffOnly:'The enquiry register is not part of your access.'},
   appSub:'Project Profitability Calculator',themeDark:'Dark',themeLight:'Light',
-  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',enquiries:'Enquiries',settings:'Settings'},
+  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',enquiries:'Enquiries',settings:'Settings',people:'People',overheads:'Fixed costs',burn:'Break-even',docs:'Documents'},
   newProj:'+ New project',dupProj:'Duplicate',delProj:'Delete',csv:'Export CSV',json:'Backup JSON',importJson:'Import',print:'Print report',
   addRow:'+ Add row',total:'Total',yes:'Yes',no:'No',
   confirmDel:'Delete this project? This cannot be undone.',
@@ -1289,9 +1395,65 @@ en: {
 },
 lt: {
   secEnquiries:'Užklausos',
+  secCompany:'Įmonė',
+  doc:{title:'Dokumentai',
+    lead:'Sąskaitos, pasiūlymai, sutartys ir sertifikatai, priskirti darbui, kuriam priklauso. Niekas neskaitoma automatiškai \u2014 sumą ir datą įvedate jūs.',
+    drop:'Nutempkite failus čia arba pasirinkite',
+    dropHint:'PDF, nuotraukos, Word, Excel. Iki 25 MB kiekvienas.',
+    search:'Paieška',none:'Kol kas nieko nėra.',
+    hFile:'Failas',hKind:'Tipas',hDate:'Data',hAmount:'Suma',hParty:'Kontrahentas',
+    hProject:'Projektas',hEnquiry:'Užklausa',
+    kind:{invoice_in:'Gauta sąskaita',invoice_out:'Išrašyta sąskaita',quote:'Pasiūlymas',contract:'Sutartis',
+      certificate:'Sertifikatas',report:'Ataskaita',photo:'Nuotrauka',other:'Kita'},
+    uploading:'Įkeliama {n} iš {of}\u2026',uploaded:'Įkelta: {n}.',
+    failed:'{name} neįkeltas. Įrašas nesukurtas.',
+    tooBig:'{name} viršija 25 MB.',
+    needsCloud:'Failams reikia duomenų bazės. Šioje naršyklės kopijoje jų padėti nėra kur.',
+    linkFailed:'Nepavyko atidaryti failo.',
+    confirmDel:'Ištrinti {name}? Failas dings kartu, atkurti nebus galima.',
+    foot:'Visi failai saugomi privačiai. Atidarant sukuriama nuoroda, nustojanti veikti po minutės \u2014 nukopijuota nuoroda nėra būdas patekti.'},
+  co:{people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Kiek kainuoja egzistuoti',
+    peopleLead:'Visa mėnesio darbuotojo kaina įmonei \u2014 bruto plius darbdavio mokesčiai, ne į rankas.',
+    overheadsLead:'Viskas, ką įmonė moka kas mėnesį, nesvarbu, ar parduotas nors vienas darbas.',
+    burnLead:'Atlyginimai ir pastovios išlaidos kartu bei kiek reikia parduoti, kad jos būtų padengtos.',
+    hName:'Vardas',hRole:'Pareigos',hDept:'Padalinys',hCost:'Kaina / mėn.',hHours:'Val. / mėn.',
+    hRate:'Už valandą',hFrom:'Nuo',hTo:'Iki',hCat:'Kategorija',hAmount:'Per mėn.',hNote:'Pastaba',
+    addPerson:'Pridėti žmogų',addOverhead:'Pridėti išlaidą',
+    newPerson:'Naujas darbuotojas',newOverhead:'Nauja išlaida',
+    noPeople:'Kol kas nėra nė vieno darbuotojo.',noOverheads:'Pastovių išlaidų dar nėra.',
+    showEnded:'Rodyti pasibaigusius',
+    costNote:'Valandos per mėnesį \u2014 tai PRODUKTYVIOS valandos, ne kalendorinės. Atostogos, ligos, kelionės ir prastovos apmokamos, bet neparduodamos \u2014 130 yra realus atskaitos taškas, o mėnuo darbo laiko apskaitos duos jūsų pačių skaičių.',
+    byCategory:'Pastovios išlaidos pagal kategorijas',
+    kPayroll:'Atlyginimai',kOverheads:'Pastovios išlaidos',kBurn:'Kas mėnesį',kRate:'Vidutinė valanda',
+    perMonth:'per mėnesį',perHour:'už valandą',perWorkday:'per darbo dieną',
+    localOnly:'Suskaičiuota iš ekrane esančių eilučių. Įmonės skaičių patvirtina serveris.',
+    breakEven:'Nenuostolingumo riba',
+    kMargin:'Faktinė marža',kBreakEven:'Reikia parduoti',kBreakDay:'Tai yra',
+    wonRows:'laimėtos užklausos',
+    noMargin:'Kol kas per mažai laimėtų užklausų su savikaina, kad būtų galima pasakyti faktinę maržą, todėl nenuostolingumo riba nerodoma, o ne spėjama.',
+    breakRead:'Esant faktinei {pct} maržai, kas mėnesį reikia parduoti {eur} darbų, kol atsiranda pelnas.',
+    cat:{premises:'Patalpos',vehicles:'Transportas',insurance:'Draudimas',software:'Programinė įranga',
+      utilities:'Komunalinės',finance:'Finansai ir lizingas',tools:'Įrankiai',other:'Kita'},
+    saved:'Išsaugota',saveFailed:'Neišsaugota',
+    conflict:'Kažkas pakeitė tai, kol turėjote atidarę. Perkraukite prieš saugodami.',
+    confirmDel:'Pašalinti {name}?'},
   secProjects:'Projektai',reportPdf:'PDF ataskaita',
   /* ---- užklausų registras ---- */
   enq:{title:'Užklausų registras',lead:'Kiekviena užklausa nuo gavimo dienos iki pristatymo.',
+    an:{title:'Analizė',
+      lead:'Apskaičiuota iš esamo registro. Nieko naujo vesti nereikia.',
+      byOwner:'Kas laimi',byClient:'Kurie klientai perka',
+      owner:'Atsakingas',client:'Klientas',wonOf:'Laimėta',rate:'Dalis',wonEur:'Laimėta, EUR',open:'Vykdoma',
+      cycle:'Kiek laiko užtrunka',toWin:'Nuo užklausos iki užsakymo',toPay:'Nuo užsakymo iki apmokėjimo',
+      days:'d.',median:'mediana iš',noData:'per mažai eilučių su datomis',
+      conc:'Klientų koncentracija',
+      concTop1:'Didžiausias klientas',concTop3:'Trys didžiausi',concOf:'laimėtos apyvartos',
+      concClients:'klientai su užsakymu',
+      concRisk:'Vienas klientas sudaro didžiąją apyvartos dalį. Tai didžiausia rizika įmonėje.',
+      concWatch:'Vienas klientas sudaro didelę apyvartos dalį. Verta žinoti, kol tai netapo priklausomybe.',
+      concOk:'Nė vienas klientas nedominuoja.',
+      season:'Sezonas',seasonLead:'Visi metai vienas ant kito \u2014 matyti mėnuo, o ne tendencija.',
+      months:['Sau','Vas','Kov','Bal','Geg','Bir','Lie','Rgp','Rgs','Spa','Lap','Grd']},
     kReceived:'Gauta užklausų',kPO:'Gauti',kProgress:'Vykdomi',kRejected:'Atmesti',
     hDate:'Data',hToSupplier:'Tiekėjui',hQuoted:'Pasiūlyta',hDays:'Dienos',
     hPo:'PO data',hDelivery:'Pristatyta',
@@ -1335,7 +1497,7 @@ lt: {
     conflict:'Kitas naudotojas išsaugojo šią užklausą, kol ji buvo atidaryta. Perkraukite ir bandykite dar kartą.',
     staffOnly:'Užklausų registras nepriklauso jūsų prieigai.'},
   appSub:'Projektų pelningumo skaičiuoklė',themeDark:'Tamsi',themeLight:'Šviesi',
-  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',enquiries:'Užklausos',settings:'Nustatymai'},
+  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',enquiries:'Užklausos',settings:'Nustatymai',people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Nenuostolingumas',docs:'Dokumentai'},
   newProj:'+ Naujas projektas',dupProj:'Kopijuoti',delProj:'Ištrinti',csv:'Eksportuoti CSV',json:'Atsarginė kopija',importJson:'Importuoti',print:'Spausdinti ataskaitą',
   addRow:'+ Pridėti eilutę',total:'Iš viso',yes:'Taip',no:'Ne',
   confirmDel:'Ištrinti šį projektą? Veiksmo atšaukti negalima.',
@@ -1405,9 +1567,65 @@ lt: {
 },
 ru: {
   secEnquiries:'Запросы',
+  secCompany:'Компания',
+  doc:{title:'Документы',
+    lead:'Счета, предложения, договоры и сертификаты, привязанные к работе, к которой относятся. Ничего не распознаётся автоматически \u2014 сумму и дату вводите вы.',
+    drop:'Перетащите файлы сюда или выберите',
+    dropHint:'PDF, изображения, Word, Excel. До 25 МБ каждый.',
+    search:'Поиск',none:'Пока ничего нет.',
+    hFile:'Файл',hKind:'Тип',hDate:'Дата',hAmount:'Сумма',hParty:'Контрагент',
+    hProject:'Проект',hEnquiry:'Запрос',
+    kind:{invoice_in:'Входящий счёт',invoice_out:'Исходящий счёт',quote:'Предложение',contract:'Договор',
+      certificate:'Сертификат',report:'Отчёт',photo:'Фото',other:'Прочее'},
+    uploading:'Загружается {n} из {of}\u2026',uploaded:'Загружено: {n}.',
+    failed:'{name} не загрузился. Запись не создана.',
+    tooBig:'{name} больше 25 МБ.',
+    needsCloud:'Для файлов нужна база данных. В этой браузерной копии их некуда положить.',
+    linkFailed:'Не удалось открыть файл.',
+    confirmDel:'Удалить {name}? Файл исчезнет вместе с записью, отменить нельзя.',
+    foot:'Все файлы хранятся приватно. При открытии создаётся ссылка, которая перестаёт работать через минуту \u2014 скопированная ссылка не даёт доступа.'},
+  co:{people:'Люди',overheads:'Постоянные расходы',burn:'Во что обходится существовать',
+    peopleLead:'Полная месячная стоимость сотрудника для компании \u2014 брутто плюс налоги работодателя, а не на руки.',
+    overheadsLead:'Всё, что компания платит каждый месяц независимо от того, продан ли хоть один заказ.',
+    burnLead:'Зарплаты и постоянные расходы вместе и сколько нужно продать, чтобы их покрыть.',
+    hName:'Имя',hRole:'Должность',hDept:'Подразделение',hCost:'Стоимость / мес.',hHours:'Часов / мес.',
+    hRate:'В час',hFrom:'С',hTo:'По',hCat:'Категория',hAmount:'В месяц',hNote:'Примечание',
+    addPerson:'Добавить человека',addOverhead:'Добавить расход',
+    newPerson:'Новый сотрудник',newOverhead:'Новый расход',
+    noPeople:'Пока никого нет.',noOverheads:'Постоянных расходов пока нет.',
+    showEnded:'Показывать завершённые',
+    costNote:'Часы в месяц \u2014 это ПРОДУКТИВНЫЕ часы, а не календарные. Отпуска, больничные, дорога к судну и простой в цеху оплачиваются и не продаются \u2014 130 разумная отправная точка, а месяц табелей даст ваше собственное число.',
+    byCategory:'Постоянные расходы по категориям',
+    kPayroll:'Зарплаты',kOverheads:'Постоянные расходы',kBurn:'Каждый месяц',kRate:'Средний час',
+    perMonth:'в месяц',perHour:'в час',perWorkday:'в рабочий день',
+    localOnly:'Посчитано по строкам на экране. Общую цифру подтверждает сервер.',
+    breakEven:'Точка безубыточности',
+    kMargin:'Фактическая маржа',kBreakEven:'Нужно продать',kBreakDay:'Это',
+    wonRows:'выигранных запросов',
+    noMargin:'Пока слишком мало выигранных запросов с себестоимостью, чтобы назвать фактическую маржу, поэтому точка безубыточности не показывается, а не угадывается.',
+    breakRead:'При фактической марже {pct} каждый месяц нужно продавать работ на {eur}, прежде чем появится прибыль.',
+    cat:{premises:'Помещения',vehicles:'Транспорт',insurance:'Страхование',software:'ПО',
+      utilities:'Коммунальные',finance:'Финансы и лизинг',tools:'Инструмент',other:'Прочее'},
+    saved:'Сохранено',saveFailed:'Не сохранено',
+    conflict:'Кто-то изменил это, пока у вас было открыто. Перезагрузите перед сохранением.',
+    confirmDel:'Удалить {name}?'},
   secProjects:'Проекты',reportPdf:'Отчёт PDF',
   /* ---- реестр запросов ---- */
   enq:{title:'Реестр запросов',lead:'Каждый запрос — от дня поступления до дня поставки.',
+    an:{title:'Разбор',
+      lead:'Посчитано по тому, что уже есть в реестре. Ничего вводить не нужно.',
+      byOwner:'Кто закрывает',byClient:'Какие клиенты покупают',
+      owner:'Ответственный',client:'Клиент',wonOf:'Выиграно',rate:'Доля',wonEur:'Выиграно, €',open:'В работе',
+      cycle:'Сколько занимает',toWin:'От запроса до заказа',toPay:'От заказа до оплаты',
+      days:'дн.',median:'медиана из',noData:'мало строк с датами',
+      conc:'Концентрация клиентов',
+      concTop1:'Крупнейший клиент',concTop3:'Три крупнейших',concOf:'выигранной выручки',
+      concClients:'клиентов с заказом',
+      concRisk:'Один клиент даёт большую часть выручки. Это крупнейший риск компании.',
+      concWatch:'Один клиент даёт большую долю выручки. Стоит знать до того, как это станет зависимостью.',
+      concOk:'Ни один клиент не доминирует.',
+      season:'Сезон',seasonLead:'Все годы наложены друг на друга \u2014 виден месяц, а не тренд.',
+      months:['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']},
     kReceived:'Получено запросов',kPO:'Получен PO',kProgress:'В работе',kRejected:'Отклонены',
     hDate:'Дата',hToSupplier:'Поставщику',hQuoted:'Предложено',hDays:'Дней',
     hPo:'Дата PO',hDelivery:'Поставлено',
@@ -1451,7 +1669,7 @@ ru: {
     conflict:'Кто-то сохранил этот запрос, пока он был открыт. Обновите страницу и повторите.',
     staffOnly:'Реестр запросов не входит в ваш доступ.'},
   appSub:'Калькулятор рентабельности проектов',themeDark:'Тёмная',themeLight:'Светлая',
-  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',enquiries:'Запросы',settings:'Настройки'},
+  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',enquiries:'Запросы',settings:'Настройки',people:'Люди',overheads:'Постоянные расходы',burn:'Безубыточность',docs:'Документы'},
   newProj:'+ Новый проект',dupProj:'Дублировать',delProj:'Удалить',csv:'Экспорт CSV',json:'Резервная копия',importJson:'Импорт',print:'Печать отчёта',
   addRow:'+ Добавить строку',total:'Итого',yes:'Да',no:'Нет',
   confirmDel:'Удалить этот проект? Действие необратимо.',
@@ -1729,6 +1947,16 @@ const CLOUD = (function(){
     return r.status === 204 ? null : r.json();
   }
 
+  /* Storage is not PostgREST: a different host path, and a body that is a
+     file rather than JSON, so rest() cannot carry it. The authentication is
+     the same though, and it is taken from the same place rather than written
+     out a second time -- two copies of an Authorization header is one of them
+     going stale after a token refresh. */
+  function authHeaders(){
+    return { apikey: KEY,
+             Authorization: 'Bearer ' + ((session && session.access_token) || KEY) };
+  }
+
   /* PostgREST answers a function declared `returns setof x` with an ARRAY and
      one declared `returns x` with a single OBJECT. Reading rows[0] against an
      object gives undefined, which every caller here treats as "no row came
@@ -1823,6 +2051,106 @@ const CLOUD = (function(){
        list and the supplier list. The app never sees the table itself. */
     async enquiries(){
       return await rest('enquiries_v?select=*&order=enquiry_date.desc.nullslast') || [];
+    },
+
+    /* ---- the company: people and fixed costs ----
+       people_v carries `where public.sees_payroll()`, so for anyone but the
+       owner this is not a redacted list, it is an empty one. Same reasoning as
+       the register: a staff list with the salaries blanked is still the staff
+       list, and a payroll screen that shows who is on it has already said too
+       much. */
+    async people(){
+      return await rest('people_v?select=*&order=name.asc') || [];
+    },
+    async personInsert(row){
+      return firstRow(await rest('rpc/create_person', {
+        method: 'POST', body: JSON.stringify({ p_row: row })
+      }));
+    },
+    async personSave(id, rev, row){
+      return firstRow(await rest('rpc/save_person', {
+        method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
+      }));
+    },
+    async personDelete(id){
+      await rest('rpc/delete_person', { method: 'POST', body: JSON.stringify({ p_id: id }) });
+    },
+
+    async overheads(){
+      return await rest('overheads_v?select=*&order=name.asc') || [];
+    },
+    async overheadInsert(row){
+      return firstRow(await rest('rpc/create_overhead', {
+        method: 'POST', body: JSON.stringify({ p_row: row })
+      }));
+    },
+    async overheadSave(id, rev, row){
+      return firstRow(await rest('rpc/save_overhead', {
+        method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
+      }));
+    },
+    async overheadDelete(id){
+      await rest('rpc/delete_overhead', { method: 'POST', body: JSON.stringify({ p_id: id }) });
+    },
+
+    /* Returns no rows at all to anyone who may not see payroll, rather than
+       zeroes -- a burn of zero does not read as "not permitted", it reads as
+       "the company spends nothing". firstRow gives null, and the screens draw
+       a dash. */
+    async burn(){
+      return firstRow(await rest('rpc/company_burn', {
+        method: 'POST', body: JSON.stringify({})
+      }));
+    },
+
+    /* ---- documents ----
+       The record lives in Postgres, the file lives in a private Storage
+       bucket, and there is no transaction across the two. Upload first: a
+       file with no row is invisible clutter, a row with no file is a document
+       store that lies about what it holds. */
+    authHeaders: authHeaders,
+
+    async documents(){
+      return await rest('documents_v?select=*&order=doc_date.desc.nullslast') || [];
+    },
+    async docUpload(path, file){
+      const res = await fetch(API + '/storage/v1/object/documents/' + encodeURI(path), {
+        method: 'POST',
+        headers: Object.assign(authHeaders(), { 'x-upsert': 'false' }),
+        body: file
+      });
+      if(!res.ok) throw new Error('upload failed ' + res.status);
+      return path;
+    },
+    async docInsert(row){
+      return firstRow(await rest('rpc/create_document', {
+        method: 'POST', body: JSON.stringify({ p_row: row })
+      }));
+    },
+    async docSave(id, rev, row){
+      return firstRow(await rest('rpc/save_document', {
+        method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
+      }));
+    },
+    /* The object first, then the row -- see above. */
+    async docDelete(id, path){
+      await fetch(API + '/storage/v1/object/documents/' + encodeURI(path),
+                  { method: 'DELETE', headers: authHeaders() });
+      await rest('rpc/delete_document', { method: 'POST', body: JSON.stringify({ p_id: id }) });
+    },
+    /* A signed URL rather than a public one: the bucket is private, and a
+       link that works forever is a link that leaks forever. Sixty seconds is
+       long enough to start a download and short enough to be useless if it is
+       pasted anywhere. */
+    async docLink(path){
+      const res = await fetch(API + '/storage/v1/object/sign/documents/' + encodeURI(path), {
+        method: 'POST',
+        headers: Object.assign(authHeaders(), { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ expiresIn: 60 })
+      });
+      if(!res.ok) return null;
+      const j = await res.json();
+      return j && j.signedURL ? API + '/storage/v1' + j.signedURL : null;
     },
 
     async enquiryInsert(row){
@@ -2567,16 +2895,30 @@ try {
   var lastRole = localStorage.getItem(ROLE_KEY);
   if(lastRole === 'admin' || lastRole === 'manager') CAN_MONEY = true;
 } catch(e){}
+/* Payroll is a narrower gate than money: the owner alone, mirroring
+   sees_payroll() in the database. Remembered for the first paint the same way
+   and for the same reason.
+
+   This is a convenience for the interface, NOT the control. The control is
+   the SQL function; a hidden tab is not a permission, and anyone who can open
+   the developer console can set this flag. If the two ever disagree the
+   database wins and the screens come back empty -- which is the right way
+   round for them to disagree. */
+var CAN_PAYROLL = false;
+try { if(localStorage.getItem(ROLE_KEY) === 'admin') CAN_PAYROLL = true; } catch(e){}
+
 var ROLE_UNKNOWN = false;   /* the lookup failed -- say so rather than restrict silently */
 
 function rememberRole(role){
   CAN_MONEY = role === 'admin' || role === 'manager';
+  CAN_PAYROLL = role === 'admin';
   try {
     if(CAN_MONEY) localStorage.setItem(ROLE_KEY, role);
     else localStorage.removeItem(ROLE_KEY);
   } catch(e){}
 }
 function canMoney(){ return !CLOUD.on || CAN_MONEY; }
+function canPayroll(){ return !CLOUD.on || CAN_PAYROLL; }
 
 /* ================= rendering ================= */
 const $ = sel => document.querySelector(sel);
@@ -2592,12 +2934,26 @@ const ALL_TABS = ['portfolio','dashboard','card','revenue','labor','subs','trave
    income, and Settings holds the target margin. None of them is an employee's
    business, and all four would be blank or misleading with the figures gone. */
 const COST_TABS = ['card','labor','subs','travel','materials','logistics'];
-function tabList(){ return canMoney() ? ALL_TABS : COST_TABS; }
+
+/* The third subject. Projects are one job, the register is the order book,
+   and this is the company itself: what it costs to open the doors. Its own
+   tab strip rather than an eleventh project tab, because none of it is
+   project-scoped and it must be readable on an account with no projects. */
+const COMPANY_TABS = ['people','overheads','burn','docs'];
+
+function tabList(){
+  if(section() === 'company') return COMPANY_TABS;
+  return canMoney() ? ALL_TABS : COST_TABS;
+}
 
 /* Which of the two subjects is on screen. Derived from the tab rather than
    stored beside it: two pieces of state that must agree is two pieces of state
    that eventually will not. */
-function section(){ return state.tab === 'enquiries' ? 'enquiries' : 'projects'; }
+function section(){
+  if(state.tab === 'enquiries') return 'enquiries';
+  if(COMPANY_TABS.indexOf(state.tab) !== -1) return 'company';
+  return 'projects';
+}
 
 function renderSections(){
   const t = tr(), el = $('#sections');
@@ -2613,11 +2969,30 @@ function renderSections(){
   /* "Enquiry register" is the screen's own heading and too long to sit in a
      switch beside one word. The switch names the subject; the page names
      itself. */
-  el.innerHTML = item('projects', t.secProjects) + item('enquiries', t.secEnquiries);
-  /* The picker and the tab strip are the project subject's own row. */
+  el.innerHTML = item('projects', t.secProjects) + item('enquiries', t.secEnquiries)
+               + (canPayroll() ? item('company', t.secCompany) : '');
+  /* The picker and the tab strip belong to the project subject. The company
+     has tabs of its own but no project picker, so the row shows and the
+     picker inside it does not. */
   const row = $('#tabrow');
-  if(row) row.hidden = cur !== 'projects';
+  if(row) row.hidden = cur === 'enquiries';
+  /* The SELECT, not its parent. pick.parentNode is #tabrow, which also holds
+     the tab strip -- hiding it took the company's own tabs off the screen
+     with it, and the section looked like it had none.
 
+     And the select is not what anybody sees: enhanceSelects covers every one
+     of them with a .nice button that mirrors it, so hiding the native control
+     hid a box that was already invisible while its painted twin stayed on
+     screen showing PRJ-001 over the payroll. Measured, not assumed -- the
+     real select reported display:none and 0x0 while the picker was plainly
+     still there. Both, therefore. */
+  const pick = $('#projectSel');
+  if(pick){
+    const show = cur === 'projects';
+    pick.hidden = !show;
+    const twin = pick.nextElementSibling;
+    if(twin && twin.classList && twin.classList.contains('nice')) twin.hidden = !show;
+  }
 }
 
 function renderChrome(){
@@ -2654,7 +3029,9 @@ function renderChrome(){
   /* The register has no button in this strip -- it is the other section -- so
      it must not be treated as an unknown tab and thrown back to Portfolio.
      It is still gated on canMoney(), the same as every tab carrying a figure. */
-  const off = tabs.indexOf(state.tab) === -1 && !(state.tab === 'enquiries' && canMoney());
+  const off = tabs.indexOf(state.tab) === -1
+              && !(state.tab === 'enquiries' && canMoney())
+              && !(COMPANY_TABS.indexOf(state.tab) !== -1 && canPayroll());
   if(off) state.tab = tabs[0];
   renderSections();
   $('#tabs').innerHTML = tabs.map(k=>`<button data-tab="${k}" class="${state.tab===k?'active':''}">${t.tabs[k]}</button>`).join('');
@@ -2734,7 +3111,11 @@ function paintPulse(){
   if(!el) return;
   const p = proj();
   /* every figure on this strip is a margin or a profit */
-  const hide = !p || !canMoney() || PULSE_OFF[state.tab];
+  /* Every figure on this strip belongs to ONE project, so it has no business
+     over the company screens: it sat above the payroll reading a margin from
+     whichever job happened to be selected. */
+  const hide = !p || !canMoney() || PULSE_OFF[state.tab]
+               || COMPANY_TABS.indexOf(state.tab) !== -1;
   if(el.hidden !== hide){ el.hidden = hide; measureChrome(); }
   if(hide) return;
 
@@ -2995,6 +3376,15 @@ function render(){
        down there never runs for the register -- which is how seven of its nine
        dropdowns stayed native while the two in the chrome were replaced. */
     enhanceSelects();
+    return;
+  }
+  /* The company screens are not project-scoped either, so they are dispatched
+     before the same guard for the same reason. */
+  if(COMPANY_TABS.indexOf(state.tab) !== -1){
+    m.innerHTML = viewCompany(state.tab);
+    m.dataset.view = state.tab === 'burn' ? 'page' : 'sheet';
+    wireCompany();
+    paintPulse(); measureChrome(); enhanceSelects();
     return;
   }
   /* Nothing to show and nothing this person may do about it. Every view below
@@ -3812,7 +4202,187 @@ function viewEnquiries(){
       {title: e.byMonthMoney, empty: e.none, a: e.sell, b: e.margin})}</div>
     <div class="card">${enqBars(enqAgeing(rows, t).map(b => ({l: b.l, v: Math.round(b.v)})),
       {title: e.ageingBuckets, empty: e.none})}</div>
+  </div>
+
+  ${enqAnalysis(rows, t)}`;
+}
+
+/* The analysis block. Kept out of the render above because that function is
+   already the longest thing on the screen, and because this reads the same
+   filtered rows -- narrow the register to one client or one year and the
+   whole analysis narrows with it, which is most of what makes it useful. */
+function enqAnalysis(rows, t){
+  const e = t.enq, a = e.an;
+  const cyc = enqCycle(rows), con = enqConcentration(rows);
+  const owners = enqWinBy(rows, 'owner').filter(g => g.l !== '\u2014');
+  const season = enqSeason(rows);
+
+  const stat = (label, value, note) =>
+    `<div class="an-stat"><span>${esc(label)}</span><b>${value}</b>${
+      note ? `<i>${esc(note)}</i>` : ''}</div>`;
+
+  const cycleCard = `<figure class="chart"><figcaption>${esc(a.cycle)}</figcaption>
+    <div class="an-stats">
+      ${stat(a.toWin, cyc.toWin == null ? '\u2014' : cyc.toWin + ' ' + a.days,
+             cyc.toWin == null ? a.noData : a.median + ' ' + cyc.toWinN)}
+      ${stat(a.toPay, cyc.toPay == null ? '\u2014' : cyc.toPay + ' ' + a.days,
+             cyc.toPay == null ? a.noData : a.median + ' ' + cyc.toPayN)}
+    </div></figure>`;
+
+  /* The risk sentence is stated, not left to be inferred from a percentage.
+     40% is the line where a single client stops being a good customer and
+     starts being the thing that decides whether the company has a year. */
+  const concCard = !con ? '' : `<figure class="chart"><figcaption>${esc(a.conc)}</figcaption>
+    <div class="an-stats">
+      ${stat(a.concTop1, pct(con.top1pct), con.top1.l)}
+      ${stat(a.concTop3, pct(con.top3pct), a.concOf)}
+      ${stat(a.concClients, con.clients, '')}
+    </div>
+    <p class="an-read ${con.top1pct >= 0.4 ? 'bad' : con.top1pct >= 0.25 ? 'warn' : 'ok'}">${
+      esc(con.top1pct >= 0.4 ? a.concRisk
+        : con.top1pct >= 0.25 ? a.concWatch : a.concOk)}</p></figure>`;
+
+  return `<h3 class="an-h">${esc(a.title)}</h3>
+  <p class="hint an-lead">${esc(a.lead)}</p>
+  <div class="enq-charts">
+    <div class="card">${cycleCard}</div>
+    <div class="card">${concCard}</div>
+  </div>
+  <div class="enq-charts">
+    <div class="card">${enqWinTable(owners, t, {title: a.byOwner, head: a.owner})}</div>
+    <div class="card">${enqWinTable(enqWinBy(rows, 'client'), t,
+                                    {title: a.byClient, head: a.client})}</div>
+  </div>
+  <div class="enq-charts">
+    <div class="card">${enqBars(season.map((m, i) => ({l: a.months[i], v: m.n})),
+      {title: a.season, empty: e.none})}
+      <p class="hint an-lead">${esc(a.seasonLead)}</p></div>
+    <div class="card">${enqBars(season.map((m, i) => ({l: a.months[i], v: Math.round(m.eur)})),
+      {title: a.season + ' \u2014 ' + a.wonEur, empty: e.none})}</div>
   </div>`;
+}
+
+/* ================= the analysis =================
+   Everything here is computed from rows that are already in the register. Not
+   one new field is asked of anybody, which is why this came first: 216
+   enquiries and 2.6 million euros were sitting in the database answering no
+   questions at all.
+
+   What it adds over the six charts above: those describe the register, these
+   judge it. A composition of turnover by client says who the clients are; the
+   concentration figure says whether the company would survive losing one.
+   ============================================================ */
+
+/* Median rather than mean, throughout. One enquiry that sat for two years
+   drags an average far enough to make it useless, and in a register built by
+   hand there is always one. */
+function med(xs){
+  if(!xs.length) return null;
+  const a = xs.slice().sort((x, y) => x - y), m = a.length >> 1;
+  return a.length % 2 ? a[m] : Math.round((a[m - 1] + a[m]) / 2);
+}
+function daysBetween(a, b){
+  if(!a || !b) return null;
+  const d = Math.round((new Date(b) - new Date(a)) / 86400000);
+  return d >= 0 && d < 3650 ? d : null;   /* a typed date can be anything */
+}
+
+/* Conversion, sliced by whoever or whatever. Decided rows only: counting the
+   ones still open as losses reports a collapsing hit rate every time the desk
+   gets busy, which is exactly backwards. */
+function enqWinBy(rows, key){
+  const by = new Map();
+  rows.forEach(r => {
+    const k = (r[key] || '').trim() || '—';
+    if(!by.has(k)) by.set(k, {l: k, won: 0, lost: 0, open: 0, wonEur: 0, allEur: 0});
+    const g = by.get(k), v = Number(r.price_ex_vat) || 0;
+    g.allEur += v;
+    if(r.status === 'Gautas PO'){ g.won++; g.wonEur += v; }
+    else if(r.status === 'Atmesta užklausa') g.lost++;
+    else g.open++;
+  });
+  return [...by.values()]
+    .map(g => ({...g, decided: g.won + g.lost,
+                rate: (g.won + g.lost) ? g.won / (g.won + g.lost) : null}))
+    .sort((a, b) => b.allEur - a.allEur);
+}
+
+/* How long a decision takes, and how long the money then takes. Two different
+   problems with two different owners: the first is the sales desk's, the
+   second is whoever chases invoices. */
+function enqCycle(rows){
+  const toWin = [], toPay = [];
+  rows.forEach(r => {
+    if(r.status === 'Gautas PO'){
+      const d = daysBetween(r.enquiry_date, r.po_date);
+      if(d != null) toWin.push(d);
+      if(r.paid){
+        const p = daysBetween(r.po_date || r.enquiry_date, r.paid_date);
+        if(p != null) toPay.push(p);
+      }
+    }
+  });
+  return {toWin: med(toWin), toWinN: toWin.length,
+          toPay: med(toPay), toPayN: toPay.length};
+}
+
+/* Concentration. The share of won turnover sitting with the largest client,
+   and with the largest three. This is the number an owner never has and the
+   bank always asks for: it is not a performance metric, it is the size of the
+   hole if one telephone call goes the wrong way. */
+function enqConcentration(rows){
+  const by = new Map();
+  rows.forEach(r => {
+    if(r.status !== 'Gautas PO') return;
+    const k = (r.client || '').trim() || '—';
+    by.set(k, (by.get(k) || 0) + (Number(r.price_ex_vat) || 0));
+  });
+  const all = [...by.entries()].map(([l, v]) => ({l, v})).sort((a, b) => b.v - a.v);
+  const tot = all.reduce((a, x) => a + x.v, 0);
+  if(!tot) return null;
+  return {
+    top1: all[0], top1pct: all[0].v / tot,
+    top3pct: all.slice(0, 3).reduce((a, x) => a + x.v, 0) / tot,
+    clients: all.length, total: tot
+  };
+}
+
+/* Month of the year, every year stacked on top of each other. The chart above
+   plots months in sequence, which shows the trend and hides the season -- and
+   a company that overhauls fishing vessels has a season. */
+function enqSeason(rows){
+  const m = Array.from({length: 12}, () => ({n: 0, eur: 0}));
+  rows.forEach(r => {
+    const d = r.enquiry_date;
+    if(!d) return;
+    const i = parseInt(d.slice(5, 7), 10) - 1;
+    if(i < 0 || i > 11) return;
+    m[i].n++;
+    if(r.status === 'Gautas PO') m[i].eur += Number(r.price_ex_vat) || 0;
+  });
+  return m;
+}
+
+/* A ranked table rather than another chart: eight names with a rate each is a
+   list, and a list drawn as bars is a chart of one number repeated. */
+function enqWinTable(groups, t, opt){
+  const e = t.enq, o = opt || {};
+  const rows = groups.filter(g => g.decided > 0).slice(0, o.limit || 8);
+  if(!rows.length) return `<p class="chart-empty">${esc(e.none)}</p>`;
+  const body = rows.map(g => {
+    const tone = g.rate >= 0.6 ? 'ok' : g.rate < 0.3 ? 'bad' : '';
+    return `<tr><td>${esc(g.l)}</td>
+      <td class="num">${g.won}/${g.decided}</td>
+      <td class="num ${tone}"><b>${pct(g.rate)}</b></td>
+      <td class="num">${fmt(g.wonEur, 0)}</td>
+      <td class="num muted">${g.open || ''}</td></tr>`;
+  }).join('');
+  return `<figure class="chart"><figcaption>${esc(o.title || '')}</figcaption>
+    <table class="kpi-table an-table"><thead><tr>
+      <th>${esc(o.head || '')}</th><th class="num">${esc(e.an.wonOf)}</th>
+      <th class="num">${esc(e.an.rate)}</th><th class="num">${esc(e.an.wonEur)}</th>
+      <th class="num">${esc(e.an.open)}</th>
+    </tr></thead><tbody>${body}</tbody></table></figure>`;
 }
 
 /* ---- enquiry register: events, editing, export ---- */
@@ -4437,6 +5007,545 @@ function niceStep(raw){
   const n = raw/mag;
   return (n<=1?1:n<=2?2:n<=5?5:10)*mag;
 }
+/* ============================================================
+   THE COMPANY
+   ------------------------------------------------------------
+   Three screens that between them answer one question the calculator could
+   not ask before: what does it cost to open the doors for a month, and
+   therefore how much work has to be sold before any of it is profit.
+
+   Projects and the register are both about money coming in. Nothing here is.
+   ============================================================ */
+const OH_CATEGORIES = ['premises','vehicles','insurance','software',
+                       'utilities','finance','tools','other'];
+
+function coState(){
+  if(!state.co) state.co = { showEnded:false };
+  return state.co;
+}
+function coPeople(){
+  const all = state.people || [];
+  return coState().showEnded ? all : all.filter(p => p.active !== false);
+}
+function coOverheads(){
+  const all = state.overheads || [];
+  return coState().showEnded ? all : all.filter(o => o.active !== false);
+}
+
+/* Computed here as well as in the database. The server figure is the truth --
+   it is the one gated on sees_payroll() -- but it arrives one round trip
+   later, and a screen that shows nothing until then reads as broken. This
+   fills the frame from rows already in hand and is replaced the moment the
+   server answers. */
+function coBurnLocal(){
+  const pay = coPeople().reduce((a, p) => a + (Number(p.monthly_cost) || 0), 0);
+  const fix = coOverheads().reduce((a, o) => a + (Number(o.amount_month) || 0), 0);
+  const hrs = coPeople().filter(p => Number(p.hours_month) > 0);
+  return {
+    headcount: coPeople().length,
+    payroll: pay, overheads: fix, burn: pay + fix,
+    hour_cost_avg: hrs.length
+      ? hrs.reduce((a, p) => a + p.monthly_cost / p.hours_month, 0) / hrs.length
+      : null
+  };
+}
+function coBurn(){ return state.burn || coBurnLocal(); }
+
+function viewCompany(tab){
+  if(tab === 'people')    return coPeopleView();
+  if(tab === 'overheads') return coOverheadsView();
+  if(tab === 'docs')      return coDocsView();
+  return coBurnView();
+}
+
+const DOC_KINDS = ['invoice_in','invoice_out','quote','contract',
+                   'certificate','report','photo','other'];
+
+function docState(){
+  if(!state.docs) state.docs = { kind:'', q:'' };
+  return state.docs;
+}
+function docRows(){
+  const f = docState(), q = (f.q || '').toLowerCase();
+  return (state.documents || []).filter(d => {
+    if(f.kind && d.kind !== f.kind) return false;
+    if(!q) return true;
+    return [d.filename, d.counterparty, d.note, d.project_ref, d.enquiry_ref]
+      .some(v => (v || '').toLowerCase().indexOf(q) !== -1);
+  });
+}
+function humanSize(n){
+  n = Number(n) || 0;
+  if(n < 1024) return n + ' B';
+  if(n < 1048576) return (n / 1024).toFixed(0) + ' KB';
+  return (n / 1048576).toFixed(1) + ' MB';
+}
+
+function coDocsView(){
+  const t = tr(), c = t.co, d = t.doc, rows = docRows();
+  const f = docState();
+  /* Built with the selected value passed in, not by string-replacing
+     `selected` into finished markup afterwards. The replace version matched
+     on a value that might appear in another option's text, or on nothing at
+     all when the id was null -- and a link that silently points at the wrong
+     job is worse than one that points nowhere. */
+  const opts = (list, sel, id, label) =>
+    `<option value="">\u2014</option>` + list.map(x =>
+      `<option value="${esc(id(x))}"${id(x) === sel ? ' selected' : ''}>${esc(label(x))}</option>`
+    ).join('');
+  const projList = state.projects || [];
+  const enqList = (state.enquiries || []).slice(0, 300);
+
+  const body = rows.length ? rows.map(r => `<tr data-doc="${esc(r.id)}">
+      <td><a href="#" class="doc-open" data-path="${esc(r.path)}">${esc(r.filename)}</a>
+          <span class="doc-size">${humanSize(r.size_bytes)}</span></td>
+      <td><select data-df="kind">${DOC_KINDS.map(k =>
+          `<option value="${k}"${r.kind === k ? ' selected' : ''}>${esc(d.kind[k])}</option>`
+        ).join('')}</select></td>
+      <td><input data-df="doc_date" type="date" value="${esc(r.doc_date || '')}"></td>
+      <td class="num"><input data-df="amount" type="number" step="0.01"
+          value="${r.amount == null ? '' : r.amount}"></td>
+      <td><input data-df="counterparty" value="${esc(r.counterparty || '')}"></td>
+      <td><select data-df="project_id">${opts(projList, r.project_id,
+            x => x.id, x => (x.card ? x.card.projectId : x.id))}</select></td>
+      <td><select data-df="enquiry_id">${opts(enqList, r.enquiry_id,
+            x => x.id, x => x.number + (x.client ? ' \u2014 ' + x.client : ''))}</select></td>
+      <td><button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button></td>
+    </tr>`).join('') : `<tr><td colspan="8" class="muted">${esc(d.none)}</td></tr>`;
+
+  return `${noticeBar()}<div class="card">
+    <h2 class="sheet">${esc(d.title)}</h2>
+    <p class="hint" style="margin:-8px 0 14px">${esc(d.lead)}</p>
+
+    <label class="drop-zone" data-doc-drop>
+      <input type="file" id="docFile" multiple class="drop-input"
+             accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.csv,.txt">
+      <span class="drop-face">
+        <span class="drop-main">${esc(d.drop)}</span>
+        <span class="drop-hint">${esc(d.dropHint)}</span>
+      </span>
+    </label>
+    <p class="doc-status" id="docStatus" role="status" aria-live="polite"></p>
+
+    <div class="pf-filters co-bar">
+      <label>${esc(d.search)}<input type="search" id="docQ" value="${esc(f.q)}"></label>
+      <label>${esc(d.hKind)}<select id="docKind"><option value="">${esc(t.enq.all)}</option>${
+        DOC_KINDS.map(k => `<option value="${k}"${f.kind === k ? ' selected' : ''}>${esc(d.kind[k])}</option>`).join('')
+      }</select></label>
+      <span class="muted">${rows.length} / ${(state.documents || []).length}</span>
+    </div>
+
+    <div class="tablewrap"><table class="sheet-table co-table doc-table">
+      <thead><tr>
+        <th>${esc(d.hFile)}</th><th>${esc(d.hKind)}</th><th>${esc(d.hDate)}</th>
+        <th class="num">${esc(d.hAmount)}</th><th>${esc(d.hParty)}</th>
+        <th>${esc(d.hProject)}</th><th>${esc(d.hEnquiry)}</th><th></th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table></div>
+    <p class="hint co-foot">${esc(d.foot)}</p>
+  </div>`;
+}
+
+function coToolbar(t){
+  const c = t.co;
+  return `<div class="pf-filters co-bar">
+    <label class="co-check"><input type="checkbox" id="coEnded"${
+      coState().showEnded ? ' checked' : ''}> ${esc(c.showEnded)}</label>
+  </div>`;
+}
+
+function coPeopleView(){
+  const t = tr(), c = t.co, rows = coPeople();
+  const body = rows.length ? rows.map(p => `<tr data-person="${esc(p.id)}">
+      <td><input data-f="name" value="${esc(p.name || '')}"></td>
+      <td><input data-f="job_title" value="${esc(p.job_title || '')}"></td>
+      <td><input data-f="department" value="${esc(p.department || '')}"></td>
+      <td class="num"><input data-f="monthly_cost" type="number" step="1"
+          value="${p.monthly_cost == null ? '' : p.monthly_cost}"></td>
+      <td class="num"><input data-f="hours_month" type="number" step="1"
+          value="${p.hours_month == null ? '' : p.hours_month}"></td>
+      <td class="num co-derived">${p.hour_cost == null
+          ? (Number(p.hours_month) > 0 ? fmt(p.monthly_cost / p.hours_month, 2) : '—')
+          : fmt(p.hour_cost, 2)}</td>
+      <td><input data-f="start_date" type="date" value="${esc(p.start_date || '')}"></td>
+      <td><input data-f="end_date" type="date" value="${esc(p.end_date || '')}"></td>
+      <td><button class="ghost co-del" data-co-del="person" title="${esc(t.remove)}">×</button></td>
+    </tr>`).join('') : `<tr><td colspan="9" class="muted">${esc(c.noPeople)}</td></tr>`;
+
+  return `${noticeBar()}<div class="card">
+    <h2 class="sheet">${esc(c.people)}</h2>
+    <p class="hint" style="margin:-8px 0 14px">${esc(c.peopleLead)}</p>
+    ${coToolbar(t)}
+    <div class="tablewrap"><table class="sheet-table co-table">
+      <thead><tr>
+        <th>${esc(c.hName)}</th><th>${esc(c.hRole)}</th><th>${esc(c.hDept)}</th>
+        <th class="num">${esc(c.hCost)}</th><th class="num">${esc(c.hHours)}</th>
+        <th class="num">${esc(c.hRate)}</th>
+        <th>${esc(c.hFrom)}</th><th>${esc(c.hTo)}</th><th></th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table></div>
+    <div class="co-actions"><button id="coAddPerson" class="primary">${esc(c.addPerson)}</button></div>
+    <p class="hint co-foot">${esc(c.costNote)}</p>
+  </div>`;
+}
+
+function coOverheadsView(){
+  const t = tr(), c = t.co, rows = coOverheads();
+  const body = rows.length ? rows.map(o => `<tr data-overhead="${esc(o.id)}">
+      <td><input data-f="name" value="${esc(o.name || '')}"></td>
+      <td><select data-f="category">${OH_CATEGORIES.map(k =>
+          `<option value="${k}"${o.category === k ? ' selected' : ''}>${esc(c.cat[k])}</option>`
+        ).join('')}</select></td>
+      <td class="num"><input data-f="amount_month" type="number" step="1"
+          value="${o.amount_month == null ? '' : o.amount_month}"></td>
+      <td><input data-f="start_date" type="date" value="${esc(o.start_date || '')}"></td>
+      <td><input data-f="end_date" type="date" value="${esc(o.end_date || '')}"></td>
+      <td><input data-f="note" value="${esc(o.note || '')}"></td>
+      <td><button class="ghost co-del" data-co-del="overhead" title="${esc(t.remove)}">×</button></td>
+    </tr>`).join('') : `<tr><td colspan="7" class="muted">${esc(c.noOverheads)}</td></tr>`;
+
+  const byCat = new Map();
+  coOverheads().forEach(o => byCat.set(o.category || 'other',
+    (byCat.get(o.category || 'other') || 0) + (Number(o.amount_month) || 0)));
+  const parts = [...byCat.entries()].map(([k, v]) => ({l: c.cat[k] || k, v}))
+                                    .sort((a, b) => b.v - a.v);
+
+  return `${noticeBar()}<div class="card">
+    <h2 class="sheet">${esc(c.overheads)}</h2>
+    <p class="hint" style="margin:-8px 0 14px">${esc(c.overheadsLead)}</p>
+    ${coToolbar(t)}
+    <div class="tablewrap"><table class="sheet-table co-table">
+      <thead><tr>
+        <th>${esc(c.hName)}</th><th>${esc(c.hCat)}</th><th class="num">${esc(c.hAmount)}</th>
+        <th>${esc(c.hFrom)}</th><th>${esc(c.hTo)}</th><th>${esc(c.hNote)}</th><th></th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table></div>
+    <div class="co-actions"><button id="coAddOverhead" class="primary">${esc(c.addOverhead)}</button></div>
+  </div>
+  ${parts.length ? `<div class="card">${chartComposition(parts, PAL_SCREEN,
+      {title: c.byCategory, empty: c.noOverheads})}</div>` : ''}`;
+}
+
+/* The screen this was all for. */
+function coBurnView(){
+  const t = tr(), c = t.co, b = coBurn();
+  const live = !!state.burn;   /* whether the server has answered yet */
+
+  /* Break-even needs a margin to divide by, and the honest source is the
+     register: what the company actually earned on won work, not a target
+     somebody typed into settings. If there is not enough of it, the figure is
+     withheld rather than guessed. */
+  const won = (state.enquiries || []).filter(r =>
+    r.status === 'Gautas PO' && r.cost_ex_vat != null && Number(r.price_ex_vat) > 0);
+  const sell = won.reduce((a, r) => a + Number(r.price_ex_vat), 0);
+  const cost = won.reduce((a, r) => a + Number(r.cost_ex_vat), 0);
+  const marg = sell > 0 ? (sell - cost) / sell : null;
+  const breakEven = (marg && marg > 0.02) ? b.burn / marg : null;
+
+  const stat = (label, value, note, tone) =>
+    `<div class="an-stat${tone ? ' ' + tone : ''}"><span>${esc(label)}</span><b>${value}</b>${
+      note ? `<i>${esc(note)}</i>` : ''}</div>`;
+
+  return `${noticeBar()}<div class="card">
+    <h2 class="sheet">${esc(c.burn)}</h2>
+    <p class="hint" style="margin:-8px 0 14px">${esc(c.burnLead)}</p>
+
+    <div class="an-stats co-stats">
+      ${stat(c.kPayroll, fmt(b.payroll, 0), b.headcount + ' ' + c.people.toLowerCase())}
+      ${stat(c.kOverheads, fmt(b.overheads, 0), '')}
+      ${stat(c.kBurn, fmt(b.burn, 0), c.perMonth, 'strong')}
+      ${stat(c.kRate, b.hour_cost_avg == null ? '—' : fmt(b.hour_cost_avg, 2), c.perHour)}
+    </div>
+    ${live ? '' : `<p class="hint co-foot">${esc(c.localOnly)}</p>`}
+
+    <h3 class="an-h">${esc(c.breakEven)}</h3>
+    ${breakEven == null
+      ? `<p class="an-read warn">${esc(c.noMargin)}</p>`
+      : `<div class="an-stats co-stats">
+          ${stat(c.kMargin, pct(marg), won.length + ' ' + c.wonRows)}
+          ${stat(c.kBreakEven, fmt(breakEven, 0), c.perMonth, 'strong')}
+          ${stat(c.kBreakDay, fmt(breakEven / 21, 0), c.perWorkday)}
+        </div>
+        <p class="an-read ${marg >= 0.25 ? 'ok' : 'warn'}">${
+          esc(c.breakRead.replace('{eur}', fmt(breakEven, 0)).replace('{pct}', pct(marg)))}</p>`}
+  </div>`;
+}
+
+/* ---- company screens: events ---- */
+function wireCompany(){
+  const on = (id, ev, fn) => { const el = $('#' + id); if(el) el.addEventListener(ev, fn); };
+
+  on('coEnded', 'change', e => {
+    coState().showEnded = e.target.checked; persist(); render();
+  });
+
+  on('coAddPerson', 'click', async () => {
+    const row = { name: tr().co.newPerson, job_title: '', department: '',
+                  monthly_cost: 0, hours_month: 130,
+                  start_date: new Date().toISOString().slice(0, 10) };
+    await coCreate('person', row);
+  });
+  on('docQ', 'input', e => { docState().q = e.target.value; persist(); render(); });
+  on('docKind', 'change', e => { docState().kind = e.target.value; persist(); render(); });
+  on('docFile', 'change', e => docUpload(e.target.files));
+
+  /* Drag and drop on top of a real <label> around a real file input, the same
+     way the careers form does it: the picker opens natively on the first
+     press, and everything here is an addition that can fail without taking
+     the control with it. */
+  const zone = $('[data-doc-drop]');
+  if(zone){
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e => {
+      e.preventDefault(); zone.classList.add('is-over'); }));
+    ['dragleave','drop'].forEach(ev => zone.addEventListener(ev, () =>
+      zone.classList.remove('is-over')));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length)
+        docUpload(e.dataTransfer.files);
+    });
+  }
+
+  on('coAddOverhead', 'click', async () => {
+    const row = { name: tr().co.newOverhead, category: 'other', amount_month: 0,
+                  start_date: new Date().toISOString().slice(0, 10) };
+    await coCreate('overhead', row);
+  });
+
+  /* One delegated listener per event rather than one per cell. The people
+     sheet is nine controls a row and the register taught this: a listener per
+     input is a listener per re-render to remove, and the ones that are missed
+     fire twice. */
+  const main = $('#main');
+  if(!main) return;
+  main.addEventListener('change', ev => {
+    const doc = ev.target.closest('[data-df]');
+    if(doc){
+      const row = doc.closest('[data-doc]');
+      if(row) docFieldChanged(row);
+      return;
+    }
+    const inp = ev.target.closest('[data-f]');
+    if(!inp) return;
+    const tr_ = inp.closest('[data-person],[data-overhead]');
+    if(!tr_) return;
+    coFieldChanged(tr_, inp);
+  });
+  main.addEventListener('click', async ev => {
+    const open = ev.target.closest('.doc-open');
+    if(open){ ev.preventDefault(); docOpen(open.getAttribute('data-path')); return; }
+    /* data-co-del, not data-del. The sheet engine already emits
+       data-del="<row index>" and has a delegated handler that reads it as a
+       number and splices that row out of the current sheet -- so a button
+       here saying data-del="person" reached it, Number('person') was NaN, and
+       the handler threw on a sheet that does not exist. It deleted nothing
+       and reported nothing; the row vanished because MY handler had already
+       run. Two meanings for one attribute name. */
+    const del = ev.target.closest('[data-co-del]');
+    if(!del) return;
+    const row = del.closest('[data-person],[data-overhead],[data-doc]');
+    if(!row) return;
+    const kind = del.getAttribute('data-co-del');
+    const id = row.getAttribute('data-' + kind);
+    if(kind === 'doc'){
+      const rec = (state.documents || []).find(x => x.id === id);
+      if(!rec) return;
+      if(!confirm(tr().doc.confirmDel.replace('{name}', rec.filename))) return;
+      /* The object first, then the row -- the mirror of the upload order, and
+         for the mirror reason: a row pointing at a file that is gone is worse
+         than a file nobody references. */
+      try { if(CLOUD.on) await CLOUD.docDelete(id, rec.path); }
+      catch(e){ toast(tr().co.saveFailed, 'bad'); return; }
+      state.documents = (state.documents || []).filter(x => x.id !== id);
+      persist(); render();
+      return;
+    }
+    const label = (row.querySelector('[data-f="name"]') || {}).value || '';
+    if(!confirm(tr().co.confirmDel.replace('{name}', label))) return;
+    await coDelete(kind, id);
+  });
+}
+
+function coList(kind){
+  if(kind === 'person') return state.people || [];
+  if(kind === 'doc') return state.documents || [];
+  return state.overheads || [];
+}
+function coSetList(kind, list){
+  if(kind === 'person') state.people = list;
+  else if(kind === 'doc') state.documents = list;
+  else state.overheads = list;
+}
+
+/* ---- documents: upload, open, edit ---- */
+const DOC_MAX = 25 * 1024 * 1024;
+
+function docSay(msg, cls){
+  const el = $('#docStatus');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.className = 'doc-status' + (cls ? ' ' + cls : '');
+}
+
+/* The path is dated and randomised rather than taken from the filename. Two
+   people uploading "invoice.pdf" in the same month must not collide, and a
+   guessable path in a bucket is one careless signature away from being a
+   public one. */
+function docPath(file){
+  const now = new Date();
+  const stamp = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  const rand = Math.random().toString(36).slice(2, 10);
+  const safe = (file.name || 'file').replace(/[^A-Za-z0-9._-]+/g, '-').slice(-60);
+  return stamp + '/' + rand + '-' + safe;
+}
+
+async function docUpload(files){
+  const list = Array.prototype.slice.call(files || []);
+  if(!list.length) return;
+  const d = tr().doc;
+
+  const tooBig = list.filter(f => f.size > DOC_MAX);
+  if(tooBig.length){ docSay(d.tooBig.replace('{name}', tooBig[0].name), 'bad'); return; }
+  if(!CLOUD.on){ docSay(d.needsCloud, 'bad'); return; }
+
+  /* The file first, the record after. There is no transaction across
+     Postgres and an object store, and of the two ways to be inconsistent a
+     file with no row is invisible clutter while a row with no file is a
+     document store lying about what it holds. */
+  let done = 0;
+  for(const f of list){
+    docSay(d.uploading.replace('{n}', (done + 1)).replace('{of}', list.length));
+    const path = docPath(f);
+    try {
+      await CLOUD.docUpload(path, f);
+      const row = await CLOUD.docInsert({
+        path: path, filename: f.name, mime: f.type || '',
+        size_bytes: String(f.size), kind: 'invoice_in',
+        doc_date: new Date().toISOString().slice(0, 10)
+      });
+      if(row) state.documents = [row].concat(state.documents || []);
+      done++;
+    } catch(e){
+      docSay(d.failed.replace('{name}', f.name), 'bad');
+      persist(); render();
+      return;
+    }
+  }
+  docSay(d.uploaded.replace('{n}', done), 'ok');
+  persist(); render();
+}
+
+async function docOpen(path){
+  const d = tr().doc;
+  if(!CLOUD.on){ docSay(d.needsCloud, 'bad'); return; }
+  try {
+    const url = await CLOUD.docLink(path);
+    if(!url){ docSay(d.linkFailed, 'bad'); return; }
+    window.open(url, '_blank', 'noopener');
+  } catch(e){ docSay(d.linkFailed, 'bad'); }
+}
+
+async function docFieldChanged(rowEl){
+  const id = rowEl.getAttribute('data-doc');
+  const cur = (state.documents || []).find(x => x.id === id);
+  if(!cur) return;
+  const patch = {};
+  rowEl.querySelectorAll('[data-df]').forEach(el => {
+    patch[el.getAttribute('data-df')] = el.value;
+  });
+  if(!CLOUD.on){ Object.assign(cur, patch); persist(); return; }
+  try {
+    const saved = await CLOUD.docSave(id, cur.rev, patch);
+    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
+    state.documents = (state.documents || []).map(x => x.id === id ? saved : x);
+    persist();
+    toast(tr().co.saved, 'ok');
+  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+}
+
+async function coCreate(kind, row){
+  if(!CLOUD.on){
+    /* Local mode: an id the server would have given, so the screens behave
+       the same before anyone has connected a database. */
+    row.id = 'local-' + Math.random().toString(36).slice(2, 10);
+    row.rev = 1; row.active = true;
+    coSetList(kind, [row].concat(coList(kind)));
+    persist(); render(); return;
+  }
+  try {
+    const saved = kind === 'person' ? await CLOUD.personInsert(row)
+                                    : await CLOUD.overheadInsert(row);
+    if(saved) coSetList(kind, [saved].concat(coList(kind)));
+    await coRefreshBurn();
+    persist(); render();
+  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+}
+
+async function coDelete(kind, id){
+  if(CLOUD.on){
+    try {
+      if(kind === 'person') await CLOUD.personDelete(id); else await CLOUD.overheadDelete(id);
+    } catch(e){ toast(tr().co.saveFailed, 'bad'); return; }
+  }
+  coSetList(kind, coList(kind).filter(x => x.id !== id));
+  await coRefreshBurn();
+  persist(); render();
+}
+
+async function coFieldChanged(rowEl, inp){
+  const kind = rowEl.hasAttribute('data-person') ? 'person' : 'overhead';
+  const id = rowEl.getAttribute('data-' + kind);
+  const cur = coList(kind).find(x => x.id === id);
+  if(!cur) return;
+
+  const patch = {};
+  rowEl.querySelectorAll('[data-f]').forEach(el => {
+    const k = el.getAttribute('data-f');
+    patch[k] = el.type === 'number' ? (el.value === '' ? 0 : Number(el.value)) : el.value;
+  });
+
+  /* No render() here, and that is the point.
+
+     Re-rendering on every change rebuilds the whole table, which throws away
+     the cell the reader is in and every other cell they had typed into but
+     not yet left. Filling three fields in a row came out with the first and
+     third saved and the second back at zero, because the redraw between them
+     put the stale value back. The derived cell is patched in place instead --
+     it is the only thing on screen that follows from the edit. */
+  const paintRate = () => {
+    const cell = rowEl.querySelector('.co-derived');
+    if(!cell) return;
+    const c = Number(patch.monthly_cost) || 0, hh = Number(patch.hours_month) || 0;
+    cell.textContent = hh > 0 ? fmt(c / hh, 2) : '\u2014';
+  };
+
+  if(!CLOUD.on){
+    Object.assign(cur, patch);
+    paintRate(); persist(); return;
+  }
+  try {
+    const saved = kind === 'person'
+      ? await CLOUD.personSave(id, cur.rev, patch)
+      : await CLOUD.overheadSave(id, cur.rev, patch);
+    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
+    coSetList(kind, coList(kind).map(x => x.id === id ? saved : x));
+    await coRefreshBurn();
+    paintRate(); persist();
+    toast(tr().co.saved, 'ok');
+  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+}
+
+/* The burn is a server-side sum, so it does not follow from patching one row
+   in the browser. Re-asked after every write rather than recomputed here --
+   two places computing the same total is two places for them to disagree. */
+async function coRefreshBurn(){
+  if(!CLOUD.on || !canPayroll()) return;
+  try { state.burn = await CLOUD.burn(); } catch(e){}
+}
+
 /* ================= usability ================= */
 
 /* The chrome's height is measured, not assumed: the toolbar wraps to two rows
@@ -5502,6 +6611,23 @@ async function cloudPull(){
     CLOUD.enquiries()
       .then(list => { state.enquiries = list; if(state.tab === 'enquiries') render(); })
       .catch(() => { state.enquiries = []; });
+    /* Overheads follow the money gate, people and the burn follow payroll.
+       All three are fired and not awaited, for the same reason the register
+       is: a company screen nobody is looking at must not hold up the app. */
+    CLOUD.overheads()
+      .then(list => { state.overheads = list; if(section() === 'company') render(); })
+      .catch(() => { state.overheads = []; });
+    CLOUD.documents()
+      .then(list => { state.documents = list; if(section() === 'company') render(); })
+      .catch(() => { state.documents = []; });
+  }
+  if(canPayroll()){
+    CLOUD.people()
+      .then(list => { state.people = list; if(section() === 'company') render(); })
+      .catch(() => { state.people = []; });
+    CLOUD.burn()
+      .then(b => { state.burn = b; if(section() === 'company') render(); })
+      .catch(() => { state.burn = null; });
   }
   state.projects = rows.map(r=>{
     const p = r.data || {};
