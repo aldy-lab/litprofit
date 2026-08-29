@@ -888,7 +888,54 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .doc-status.bad{color:var(--critical)}
 .doc-size{margin-left:8px;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
 .doc-table td:first-child{min-width:220px}
-.doc-open{text-decoration:underline;text-underline-offset:2px}
+.doc-open{text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.doc-who{font-size:12px;color:var(--ink-2)}
+.doc-when{display:block;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+
+/* ---- folders ----
+   A row of buckets with a count each, in the order the kind list declares.
+   Not sorted by size: a folder that moves when a file is added is a folder
+   you have to look for every time. */
+.doc-folders{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.doc-folder{display:grid;gap:2px;justify-items:start;text-align:left;
+  padding:10px 14px;min-width:118px;border:1px solid var(--baseline);
+  background:transparent;cursor:pointer;
+  transition:border-color .2s,background .2s}
+.doc-folder:hover{border-color:var(--ink-3)}
+.doc-folder.on{border-color:var(--series-1);background:var(--surface-2,transparent)}
+.doc-folder-n{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums;
+  color:var(--ink-1);line-height:1.1}
+.doc-folder-name{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.doc-folder-sum{font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+
+/* ---- preview ---- */
+body.has-overlay{overflow:hidden}
+.dp{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px}
+.dp-scrim{position:absolute;inset:0;background:rgba(6,7,24,.72);backdrop-filter:blur(2px)}
+.dp-panel{position:relative;display:grid;grid-template-rows:auto 1fr auto;
+  width:min(1100px,100%);height:min(88vh,900px);
+  background:var(--surface-1);border:1px solid var(--baseline);box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.dp-head{display:flex;align-items:center;gap:16px;padding:14px 16px;
+  border-bottom:1px solid var(--baseline)}
+.dp-title{display:grid;gap:2px;min-width:0;flex:1 1 auto}
+.dp-title b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dp-title span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.dp-out{font-size:12px;color:var(--series-1);text-decoration:underline;text-underline-offset:2px}
+.dp-x{border:0;background:transparent;font-size:22px;line-height:1;color:var(--ink-3);
+  cursor:pointer;padding:2px 8px}
+.dp-x:hover{color:var(--ink-1)}
+.dp-body{overflow:auto;background:var(--surface-2,#0e1030);display:grid;place-items:center}
+.dp-body img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.dp-body iframe{width:100%;height:100%;border:0;background:#fff}
+.dp-loading{font-size:13px;color:var(--ink-3);padding:40px;text-align:center;max-width:44ch}
+.dp-loading.is-error{color:var(--critical)}
+.dp-facts{display:flex;flex-wrap:wrap;gap:6px 26px;padding:12px 16px;
+  border-top:1px solid var(--baseline)}
+.dp-fact{display:grid;gap:1px}
+.dp-fact span{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.dp-fact b{font-size:13px;font-variant-numeric:tabular-nums}
+@media(max-width:700px){ .dp{padding:0} .dp-panel{height:100vh;width:100%} }
 .co-stats{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
 .an-stat.strong b{color:var(--ink-1)}
 .an-stat.strong{border-color:var(--ink-3)}
@@ -1242,7 +1289,9 @@ en: {
     dropHint:'PDF, images, Word, Excel. Up to 25 MB each.',
     search:'Search',none:'Nothing filed yet.',
     hFile:'File',hKind:'Kind',hDate:'Date',hAmount:'Amount',hParty:'Counterparty',
-    hProject:'Project',hEnquiry:'Enquiry',
+    hProject:'Project',hEnquiry:'Enquiry',hWho:'Filed by',hFiled:'Filed on',
+    allFiles:'Everything',openFile:'Open the file',loading:'Opening\u2026',
+    noPreview:'No preview for this kind of file. Open it to read it.',
     kind:{invoice_in:'Invoice in',invoice_out:'Invoice out',quote:'Quote',contract:'Contract',
       certificate:'Certificate',report:'Report',photo:'Photo',other:'Other'},
     uploading:'Uploading {n} of {of}\u2026',uploaded:'{n} filed.',
@@ -1433,7 +1482,9 @@ lt: {
     dropHint:'PDF, nuotraukos, Word, Excel. Iki 25 MB kiekvienas.',
     search:'Paieška',none:'Kol kas nieko nėra.',
     hFile:'Failas',hKind:'Tipas',hDate:'Data',hAmount:'Suma',hParty:'Kontrahentas',
-    hProject:'Projektas',hEnquiry:'Užklausa',
+    hProject:'Projektas',hEnquiry:'Užklausa',hWho:'Įkėlė',hFiled:'Įkelta',
+    allFiles:'Viskas',openFile:'Atidaryti failą',loading:'Atidaroma\u2026',
+    noPreview:'Šio tipo failo peržiūros nėra. Atidarykite jį, kad perskaitytumėte.',
     kind:{invoice_in:'Gauta sąskaita',invoice_out:'Išrašyta sąskaita',quote:'Pasiūlymas',contract:'Sutartis',
       certificate:'Sertifikatas',report:'Ataskaita',photo:'Nuotrauka',other:'Kita'},
     uploading:'Įkeliama {n} iš {of}\u2026',uploaded:'Įkelta: {n}.',
@@ -1624,7 +1675,9 @@ ru: {
     dropHint:'PDF, изображения, Word, Excel. До 25 МБ каждый.',
     search:'Поиск',none:'Пока ничего нет.',
     hFile:'Файл',hKind:'Тип',hDate:'Дата',hAmount:'Сумма',hParty:'Контрагент',
-    hProject:'Проект',hEnquiry:'Запрос',
+    hProject:'Проект',hEnquiry:'Запрос',hWho:'Загрузил',hFiled:'Загружено',
+    allFiles:'Всё',openFile:'Открыть файл',loading:'Открывается\u2026',
+    noPreview:'Для такого типа файла предпросмотра нет. Откройте его, чтобы прочитать.',
     kind:{invoice_in:'Входящий счёт',invoice_out:'Исходящий счёт',quote:'Предложение',contract:'Договор',
       certificate:'Сертификат',report:'Отчёт',photo:'Фото',other:'Прочее'},
     uploading:'Загружается {n} из {of}\u2026',uploaded:'Загружено: {n}.',
@@ -2211,11 +2264,15 @@ const CLOUD = (function(){
        link that works forever is a link that leaks forever. Sixty seconds is
        long enough to start a download and short enough to be useless if it is
        pasted anywhere. */
-    async docLink(path){
+    async docLink(path, seconds){
       const res = await fetch(API + '/storage/v1/object/sign/documents/' + encodeURI(path), {
         method: 'POST',
         headers: Object.assign(authHeaders(), { 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ expiresIn: 60 })
+        /* Sixty seconds is right for a download that starts at once. A
+           preview is looked AT -- a PDF the reader is still scrolling when
+           the link dies reloads into an error inside the frame. Five minutes
+           for that, and it is still a link that stops working. */
+        body: JSON.stringify({ expiresIn: seconds || 60 })
       });
       if(!res.ok) return null;
       const j = await res.json();
@@ -2770,6 +2827,24 @@ const LOCALES = {en:'en-GB', lt:'lt-LT', ru:'ru-RU'};
 function fmt(n, dec=2){
   if(n===null||n===undefined||isNaN(n)) return '';
   return new Intl.NumberFormat(LOCALES[state.lang]||'en-GB',{minimumFractionDigits:0,maximumFractionDigits:dec}).format(n);
+}
+
+/* A price, padded to two decimals and with no currency on it.
+
+   fmt() drops trailing zeroes, which is right for the sheets -- a table of
+   whole-euro figures does not want ",00" on every line -- and wrong for a
+   single amount read on its own: 1240.5 came out "1,240.5", which reads as a
+   rounding error rather than as a price.
+
+   Its own function rather than a wider fmt, because sixty calls take fmt's
+   default and changing what the default means would put two decimals on every
+   figure in every project sheet to fix three places. And NOT called money():
+   that name is taken by the one that appends the project's currency, and this
+   is used on company screens that have no project to ask. */
+function price(n){
+  if(n===null||n===undefined||isNaN(n)) return '';
+  return new Intl.NumberFormat(LOCALES[state.lang]||'en-GB',
+    {minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
 }
 function money(n){ return n===null||isNaN(n) ? '' : fmt(n)+' '+(proj().settings.currency||''); }
 /* A non-breaking space, because "8.5 %" split across two lines wherever a
@@ -3412,6 +3487,13 @@ function enhanceSelects(root){
     }
     if(sel.title && !host.title) host.title = sel.title;
     host.disabled = sel.disabled;
+    /* The twin follows the control it stands in for. renderSections hides the
+       project picker outside the Projects section by setting hidden on the
+       select AND on this button -- but on the very first paint the button does
+       not exist yet, so it was created afterwards, visible, and PRJ-001 sat
+       over the Documents screen. Mirroring it here means the twin cannot be
+       out of step with the thing it mirrors, whatever the order. */
+    host.hidden = sel.hidden;
     /* the label is re-read every pass: the app sets .value directly in places
        and never tells anybody */
     const label = niceLabel(sel);
@@ -5208,6 +5290,50 @@ function humanSize(n){
   return (n / 1048576).toFixed(1) + ' MB';
 }
 
+/* Folders are a view of `kind`, not a path.
+
+   The obvious way to file these is to put the kind in the storage path and
+   let the bucket show the structure. It is wrong here for a reason already in
+   the schema: `path` is deliberately not updatable, because a record that can
+   point somewhere other than where the file is, is a store that lies about
+   what it holds. And kind IS meant to change -- a file is uploaded, somebody
+   looks at it and decides it is a quote rather than an invoice. If the kind
+   were the folder, that edit would have to move the object: two operations
+   across two systems with no transaction between them, which is the exact
+   failure the upload order was arranged to avoid.
+
+   The bucket is storage. The folders are the filing. */
+function docFolders(){
+  const all = state.documents || [];
+  const by = new Map();
+  all.forEach(d => {
+    const k = d.kind || 'other';
+    const g = by.get(k) || { kind: k, n: 0, sum: 0 };
+    g.n++; g.sum += Number(d.amount) || 0;
+    by.set(k, g);
+  });
+  /* Every kind that has something in it, in the order the list declares --
+     not sorted by count, because a folder that moves when a file is added is
+     a folder you have to look for every time. */
+  return DOC_KINDS.filter(k => by.has(k)).map(k => by.get(k));
+}
+
+function docFolderTiles(t){
+  const d = t.doc, f = docState(), folders = docFolders();
+  const all = (state.documents || []).length;
+  if(!all) return '';
+  const tile = (key, label, n, sum) =>
+    `<button type="button" class="doc-folder${f.kind === key ? ' on' : ''}" data-folder="${key}">
+      <span class="doc-folder-n">${n}</span>
+      <span class="doc-folder-name">${esc(label)}</span>
+      ${sum ? `<span class="doc-folder-sum">${fmt(sum, 0)}</span>` : ''}
+    </button>`;
+  return `<div class="doc-folders">
+    ${tile('', d.allFiles, all, (state.documents || []).reduce((a, x) => a + (Number(x.amount) || 0), 0))}
+    ${folders.map(g => tile(g.kind, d.kind[g.kind], g.n, g.sum)).join('')}
+  </div>`;
+}
+
 function coDocsView(){
   const t = tr(), c = t.co, d = t.doc, rows = docRows();
   const f = docState();
@@ -5224,7 +5350,7 @@ function coDocsView(){
   const enqList = (state.enquiries || []).slice(0, 300);
 
   const body = rows.length ? rows.map(r => `<tr data-doc="${esc(r.id)}">
-      <td><a href="#" class="doc-open" data-path="${esc(r.path)}">${esc(r.filename)}</a>
+      <td><a href="#" class="doc-open" data-doc-open="${esc(r.id)}">${esc(r.filename)}</a>
           <span class="doc-size">${humanSize(r.size_bytes)}</span></td>
       <td><select data-df="kind">${DOC_KINDS.map(k =>
           `<option value="${k}"${r.kind === k ? ' selected' : ''}>${esc(d.kind[k])}</option>`
@@ -5237,12 +5363,16 @@ function coDocsView(){
             x => x.id, x => (x.card ? x.card.projectId : x.id))}</select></td>
       <td><select data-df="enquiry_id">${opts(enqList, r.enquiry_id,
             x => x.id, x => x.number + (x.client ? ' \u2014 ' + x.client : ''))}</select></td>
+      <td class="doc-who">${r.uploaded_by ? esc(r.uploaded_by) : '\u2014'}
+          <span class="doc-when">${esc((r.created_at || '').slice(0, 10))}</span></td>
       <td><button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button></td>
-    </tr>`).join('') : `<tr><td colspan="8" class="muted">${esc(d.none)}</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="9" class="muted">${esc(d.none)}</td></tr>`;
 
   return `${noticeBar()}<div class="card">
     <h2 class="sheet">${esc(d.title)}</h2>
     <p class="hint" style="margin:-8px 0 14px">${esc(d.lead)}</p>
+
+    ${docFolderTiles(t)}
 
     <label class="drop-zone" data-doc-drop>
       <input type="file" id="docFile" multiple class="drop-input"
@@ -5256,9 +5386,6 @@ function coDocsView(){
 
     <div class="pf-filters co-bar">
       <label>${esc(d.search)}<input type="search" id="docQ" value="${esc(f.q)}"></label>
-      <label>${esc(d.hKind)}<select id="docKind"><option value="">${esc(t.enq.all)}</option>${
-        DOC_KINDS.map(k => `<option value="${k}"${f.kind === k ? ' selected' : ''}>${esc(d.kind[k])}</option>`).join('')
-      }</select></label>
       <span class="muted">${rows.length} / ${(state.documents || []).length}</span>
     </div>
 
@@ -5266,7 +5393,8 @@ function coDocsView(){
       <thead><tr>
         <th>${esc(d.hFile)}</th><th>${esc(d.hKind)}</th><th>${esc(d.hDate)}</th>
         <th class="num">${esc(d.hAmount)}</th><th>${esc(d.hParty)}</th>
-        <th>${esc(d.hProject)}</th><th>${esc(d.hEnquiry)}</th><th></th>
+        <th>${esc(d.hProject)}</th><th>${esc(d.hEnquiry)}</th>
+        <th>${esc(d.hWho)}</th><th></th>
       </tr></thead>
       <tbody>${body}</tbody>
     </table></div>
@@ -5531,12 +5659,12 @@ function coPeopleView(){
       <td><select data-f="contract">${CONTRACTS.map(k =>
           `<option value="${k}"${(p.contract || 'permanent') === k ? ' selected' : ''}>${
             esc(c.contractName[k])}</option>`).join('')}</select></td>
-      <td class="num co-derived">${fmt(employerCostOf(p), 2)}</td>
-      <td class="num co-derived co-strong">${fmt(totalCostOf(p), 2)}</td>
+      <td class="num co-derived">${price(employerCostOf(p))}</td>
+      <td class="num co-derived co-strong">${price(totalCostOf(p))}</td>
       <td class="num"><input data-f="hours_month" type="number" step="1"
           value="${p.hours_month == null ? '' : p.hours_month}"></td>
       <td class="num co-derived">${
-          Number(p.hours_month) > 0 ? fmt(totalCostOf(p) / p.hours_month, 2) : '—'}</td>
+          Number(p.hours_month) > 0 ? price(totalCostOf(p) / p.hours_month) : '—'}</td>
       <td><input data-f="start_date" type="date" value="${esc(p.start_date || '')}"></td>
       <td><input data-f="end_date" type="date" value="${esc(p.end_date || '')}"></td>
       <td><button class="ghost co-del" data-co-del="person" title="${esc(t.remove)}">×</button></td>
@@ -5860,7 +5988,6 @@ function wireCompany(){
     await coCreate('person', row);
   });
   on('docQ', 'input', e => { docState().q = e.target.value; persist(); render(); });
-  on('docKind', 'change', e => { docState().kind = e.target.value; persist(); render(); });
   on('docFile', 'change', e => docUpload(e.target.files));
 
   /* Drag and drop on top of a real <label> around a real file input, the same
@@ -5918,6 +6045,17 @@ function wireCompany(){
   if(!main || main.dataset.coWired) return;
   main.dataset.coWired = '1';
 
+  /* The preview is appended to <body>, not to #main, so clicks inside it
+     never reach the delegated listeners below. Its own pair, bound once with
+     the rest. */
+  document.addEventListener('click', ev => {
+    if(!DOC_PREVIEW) return;
+    if(ev.target.closest('[data-dp-close]')) docPreviewClose();
+  });
+  document.addEventListener('keydown', ev => {
+    if(DOC_PREVIEW && ev.key === 'Escape'){ ev.preventDefault(); docPreviewClose(); }
+  });
+
   main.addEventListener('change', ev => {
     const doc = ev.target.closest('[data-df]');
     if(doc){
@@ -5932,8 +6070,17 @@ function wireCompany(){
     coFieldChanged(tr_, inp);
   });
   main.addEventListener('click', async ev => {
-    const open = ev.target.closest('.doc-open');
-    if(open){ ev.preventDefault(); docOpen(open.getAttribute('data-path')); return; }
+    const folder = ev.target.closest('[data-folder]');
+    if(folder){
+      const k = folder.getAttribute('data-folder');
+      /* Clicking the folder you are in goes back to all of them, so the same
+         control is the way out. */
+      docState().kind = (docState().kind === k) ? '' : k;
+      persist(); render();
+      return;
+    }
+    const open = ev.target.closest('[data-doc-open]');
+    if(open){ ev.preventDefault(); docPreview(open.getAttribute('data-doc-open')); return; }
     /* data-co-del, not data-del. The sheet engine already emits
        data-del="<row index>" and has a delegated handler that reads it as a
        number and splices that row out of the current sheet -- so a button
@@ -6035,6 +6182,101 @@ async function docUpload(files){
   persist(); render();
 }
 
+/* What the browser can actually render. Everything else gets the metadata and
+   a way out to the file itself, rather than an empty frame that looks broken:
+   a Word document in an <iframe> is a download prompt or a blank box
+   depending on the browser, and neither is a preview. */
+function docPreviewKind(rec){
+  const m = (rec.mime || '').toLowerCase();
+  const n = (rec.filename || '').toLowerCase();
+  if(m.indexOf('image/') === 0 || /\.(png|jpe?g|webp|gif|avif|bmp)$/.test(n)) return 'image';
+  if(m === 'application/pdf' || /\.pdf$/.test(n)) return 'pdf';
+  if(m.indexOf('text/') === 0 || /\.(txt|csv|md)$/.test(n)) return 'text';
+  return 'none';
+}
+
+var DOC_PREVIEW = null;   /* the record on screen, so Escape knows what to close */
+
+function docPreviewClose(){
+  const el = $('#docPreview');
+  if(el) el.remove();
+  DOC_PREVIEW = null;
+  document.body.classList.remove('has-overlay');
+}
+
+async function docPreview(id){
+  const t = tr(), d = t.doc;
+  const rec = (state.documents || []).find(x => x.id === id);
+  if(!rec) return;
+  if(!CLOUD.on){ docSay(d.needsCloud, 'bad'); return; }
+
+  docPreviewClose();
+  const kind = docPreviewKind(rec);
+  const fact = (label, value) => value
+    ? `<div class="dp-fact"><span>${esc(label)}</span><b>${esc(value)}</b></div>` : '';
+
+  const el = document.createElement('div');
+  el.id = 'docPreview';
+  el.className = 'dp';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-modal', 'true');
+  el.setAttribute('aria-label', rec.filename || '');
+  el.innerHTML = `
+    <div class="dp-scrim" data-dp-close></div>
+    <div class="dp-panel">
+      <div class="dp-head">
+        <div class="dp-title">
+          <b>${esc(rec.filename)}</b>
+          <span>${esc(d.kind[rec.kind] || rec.kind)} \u00b7 ${humanSize(rec.size_bytes)}</span>
+        </div>
+        <a class="dp-out" href="#" data-dp-out>${esc(d.openFile)}</a>
+        <button type="button" class="dp-x" data-dp-close aria-label="${esc(t.close || 'Close')}">\u00d7</button>
+      </div>
+      <div class="dp-body" data-dp-body>
+        <p class="dp-loading">${esc(d.loading)}</p>
+      </div>
+      <div class="dp-facts">
+        ${fact(d.hDate, rec.doc_date)}
+        ${fact(d.hAmount, rec.amount == null ? '' : price(rec.amount))}
+        ${fact(d.hParty, rec.counterparty)}
+        ${fact(d.hProject, rec.project_ref)}
+        ${fact(d.hEnquiry, rec.enquiry_ref)}
+        ${fact(d.hWho, rec.uploaded_by)}
+        ${fact(d.hFiled, (rec.created_at || '').slice(0, 10))}
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  document.body.classList.add('has-overlay');
+  DOC_PREVIEW = rec;
+
+  const close = el.querySelector('.dp-x');
+  if(close) close.focus();
+
+  /* Five minutes, not sixty seconds: a preview is looked at rather than
+     clicked, and a PDF whose link expires mid-scroll reloads the frame into
+     an error page. */
+  let url = null;
+  try { url = await CLOUD.docLink(rec.path, 300); } catch(e){}
+  const body = el.querySelector('[data-dp-body]');
+  const out = el.querySelector('[data-dp-out]');
+  if(!body) return;
+  if(!url){ body.innerHTML = `<p class="dp-loading is-error">${esc(d.linkFailed)}</p>`; return; }
+  if(out) out.setAttribute('href', url);
+
+  if(kind === 'image'){
+    body.innerHTML = `<img src="${esc(url)}" alt="${esc(rec.filename)}">`;
+  } else if(kind === 'pdf' || kind === 'text'){
+    /* An <iframe>, not <object>: object falls back to its own content on
+       failure and shows nothing at all, while a frame at least shows the
+       browser's own message. */
+    body.innerHTML = `<iframe src="${esc(url)}" title="${esc(rec.filename)}"></iframe>`;
+  } else {
+    body.innerHTML = `<p class="dp-loading">${esc(d.noPreview)}</p>`;
+  }
+}
+
+/* Kept as the way OUT of the app to the file itself; the preview is what a
+   click on the name does now. */
 async function docOpen(path){
   const d = tr().doc;
   if(!CLOUD.on){ docSay(d.needsCloud, 'bad'); return; }
