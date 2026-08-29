@@ -610,6 +610,46 @@ svg text{font-family:var(--mono)}
    browser ignores `page:`, the rule below shrinks them to fit instead, so the
    worst case is small type rather than missing figures. */
 @page detail{ size:A4 landscape; margin:12mm; }
+
+/* ---- the act, on paper ----
+   Plain, ruled and bilingual. It is a document somebody signs, so nothing on
+   it is decoration: no brand colour, no shading behind figures, and every
+   label carries the English and the Lithuanian one above the other. */
+@media print{
+  .ac-top{display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:.4mm solid #2b2d42;padding-bottom:2mm;margin-bottom:5mm}
+  .ac-brand{font-weight:700;letter-spacing:.12em;font-size:11pt}
+  .ac-title{text-align:right;max-width:120mm}
+  .ac-en{display:block;font-size:9pt;font-weight:700;letter-spacing:.02em}
+  .ac-lt{display:block;font-size:7.6pt;color:#4a4d63;font-style:italic}
+  .ac-head{width:100%;border-collapse:collapse;margin-bottom:6mm}
+  .ac-head th{width:44mm;text-align:left;vertical-align:top;padding:1.4mm 3mm 1.4mm 0;
+    border:0;background:none}
+  .ac-head td{padding:1.4mm 0;border-bottom:.2mm solid #c9ccd8;font-size:10pt}
+  .ac-lines{width:100%;border-collapse:collapse}
+  /* #print-area thead th is an id selector and outranks a class, so the
+     report's shaded, mono, upper-cased heading came through onto a document
+     somebody signs. Matched at the same weight to take it back: an act is
+     ruled and plain, and the only emphasis on it is the rule itself. */
+  #print-area .ac-lines th{
+    border-bottom:.35mm solid #2b2d42;text-align:left;padding:2mm 2.5mm;
+    background:none;color:#1c1e2e;font-family:inherit;text-transform:none;
+    letter-spacing:0;font-size:9pt}
+  #print-area .ac-lines th .ac-en{font-size:8.6pt}
+  #print-area .ac-lines th .ac-lt{font-size:7.2pt}
+  .ac-lines td{padding:2.2mm 2.5mm;border-bottom:.2mm solid #d7d9e4;vertical-align:top;
+    font-size:9.4pt}
+  .ac-lines tr{break-inside:avoid}
+  .ac-lines thead{display:table-header-group}
+  .ac-note{margin:7mm 0 10mm;font-size:8.6pt;line-height:1.5;max-width:150mm}
+  .ac-note i{color:#4a4d63}
+  .ac-sign{width:100%;border-collapse:collapse;break-inside:avoid}
+  .ac-sign td{width:50%;padding:0 8mm 0 0;vertical-align:top;border:0}
+  /* The rule the pen goes on, and the typed name under it -- the name is a
+     record of who it should be, never a substitute for the signature. */
+  .ac-line{display:block;height:12mm;border-bottom:.3mm solid #2b2d42;margin:2mm 0 1.5mm}
+  .ac-name{font-size:8.6pt;color:#4a4d63}
+}
 @media print{
   /* the app itself is not the document */
   .chrome,body>header,nav.tabs,.pulse,.seam,main,.tooltip,.toast,.signin,.conflict{display:none !important}
@@ -867,6 +907,20 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .co-table td.co-strong{border-left:1px solid var(--baseline)}
 .co-del{padding:2px 8px;line-height:1.2}
 .co-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.act-bar{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.act-sp{flex:1 1 auto}
+.act-head{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px 16px;margin:0 0 16px}
+.act-sign{grid-template-columns:minmax(240px,340px);margin-top:16px}
+.act-f{display:grid;gap:5px}
+.act-f span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.act-table td.act-n,.act-table th.act-n{width:34px;text-align:right;color:var(--ink-3);
+  font-family:var(--mono);font-variant-numeric:tabular-nums}
+.act-table input{width:100%;min-width:0}
+.act-table td.num input{text-align:right;font-family:var(--mono)}
+.act-list tr.act-row{cursor:pointer}
+.act-list tr.act-row:hover{background:var(--surface-2,rgba(0,0,0,.03))}
+.act-who{font-size:12px;color:var(--ink-3)}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
 .co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
   border-top:2px solid var(--baseline)}
@@ -1302,10 +1356,46 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 <script>
 'use strict';
 /* ================= i18n ================= */
+/* The act prints in BOTH languages at once, whatever the interface is set
+   to: the customer's representative and the yard are not always reading the
+   same one, and the paper form this replaces has always carried both. So this
+   block is shared by all three dictionaries rather than translated into each
+   -- three copies of a bilingual form is three places for the Lithuanian to
+   drift from the Lithuanian. */
+const T_ACT_PRINT = {
+    title:'REPAIR SPECIFICATION OF ACTUAL WORK COMPLETED',
+    titleLt:'Atliktų faktinių remonto darbų specifikacija',
+    /* The number is not on the paper form this replaces. It is here because
+       the act is stored, referred to and searched for by it, and a document
+       nobody can name is a document nobody can find in a folder either. */
+    actNo:'Act No.',actNoLt:'Akto Nr.',
+    executor:'Executor',executorLt:'Vykdytojas',
+    date:'Date',dateLt:'Data',
+    customer:'Customer',customerLt:'Užsakovas',
+    imo:'IMO No.',imoLt:'IMO Nr.',
+    object:'Object',objectLt:'Objektas',
+    projectNo:'Project number',projectNoLt:'Projekto numeris',
+    work:'Work description',workLt:'Darbų aprašymas',
+    unit:'Unit',unitLt:'Mato vnt.',
+    qty:'Q-ty',qtyLt:'Kiekis',
+    remarks:'Remarks',remarksLt:'Pastabos',
+    rep:'Customer\u2019s representative',repLt:'Kliento atstovas',
+    confirm:'The Customer\u2019s representative confirms that he has the right to accept and sign this act on behalf of the Customer.',
+    confirmLt:'Kliento atstovas patvirtina, kad jis turi teisę priimti ir pasirašyti šį aktą kliento vardu.'};
+
 const T = {
 en: {
   secEnquiries:'Enquiries',
   secCompany:'Company',
+  act:{title:'Work carried out',
+    lead:'The specification the customer\u2019s representative signs on board. It carries no prices \u2014 a description, a unit and a quantity.',
+    none:'No acts on this job yet.',newAct:'New act',backToList:'All acts',printPdf:'Print / PDF',
+    hNumber:'Act no.',hDate:'Date',hCustomer:'Customer',hImo:'IMO no.',hObject:'Object',
+    hProjectNo:'Project no.',hWork:'Work description',hUnit:'Unit',hQty:'Q-ty',hRemarks:'Remarks',
+    hLines:'Items',hWritten:'Written by',hRep:'Customer\u2019s representative',
+    repNote:'The name is printed under the signature line. The customer signs the paper, not the screen.',
+    confirmDel:'Delete act {n}? This cannot be undone.'},
+  actPrint:T_ACT_PRINT,
   doc:{title:'Documents',
     lead:'Invoices, quotes, contracts and certificates, filed against the job they belong to. Nothing here is read automatically \u2014 the amount and the date are the ones you type.',
     drop:'Drop files here, or choose them',
@@ -1436,7 +1526,7 @@ en: {
     conflict:'Somebody else saved this enquiry while you had it open. Reload and try again.',
     staffOnly:'The enquiry register is not part of your access.'},
   appSub:'Project Profitability Calculator',themeDark:'Dark',themeLight:'Light',
-  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',enquiries:'Enquiries',settings:'Settings',people:'People',overheads:'Fixed costs',burn:'Break-even',docs:'Documents'},
+  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',acts:'Work carried out',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',enquiries:'Enquiries',settings:'Settings',people:'People',overheads:'Fixed costs',burn:'Break-even',docs:'Documents'},
   newProj:'+ New project',dupProj:'Duplicate',delProj:'Delete',csv:'Export CSV',json:'Backup JSON',importJson:'Import',print:'Print report',
   addRow:'+ Add row',total:'Total',yes:'Yes',no:'No',
   confirmDel:'Delete this project? This cannot be undone.',
@@ -1507,6 +1597,15 @@ en: {
 lt: {
   secEnquiries:'Užklausos',
   secCompany:'Įmonė',
+  actPrint:T_ACT_PRINT,
+  act:{title:'Atlikti darbai',
+    lead:'Specifikacija, kurią laive pasirašo kliento atstovas. Kainų joje nėra \u2014 aprašymas, matavimo vienetas ir kiekis.',
+    none:'Šiame darbe aktų dar nėra.',newAct:'Naujas aktas',backToList:'Visi aktai',printPdf:'Spausdinti / PDF',
+    hNumber:'Akto nr.',hDate:'Data',hCustomer:'Užsakovas',hImo:'IMO nr.',hObject:'Objektas',
+    hProjectNo:'Projekto nr.',hWork:'Darbų aprašymas',hUnit:'Mato vnt.',hQty:'Kiekis',hRemarks:'Pastabos',
+    hLines:'Pozicijos',hWritten:'Surašė',hRep:'Kliento atstovas',
+    repNote:'Vardas spausdinamas po parašo linija. Klientas pasirašo popierių, ne ekraną.',
+    confirmDel:'Ištrinti aktą {n}? Atkurti nebus galima.'},
   doc:{title:'Dokumentai',
     lead:'Sąskaitos, pasiūlymai, sutartys ir sertifikatai, priskirti darbui, kuriam priklauso. Niekas neskaitoma automatiškai \u2014 sumą ir datą įvedate jūs.',
     drop:'Nutempkite failus čia arba pasirinkite',
@@ -1637,7 +1736,7 @@ lt: {
     conflict:'Kitas naudotojas išsaugojo šią užklausą, kol ji buvo atidaryta. Perkraukite ir bandykite dar kartą.',
     staffOnly:'Užklausų registras nepriklauso jūsų prieigai.'},
   appSub:'Projektų pelningumo skaičiuoklė',themeDark:'Tamsi',themeLight:'Šviesi',
-  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',enquiries:'Užklausos',settings:'Nustatymai',people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Nenuostolingumas',docs:'Dokumentai'},
+  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',acts:'Atlikti darbai',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',enquiries:'Užklausos',settings:'Nustatymai',people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Nenuostolingumas',docs:'Dokumentai'},
   newProj:'+ Naujas projektas',dupProj:'Kopijuoti',delProj:'Ištrinti',csv:'Eksportuoti CSV',json:'Atsarginė kopija',importJson:'Importuoti',print:'Spausdinti ataskaitą',
   addRow:'+ Pridėti eilutę',total:'Iš viso',yes:'Taip',no:'Ne',
   confirmDel:'Ištrinti šį projektą? Veiksmo atšaukti negalima.',
@@ -1708,6 +1807,15 @@ lt: {
 ru: {
   secEnquiries:'Запросы',
   secCompany:'Компания',
+  actPrint:T_ACT_PRINT,
+  act:{title:'Выполненные работы',
+    lead:'Спецификация, которую на борту подписывает представитель заказчика. Цен в ней нет \u2014 описание, единица и количество.',
+    none:'По этой работе актов пока нет.',newAct:'Новый акт',backToList:'Все акты',printPdf:'Печать / PDF',
+    hNumber:'№ акта',hDate:'Дата',hCustomer:'Заказчик',hImo:'IMO №',hObject:'Объект',
+    hProjectNo:'№ проекта',hWork:'Описание работ',hUnit:'Ед. изм.',hQty:'Кол-во',hRemarks:'Примечания',
+    hLines:'Позиций',hWritten:'Составил',hRep:'Представитель заказчика',
+    repNote:'Имя печатается под линией подписи. Заказчик подписывает бумагу, а не экран.',
+    confirmDel:'Удалить акт {n}? Отменить нельзя.'},
   doc:{title:'Документы',
     lead:'Счета, предложения, договоры и сертификаты, привязанные к работе, к которой относятся. Ничего не распознаётся автоматически \u2014 сумму и дату вводите вы.',
     drop:'Перетащите файлы сюда или выберите',
@@ -1838,7 +1946,7 @@ ru: {
     conflict:'Кто-то сохранил этот запрос, пока он был открыт. Обновите страницу и повторите.',
     staffOnly:'Реестр запросов не входит в ваш доступ.'},
   appSub:'Калькулятор рентабельности проектов',themeDark:'Тёмная',themeLight:'Светлая',
-  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',enquiries:'Запросы',settings:'Настройки',people:'Люди',overheads:'Постоянные расходы',burn:'Безубыточность',docs:'Документы'},
+  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',acts:'Выполненные работы',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',enquiries:'Запросы',settings:'Настройки',people:'Люди',overheads:'Постоянные расходы',burn:'Безубыточность',docs:'Документы'},
   newProj:'+ Новый проект',dupProj:'Дублировать',delProj:'Удалить',csv:'Экспорт CSV',json:'Резервная копия',importJson:'Импорт',print:'Печать отчёта',
   addRow:'+ Добавить строку',total:'Итого',yes:'Да',no:'Нет',
   confirmDel:'Удалить этот проект? Действие необратимо.',
@@ -2324,6 +2432,27 @@ const CLOUD = (function(){
       if(!res.ok) return null;
       const j = await res.json();
       return j && j.signedURL ? API + '/storage/v1' + j.signedURL : null;
+    },
+
+    /* ---- acts ----
+       acts_v is gated on `auth.uid() is not null` rather than on
+       sees_money(): an act carries no prices, and the fitter who fills it in
+       is exactly the role sees_money() shuts out. */
+    async acts(){
+      return await rest('acts_v?select=*&order=act_date.desc') || [];
+    },
+    async actInsert(row){
+      return firstRow(await rest('rpc/create_act', {
+        method: 'POST', body: JSON.stringify({ p_row: row })
+      }));
+    },
+    async actSave(id, rev, row){
+      return firstRow(await rest('rpc/save_act', {
+        method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
+      }));
+    },
+    async actDelete(id){
+      await rest('rpc/delete_act', { method: 'POST', body: JSON.stringify({ p_id: id }) });
     },
 
     async enquiryInsert(row){
@@ -3135,11 +3264,15 @@ const $ = sel => document.querySelector(sel);
    of the job in front of you. It lives in the overflow menu now, which is
    where this app already keeps the things that are about the company rather
    than the project. */
-const ALL_TABS = ['portfolio','dashboard','card','revenue','labor','subs','travel','materials','logistics','settings'];
+const ALL_TABS = ['portfolio','dashboard','card','acts','revenue','labor','subs','travel','materials','logistics','settings'];
 /* Portfolio and Dashboard are the company's position, Revenue is the company's
    income, and Settings holds the target margin. None of them is an employee's
    business, and all four would be blank or misleading with the figures gone. */
-const COST_TABS = ['card','labor','subs','travel','materials','logistics'];
+/* 'acts' is in BOTH lists on purpose. The specification of work carried out
+   is filled in by the person who did the work, standing on the vessel, and
+   that person is staff -- the role the cost list exists to serve. It carries
+   no prices, so there is nothing here to withhold from them. */
+const COST_TABS = ['card','acts','labor','subs','travel','materials','logistics'];
 
 /* The third subject. Projects are one job, the register is the order book,
    and this is the company itself: what it costs to open the doors. Its own
@@ -3148,7 +3281,14 @@ const COST_TABS = ['card','labor','subs','travel','materials','logistics'];
 const COMPANY_TABS = ['people','overheads','burn','docs'];
 
 function tabList(){
-  if(section() === 'company') return COMPANY_TABS;
+  /* ...and only if this person may see it. Without the second half the list
+     was derived from the tab alone, so a company tab always "belonged" to the
+     company list whoever was looking -- which meant the off-tab guard below
+     could never fire for one. A fitter whose last session ended on Documents
+     opened the app there, on a screen with an empty table and no button in
+     the section row to leave by. Nothing leaked, because the views return
+     nothing to that role; it was simply a room with no door. */
+  if(section() === 'company' && canPayroll()) return COMPANY_TABS;
   return canMoney() ? ALL_TABS : COST_TABS;
 }
 
@@ -3609,13 +3749,15 @@ function render(){
     paintPulse(); measureChrome(); enhanceSelects();
     return;
   }
-  if(state.tab==='portfolio') m.innerHTML = viewPortfolio();
+  if(state.tab==='acts') m.innerHTML = viewActs();
+  else if(state.tab==='portfolio') m.innerHTML = viewPortfolio();
   else if(state.tab==='dashboard') m.innerHTML = viewDashboard();
   else if(state.tab==='card') m.innerHTML = viewCard();
   else if(state.tab==='settings') m.innerHTML = viewSettings();
   else m.innerHTML = viewSheet(state.tab);
   /* the six data sheets plus the portfolio are tables and get the wider column */
   m.dataset.view = (state.tab==='dashboard'||state.tab==='card'||state.tab==='settings') ? 'page' : 'sheet';
+  if(state.tab==='acts') wireActs();
   if(state.tab==='dashboard') wireChart();
   paintPulse();
   measureChrome();
@@ -6095,6 +6237,302 @@ function coBurnView(){
   </div>`;
 }
 
+/* ============================================================
+   ACTS -- the specification of work actually carried out
+   ------------------------------------------------------------
+   The sheet the crew fills in on board and the customer's representative
+   signs. It is what turns finished work into something that can be invoiced
+   and, if it comes to it, argued about a year later.
+
+   The header is COPIED from the project when the act is made, never joined
+   live. An act is a signed document: somebody put their name under those
+   exact words, and a project renamed next year must not rewrite them.
+
+   It prints in English AND Lithuanian together, whatever language the app is
+   set to, because the two parties to it are not always reading the same one
+   -- which is how the paper form has always been laid out.
+   ============================================================ */
+const ACT_UNITS = ['pcs', 'set', 'm', 'm2', 'm3', 'kg', 'h', 'l', 'compl.'];
+
+/* The app had no constant for this -- the printed report wrote it inline --
+   and an act names the executor twice, in the header and over the signature.
+   Two literals of a company's legal name is one of them going stale. */
+const LEGAL_NAME = 'UAB "Litprofit"';
+
+function actsOf(){
+  const pid = proj() && proj().id;
+  return (state.acts || []).filter(a => a.project_id === pid);
+}
+function actOpen(){
+  return (state.acts || []).find(a => a.id === state.actId) || null;
+}
+function actLines(a){
+  const l = Array.isArray(a.lines) ? a.lines : [];
+  /* Always one spare row at the end, so adding a line is typing rather than
+     finding a button first. */
+  return l.concat([{ work: '', unit: '', qty: '', remarks: '' }]);
+}
+
+/* The next number for this project: PRJ-001/01, /02, and so on. Suggested,
+   not enforced -- a company that has been numbering acts its own way for
+   years should not have to argue with the field. */
+function actNextNumber(){
+  const p = proj(), base = (p && p.card.projectId) || 'ACT';
+  const used = actsOf().map(a => a.number || '');
+  let n = 1;
+  while(used.indexOf(base + '/' + String(n).padStart(2, '0')) !== -1) n++;
+  return base + '/' + String(n).padStart(2, '0');
+}
+
+function viewActs(){
+  const t = tr(), a = t.act, p = proj();
+  const cur = actOpen();
+  if(cur) return actEditor(cur, t);
+
+  const list = actsOf();
+  const body = list.length ? list.map(x => `<tr class="act-row" data-act-open="${esc(x.id)}">
+      <td><b>${esc(x.number || '\u2014')}</b></td>
+      <td>${esc(x.act_date || '')}</td>
+      <td>${esc(x.object || '\u2014')}</td>
+      <td>${esc(x.customer || '\u2014')}</td>
+      <td class="num">${x.line_count == null ? '' : x.line_count}</td>
+      <td class="act-who">${esc(x.written_by || '\u2014')}</td>
+      <td><button class="ghost co-del" data-act-del="${esc(x.id)}"
+            title="${esc(t.remove)}">×</button></td>
+    </tr>`).join('') : `<tr><td colspan="7" class="muted">${esc(a.none)}</td></tr>`;
+
+  return `${noticeBar()}<div class="card">
+    <h2 class="sheet">${esc(a.title)} <span class="muted" style="font-weight:400">// ${
+      esc(p ? p.card.projectId : '')}</span></h2>
+    <p class="hint" style="margin:-8px 0 14px">${esc(a.lead)}</p>
+    <div class="tablewrap"><table class="sheet-table act-list">
+      <thead><tr>
+        <th>${esc(a.hNumber)}</th><th>${esc(a.hDate)}</th><th>${esc(a.hObject)}</th>
+        <th>${esc(a.hCustomer)}</th><th class="num">${esc(a.hLines)}</th>
+        <th>${esc(a.hWritten)}</th><th></th>
+      </tr></thead><tbody>${body}</tbody></table></div>
+    <div class="co-actions"><button id="actNew" class="primary">${esc(a.newAct)}</button></div>
+  </div>`;
+}
+
+function actEditor(x, t){
+  const a = t.act;
+  const field = (key, label, type) =>
+    `<label class="act-f"><span>${esc(label)}</span>
+      <input data-af="${key}" type="${type || 'text'}" value="${esc(x[key] || '')}"></label>`;
+
+  const rows = actLines(x).map((l, i) => `<tr data-line="${i}">
+      <td class="act-n">${l.work || l.unit || l.qty || l.remarks ? (i + 1) : ''}</td>
+      <td><input data-al="work" data-i="${i}" value="${esc(l.work || '')}"></td>
+      <td><input data-al="unit" data-i="${i}" list="actUnits" value="${esc(l.unit || '')}"></td>
+      <td class="num"><input data-al="qty" data-i="${i}" value="${esc(l.qty || '')}"></td>
+      <td><input data-al="remarks" data-i="${i}" value="${esc(l.remarks || '')}"></td>
+      <td>${l.work || l.unit || l.qty || l.remarks
+            ? `<button class="ghost co-del" data-line-del="${i}" title="${esc(t.remove)}">×</button>`
+            : ''}</td>
+    </tr>`).join('');
+
+  return `${noticeBar()}<div class="card">
+    <div class="act-bar">
+      <button class="doc-back" id="actBack">${esc(a.backToList)}</button>
+      <span class="act-sp"></span>
+      <button id="actPrint" class="primary">${esc(a.printPdf)}</button>
+    </div>
+
+    <h2 class="sheet">${esc(a.title)} <span class="muted" style="font-weight:400">// ${
+      esc(x.number || '')}</span></h2>
+
+    <div class="act-head">
+      ${field('number', a.hNumber)}
+      ${field('act_date', a.hDate, 'date')}
+      ${field('customer', a.hCustomer)}
+      ${field('imo', a.hImo)}
+      ${field('object', a.hObject)}
+      ${field('project_ref', a.hProjectNo)}
+    </div>
+
+    <datalist id="actUnits">${ACT_UNITS.map(u => `<option value="${u}">`).join('')}</datalist>
+    <div class="tablewrap"><table class="sheet-table act-table">
+      <thead><tr>
+        <th class="act-n">№</th><th>${esc(a.hWork)}</th><th>${esc(a.hUnit)}</th>
+        <th class="num">${esc(a.hQty)}</th><th>${esc(a.hRemarks)}</th><th></th>
+      </tr></thead><tbody>${rows}</tbody></table></div>
+
+    <div class="act-head act-sign">
+      ${field('rep_name', a.hRep)}
+    </div>
+    <p class="hint co-foot">${esc(a.repNote)}</p>
+  </div>`;
+}
+
+/* ---- the printed act ----
+   Both languages on every label, whatever the app is set to. The customer's
+   representative and the yard are not always reading the same one, and the
+   paper form this replaces has always carried both. */
+function printAct(x){
+  const t = tr(), a = t.act;
+  const two = (en, lt) => `<span class="ac-en">${esc(en)}</span><span class="ac-lt">${esc(lt)}</span>`;
+  const L = t.actPrint;
+
+  const lines = (Array.isArray(x.lines) ? x.lines : [])
+    .filter(l => (l.work || '').trim() || (l.unit || '').trim() || (l.qty || '').trim());
+  const body = lines.length ? lines.map((l, i) => `<tr>
+      <td class="num">${i + 1}</td><td>${esc(l.work || '')}</td>
+      <td>${esc(l.unit || '')}</td><td class="num">${esc(l.qty || '')}</td>
+      <td>${esc(l.remarks || '')}</td></tr>`).join('')
+    /* Never an empty table: a signed sheet with no rows is a document somebody
+       has to explain. */
+    : `<tr><td class="num">1</td><td colspan="4">${esc(a.none)}</td></tr>`;
+
+  const hd = (en, lt, v) => `<tr><th>${two(en, lt)}</th><td>${esc(v || '')}</td></tr>`;
+
+  $('#print-area').innerHTML = `
+    <div class="ac-top">
+      <div class="ac-brand">LITPROFIT</div>
+      <div class="ac-title">${two(L.title, L.titleLt)}</div>
+    </div>
+    <table class="ac-head">
+      ${hd(L.actNo, L.actNoLt, x.number)}
+      ${hd(L.executor, L.executorLt, LEGAL_NAME)}
+      ${hd(L.date, L.dateLt, x.act_date)}
+      ${hd(L.customer, L.customerLt, x.customer)}
+      ${hd(L.imo, L.imoLt, x.imo)}
+      ${hd(L.object, L.objectLt, x.object)}
+      ${hd(L.projectNo, L.projectNoLt, x.project_ref)}
+    </table>
+
+    <table class="ac-lines"><thead><tr>
+      <th class="num">№</th>
+      <th>${two(L.work, L.workLt)}</th>
+      <th>${two(L.unit, L.unitLt)}</th>
+      <th class="num">${two(L.qty, L.qtyLt)}</th>
+      <th>${two(L.remarks, L.remarksLt)}</th>
+    </tr></thead><tbody>${body}</tbody></table>
+
+    <p class="ac-note">${esc(L.confirm)}<br><i>${esc(L.confirmLt)}</i></p>
+
+    <table class="ac-sign"><tr>
+      <td>${two(L.rep, L.repLt)}<span class="ac-line"></span>
+          <span class="ac-name">${esc(x.rep_name || '')}</span></td>
+      <td>${two(L.executor, L.executorLt)}<span class="ac-line"></span>
+          <span class="ac-name">${esc(LEGAL_NAME)}</span></td>
+    </tr></table>`;
+
+  printAs(['Litprofit', L.title, x.number || '', x.act_date || ''].filter(Boolean).join(' \u2014 '));
+}
+
+/* ---- acts: events ---- */
+function wireActs(){
+  const on = (id, ev, fn) => { const el = $('#' + id); if(el) el.addEventListener(ev, fn); };
+
+  on('actNew', 'click', async () => {
+    const p = proj(), c = p.card;
+    /* Copied from the project once, here, and the act owns them afterwards. */
+    await actCreate({
+      project_id: p.id,
+      number: actNextNumber(),
+      act_date: new Date().toISOString().slice(0, 10),
+      customer: c.client || '',
+      object: c.site || '',
+      project_ref: c.projectId || '',
+      /* the IMO is not on the project, so the last act for this job is the
+         best guess -- one vessel, several acts, one number typed once */
+      imo: (actsOf().find(z => z.imo) || {}).imo || '',
+      lines: []
+    });
+  });
+  on('actBack', 'click', () => { state.actId = null; persist(); render(); });
+  on('actPrint', 'click', () => { const x = actOpen(); if(x) printAct(x); });
+
+  const main = $('#main');
+  if(!main || main.dataset.actWired) return;
+  main.dataset.actWired = '1';
+
+  main.addEventListener('click', async ev => {
+    const del = ev.target.closest('[data-act-del]');
+    if(del){
+      ev.stopPropagation();
+      const id = del.getAttribute('data-act-del');
+      const rec = (state.acts || []).find(z => z.id === id);
+      if(!rec || !confirm(tr().act.confirmDel.replace('{n}', rec.number || ''))) return;
+      await actDelete(id);
+      return;
+    }
+    const lineDel = ev.target.closest('[data-line-del]');
+    if(lineDel){
+      const i = Number(lineDel.getAttribute('data-line-del'));
+      const x = actOpen(); if(!x) return;
+      const l = (Array.isArray(x.lines) ? x.lines : []).slice();
+      l.splice(i, 1);
+      await actSave(x, { lines: l }, true);
+      return;
+    }
+    const open = ev.target.closest('[data-act-open]');
+    if(open){ state.actId = open.getAttribute('data-act-open'); persist(); render(); }
+  });
+
+  main.addEventListener('change', ev => {
+    const x = actOpen(); if(!x) return;
+    const hf = ev.target.closest('[data-af]');
+    if(hf){ actSave(x, { [hf.getAttribute('data-af')]: hf.value }); return; }
+    const lf = ev.target.closest('[data-al]');
+    if(lf){
+      const i = Number(lf.getAttribute('data-i')), key = lf.getAttribute('data-al');
+      const l = (Array.isArray(x.lines) ? x.lines : []).slice();
+      while(l.length <= i) l.push({ work: '', unit: '', qty: '', remarks: '' });
+      l[i] = Object.assign({}, l[i], { [key]: lf.value });
+      /* A spare row is redrawn only when the last one has been started, so
+         typing in the middle of the sheet does not move anything. */
+      const wasLast = i === l.length - 1;
+      actSave(x, { lines: l }, wasLast);
+    }
+  });
+}
+
+async function actCreate(row){
+  if(!CLOUD.on){
+    row.id = 'local-' + Math.random().toString(36).slice(2, 10);
+    row.rev = 1; row.line_count = 0;
+    state.acts = [row].concat(state.acts || []);
+    state.actId = row.id; persist(); render(); return;
+  }
+  try {
+    const saved = await CLOUD.actInsert(row);
+    if(saved){ state.acts = [saved].concat(state.acts || []); state.actId = saved.id; }
+    persist(); render();
+  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+}
+
+async function actDelete(id){
+  if(CLOUD.on){
+    try { await CLOUD.actDelete(id); }
+    catch(e){ toast(tr().co.saveFailed, 'bad'); return; }
+  }
+  state.acts = (state.acts || []).filter(z => z.id !== id);
+  if(state.actId === id) state.actId = null;
+  persist(); render();
+}
+
+async function actSave(x, patch, redraw){
+  const merged = Object.assign({}, x, patch);
+  if(!CLOUD.on){
+    Object.assign(x, patch);
+    x.line_count = (Array.isArray(x.lines) ? x.lines : [])
+      .filter(l => (l.work || '').trim()).length;
+    persist(); if(redraw) render(); return;
+  }
+  try {
+    const saved = await CLOUD.actSave(x.id, x.rev, {
+      number: merged.number, act_date: merged.act_date, customer: merged.customer,
+      imo: merged.imo, object: merged.object, project_ref: merged.project_ref,
+      lines: merged.lines, rep_name: merged.rep_name, note: merged.note
+    });
+    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
+    state.acts = (state.acts || []).map(z => z.id === saved.id ? saved : z);
+    persist(); if(redraw) render();
+  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+}
+
 /* ---- company screens: events ---- */
 function wireCompany(){
   const on = (id, ev, fn) => { const el = $('#' + id); if(el) el.addEventListener(ev, fn); };
@@ -7616,6 +8054,12 @@ async function cloudPull(){
      and a slow or missing enquiries table must not hold up the whole app.
      For a staff member the view returns an empty list by design, so an empty
      register and no register look the same here -- which is the point. */
+  /* Not inside canMoney(): the acts are the one thing on this screen a
+     fitter is meant to write. */
+  CLOUD.acts()
+    .then(list => { state.acts = list; if(state.tab === 'acts') render(); })
+    .catch(() => { state.acts = []; });
+
   if(canMoney()){
     CLOUD.enquiries()
       .then(list => { state.enquiries = list; if(state.tab === 'enquiries') render(); })
