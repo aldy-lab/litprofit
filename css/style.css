@@ -133,6 +133,19 @@
    two plates. `.seam-top` / `.seam-bottom` are opt-in, so a section only
    gets a seam where a seam makes sense.
    ============================================================ */
+/* The seam fades in and out rather than switching on.
+
+   Measured across a 3024px capture, the row of rivets ran from x=47 to
+   x=2976: edge to edge at full strength, cut off by the viewport at both
+   ends. A line of fasteners does not begin at the left edge of a screen, and
+   the eye reads a strip that starts and stops at nothing as a stamp laid over
+   the page rather than as a join in it.
+
+   Two masks. Along the row, so the fasteners emerge from the margins and
+   return to them; and down through it, so the band has a falloff instead of a
+   top and a bottom edge. The rivets in the middle are untouched -- this
+   changes only how the row meets everything around it, which is the whole of
+   what a seam is for. */
 .seam-top, .seam-bottom { position: relative; }
 .seam-top::before, .seam-bottom::after {
   content: "";
@@ -145,7 +158,35 @@
   opacity: 0.45;
   pointer-events: none;
   z-index: 2;
+  /* Two mask layers, intersected: the horizontal fade and the vertical one.
+     -webkit- as well, because Safari only dropped the prefix in 15.4 and a
+     mask that is ignored is a seam back to full strength, not a broken one. */
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent),
+    linear-gradient(180deg, transparent, #000 38%, #000 62%, transparent);
+  mask-image:
+    linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent),
+    linear-gradient(180deg, transparent, #000 38%, #000 62%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
+
+/* And a hairline under the fasteners, fading the same way. The rivets say
+   where the join is; this says the two sides meet there. Without it the
+   masked row reads as a scatter of squares with nothing holding them. */
+.seam-top::after, .seam-bottom::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent, rgba(255, 255, 255, 0.13) 22%,
+    rgba(255, 255, 255, 0.13) 78%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+.seam-top::after { top: calc(var(--rivet-pitch) / 2); }
+.seam-bottom::before { bottom: calc(var(--rivet-pitch) / 2); }
 .seam-top::before { top: 0; }
 .seam-bottom::after { bottom: 0; }
 
