@@ -160,33 +160,26 @@
   z-index: 2;
   /* Two mask layers, intersected: the horizontal fade and the vertical one.
      -webkit- as well, because Safari only dropped the prefix in 15.4 and a
-     mask that is ignored is a seam back to full strength, not a broken one. */
+     mask that is ignored is a seam back to full strength, not a broken one.
+
+     The fade reaches a third of the way in from each side. At 14% it was a
+     fade you had to be told about; the point is that the row has no visible
+     beginning, and a short ramp still reads as an edge with a gradient on it
+     rather than as fasteners coming out of the margin. */
   -webkit-mask-image:
-    linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent),
-    linear-gradient(180deg, transparent, #000 38%, #000 62%, transparent);
+    linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent),
+    linear-gradient(180deg, transparent, #000 42%, #000 58%, transparent);
   mask-image:
-    linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent),
-    linear-gradient(180deg, transparent, #000 38%, #000 62%, transparent);
+    linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent),
+    linear-gradient(180deg, transparent, #000 42%, #000 58%, transparent);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
 
-/* And a hairline under the fasteners, fading the same way. The rivets say
-   where the join is; this says the two sides meet there. Without it the
-   masked row reads as a scatter of squares with nothing holding them. */
-.seam-top::after, .seam-bottom::before {
-  content: "";
-  position: absolute;
-  left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent, rgba(255, 255, 255, 0.13) 22%,
-    rgba(255, 255, 255, 0.13) 78%, transparent);
-  pointer-events: none;
-  z-index: 2;
-}
-.seam-top::after { top: calc(var(--rivet-pitch) / 2); }
-.seam-bottom::before { bottom: calc(var(--rivet-pitch) / 2); }
+/* NO rule through the rivets. One was added here and taken out again: a line
+   joining them turns a row of fasteners into a border, and a border is the
+   hard edge this whole change exists to remove. The fasteners mark the join
+   on their own; that is what fasteners do. */
 .seam-top::before { top: 0; }
 .seam-bottom::after { bottom: 0; }
 
@@ -1450,7 +1443,11 @@ a.card { position: relative; }
   content: "";
   position: absolute;
   left: 0;
-  top: 0.72em;
+  /* Half the line box, less the marker's own height and the half pixel the
+     line box sits above the content box. Measured against the first line's
+     own client rect, not eyeballed. */
+  top: calc(0.825em - 1px);
+  top: calc(0.5lh - 1px);
   width: 10px;
   height: 1px;
   background: var(--grey-500);
@@ -1693,18 +1690,33 @@ html.is-frost #frostToggle {
   border-top: 1px solid var(--line);
 }
 .scope-list li {
-  padding: 11px 0 11px 26px;
+  /* The row padding is a variable because the marker has to know it. Written
+     as a literal in both places they drift, and the drift is invisible in the
+     source and obvious on the page. */
+  --row-pad: 11px;
+  padding: var(--row-pad) 0 var(--row-pad) 26px;
   border-bottom: 1px solid var(--line);
   position: relative;
 }
 /* Same rule, drawn from the same place, so a scope list inside .prose cannot
-   end up with one marker from each. */
+   end up with one marker from each.
+
+   The vertical position is DERIVED, not chosen. It was 1.05em, which ignored
+   the row's own 11px of padding and put the dash 6.2px above the middle of
+   the line it marks -- measured, because at this size it reads as "slightly
+   wrong" long before anyone can say by how much. The marker belongs half a
+   line box below the top of the text, and the top of the text is the padding.
+
+   Two declarations on purpose: the em fallback is half of the 1.65 line
+   height written out, and the lh version overrides it wherever the unit is
+   supported and then follows the line height if it ever changes. */
 .prose .scope-list li::before,
 .scope-list li::before {
   content: "";
   position: absolute;
   left: 2px;
-  top: 1.05em;
+  top: calc(var(--row-pad) + 0.825em - 1px);
+  top: calc(var(--row-pad) + 0.5lh - 1px);
   width: 10px;
   height: 1px;
   background: var(--grey-500);
@@ -4049,7 +4061,9 @@ a.card:active,
 .job-needs li::before {
   content: "";
   position: absolute;
-  left: 0; top: 0.7em;
+  left: 0;
+  top: calc(0.825em - 1px);
+  top: calc(0.5lh - 1px);
   width: 10px; height: 1px;
   background: var(--grey-500);
 }
