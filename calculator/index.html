@@ -896,18 +896,41 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
    A row of buckets with a count each, in the order the kind list declares.
    Not sorted by size: a folder that moves when a file is added is a folder
    you have to look for every time. */
-.doc-folders{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.doc-folder{display:grid;gap:2px;justify-items:start;text-align:left;
-  padding:10px 14px;min-width:118px;border:1px solid var(--baseline);
-  background:transparent;cursor:pointer;
+/* ---- the folder grid ----
+   Every kind is shown, including the empty ones: a folder that appears only
+   once something is in it is a folder nobody files into, because nobody knows
+   it is there. */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:6px;margin:4px 0 6px}
+.doc-dir{display:grid;gap:4px;justify-items:start;text-align:left;
+  padding:14px 16px;min-height:96px;border:1px solid var(--baseline);
+  background:transparent;cursor:pointer;align-content:start;
   transition:border-color .2s,background .2s}
-.doc-folder:hover{border-color:var(--ink-3)}
-.doc-folder.on{border-color:var(--series-1);background:var(--surface-2,transparent)}
-.doc-folder-n{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums;
-  color:var(--ink-1);line-height:1.1}
-.doc-folder-name{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.doc-folder-sum{font-family:var(--mono);font-size:11px;color:var(--ink-3);
+.doc-dir:hover{border-color:var(--series-1)}
+.doc-dir.is-empty{opacity:.5}
+.doc-dir.is-empty:hover{opacity:1}
+.doc-dir-top{display:flex;align-items:baseline;gap:8px;width:100%}
+.doc-dir-n{font-family:var(--mono);font-size:24px;line-height:1;color:var(--ink-1);
   font-variant-numeric:tabular-nums}
+.doc-dir-soon{font-family:var(--mono);font-size:10.5px;padding:2px 6px;
+  background:var(--warning,#b7791f);color:#fff;border-radius:2px}
+.doc-dir-name{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.doc-dir-foot{display:flex;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;margin-top:auto}
+.doc-dir-foot i{font-style:normal;opacity:.7}
+.doc-dir-foot em{font-style:normal;opacity:.45}
+
+.doc-crumb{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:12px;color:var(--ink-3)}
+.doc-back{border:0;background:transparent;padding:0;cursor:pointer;color:var(--series-1);
+  text-decoration:underline;text-underline-offset:2px;font:inherit}
+.doc-crumb b{color:var(--ink-1)}
+.doc-tag{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);
+  border:1px solid var(--baseline);padding:2px 7px;white-space:nowrap}
+.doc-left{display:block;font-family:var(--mono);font-size:10.5px;margin-top:3px}
+.doc-soon .doc-left{color:var(--warning,#b7791f)}
+.doc-gone .doc-left{color:var(--critical)}
+.dp-fact.is-soon b{color:var(--warning,#b7791f)}
+.dp-fact.is-gone b{color:var(--critical)}
 
 /* ---- preview ---- */
 body.has-overlay{overflow:hidden}
@@ -1290,6 +1313,14 @@ en: {
     search:'Search',none:'Nothing filed yet.',
     hFile:'File',hKind:'Kind',hDate:'Date',hAmount:'Amount',hParty:'Counterparty',
     hProject:'Project',hEnquiry:'Enquiry',hWho:'Filed by',hFiled:'Filed on',
+    hRef:'No.',hValid:'Valid until',
+    dInvoiced:'Invoiced',dSent:'Sent',dSigned:'Signed',dIssued:'Issued',
+    dTaken:'Taken',dDated:'Date',
+    pSupplier:'Supplier',pClient:'Client',pIssuer:'Issued by',pParty:'Other party',
+    folderLead:'Only the columns this kind of document actually has. Change the folder on a row and it moves.',
+    searchAll:'across every folder',
+    dropInto:'Drop files here \u2014 they go into {folder}',
+    expiringSoon:'expiring within 90 days',expired:'expired',daysLeft:'{n} days left',
     allFiles:'Everything',openFile:'Open the file',loading:'Opening\u2026',
     noPreview:'No preview for this kind of file. Open it to read it.',
     kind:{invoice_in:'Invoice in',invoice_out:'Invoice out',quote:'Quote',contract:'Contract',
@@ -1483,6 +1514,14 @@ lt: {
     search:'Paieška',none:'Kol kas nieko nėra.',
     hFile:'Failas',hKind:'Tipas',hDate:'Data',hAmount:'Suma',hParty:'Kontrahentas',
     hProject:'Projektas',hEnquiry:'Užklausa',hWho:'Įkėlė',hFiled:'Įkelta',
+    hRef:'Nr.',hValid:'Galioja iki',
+    dInvoiced:'Sąskaitos data',dSent:'Išsiųsta',dSigned:'Pasirašyta',dIssued:'Išduota',
+    dTaken:'Nufotografuota',dDated:'Data',
+    pSupplier:'Tiekėjas',pClient:'Klientas',pIssuer:'Išdavė',pParty:'Kita šalis',
+    folderLead:'Tik tie stulpeliai, kuriuos šio tipo dokumentas iš tikrųjų turi. Pakeitus aplanką eilutėje, ji persikelia.',
+    searchAll:'visuose aplankuose',
+    dropInto:'Nutempkite failus \u2014 jie pateks į „{folder}“',
+    expiringSoon:'baigia galioti per 90 dienų',expired:'nebegalioja',daysLeft:'liko {n} d.',
     allFiles:'Viskas',openFile:'Atidaryti failą',loading:'Atidaroma\u2026',
     noPreview:'Šio tipo failo peržiūros nėra. Atidarykite jį, kad perskaitytumėte.',
     kind:{invoice_in:'Gauta sąskaita',invoice_out:'Išrašyta sąskaita',quote:'Pasiūlymas',contract:'Sutartis',
@@ -1676,6 +1715,14 @@ ru: {
     search:'Поиск',none:'Пока ничего нет.',
     hFile:'Файл',hKind:'Тип',hDate:'Дата',hAmount:'Сумма',hParty:'Контрагент',
     hProject:'Проект',hEnquiry:'Запрос',hWho:'Загрузил',hFiled:'Загружено',
+    hRef:'№',hValid:'Действует до',
+    dInvoiced:'Дата счёта',dSent:'Отправлено',dSigned:'Подписан',dIssued:'Выдан',
+    dTaken:'Снято',dDated:'Дата',
+    pSupplier:'Поставщик',pClient:'Клиент',pIssuer:'Кем выдан',pParty:'Вторая сторона',
+    folderLead:'Только те колонки, которые у документа этого типа действительно есть. Смените папку в строке — она переедет.',
+    searchAll:'по всем папкам',
+    dropInto:'Перетащите файлы \u2014 они попадут в «{folder}»',
+    expiringSoon:'заканчивается в ближайшие 90 дней',expired:'истёк',daysLeft:'осталось {n} дн.',
     allFiles:'Всё',openFile:'Открыть файл',loading:'Открывается\u2026',
     noPreview:'Для такого типа файла предпросмотра нет. Откройте его, чтобы прочитать.',
     kind:{invoice_in:'Входящий счёт',invoice_out:'Исходящий счёт',quote:'Предложение',contract:'Договор',
@@ -5270,25 +5317,6 @@ function viewCompany(tab){
 const DOC_KINDS = ['invoice_in','invoice_out','quote','contract',
                    'certificate','report','photo','other'];
 
-function docState(){
-  if(!state.docs) state.docs = { kind:'', q:'' };
-  return state.docs;
-}
-function docRows(){
-  const f = docState(), q = (f.q || '').toLowerCase();
-  return (state.documents || []).filter(d => {
-    if(f.kind && d.kind !== f.kind) return false;
-    if(!q) return true;
-    return [d.filename, d.counterparty, d.note, d.project_ref, d.enquiry_ref]
-      .some(v => (v || '').toLowerCase().indexOf(q) !== -1);
-  });
-}
-function humanSize(n){
-  n = Number(n) || 0;
-  if(n < 1024) return n + ' B';
-  if(n < 1048576) return (n / 1024).toFixed(0) + ' KB';
-  return (n / 1048576).toFixed(1) + ' MB';
-}
 
 /* Folders are a view of `kind`, not a path.
 
@@ -5303,101 +5331,195 @@ function humanSize(n){
    failure the upload order was arranged to avoid.
 
    The bucket is storage. The folders are the filing. */
+
+/* ---- what each kind of document actually has ----
+   One table for eight kinds meant every row carried an invoice's fields. A
+   photograph has no amount and a certificate has no counterparty in the sense
+   an invoice does -- it has an issuer -- while the thing that matters most
+   about it, the day it expires, had no column at all.
+
+   Each folder declares its own columns and its own words for them. An empty
+   column is not a small cost: it invites somebody to fill it in, and a number
+   typed under the wrong heading is worse than a heading nobody sees. */
+const DOC_SCHEMA = {
+  invoice_in:  { fields: ['doc_date','ref','amount','counterparty','project_id','enquiry_id'],
+                 date: 'dInvoiced', party: 'pSupplier' },
+  invoice_out: { fields: ['doc_date','ref','amount','counterparty','project_id','enquiry_id'],
+                 date: 'dInvoiced', party: 'pClient' },
+  quote:       { fields: ['doc_date','ref','amount','counterparty','valid_until','enquiry_id'],
+                 date: 'dSent', party: 'pClient' },
+  contract:    { fields: ['doc_date','ref','amount','counterparty','valid_until','project_id'],
+                 date: 'dSigned', party: 'pParty' },
+  certificate: { fields: ['doc_date','ref','counterparty','valid_until'],
+                 date: 'dIssued', party: 'pIssuer' },
+  report:      { fields: ['doc_date','ref','project_id','enquiry_id'], date: 'dDated' },
+  photo:       { fields: ['doc_date','project_id','enquiry_id'], date: 'dTaken' },
+  other:       { fields: ['doc_date','note'], date: 'dDated' }
+};
+function docSchema(kind){ return DOC_SCHEMA[kind] || DOC_SCHEMA.other; }
+
+/* The heading for one column of one folder: the folder's own word where it
+   has one, the generic word otherwise. */
+function docLabel(kind, field, d){
+  const sc = docSchema(kind);
+  if(field === 'doc_date')     return d[sc.date] || d.hDate;
+  if(field === 'counterparty') return d[sc.party] || d.hParty;
+  return { ref: d.hRef, amount: d.hAmount, valid_until: d.hValid,
+           project_id: d.hProject, enquiry_id: d.hEnquiry, note: d.hNote }[field] || field;
+}
+
 function docFolders(){
   const all = state.documents || [];
   const by = new Map();
-  all.forEach(d => {
-    const k = d.kind || 'other';
-    const g = by.get(k) || { kind: k, n: 0, sum: 0 };
-    g.n++; g.sum += Number(d.amount) || 0;
+  all.forEach(x => {
+    const k = x.kind || 'other';
+    const g = by.get(k) || { kind: k, n: 0, sum: 0, bytes: 0, soon: 0 };
+    g.n++; g.sum += Number(x.amount) || 0; g.bytes += Number(x.size_bytes) || 0;
+    /* Ninety days, because a class certificate is not renewed in a week. */
+    if(x.days_left != null && x.days_left <= 90) g.soon++;
     by.set(k, g);
   });
-  /* Every kind that has something in it, in the order the list declares --
-     not sorted by count, because a folder that moves when a file is added is
-     a folder you have to look for every time. */
-  return DOC_KINDS.filter(k => by.has(k)).map(k => by.get(k));
+  /* Every kind, in the order the list declares -- including the empty ones.
+     A folder that appears only once something is in it is a folder nobody
+     files into, because nobody knows it is there. */
+  return DOC_KINDS.map(k => by.get(k) || { kind: k, n: 0, sum: 0, bytes: 0, soon: 0 });
 }
 
-function docFolderTiles(t){
-  const d = t.doc, f = docState(), folders = docFolders();
-  const all = (state.documents || []).length;
-  if(!all) return '';
-  const tile = (key, label, n, sum) =>
-    `<button type="button" class="doc-folder${f.kind === key ? ' on' : ''}" data-folder="${key}">
-      <span class="doc-folder-n">${n}</span>
-      <span class="doc-folder-name">${esc(label)}</span>
-      ${sum ? `<span class="doc-folder-sum">${fmt(sum, 0)}</span>` : ''}
-    </button>`;
-  return `<div class="doc-folders">
-    ${tile('', d.allFiles, all, (state.documents || []).reduce((a, x) => a + (Number(x.amount) || 0), 0))}
-    ${folders.map(g => tile(g.kind, d.kind[g.kind], g.n, g.sum)).join('')}
+function docState(){
+  if(!state.docs) state.docs = { kind: '', q: '' };
+  return state.docs;
+}
+function docRows(){
+  const f = docState(), q = (f.q || '').toLowerCase();
+  return (state.documents || []).filter(x => {
+    if(f.kind && x.kind !== f.kind) return false;
+    if(!q) return true;
+    return [x.filename, x.ref, x.counterparty, x.note, x.project_ref, x.enquiry_ref]
+      .some(v => (v || '').toLowerCase().indexOf(q) !== -1);
+  }).sort((a, b) => (b.doc_date || b.created_at || '').localeCompare(a.doc_date || a.created_at || ''));
+}
+function humanSize(n){
+  n = Number(n) || 0;
+  if(n < 1024) return n + ' B';
+  if(n < 1048576) return (n / 1024).toFixed(0) + ' KB';
+  return (n / 1048576).toFixed(1) + ' MB';
+}
+
+/* ---- the folder grid ---- */
+function docFolderGrid(t){
+  const d = t.doc;
+  return `<div class="doc-grid">
+    ${docFolders().map(g => `
+      <button type="button" class="doc-dir${g.n ? '' : ' is-empty'}" data-folder="${g.kind}">
+        <span class="doc-dir-top">
+          <span class="doc-dir-n">${g.n}</span>
+          ${g.soon ? `<span class="doc-dir-soon" title="${esc(d.expiringSoon)}">${g.soon}</span>` : ''}
+        </span>
+        <span class="doc-dir-name">${esc(d.kind[g.kind])}</span>
+        <span class="doc-dir-foot">${g.sum ? fmt(g.sum, 0) : ''}${
+          g.sum && g.bytes ? '<em>\u00b7</em>' : ''}${
+          g.bytes ? `<i>${humanSize(g.bytes)}</i>` : ''}</span>
+      </button>`).join('')}
   </div>`;
 }
 
-function coDocsView(){
-  const t = tr(), c = t.co, d = t.doc, rows = docRows();
-  const f = docState();
-  /* Built with the selected value passed in, not by string-replacing
-     `selected` into finished markup afterwards. The replace version matched
-     on a value that might appear in another option's text, or on nothing at
-     all when the id was null -- and a link that silently points at the wrong
-     job is worse than one that points nowhere. */
-  const opts = (list, sel, id, label) =>
-    `<option value="">\u2014</option>` + list.map(x =>
-      `<option value="${esc(id(x))}"${id(x) === sel ? ' selected' : ''}>${esc(label(x))}</option>`
-    ).join('');
+/* ---- one row, with only the columns its folder declares ---- */
+function docCell(r, field, t){
+  const d = t.doc;
   const projList = state.projects || [];
   const enqList = (state.enquiries || []).slice(0, 300);
+  const opts = (list, sel, id, label) =>
+    `<option value="">\u2014</option>` + list.map(x =>
+      `<option value="${esc(id(x))}"${id(x) === sel ? ' selected' : ''}>${esc(label(x))}</option>`).join('');
 
-  const body = rows.length ? rows.map(r => `<tr data-doc="${esc(r.id)}">
-      <td><a href="#" class="doc-open" data-doc-open="${esc(r.id)}">${esc(r.filename)}</a>
-          <span class="doc-size">${humanSize(r.size_bytes)}</span></td>
-      <td><select data-df="kind">${DOC_KINDS.map(k =>
-          `<option value="${k}"${r.kind === k ? ' selected' : ''}>${esc(d.kind[k])}</option>`
-        ).join('')}</select></td>
-      <td><input data-df="doc_date" type="date" value="${esc(r.doc_date || '')}"></td>
-      <td class="num"><input data-df="amount" type="number" step="0.01"
-          value="${r.amount == null ? '' : r.amount}"></td>
-      <td><input data-df="counterparty" value="${esc(r.counterparty || '')}"></td>
-      <td><select data-df="project_id">${opts(projList, r.project_id,
-            x => x.id, x => (x.card ? x.card.projectId : x.id))}</select></td>
-      <td><select data-df="enquiry_id">${opts(enqList, r.enquiry_id,
-            x => x.id, x => x.number + (x.client ? ' \u2014 ' + x.client : ''))}</select></td>
-      <td class="doc-who">${r.uploaded_by ? esc(r.uploaded_by) : '\u2014'}
-          <span class="doc-when">${esc((r.created_at || '').slice(0, 10))}</span></td>
-      <td><button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button></td>
-    </tr>`).join('') : `<tr><td colspan="9" class="muted">${esc(d.none)}</td></tr>`;
+  if(field === 'doc_date' || field === 'valid_until'){
+    const v = r[field] || '';
+    const late = field === 'valid_until' && r.days_left != null && r.days_left <= 90;
+    return `<td class="${late ? (r.days_left < 0 ? 'doc-gone' : 'doc-soon') : ''}">
+      <input data-df="${field}" type="date" value="${esc(v)}">
+      ${late ? `<span class="doc-left">${r.days_left < 0
+          ? esc(d.expired) : d.daysLeft.replace('{n}', r.days_left)}</span>` : ''}</td>`;
+  }
+  if(field === 'amount')
+    return `<td class="num"><input data-df="amount" type="number" step="0.01"
+      value="${r.amount == null ? '' : r.amount}"></td>`;
+  if(field === 'project_id')
+    return `<td><select data-df="project_id">${opts(projList, r.project_id,
+      x => x.id, x => (x.card ? x.card.projectId : x.id))}</select></td>`;
+  if(field === 'enquiry_id')
+    return `<td><select data-df="enquiry_id">${opts(enqList, r.enquiry_id,
+      x => x.id, x => x.number + (x.client ? ' \u2014 ' + x.client : ''))}</select></td>`;
+  return `<td><input data-df="${field}" value="${esc(r[field] || '')}"></td>`;
+}
+
+function coDocsView(){
+  const t = tr(), d = t.doc, f = docState();
+  const rows = docRows();
+  const searching = !!(f.q || '').trim();
+  const inFolder = !!f.kind;
+
+  /* Uploading INTO the folder you are standing in. Everything used to arrive
+     as an incoming invoice whatever screen you were on, which is a wrong
+     default seven times out of eight and one nobody notices until the
+     invoices folder is full of photographs. */
+  const dropKind = f.kind || 'other';
+
+  const head = inFolder
+    ? `<p class="doc-crumb"><button type="button" class="doc-back" data-folder="">${
+        esc(d.allFiles)}</button> <span>/</span> <b>${esc(d.kind[f.kind])}</b></p>`
+    : '';
+
+  const table = (inFolder || searching) ? (() => {
+    /* When searching across folders the rows are of mixed kinds, so the
+       columns fall back to the common ones and each row says which folder it
+       is in. Inside a folder they are that folder's own. */
+    const fields = inFolder ? docSchema(f.kind).fields : ['doc_date','ref','amount','counterparty'];
+    const body = rows.length ? rows.map(r => `<tr data-doc="${esc(r.id)}">
+        <td><a href="#" class="doc-open" data-doc-open="${esc(r.id)}">${esc(r.filename)}</a>
+            <span class="doc-size">${humanSize(r.size_bytes)}</span></td>
+        ${searching && !inFolder
+          ? `<td><span class="doc-tag">${esc(d.kind[r.kind])}</span></td>` : ''}
+        ${fields.map(x => docCell(r, x, t)).join('')}
+        <td class="doc-who">${r.uploaded_by ? esc(r.uploaded_by) : '\u2014'}
+            <span class="doc-when">${esc((r.created_at || '').slice(0, 10))}</span></td>
+        <td><button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button></td>
+      </tr>`).join('')
+      : `<tr><td colspan="${fields.length + 4}" class="muted">${esc(d.none)}</td></tr>`;
+
+    return `<div class="tablewrap"><table class="sheet-table co-table doc-table">
+      <thead><tr>
+        <th>${esc(d.hFile)}</th>
+        ${searching && !inFolder ? `<th>${esc(d.hKind)}</th>` : ''}
+        ${fields.map(x => `<th class="${x === 'amount' ? 'num' : ''}">${
+          esc(docLabel(inFolder ? f.kind : 'other', x, d))}</th>`).join('')}
+        <th>${esc(d.hWho)}</th><th></th>
+      </tr></thead><tbody>${body}</tbody></table></div>`;
+  })() : docFolderGrid(t);
 
   return `${noticeBar()}<div class="card">
-    <h2 class="sheet">${esc(d.title)}</h2>
-    <p class="hint" style="margin:-8px 0 14px">${esc(d.lead)}</p>
+    <h2 class="sheet">${esc(d.title)}${inFolder ? ' // ' + esc(d.kind[f.kind]) : ''}</h2>
+    <p class="hint" style="margin:-8px 0 14px">${esc(inFolder ? d.folderLead : d.lead)}</p>
+    ${head}
 
-    ${docFolderTiles(t)}
-
-    <label class="drop-zone" data-doc-drop>
+    <label class="drop-zone" data-doc-drop data-drop-kind="${dropKind}">
       <input type="file" id="docFile" multiple class="drop-input"
              accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.csv,.txt">
       <span class="drop-face">
-        <span class="drop-main">${esc(d.drop)}</span>
+        <span class="drop-main">${esc(inFolder
+          ? d.dropInto.replace('{folder}', d.kind[f.kind]) : d.drop)}</span>
         <span class="drop-hint">${esc(d.dropHint)}</span>
       </span>
     </label>
     <p class="doc-status" id="docStatus" role="status" aria-live="polite"></p>
 
     <div class="pf-filters co-bar">
-      <label>${esc(d.search)}<input type="search" id="docQ" value="${esc(f.q)}"></label>
-      <span class="muted">${rows.length} / ${(state.documents || []).length}</span>
+      <label>${esc(d.search)}<input type="search" id="docQ" value="${esc(f.q)}"
+        placeholder="${esc(d.searchAll)}"></label>
+      ${(inFolder || searching)
+        ? `<span class="muted">${rows.length} / ${(state.documents || []).length}</span>` : ''}
     </div>
 
-    <div class="tablewrap"><table class="sheet-table co-table doc-table">
-      <thead><tr>
-        <th>${esc(d.hFile)}</th><th>${esc(d.hKind)}</th><th>${esc(d.hDate)}</th>
-        <th class="num">${esc(d.hAmount)}</th><th>${esc(d.hParty)}</th>
-        <th>${esc(d.hProject)}</th><th>${esc(d.hEnquiry)}</th>
-        <th>${esc(d.hWho)}</th><th></th>
-      </tr></thead>
-      <tbody>${body}</tbody>
-    </table></div>
+    ${table}
     <p class="hint co-foot">${esc(d.foot)}</p>
   </div>`;
 }
@@ -6167,7 +6289,12 @@ async function docUpload(files){
       await CLOUD.docUpload(path, f);
       const row = await CLOUD.docInsert({
         path: path, filename: f.name, mime: f.type || '',
-        size_bytes: String(f.size), kind: 'invoice_in',
+        size_bytes: String(f.size),
+        /* The folder you are standing in. Everything used to arrive as an
+           incoming invoice whatever screen you were on -- a wrong default
+           seven times out of eight, and one nobody notices until the invoices
+           folder is full of photographs. */
+        kind: docState().kind || 'other',
         doc_date: new Date().toISOString().slice(0, 10)
       });
       if(row) state.documents = [row].concat(state.documents || []);
@@ -6236,11 +6363,25 @@ async function docPreview(id){
         <p class="dp-loading">${esc(d.loading)}</p>
       </div>
       <div class="dp-facts">
-        ${fact(d.hDate, rec.doc_date)}
-        ${fact(d.hAmount, rec.amount == null ? '' : price(rec.amount))}
-        ${fact(d.hParty, rec.counterparty)}
-        ${fact(d.hProject, rec.project_ref)}
-        ${fact(d.hEnquiry, rec.enquiry_ref)}
+        ${docSchema(rec.kind).fields.map(x => {
+          /* The countdown belongs ON the expiry line, not under a second one
+             with the same heading. Two facts labelled "Valid until", one a
+             date and one a number of days, read as two different fields. */
+          if(x === 'valid_until'){
+            if(!rec.valid_until) return '';
+            const near = rec.days_left != null && rec.days_left <= 90;
+            const tone = !near ? '' : (rec.days_left < 0 ? ' is-gone' : ' is-soon');
+            const tail = !near ? '' : ' \u00b7 ' + (rec.days_left < 0
+              ? d.expired : d.daysLeft.replace('{n}', rec.days_left));
+            return `<div class="dp-fact${tone}"><span>${esc(docLabel(rec.kind, x, d))}</span>` +
+                   `<b>${esc(rec.valid_until + tail)}</b></div>`;
+          }
+          const v = x === 'amount'     ? (rec.amount == null ? '' : price(rec.amount))
+                  : x === 'project_id' ? rec.project_ref
+                  : x === 'enquiry_id' ? rec.enquiry_ref
+                  : rec[x];
+          return fact(docLabel(rec.kind, x, d), v);
+        }).join('')}
         ${fact(d.hWho, rec.uploaded_by)}
         ${fact(d.hFiled, (rec.created_at || '').slice(0, 10))}
       </div>
