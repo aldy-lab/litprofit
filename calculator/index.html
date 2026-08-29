@@ -647,8 +647,15 @@ svg text{font-family:var(--mono)}
   .ac-sign td{width:50%;padding:0 8mm 0 0;vertical-align:top;border:0}
   /* The rule the pen goes on, and the typed name under it -- the name is a
      record of who it should be, never a substitute for the signature. */
-  .ac-line{display:block;height:12mm;border-bottom:.3mm solid #2b2d42;margin:2mm 0 1.5mm}
-  .ac-name{font-size:8.6pt;color:#4a4d63}
+  /* Flex so the signature sits ON the rule the way a pen would, bottom
+     edges together, instead of floating in the middle of the box. An unsigned
+     act still prints the empty rule -- it is still a form somebody can sign
+     with a pen. */
+  .ac-line{display:flex;align-items:flex-end;height:12mm;
+    border-bottom:.3mm solid #2b2d42;margin:2mm 0 1.5mm}
+  .ac-sig{max-height:11mm;max-width:100%;margin-bottom:.6mm}
+  .ac-name{display:block;font-size:8.6pt;color:#4a4d63}
+  .ac-when{display:block;font-size:7.4pt;color:#6b6e85;margin-top:.8mm}
 }
 @media print{
   /* the app itself is not the document */
@@ -914,13 +921,80 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .act-sign{grid-template-columns:minmax(240px,340px);margin-top:16px}
 .act-f{display:grid;gap:5px}
 .act-f span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.act-table td.act-n,.act-table th.act-n{width:34px;text-align:right;color:var(--ink-3);
+/* Fixed columns, so the sheet keeps its proportions when the inputs go away.
+   Without this a signed act collapses to the width of its own text and the
+   description runs straight into the unit. */
+.act-table{width:100%}
+/* Fixed columns only where there is room for six of them. On a phone the
+   fixed layout obediently squeezed the work description down to three
+   characters, and a min-width to stop it pushed the whole app sideways
+   instead -- the wrapper could not contain it. Below this width the table
+   sizes to its content and .tablewrap scrolls, which is a scrollbar inside
+   the card rather than a page that moves. */
+@media (min-width: 760px){
+  .act-table{table-layout:fixed}
+        }
+.act-table td.act-n,.act-table th.act-n{width:36px;text-align:right;color:var(--ink-3);
   font-family:var(--mono);font-variant-numeric:tabular-nums}
+.act-table th:nth-child(3),.act-table td:nth-child(3){width:96px}
+.act-table th:nth-child(4),.act-table td:nth-child(4){width:84px}
+.act-table th:nth-child(5),.act-table td:nth-child(5){width:24%}
+.act-table th:nth-child(6),.act-table td:nth-child(6){width:46px}
+.act-table td{overflow-wrap:anywhere}
+/* A th is centred by default, which only showed once the columns stopped
+   being the width of their own contents. */
+.act-table th{text-align:left}
+.act-table th.num,.act-table td.num{text-align:right}
 .act-table input{width:100%;min-width:0}
 .act-table td.num input{text-align:right;font-family:var(--mono)}
 .act-list tr.act-row{cursor:pointer}
 .act-list tr.act-row:hover{background:var(--surface-2,rgba(0,0,0,.03))}
 .act-who{font-size:12px;color:var(--ink-3)}
+/* ---- the signature ----
+   The pad is white in both themes, on purpose. The ink has to be near-black
+   because it is going onto paper, and near-black ink on this app's own dark
+   ground would be a signature nobody can watch themselves write. So the pad
+   is a piece of paper, which is also what it is pretending to be. */
+/* A signed act reads as a record: the values sit on a hairline where the
+   field's box used to be, so the shape of the sheet is unchanged and there is
+   nothing left that looks like somewhere to type. */
+.act-read .act-f b{font-weight:600;color:var(--ink-1);font-size:15px;
+  padding:7px 0 6px;border-bottom:1px solid var(--grid);min-height:1.4em}
+.act-table td.act-n{white-space:nowrap}
+.sig,.sig-done{margin-top:20px;max-width:430px}
+.sig-lab{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:7px}
+.sig-pad{position:relative;background:#fff;border:1px solid rgba(11,13,42,.22);
+  border-radius:2px;transition:border-color .2s}
+.sig-pad.is-ink{border-color:var(--series-1)}
+/* touch-action:none is the whole reason a finger draws instead of scrolling
+   the page out from under itself. */
+.sig-pad canvas{display:block;width:100%;height:158px;touch-action:none;cursor:crosshair}
+/* The rule and the cross sit UNDER the canvas, not in it: drawn into the
+   canvas they would be exported as part of the signature. */
+.sig-rule{position:absolute;left:16px;right:16px;bottom:38px;
+  border-bottom:1px solid rgba(11,13,42,.28);pointer-events:none}
+.sig-x{position:absolute;left:16px;bottom:42px;font-family:var(--mono);font-size:13px;
+  color:rgba(11,13,42,.45);pointer-events:none;line-height:1}
+.sig-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.sig-sp{flex:1 1 auto}
+/* justify-items:start so the slip is the width of the signature on it, not
+   the width of the card: a white rectangle the width of the screen with a
+   small mark in one corner reads as an empty box. */
+.sig-done{display:grid;gap:9px;justify-items:start}
+.sig-img{background:#fff;border:1px solid rgba(11,13,42,.18);
+  border-bottom:1px solid rgba(11,13,42,.45);border-radius:2px;
+  display:inline-flex;align-items:flex-end;padding:10px 18px 6px;max-width:100%}
+.sig-img img{height:70px;width:auto;max-width:100%}
+.sig-meta{font-size:12px;color:var(--ink-3)}
+.act-locked{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;
+  border-left:2px solid var(--good);padding:8px 0 8px 12px;margin:0 0 16px}
+.act-locked b{color:var(--good-text);letter-spacing:.06em;text-transform:uppercase;
+  font-size:11px}
+.act-locked span{color:var(--ink-3);font-size:13px}
+.act-ok{font-style:normal;color:var(--good-text);margin-left:6px}
+.act-todo{font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);margin-left:8px;white-space:nowrap}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
 .co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
   border-top:2px solid var(--baseline)}
@@ -1380,6 +1454,7 @@ const T_ACT_PRINT = {
     qty:'Q-ty',qtyLt:'Kiekis',
     remarks:'Remarks',remarksLt:'Pastabos',
     rep:'Customer\u2019s representative',repLt:'Kliento atstovas',
+    signedOn:'Signed on',signedOnLt:'Pasirašyta',
     confirm:'The Customer\u2019s representative confirms that he has the right to accept and sign this act on behalf of the Customer.',
     confirmLt:'Kliento atstovas patvirtina, kad jis turi teisę priimti ir pasirašyti šį aktą kliento vardu.'};
 
@@ -1393,7 +1468,17 @@ en: {
     hNumber:'Act no.',hDate:'Date',hCustomer:'Customer',hImo:'IMO no.',hObject:'Object',
     hProjectNo:'Project no.',hWork:'Work description',hUnit:'Unit',hQty:'Q-ty',hRemarks:'Remarks',
     hLines:'Items',hWritten:'Written by',hRep:'Customer\u2019s representative',
-    repNote:'The name is printed under the signature line. The customer signs the paper, not the screen.',
+    repNote:'Printed under the signature line, as the record of who signed.',
+    signHere:'Sign here',sign:'Sign',clear:'Clear',undo:'Undo',
+    signed:'Signed',notSigned:'not signed',
+    signedAt:'{when} \u00b7 witnessed by {who}',
+    signNote:'The customer\u2019s representative signs on the screen. The signature is printed onto the act, and the act is then locked \u2014 changing anything on it means clearing the signature first.',
+    lockedNote:'Nothing on a signed act can be changed. Clear the signature to edit it.',
+    clearSig:'Clear the signature',
+    confirmClear:'Clear the signature? The act becomes editable again, and the fact that a signature was here stays on the record.',
+    needName:'Type the representative\u2019s name first.',
+    needInk:'Nothing has been drawn yet.',
+    signFailed:'The signature did not save. Nothing was signed.',
     confirmDel:'Delete act {n}? This cannot be undone.'},
   actPrint:T_ACT_PRINT,
   doc:{title:'Documents',
@@ -1604,7 +1689,17 @@ lt: {
     hNumber:'Akto nr.',hDate:'Data',hCustomer:'Užsakovas',hImo:'IMO nr.',hObject:'Objektas',
     hProjectNo:'Projekto nr.',hWork:'Darbų aprašymas',hUnit:'Mato vnt.',hQty:'Kiekis',hRemarks:'Pastabos',
     hLines:'Pozicijos',hWritten:'Surašė',hRep:'Kliento atstovas',
-    repNote:'Vardas spausdinamas po parašo linija. Klientas pasirašo popierių, ne ekraną.',
+    repNote:'Spausdinama po parašo linija \u2014 įrašas, kas pasirašė.',
+    signHere:'Pasirašykite čia',sign:'Pasirašyti',clear:'Išvalyti',undo:'Atšaukti',
+    signed:'Pasirašyta',notSigned:'nepasirašyta',
+    signedAt:'{when} \u00b7 liudijo {who}',
+    signNote:'Kliento atstovas pasirašo ekrane. Parašas atspausdinamas akte, o aktas užrakinamas \u2014 kad ką nors pakeistumėte, parašą pirma reikia pašalinti.',
+    lockedNote:'Pasirašyto akto keisti negalima. Norėdami redaguoti, pašalinkite parašą.',
+    clearSig:'Pašalinti parašą',
+    confirmClear:'Pašalinti parašą? Aktą vėl bus galima redaguoti, o tai, kad parašas čia buvo, lieka užfiksuota.',
+    needName:'Pirma įveskite atstovo vardą.',
+    needInk:'Dar nieko nenupiešta.',
+    signFailed:'Parašas neišsaugotas. Niekas nepasirašyta.',
     confirmDel:'Ištrinti aktą {n}? Atkurti nebus galima.'},
   doc:{title:'Dokumentai',
     lead:'Sąskaitos, pasiūlymai, sutartys ir sertifikatai, priskirti darbui, kuriam priklauso. Niekas neskaitoma automatiškai \u2014 sumą ir datą įvedate jūs.',
@@ -1814,7 +1909,17 @@ ru: {
     hNumber:'№ акта',hDate:'Дата',hCustomer:'Заказчик',hImo:'IMO №',hObject:'Объект',
     hProjectNo:'№ проекта',hWork:'Описание работ',hUnit:'Ед. изм.',hQty:'Кол-во',hRemarks:'Примечания',
     hLines:'Позиций',hWritten:'Составил',hRep:'Представитель заказчика',
-    repNote:'Имя печатается под линией подписи. Заказчик подписывает бумагу, а не экран.',
+    repNote:'Печатается под линией подписи \u2014 запись о том, кто подписал.',
+    signHere:'Подпишите здесь',sign:'Подписать',clear:'Очистить',undo:'Отменить',
+    signed:'Подписано',notSigned:'без подписи',
+    signedAt:'{when} \u00b7 засвидетельствовал {who}',
+    signNote:'Представитель заказчика подписывает на экране. Подпись печатается в акте, после чего акт блокируется \u2014 чтобы что-то изменить, подпись нужно сначала снять.',
+    lockedNote:'В подписанном акте ничего изменить нельзя. Чтобы редактировать, снимите подпись.',
+    clearSig:'Снять подпись',
+    confirmClear:'Снять подпись? Акт снова можно будет редактировать, а то, что подпись здесь была, останется в записи.',
+    needName:'Сначала введите имя представителя.',
+    needInk:'Пока ничего не нарисовано.',
+    signFailed:'Подпись не сохранилась. Ничего не подписано.',
     confirmDel:'Удалить акт {n}? Отменить нельзя.'},
   doc:{title:'Документы',
     lead:'Счета, предложения, договоры и сертификаты, привязанные к работе, к которой относятся. Ничего не распознаётся автоматически \u2014 сумму и дату вводите вы.',
@@ -2439,7 +2544,28 @@ const CLOUD = (function(){
        sees_money(): an act carries no prices, and the fitter who fills it in
        is exactly the role sees_money() shuts out. */
     async acts(){
-      return await rest('acts_v?select=*&order=act_date.desc') || [];
+      /* Every column EXCEPT the signature. A list of forty acts has no use
+         for forty signature images, and this list is also what goes through
+         JSON.stringify into localStorage on every keystroke -- `select=*`
+         would push a few hundred kilobytes of PNG through it each time. The
+         image is fetched for the one act somebody is looking at. */
+      const cols = ['id','project_id','number','act_date','customer','imo','object',
+        'project_ref','lines','rep_name','note','line_count','signed','signed_at',
+        'sign_log','witnessed_by','written_by','rev','created_at','updated_at'].join(',');
+      return await rest('acts_v?select=' + cols + '&order=act_date.desc') || [];
+    },
+    async actSignature(id){
+      const r = firstRow(await rest(
+        'acts_v?select=signature&id=eq.' + encodeURIComponent(id)));
+      return r ? r.signature : null;
+    },
+    async actSign(id, rev, png, rep){
+      return firstRow(await rest('rpc/sign_act', { method: 'POST',
+        body: JSON.stringify({ p_id: id, p_rev: rev, p_signature: png, p_rep_name: rep }) }));
+    },
+    async actUnsign(id, rev){
+      return firstRow(await rest('rpc/unsign_act', { method: 'POST',
+        body: JSON.stringify({ p_id: id, p_rev: rev }) }));
     },
     async actInsert(row){
       return firstRow(await rest('rpc/create_act', {
@@ -6259,6 +6385,33 @@ const ACT_UNITS = ['pcs', 'set', 'm', 'm2', 'm3', 'kg', 'h', 'l', 'compl.'];
    Two literals of a company's legal name is one of them going stale. */
 const LEGAL_NAME = 'UAB "Litprofit"';
 
+/* ---- the signature ----
+   The image never enters state.acts. Every act write returns the whole row
+   including it, and state.acts is stringified into localStorage on every
+   keystroke -- so it is lifted out here into a cache that is not persisted
+   and does not survive a reload. Which is right: a signed document lives in
+   the database, not in a browser somebody happened to log in from. */
+const SIG = Object.create(null);
+
+function stripSig(row){
+  if(row && row.signature){ SIG[row.id] = row.signature; delete row.signature; }
+  return row;
+}
+
+/* Half-drawn strokes, kept across a re-render. Starting the spare line at the
+   bottom of the sheet redraws the screen, and that would otherwise wipe a
+   signature somebody was in the middle of. */
+const SIG_DRAFT = Object.create(null);
+
+async function sigFor(x){
+  if(!x || !x.signed) return null;
+  if(x.signature) return x.signature;          /* browser-only copy */
+  if(SIG[x.id]) return SIG[x.id];
+  if(!CLOUD.on) return null;
+  try { SIG[x.id] = await CLOUD.actSignature(x.id); } catch(e){ return null; }
+  return SIG[x.id];
+}
+
 function actsOf(){
   const pid = proj() && proj().id;
   return (state.acts || []).filter(a => a.project_id === pid);
@@ -6266,11 +6419,17 @@ function actsOf(){
 function actOpen(){
   return (state.acts || []).find(a => a.id === state.actId) || null;
 }
+/* One reading of "is this signed", used by the editor, the list, the print
+   and the save guard. `signed` is the server's boolean; `signature` is what a
+   browser-only copy carries instead. */
+function x_signed(a){ return !!(a && (a.signed || a.signature)); }
+
 function actLines(a){
   const l = Array.isArray(a.lines) ? a.lines : [];
   /* Always one spare row at the end, so adding a line is typing rather than
-     finding a button first. */
-  return l.concat([{ work: '', unit: '', qty: '', remarks: '' }]);
+     finding a button first -- except on a signed act, where there is nothing
+     left to add. */
+  return x_signed(a) ? l : l.concat([{ work: '', unit: '', qty: '', remarks: '' }]);
 }
 
 /* The next number for this project: PRJ-001/01, /02, and so on. Suggested,
@@ -6291,7 +6450,11 @@ function viewActs(){
 
   const list = actsOf();
   const body = list.length ? list.map(x => `<tr class="act-row" data-act-open="${esc(x.id)}">
-      <td><b>${esc(x.number || '\u2014')}</b></td>
+      <td><b>${esc(x.number || '\u2014')}</b> ${x_signed(x)
+        ? `<i class="act-ok" title="${esc(a.signed)}">\u2713</i>`
+        /* The unsigned one is the one that wants pointing at: an act nobody
+           has signed is work that cannot be invoiced. */
+        : `<i class="act-todo">${esc(a.notSigned)}</i>`}</td>
       <td>${esc(x.act_date || '')}</td>
       <td>${esc(x.object || '\u2014')}</td>
       <td>${esc(x.customer || '\u2014')}</td>
@@ -6315,22 +6478,65 @@ function viewActs(){
   </div>`;
 }
 
-function actEditor(x, t){
-  const a = t.act;
-  const field = (key, label, type) =>
-    `<label class="act-f"><span>${esc(label)}</span>
-      <input data-af="${key}" type="${type || 'text'}" value="${esc(x[key] || '')}"></label>`;
-
-  const rows = actLines(x).map((l, i) => `<tr data-line="${i}">
-      <td class="act-n">${l.work || l.unit || l.qty || l.remarks ? (i + 1) : ''}</td>
-      <td><input data-al="work" data-i="${i}" value="${esc(l.work || '')}"></td>
-      <td><input data-al="unit" data-i="${i}" list="actUnits" value="${esc(l.unit || '')}"></td>
-      <td class="num"><input data-al="qty" data-i="${i}" value="${esc(l.qty || '')}"></td>
-      <td><input data-al="remarks" data-i="${i}" value="${esc(l.remarks || '')}"></td>
-      <td>${l.work || l.unit || l.qty || l.remarks
+/* One row of the sheet, in one place, because it is written twice: by the
+   editor and by the growing sheet below. Two copies of this markup would
+   drift the day a column is added and only one of them hears about it. */
+function actRow(l, i, t, lock){
+  const dis = lock ? ' disabled' : '';
+  const used = !!(l.work || l.unit || l.qty || l.remarks);
+  const cell = (k, cls) => lock
+    ? `<td${cls ? ' class="' + cls + '"' : ''}>${esc(l[k] || '')}</td>`
+    : `<td${cls ? ' class="' + cls + '"' : ''}><input data-al="${k}" data-i="${i}"${
+        k === 'unit' ? ' list="actUnits"' : ''} value="${esc(l[k] || '')}"${dis}></td>`;
+  return `<tr data-line="${i}">
+      <td class="act-n">${used ? (i + 1) : ''}</td>
+      ${cell('work')}${cell('unit')}${cell('qty', 'num')}${cell('remarks')}
+      <td>${!lock && used
             ? `<button class="ghost co-del" data-line-del="${i}" title="${esc(t.remove)}">×</button>`
             : ''}</td>
-    </tr>`).join('');
+    </tr>`;
+}
+
+/* ---- the sheet grows without being redrawn ----
+   Typing in the last line has to produce a new spare line under it, and the
+   obvious way -- save, then render() -- destroys the whole sheet including
+   the field the caret is at that moment landing in. The row appeared, the
+   focus went nowhere, and the next thing typed went into the page rather
+   than into the act. Found by tabbing across the row and watching where the
+   characters went.
+
+   So the two cells that actually change state are patched and one row is
+   appended. Nothing the user is touching is replaced. */
+function actGrowSheet(x, i, t){
+  const tb = document.querySelector('.act-table tbody');
+  if(!tb) return;
+  const row = tb.querySelector(`tr[data-line="${i}"]`);
+  if(row){
+    const num = row.querySelector('.act-n');
+    if(num && !num.textContent.trim()) num.textContent = String(i + 1);
+    const last = row.lastElementChild;
+    if(last && !last.firstElementChild)
+      last.innerHTML = `<button class="ghost co-del" data-line-del="${i}" title="${
+        esc(t.remove)}">×</button>`;
+  }
+  if(!tb.querySelector(`tr[data-line="${i + 1}"]`))
+    tb.insertAdjacentHTML('beforeend',
+      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false));
+}
+
+function actEditor(x, t){
+  const a = t.act;
+  /* A signed act is not a form any more. The fields become what they say --
+     a record -- because a disabled input still looks like somewhere to type,
+     and the first thing anybody does with one is try. */
+  const lock = x_signed(x), dis = lock ? ' disabled' : '';
+  const field = (key, label, type) => lock
+    ? `<div class="act-f"><span>${esc(label)}</span>
+        <b>${esc(x[key] || '\u2014')}</b></div>`
+    : `<label class="act-f"><span>${esc(label)}</span>
+      <input data-af="${key}" type="${type || 'text'}" value="${esc(x[key] || '')}"${dis}></label>`;
+
+  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock)).join('');
 
   return `${noticeBar()}<div class="card">
     <div class="act-bar">
@@ -6341,8 +6547,10 @@ function actEditor(x, t){
 
     <h2 class="sheet">${esc(a.title)} <span class="muted" style="font-weight:400">// ${
       esc(x.number || '')}</span></h2>
+    ${lock ? `<div class="act-locked"><b>${esc(a.signed)}</b><span>${
+      esc(a.lockedNote)}</span></div>` : ''}
 
-    <div class="act-head">
+    <div class="act-head${lock ? ' act-read' : ''}">
       ${field('number', a.hNumber)}
       ${field('act_date', a.hDate, 'date')}
       ${field('customer', a.hCustomer)}
@@ -6358,19 +6566,192 @@ function actEditor(x, t){
         <th class="num">${esc(a.hQty)}</th><th>${esc(a.hRemarks)}</th><th></th>
       </tr></thead><tbody>${rows}</tbody></table></div>
 
-    <div class="act-head act-sign">
+    <div class="act-head act-sign${lock ? ' act-read' : ''}">
       ${field('rep_name', a.hRep)}
     </div>
-    <p class="hint co-foot">${esc(a.repNote)}</p>
+    ${lock ? '' : `<p class="hint co-foot">${esc(a.repNote)}</p>`}
+    ${lock ? sigDone(x, t) : sigPadHtml(t)}
   </div>`;
+}
+
+/* The pad. White, because it is a piece of paper: the ink is near-black so it
+   prints, and near-black on this app's own dark ground would be a signature
+   nobody can see themselves writing. */
+function sigPadHtml(t){
+  const a = t.act;
+  return `<div class="sig">
+    <span class="sig-lab">${esc(a.signHere)}</span>
+    <div class="sig-pad" id="sigBox">
+      <canvas id="sigPad"></canvas>
+      <span class="sig-rule"></span><span class="sig-x">×</span>
+    </div>
+    <div class="sig-acts">
+      <button class="ghost" id="sigUndo">${esc(a.undo)}</button>
+      <button class="ghost" id="sigWipe">${esc(a.clear)}</button>
+      <span class="sig-sp"></span>
+      <button class="primary" id="sigSign" disabled>${esc(a.sign)}</button>
+    </div>
+    <p class="hint co-foot">${esc(a.signNote)}</p>
+  </div>`;
+}
+
+/* Signed. The image may not have arrived yet -- it is fetched per act, not
+   with the list -- so the slip renders empty and fills itself in rather than
+   the whole screen waiting on one request. */
+function sigDone(x, t){
+  const a = t.act;
+  const png = SIG[x.id] || x.signature || '';
+  const when = String(x.signed_at || '').replace('T', ' ').slice(0, 16);
+  return `<div class="sig-done">
+    <div class="sig-img" id="sigShow">${png
+      ? `<img src="${esc(png)}" alt="${esc(a.signed)}">` : ''}</div>
+    <div class="sig-meta">${esc(x.witnessed_by
+      ? a.signedAt.replace('{when}', when).replace('{who}', x.witnessed_by)
+      /* A browser-only copy has no accounts, so there is nobody to name and
+         the sentence is the timestamp on its own rather than "witnessed by —". */
+      : when)}</div>
+    <div class="sig-acts"><button class="ghost" id="sigClear">${esc(a.clearSig)}</button></div>
+  </div>`;
+}
+
+/* ---- the pad itself ----
+   Strokes are kept as points in CSS pixels and REDRAWN, never accumulated
+   into the canvas: that is what makes undo, a resize and the export at twice
+   the screen resolution all the same operation. The canvas is only ever a
+   picture of the strokes. */
+const SIG_INK = '#101010';
+let PAD = null;
+
+function sigPad(canvas, key, onChange){
+  const ctx = canvas.getContext('2d');
+  let strokes = SIG_DRAFT[key] || (SIG_DRAFT[key] = []);
+  let cur = null, w = 0, h = 0;
+
+  function mid(a, b){ return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+
+  function paint(c){
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.strokeStyle = SIG_INK; c.fillStyle = SIG_INK;
+    strokes.forEach(st => {
+      if(st.length === 1){
+        c.beginPath(); c.arc(st[0].x, st[0].y, 1.2, 0, 6.2832); c.fill(); return;
+      }
+      for(let i = 1; i < st.length; i++){
+        const p = st[i - 1], q = st[i];
+        /* A fast stroke is a thin one, the way a nib runs dry. Without this a
+           signature comes out as uniform wire and reads as a drawing of a
+           signature rather than one. */
+        const d = Math.hypot(q.x - p.x, q.y - p.y);
+        const m0 = i > 1 ? mid(st[i - 2], p) : p;
+        const m1 = mid(p, q);
+        c.beginPath(); c.lineWidth = Math.max(0.85, 2.5 - d * 0.12);
+        c.moveTo(m0.x, m0.y); c.quadraticCurveTo(p.x, p.y, m1.x, m1.y); c.stroke();
+      }
+      /* the last leg, so a stroke ends where the pen actually lifted rather
+         than at the midpoint before it */
+      const e = st[st.length - 1], m = mid(st[st.length - 2], e);
+      c.beginPath(); c.lineWidth = 1.3; c.moveTo(m.x, m.y); c.lineTo(e.x, e.y); c.stroke();
+    });
+  }
+
+  function draw(){ ctx.clearRect(0, 0, w, h); paint(ctx); }
+
+  function size(){
+    const r = canvas.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    w = r.width; h = r.height;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function at(e){
+    const r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    try { canvas.setPointerCapture(e.pointerId); } catch(err){}
+    cur = [at(e)]; strokes.push(cur); draw(); onChange();
+  });
+  canvas.addEventListener('pointermove', e => {
+    if(!cur) return;
+    e.preventDefault();
+    /* Coalesced events are the points a 120 Hz pen produced between two
+       frames. Without them a quick signature is a polygon.
+
+       The `length` check is not defensive padding: getCoalescedEvents()
+       returns an EMPTY array for any event the browser did not itself
+       generate, so the list has to fall back to the event. Found because a
+       synthetic touch stroke drew nothing at all and threw nothing either --
+       which is also what a real one would do wherever the method is stubbed. */
+    const co = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+    const pts = (co && co.length) ? co : [e];
+    let moved = false;
+    for(const ev of pts){
+      const p = at(ev), last = cur[cur.length - 1];
+      if(Math.hypot(p.x - last.x, p.y - last.y) < 1) continue;
+      cur.push(p); moved = true;
+    }
+    if(moved) draw();
+  });
+  const stop = () => { if(cur){ cur = null; onChange(); } };
+  canvas.addEventListener('pointerup', stop);
+  canvas.addEventListener('pointercancel', stop);
+
+  if(window.ResizeObserver) new ResizeObserver(size).observe(canvas);
+  size();
+
+  return {
+    ink(){
+      let d = 0;
+      strokes.forEach(st => { for(let i = 1; i < st.length; i++)
+        d += Math.hypot(st[i].x - st[i - 1].x, st[i].y - st[i - 1].y); });
+      return d;
+    },
+    /* A stray tap is not a signature. Sixty pixels of travel is about the
+       shortest initial anybody actually writes. */
+    hasInk(){ return this.ink() > 60; },
+    undo(){ strokes.pop(); draw(); onChange(); },
+    wipe(){ strokes.length = 0; draw(); onChange(); },
+    png(){
+      if(!this.hasInk()) return null;
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      strokes.forEach(st => st.forEach(p => {
+        if(p.x < x0) x0 = p.x; if(p.x > x1) x1 = p.x;
+        if(p.y < y0) y0 = p.y; if(p.y > y1) y1 = p.y;
+      }));
+      /* Trimmed to the ink, or the printed signature is a postage stamp in
+         the middle of an empty box. The padding is the widest the pen gets. */
+      const pad = 5;
+      x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad);
+      x1 = Math.min(w, x1 + pad); y1 = Math.min(h, y1 + pad);
+      const sc = 2, off = document.createElement('canvas');
+      off.width = Math.max(1, Math.round((x1 - x0) * sc));
+      off.height = Math.max(1, Math.round((y1 - y0) * sc));
+      const o = off.getContext('2d');
+      o.setTransform(sc, 0, 0, sc, -x0 * sc, -y0 * sc);
+      paint(o);                       /* transparent ground: it sits on a rule */
+      return off.toDataURL('image/png');
+    }
+  };
 }
 
 /* ---- the printed act ----
    Both languages on every label, whatever the app is set to. The customer's
    representative and the yard are not always reading the same one, and the
    paper form this replaces has always carried both. */
-function printAct(x){
+async function printAct(x){
   const t = tr(), a = t.act;
+  const png = await sigFor(x);
+  /* Decoded BEFORE the print dialog opens. A data URL in fresh markup is
+     usually painted in time and "usually" is how a signature goes missing
+     from one PDF in twenty with nothing to show it ever happened. */
+  if(png) await new Promise(go => {
+    const im = new Image(); im.onload = im.onerror = go; im.src = png;
+  });
   const two = (en, lt) => `<span class="ac-en">${esc(en)}</span><span class="ac-lt">${esc(lt)}</span>`;
   const L = t.actPrint;
 
@@ -6412,8 +6793,11 @@ function printAct(x){
     <p class="ac-note">${esc(L.confirm)}<br><i>${esc(L.confirmLt)}</i></p>
 
     <table class="ac-sign"><tr>
-      <td>${two(L.rep, L.repLt)}<span class="ac-line"></span>
-          <span class="ac-name">${esc(x.rep_name || '')}</span></td>
+      <td>${two(L.rep, L.repLt)}<span class="ac-line">${png
+            ? `<img class="ac-sig" src="${esc(png)}" alt="">` : ''}</span>
+          <span class="ac-name">${esc(x.rep_name || '')}</span>
+          ${x.signed_at ? `<span class="ac-when">${esc(L.signedOn)} / ${
+            esc(L.signedOnLt)}: ${esc(String(x.signed_at).slice(0, 10))}</span>` : ''}</td>
       <td>${two(L.executor, L.executorLt)}<span class="ac-line"></span>
           <span class="ac-name">${esc(LEGAL_NAME)}</span></td>
     </tr></table>`;
@@ -6444,6 +6828,49 @@ function wireActs(){
   on('actBack', 'click', () => { state.actId = null; persist(); render(); });
   on('actPrint', 'click', () => { const x = actOpen(); if(x) printAct(x); });
 
+  /* ---- the pad, rebuilt with the screen ----
+     The canvas is a new element on every render, so the pad is too. The
+     strokes are not: they live in SIG_DRAFT, keyed by act. */
+  PAD = null;
+  const cv = $('#sigPad'), open = actOpen();
+  if(cv && open){
+    PAD = sigPad(cv, open.id, () => {
+      const b = $('#sigSign'), box = $('#sigBox'), has = PAD.hasInk();
+      if(b) b.disabled = !has;
+      if(box) box.classList.toggle('is-ink', has);
+    });
+    const b = $('#sigSign'); if(b) b.disabled = !PAD.hasInk();
+  }
+  on('sigUndo', 'click', () => { if(PAD) PAD.undo(); });
+  on('sigWipe', 'click', () => { if(PAD) PAD.wipe(); });
+
+  on('sigSign', 'click', async () => {
+    /* Clicking the button blurs the name field, which fires its change and
+       starts a save. Signing on the rev we were rendered with would then hit
+       a row one revision ahead and come back as somebody else's conflict --
+       so wait for our own save to land first. */
+    if(actSaving){ try { await actSaving; } catch(e){} }
+    const x = actOpen(); if(!x || !PAD) return;
+    const nameEl = document.querySelector('[data-af="rep_name"]');
+    const name = String((nameEl && nameEl.value) || x.rep_name || '').trim();
+    if(!name){ toast(tr().act.needName, 'bad'); if(nameEl) nameEl.focus(); return; }
+    const png = PAD.png();
+    if(!png){ toast(tr().act.needInk, 'bad'); return; }
+    await actSign(x, png, name);
+  });
+
+  on('sigClear', 'click', () => { const x = actOpen(); if(x) actUnsign(x); });
+
+  /* The signature of an act opened from the list is not in the payload the
+     list arrived in. Fetched here, once, and dropped into the slip. */
+  const show = $('#sigShow');
+  if(show && !show.firstChild && open){
+    sigFor(open).then(png => {
+      const el = $('#sigShow');
+      if(el && png && !el.firstChild) el.innerHTML = `<img src="${esc(png)}" alt="">`;
+    });
+  }
+
   const main = $('#main');
   if(!main || main.dataset.actWired) return;
   main.dataset.actWired = '1';
@@ -6461,7 +6888,7 @@ function wireActs(){
     const lineDel = ev.target.closest('[data-line-del]');
     if(lineDel){
       const i = Number(lineDel.getAttribute('data-line-del'));
-      const x = actOpen(); if(!x) return;
+      const x = actOpen(); if(!x || x_signed(x)) return;
       const l = (Array.isArray(x.lines) ? x.lines : []).slice();
       l.splice(i, 1);
       await actSave(x, { lines: l }, true);
@@ -6472,7 +6899,7 @@ function wireActs(){
   });
 
   main.addEventListener('change', ev => {
-    const x = actOpen(); if(!x) return;
+    const x = actOpen(); if(!x || x_signed(x)) return;
     const hf = ev.target.closest('[data-af]');
     if(hf){ actSave(x, { [hf.getAttribute('data-af')]: hf.value }); return; }
     const lf = ev.target.closest('[data-al]');
@@ -6481,10 +6908,11 @@ function wireActs(){
       const l = (Array.isArray(x.lines) ? x.lines : []).slice();
       while(l.length <= i) l.push({ work: '', unit: '', qty: '', remarks: '' });
       l[i] = Object.assign({}, l[i], { [key]: lf.value });
-      /* A spare row is redrawn only when the last one has been started, so
-         typing in the middle of the sheet does not move anything. */
+      /* Never a re-render on a keystroke: the sheet grows by one row in
+         place, so the field being tabbed into survives. */
       const wasLast = i === l.length - 1;
-      actSave(x, { lines: l }, wasLast);
+      actSave(x, { lines: l }, false);
+      if(wasLast) actGrowSheet(x, i, tr());
     }
   });
 }
@@ -6497,7 +6925,7 @@ async function actCreate(row){
     state.actId = row.id; persist(); render(); return;
   }
   try {
-    const saved = await CLOUD.actInsert(row);
+    const saved = stripSig(await CLOUD.actInsert(row));
     if(saved){ state.acts = [saved].concat(state.acts || []); state.actId = saved.id; }
     persist(); render();
   } catch(e){ toast(tr().co.saveFailed, 'bad'); }
@@ -6513,7 +6941,20 @@ async function actDelete(id){
   persist(); render();
 }
 
-async function actSave(x, patch, redraw){
+/* The save in flight, so signing can wait for it. One slot is enough: the
+   only writer is a field change, and a field change is one at a time. */
+let actSaving = null;
+
+function actSave(x, patch, redraw){
+  const job = actSaveNow(x, patch, redraw);
+  actSaving = job.catch(() => {});
+  return job;
+}
+
+async function actSaveNow(x, patch, redraw){
+  /* Refused here as well as on the server, so a signed act never produces an
+     error toast for a save that was never going to be allowed. */
+  if(x_signed(x)) return;
   const merged = Object.assign({}, x, patch);
   if(!CLOUD.on){
     Object.assign(x, patch);
@@ -6522,14 +6963,51 @@ async function actSave(x, patch, redraw){
     persist(); if(redraw) render(); return;
   }
   try {
-    const saved = await CLOUD.actSave(x.id, x.rev, {
+    const saved = stripSig(await CLOUD.actSave(x.id, x.rev, {
       number: merged.number, act_date: merged.act_date, customer: merged.customer,
       imo: merged.imo, object: merged.object, project_ref: merged.project_ref,
       lines: merged.lines, rep_name: merged.rep_name, note: merged.note
-    });
+    }));
     if(!saved){ toast(tr().co.conflict, 'bad'); return; }
     state.acts = (state.acts || []).map(z => z.id === saved.id ? saved : z);
     persist(); if(redraw) render();
+  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+}
+
+/* ---- signing ----
+   Signing is its own call and not a field, because it is an event: it has a
+   moment, a witness, and a record of having happened. */
+async function actSign(x, png, name){
+  if(!CLOUD.on){
+    /* A browser-only copy has no server, so here the image does live on the
+       row and goes to localStorage with it. There is nowhere else for it. */
+    Object.assign(x, { signature: png, signed: true, rep_name: name,
+                       signed_at: new Date().toISOString(), witnessed_by: null });
+    delete SIG_DRAFT[x.id];
+    persist(); render(); return;
+  }
+  try {
+    const saved = stripSig(await CLOUD.actSign(x.id, x.rev, png, name));
+    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
+    delete SIG_DRAFT[x.id];
+    state.acts = (state.acts || []).map(z => z.id === saved.id ? saved : z);
+    persist(); render();
+  } catch(e){ toast(tr().act.signFailed, 'bad'); }
+}
+
+async function actUnsign(x){
+  if(!confirm(tr().act.confirmClear)) return;
+  if(!CLOUD.on){
+    delete x.signature;
+    Object.assign(x, { signed: false, signed_at: null });
+    persist(); render(); return;
+  }
+  try {
+    const saved = stripSig(await CLOUD.actUnsign(x.id, x.rev));
+    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
+    delete SIG[x.id];
+    state.acts = (state.acts || []).map(z => z.id === saved.id ? saved : z);
+    persist(); render();
   } catch(e){ toast(tr().co.saveFailed, 'bad'); }
 }
 
