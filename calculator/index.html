@@ -993,8 +993,13 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
   font-size:11px}
 .act-locked span{color:var(--ink-3);font-size:13px}
 .act-ok{font-style:normal;color:var(--good-text);margin-left:6px}
-.act-todo{font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--ink-3);margin-left:8px;white-space:nowrap}
+.act-todo,.act-wait{font-style:normal;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+/* Not an error. On a vessel it is the normal state, and it says what is true:
+   this browser has it and the database does not yet. */
+.act-wait{color:var(--warning)}
+.act-sync{font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--warning);white-space:nowrap}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
 .co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
   border-top:2px solid var(--baseline)}
@@ -1470,7 +1475,8 @@ en: {
     hLines:'Items',hWritten:'Written by',hRep:'Customer\u2019s representative',
     repNote:'Printed under the signature line, as the record of who signed.',
     signHere:'Sign here',sign:'Sign',clear:'Clear',undo:'Undo',
-    signed:'Signed',notSigned:'not signed',
+    signed:'Signed',notSigned:'not signed',unsent:'not sent',
+    sendFailed:'Could not reach the database. Nothing is lost \u2014 it goes up when there is a connection.',
     signedAt:'{when} \u00b7 witnessed by {who}',
     signNote:'The customer\u2019s representative signs on the screen. The signature is printed onto the act, and the act is then locked \u2014 changing anything on it means clearing the signature first.',
     lockedNote:'Nothing on a signed act can be changed. Clear the signature to edit it.',
@@ -1691,7 +1697,8 @@ lt: {
     hLines:'Pozicijos',hWritten:'Surašė',hRep:'Kliento atstovas',
     repNote:'Spausdinama po parašo linija \u2014 įrašas, kas pasirašė.',
     signHere:'Pasirašykite čia',sign:'Pasirašyti',clear:'Išvalyti',undo:'Atšaukti',
-    signed:'Pasirašyta',notSigned:'nepasirašyta',
+    signed:'Pasirašyta',notSigned:'nepasirašyta',unsent:'neišsiųsta',
+    sendFailed:'Nepavyko pasiekti duomenų bazės. Niekas neprarasta \u2014 bus išsiųsta atsiradus ryšiui.',
     signedAt:'{when} \u00b7 liudijo {who}',
     signNote:'Kliento atstovas pasirašo ekrane. Parašas atspausdinamas akte, o aktas užrakinamas \u2014 kad ką nors pakeistumėte, parašą pirma reikia pašalinti.',
     lockedNote:'Pasirašyto akto keisti negalima. Norėdami redaguoti, pašalinkite parašą.',
@@ -1911,7 +1918,8 @@ ru: {
     hLines:'Позиций',hWritten:'Составил',hRep:'Представитель заказчика',
     repNote:'Печатается под линией подписи \u2014 запись о том, кто подписал.',
     signHere:'Подпишите здесь',sign:'Подписать',clear:'Очистить',undo:'Отменить',
-    signed:'Подписано',notSigned:'без подписи',
+    signed:'Подписано',notSigned:'без подписи',unsent:'не отправлено',
+    sendFailed:'Не удалось связаться с базой. Ничего не потеряно \u2014 уйдёт, когда появится связь.',
     signedAt:'{when} \u00b7 засвидетельствовал {who}',
     signNote:'Представитель заказчика подписывает на экране. Подпись печатается в акте, после чего акт блокируется \u2014 чтобы что-то изменить, подпись нужно сначала снять.',
     lockedNote:'В подписанном акте ничего изменить нельзя. Чтобы редактировать, снимите подпись.',
@@ -2286,12 +2294,21 @@ const CLOUD = (function(){
     } catch(e){}
   }
 
+  /* A request that never reached a server is not a request the server
+     refused, and the difference decides whether somebody carries on working
+     or is shown a login screen on a vessel with no signal. Everything that
+     fetches marks the first kind so callers can tell them apart. */
+  function offline(){ const e = new Error('offline'); e.offline = true; return e; }
+
   async function auth(path, body){
-    const r = await fetch(API + '/auth/v1/' + path, {
-      method: 'POST',
-      headers: { apikey: KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    let r;
+    try {
+      r = await fetch(API + '/auth/v1/' + path, {
+        method: 'POST',
+        headers: { apikey: KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } catch(err){ throw offline(); }
     let j = {};
     try { j = await r.json(); } catch(e){}
     if(!r.ok) throw new Error(j.error_description || j.msg || j.error || ('HTTP ' + r.status));
@@ -2302,7 +2319,15 @@ const CLOUD = (function(){
     if(!session || !session.refresh_token) return false;
     try { keep(await auth('token?grant_type=refresh_token',
                           { refresh_token: session.refresh_token })); return true; }
-    catch(e){ keep(null); return false; }
+    catch(e){
+      /* keep(null) here USED TO run for every failure, a fetch that never
+         reached a server included. So going out of signal DELETED the
+         session: the tablet on board put up a sign-in screen, with no network
+         to sign in through, and the day's acts sitting in localStorage behind
+         it. Only a refusal ends a session. */
+      if(!e || !e.offline) keep(null);
+      return false;
+    }
   }
 
   /* One retry on 401, because an access token expires mid-session and the
@@ -2317,9 +2342,12 @@ const CLOUD = (function(){
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + ((session && session.access_token) || KEY)
     }, opts.headers || {});
-    const r = await fetch(API + '/rest/v1/' + path, {
-      method: opts.method || 'GET', headers: headers, body: opts.body
-    });
+    let r;
+    try {
+      r = await fetch(API + '/rest/v1/' + path, {
+        method: opts.method || 'GET', headers: headers, body: opts.body
+      });
+    } catch(err){ throw offline(); }
     if(r.status === 401 && !retried && await refresh()) return rest(path, opts, true);
     if(!r.ok){
       let msg = 'HTTP ' + r.status;
@@ -2559,9 +2587,13 @@ const CLOUD = (function(){
         'acts_v?select=signature&id=eq.' + encodeURIComponent(id)));
       return r ? r.signature : null;
     },
-    async actSign(id, rev, png, rep){
+    /* signed_at goes UP, it is not stamped here. An act signed on board at
+       two and synced at six would otherwise be dated six. The server clamps
+       the claim and keeps its own arrival time beside it. */
+    async actSign(id, rev, png, rep, signedAt){
       return firstRow(await rest('rpc/sign_act', { method: 'POST',
-        body: JSON.stringify({ p_id: id, p_rev: rev, p_signature: png, p_rep_name: rep }) }));
+        body: JSON.stringify({ p_id: id, p_rev: rev, p_signature: png,
+                               p_rep_name: rep, p_signed_at: signedAt || null }) }));
     },
     async actUnsign(id, rev){
       return firstRow(await rest('rpc/unsign_act', { method: 'POST',
@@ -2619,6 +2651,12 @@ function loadState(){
 /* Marks the CURRENT project as edited. Called from the data paths only —
    switching language or theme is not an edit to a project. */
 const pendingPush = new Set();
+/* Its twin for acts. Declared here rather than beside the act code four
+   thousand lines down because persist() reads both, persist() runs during
+   start-up, and a const declared after that point is in its temporal dead
+   zone when it does -- which stops the whole script evaluating and shows up
+   as an error about some unrelated identifier much further on. */
+const pendingActs = new Set();
 function touch(){
   const p = proj();
   if(!p) return;
@@ -2649,6 +2687,14 @@ var savedAt = null;
    saving. The filters stay: they are settings, not data. */
 function persist(){
   mem = state;
+  /* The queues were Sets in memory only. Edit with no signal, close the page,
+     and the edits sat in localStorage with nothing left to say they had never
+     been sent -- and the next successful load replaced state.projects with
+     the server's copy and took them with it. Written here, in the one place
+     every save goes through, rather than at each of the dozen sites that add
+     to a queue. */
+  state.unsentProjects = [...pendingPush];
+  state.unsentActs = [...pendingActs];
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(state,
       (k, v) => k === 'enquiries' ? undefined : v));
@@ -6414,7 +6460,9 @@ async function sigFor(x){
 
 function actsOf(){
   const pid = proj() && proj().id;
-  return (state.acts || []).filter(a => a.project_id === pid);
+  /* `gone` is a tombstone waiting for the server to be told. It is not a
+     listed act from the moment the button is pressed. */
+  return (state.acts || []).filter(a => a.project_id === pid && !a.gone);
 }
 function actOpen(){
   return (state.acts || []).find(a => a.id === state.actId) || null;
@@ -6450,11 +6498,15 @@ function viewActs(){
 
   const list = actsOf();
   const body = list.length ? list.map(x => `<tr class="act-row" data-act-open="${esc(x.id)}">
-      <td><b>${esc(x.number || '\u2014')}</b> ${x_signed(x)
-        ? `<i class="act-ok" title="${esc(a.signed)}">\u2713</i>`
-        /* The unsigned one is the one that wants pointing at: an act nobody
+      <td><b>${esc(x.number || '\u2014')}</b>${x_signed(x)
+        ? ` <i class="act-ok" title="${esc(a.signed)}">\u2713</i>` : ''}${
+        /* Two independent facts: whether it is signed, and whether this
+           database has heard about it. An act signed on board and not yet
+           sent is both, and that is the row somebody has to see. The
+           unsigned one still wants pointing at on its own -- an act nobody
            has signed is work that cannot be invoiced. */
-        : `<i class="act-todo">${esc(a.notSigned)}</i>`}</td>
+        actUnsent(x) ? ` <i class="act-wait">${esc(a.unsent)}</i>`
+          : (x_signed(x) ? '' : ` <i class="act-todo">${esc(a.notSigned)}</i>`)}</td>
       <td>${esc(x.act_date || '')}</td>
       <td>${esc(x.object || '\u2014')}</td>
       <td>${esc(x.customer || '\u2014')}</td>
@@ -6542,6 +6594,8 @@ function actEditor(x, t){
     <div class="act-bar">
       <button class="doc-back" id="actBack">${esc(a.backToList)}</button>
       <span class="act-sp"></span>
+      <span class="act-sync" id="actSync"${actUnsent(x) ? '' : ' hidden'}>${
+        esc(a.unsent)}</span>
       <button id="actPrint" class="primary">${esc(a.printPdf)}</button>
     </div>
 
@@ -6809,10 +6863,10 @@ async function printAct(x){
 function wireActs(){
   const on = (id, ev, fn) => { const el = $('#' + id); if(el) el.addEventListener(ev, fn); };
 
-  on('actNew', 'click', async () => {
+  on('actNew', 'click', () => {
     const p = proj(), c = p.card;
     /* Copied from the project once, here, and the act owns them afterwards. */
-    await actCreate({
+    actCreate({
       project_id: p.id,
       number: actNextNumber(),
       act_date: new Date().toISOString().slice(0, 10),
@@ -6844,19 +6898,18 @@ function wireActs(){
   on('sigUndo', 'click', () => { if(PAD) PAD.undo(); });
   on('sigWipe', 'click', () => { if(PAD) PAD.wipe(); });
 
-  on('sigSign', 'click', async () => {
-    /* Clicking the button blurs the name field, which fires its change and
-       starts a save. Signing on the rev we were rendered with would then hit
-       a row one revision ahead and come back as somebody else's conflict --
-       so wait for our own save to land first. */
-    if(actSaving){ try { await actSaving; } catch(e){} }
+  on('sigSign', 'click', () => {
+    /* This used to have to wait for a save in flight: clicking the button
+       blurs the name field, that fired a change, and the save bumped the
+       revision under the signature. Writes are local now and the revision is
+       read when the queue runs, so there is nothing left to wait for. */
     const x = actOpen(); if(!x || !PAD) return;
     const nameEl = document.querySelector('[data-af="rep_name"]');
     const name = String((nameEl && nameEl.value) || x.rep_name || '').trim();
     if(!name){ toast(tr().act.needName, 'bad'); if(nameEl) nameEl.focus(); return; }
     const png = PAD.png();
     if(!png){ toast(tr().act.needInk, 'bad'); return; }
-    await actSign(x, png, name);
+    actSign(x, png, name);
   });
 
   on('sigClear', 'click', () => { const x = actOpen(); if(x) actUnsign(x); });
@@ -6882,7 +6935,7 @@ function wireActs(){
       const id = del.getAttribute('data-act-del');
       const rec = (state.acts || []).find(z => z.id === id);
       if(!rec || !confirm(tr().act.confirmDel.replace('{n}', rec.number || ''))) return;
-      await actDelete(id);
+      actDelete(id);
       return;
     }
     const lineDel = ev.target.closest('[data-line-del]');
@@ -6891,7 +6944,7 @@ function wireActs(){
       const x = actOpen(); if(!x || x_signed(x)) return;
       const l = (Array.isArray(x.lines) ? x.lines : []).slice();
       l.splice(i, 1);
-      await actSave(x, { lines: l }, true);
+      actSave(x, { lines: l }, true);
       return;
     }
     const open = ev.target.closest('[data-act-open]');
@@ -6917,98 +6970,248 @@ function wireActs(){
   });
 }
 
-async function actCreate(row){
-  if(!CLOUD.on){
-    row.id = 'local-' + Math.random().toString(36).slice(2, 10);
-    row.rev = 1; row.line_count = 0;
-    state.acts = [row].concat(state.acts || []);
-    state.actId = row.id; persist(); render(); return;
-  }
-  try {
-    const saved = stripSig(await CLOUD.actInsert(row));
-    if(saved){ state.acts = [saved].concat(state.acts || []); state.actId = saved.id; }
-    persist(); render();
-  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+/* ================= acts: the outbox =================
+   Acts are written to this browser FIRST and sent afterwards. That is the
+   opposite way round from how the screen started, and it is the only
+   arrangement that works where the screen is used: a vessel has no signal,
+   the act is filled in and signed on board, and it reaches the database when
+   the tablet is back in range. Writing straight through meant the signature
+   the whole feature exists for failed exactly where it was taken.
+
+   The queue has the same shape as the projects' one -- a set of ids, one pass
+   at a time, a backoff that keeps trying rather than waiting for the next
+   keystroke -- and it survives the tab being closed, because persist() writes
+   it out with everything else. */
+var actPushTimer = null, actPushing = false, actPushAgain = false, actBackoff = 0;
+
+/* Anything the server has not been told about yet. `rev` is only ever set by
+   adoptAct, so an act without one has never been sent.
+
+   False outright with no database configured: in a browser-only copy there
+   is no server to be behind, and every act would otherwise wear a permanent
+   "not sent" badge about a machine that does not exist. */
+function actUnsent(a){
+  return CLOUD.on && !!(a && (a.dirty || a.gone || !a.rev));
+}
+function unsentCount(){ return (state.acts || []).filter(actUnsent).length; }
+
+function actQueue(a){
+  if(a && CLOUD.on) pendingActs.add(a.id);
+  persist();
+  if(CLOUD.on) actPushSoon(0);
+}
+function actPushSoon(delay){
+  clearTimeout(actPushTimer);
+  actPushTimer = setTimeout(pushActs, delay === undefined ? 300 : delay);
 }
 
-async function actDelete(id){
-  if(CLOUD.on){
-    try { await CLOUD.actDelete(id); }
-    catch(e){ toast(tr().co.saveFailed, 'bad'); return; }
+/* What the row is, without the parts that belong to this browser. */
+function actPayload(a){
+  return { project_id: a.project_id, number: a.number, act_date: a.act_date,
+           customer: a.customer, imo: a.imo, object: a.object,
+           project_ref: a.project_ref, lines: a.lines,
+           rep_name: a.rep_name, note: a.note };
+}
+
+/* The server's row replaces the local one, except for what is local by
+   nature: the image moves to the cache, and the queue flags go because they
+   have just been honoured. An id changes here exactly once -- when an act
+   created with no signal is finally inserted -- and everything keyed by the
+   old one has to move with it. */
+function adoptAct(a, row){
+  const was = a.id;
+  /* What is still owed has to survive the server's answer. An act created
+     with no signal is inserted first and signed second, and the insert comes
+     back saying signed:false -- which is TRUE, the signature has not been
+     sent yet. Copying that over the row deleted a signature taken on board
+     and never sent: the act arrived with its lines and no signature, and
+     nothing anywhere said so. Caught by taking the network away, signing,
+     and giving it back. */
+  const owed = (a.signed && !a.serverSigned)
+    ? { png: a.signature || SIG[a.id], at: a.signed_at, rep: a.rep_name }
+    : null;
+
+  stripSig(row);
+  Object.keys(row).forEach(k => { a[k] = row[k]; });
+  a.serverSigned = !!row.signed;
+  delete a.dirty;
+  delete a.signature;
+
+  if(was !== a.id){
+    if(state.actId === was) state.actId = a.id;
+    if(SIG[was]){ SIG[a.id] = SIG[was]; delete SIG[was]; }
+    if(SIG_DRAFT[was]){ SIG_DRAFT[a.id] = SIG_DRAFT[was]; delete SIG_DRAFT[was]; }
+    pendingActs.delete(was);
   }
+
+  if(owed && !a.serverSigned){
+    a.signed = true; a.signed_at = owed.at; a.rep_name = owed.rep;
+    a.signature = owed.png; SIG[a.id] = owed.png;
+    a.dirty = true;
+  }
+}
+
+function dropAct(id){
   state.acts = (state.acts || []).filter(z => z.id !== id);
+  pendingActs.delete(id);
+  delete SIG[id]; delete SIG_DRAFT[id];
   if(state.actId === id) state.actId = null;
-  persist(); render();
 }
 
-/* The save in flight, so signing can wait for it. One slot is enough: the
-   only writer is a field change, and a field change is one at a time. */
-let actSaving = null;
+async function pushActs(){
+  if(!CLOUD.on || !pendingActs.size) return;
+  if(actPushing){ actPushAgain = true; return; }
+  actPushing = true;
+  const ids = [...pendingActs];
+  pendingActs.clear();
+  let failed = false, quiet = true, changed = false;
+  try {
+    for(let i = 0; i < ids.length; i++){
+      const id = ids[i];
+      const a = (state.acts || []).find(z => z.id === id);
+      if(!a) continue;
+      try {
+        /* Deleted before it was ever sent: there is nobody to tell. */
+        if(a.gone && !a.rev){ dropAct(id); changed = true; continue; }
+        if(a.gone){ await CLOUD.actDelete(a.id); dropAct(a.id); changed = true; continue; }
+
+        if(!a.rev){
+          const row = await CLOUD.actInsert(actPayload(a));
+          if(row){ adoptAct(a, row); changed = true; }
+        }
+        /* The order is the order the things happened in. save_act refuses a
+           signed act, so an edit still owed has to go up before the
+           signature does -- otherwise an act filled in and signed in one
+           session on board arrives with its lines missing. */
+        if(a.dirty && !a.signed && a.rev){
+          const row = await CLOUD.actSave(a.id, a.rev, actPayload(a));
+          if(!row){ toast(tr().co.conflict, 'bad'); quiet = false; }
+          else { adoptAct(a, row); changed = true; }
+        }
+        if(a.signed && !a.serverSigned && a.rev){
+          const row = await CLOUD.actSign(a.id, a.rev, a.signature || SIG[a.id],
+                                          a.rep_name, a.signed_at);
+          if(!row){ toast(tr().co.conflict, 'bad'); quiet = false; }
+          else { adoptAct(a, row); changed = true; }
+        }
+        if(!a.signed && a.serverSigned && a.rev){
+          const row = await CLOUD.actUnsign(a.id, a.rev);
+          if(row){ adoptAct(a, row); changed = true; }
+        }
+        delete a.dirty;
+      } catch(e){
+        /* Put back everything still owed, not only the one that failed --
+           the same trap the projects' queue fell into once. */
+        for(let j = i; j < ids.length; j++) pendingActs.add(ids[j]);
+        failed = true;
+        /* No signal is not an error to shout about. It is the expected state
+           on a vessel, and the list already says what has not been sent. */
+        if(!e || !e.offline){ toast(tr().act.sendFailed, 'bad'); quiet = false; }
+        break;
+      }
+    }
+    /* The queue is re-derived from the data before it is written out. A step
+       that came back empty -- somebody else got there first -- leaves the act
+       still owing something with its id no longer in the set, and it would
+       then sit there until the next unrelated edit happened to schedule a
+       push. What is unsent is a property of the acts, not of a variable. */
+    (state.acts || []).filter(actUnsent).forEach(z => pendingActs.add(z.id));
+    persist();
+  } finally {
+    actPushing = false;
+    if(failed){
+      actBackoff = Math.min(actBackoff ? actBackoff * 2 : PUSH_RETRY_MIN, PUSH_RETRY_MAX);
+      actPushSoon(actBackoff);
+    } else {
+      actBackoff = 0;
+      if(actPushAgain){ actPushAgain = false; actPushSoon(0); }
+    }
+    paintUnsent(changed);
+  }
+}
+
+/* Repainting from the queue is not free: a full render while somebody is
+   typing in the sheet destroys the field the caret is in, which is a bug
+   this file has already had once. So the list is redrawn and the editor is
+   only told how much is still owed. */
+function paintUnsent(changed){
+  if(state.tab !== 'acts') return;
+  if(!state.actId){ if(changed) render(); return; }
+  const tag = $('#actSync');
+  if(tag){
+    const a = actOpen();
+    tag.textContent = a && actUnsent(a) ? tr().act.unsent : '';
+    tag.hidden = !tag.textContent;
+  }
+}
+
+/* The network coming back is the moment to try again, and it is free to
+   listen for. */
+window.addEventListener('online', () => { if(CLOUD.on){ actPushSoon(0); pushSoon(0); } });
+
+/* ---- the five things that can happen to an act ----
+   All of them land here and none of them touch the network: they change the
+   row, put it on the queue and draw. */
+function actCreate(row){
+  row.id = 'local-' + Math.random().toString(36).slice(2, 10);
+  row.line_count = 0;
+  row.dirty = true;                       /* and no rev: never been sent */
+  state.acts = [row].concat(state.acts || []);
+  state.actId = row.id;
+  actQueue(row);
+  render();
+}
+
+function actDelete(id){
+  const a = (state.acts || []).find(z => z.id === id);
+  if(!a) return;
+  /* A tombstone, not a removal: deleting the row here and then failing to
+     reach the server would leave the act on the server with nothing left
+     pointing at it. With no server there is nothing to tell and nothing to
+     wait for, so it simply goes. Either way it stops being listed at once. */
+  if(!CLOUD.on){ dropAct(id); persist(); render(); return; }
+  a.gone = true;
+  if(state.actId === id) state.actId = null;
+  actQueue(a);
+  render();
+}
 
 function actSave(x, patch, redraw){
-  const job = actSaveNow(x, patch, redraw);
-  actSaving = job.catch(() => {});
-  return job;
-}
-
-async function actSaveNow(x, patch, redraw){
   /* Refused here as well as on the server, so a signed act never produces an
      error toast for a save that was never going to be allowed. */
   if(x_signed(x)) return;
-  const merged = Object.assign({}, x, patch);
-  if(!CLOUD.on){
-    Object.assign(x, patch);
-    x.line_count = (Array.isArray(x.lines) ? x.lines : [])
-      .filter(l => (l.work || '').trim()).length;
-    persist(); if(redraw) render(); return;
-  }
-  try {
-    const saved = stripSig(await CLOUD.actSave(x.id, x.rev, {
-      number: merged.number, act_date: merged.act_date, customer: merged.customer,
-      imo: merged.imo, object: merged.object, project_ref: merged.project_ref,
-      lines: merged.lines, rep_name: merged.rep_name, note: merged.note
-    }));
-    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
-    state.acts = (state.acts || []).map(z => z.id === saved.id ? saved : z);
-    persist(); if(redraw) render();
-  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+  Object.assign(x, patch);
+  x.line_count = (Array.isArray(x.lines) ? x.lines : [])
+    .filter(l => (l.work || '').trim()).length;
+  x.dirty = true;
+  actQueue(x);
+  if(redraw) render();
 }
 
 /* ---- signing ----
    Signing is its own call and not a field, because it is an event: it has a
    moment, a witness, and a record of having happened. */
-async function actSign(x, png, name){
-  if(!CLOUD.on){
-    /* A browser-only copy has no server, so here the image does live on the
-       row and goes to localStorage with it. There is nowhere else for it. */
-    Object.assign(x, { signature: png, signed: true, rep_name: name,
-                       signed_at: new Date().toISOString(), witnessed_by: null });
-    delete SIG_DRAFT[x.id];
-    persist(); render(); return;
-  }
-  try {
-    const saved = stripSig(await CLOUD.actSign(x.id, x.rev, png, name));
-    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
-    delete SIG_DRAFT[x.id];
-    state.acts = (state.acts || []).map(z => z.id === saved.id ? saved : z);
-    persist(); render();
-  } catch(e){ toast(tr().act.signFailed, 'bad'); }
+function actSign(x, png, name){
+  /* The image goes ON the row, and therefore into localStorage, until the
+     server has it. That is the one place this app keeps a signature where a
+     reload can find it, and it is deliberate: an act signed on board must
+     survive the tablet being shut before it is back in range. adoptAct takes
+     it off the row the moment the server confirms. */
+  Object.assign(x, { signature: png, signed: true, rep_name: name,
+                     signed_at: new Date().toISOString(), witnessed_by: null,
+                     dirty: true });
+  SIG[x.id] = png;
+  delete SIG_DRAFT[x.id];
+  actQueue(x);
+  render();
 }
 
-async function actUnsign(x){
+function actUnsign(x){
   if(!confirm(tr().act.confirmClear)) return;
-  if(!CLOUD.on){
-    delete x.signature;
-    Object.assign(x, { signed: false, signed_at: null });
-    persist(); render(); return;
-  }
-  try {
-    const saved = stripSig(await CLOUD.actUnsign(x.id, x.rev));
-    if(!saved){ toast(tr().co.conflict, 'bad'); return; }
-    delete SIG[x.id];
-    state.acts = (state.acts || []).map(z => z.id === saved.id ? saved : z);
-    persist(); render();
-  } catch(e){ toast(tr().co.saveFailed, 'bad'); }
+  delete x.signature; delete SIG[x.id];
+  Object.assign(x, { signed: false, signed_at: null, witnessed_by: null, dirty: true });
+  actQueue(x);
+  render();
 }
 
 /* ---- company screens: events ---- */
@@ -8312,6 +8515,19 @@ $('#btnPrint').addEventListener('click', ()=>{
   else printProjectReport();
 });
 
+/* The pull is the server's copy; the queue is what the server has not heard
+   yet. Replacing the list wholesale deleted an act signed on board the moment
+   the tablet found a network -- the exact failure this whole pass is about,
+   and the projects' pull had it too (see bootCloud). Local wins while it is
+   still owed, and the server wins everywhere else. */
+function mergeActs(server){
+  const by = {};
+  (server || []).forEach(r => { const row = stripSig(r); by[row.id] = row; });
+  (state.acts || []).filter(actUnsent).forEach(a => { by[a.id] = a; });
+  return Object.keys(by).map(k => by[k])
+    .sort((x, y) => String(y.act_date || '').localeCompare(String(x.act_date || '')));
+}
+
 /* ================= sync =================
    Push is per project and only for projects actually edited, so switching
    language or theme never touches the network. */
@@ -8535,8 +8751,10 @@ async function cloudPull(){
   /* Not inside canMoney(): the acts are the one thing on this screen a
      fitter is meant to write. */
   CLOUD.acts()
-    .then(list => { state.acts = list; if(state.tab === 'acts') render(); })
-    .catch(() => { state.acts = []; });
+    .then(list => { state.acts = mergeActs(list); if(state.tab === 'acts') render(); })
+    /* An empty list on failure would erase acts signed on board and not yet
+       sent. Keep what is here; the queue will settle it. */
+    .catch(() => {});
 
   if(canMoney()){
     CLOUD.enquiries()
@@ -8670,6 +8888,26 @@ async function bootCloud(){
 }
 
 /* ================= init ================= */
+/* The page itself, openable with no network. Everything else about working
+   out of range -- the outbox, a signature held until it can be sent, a
+   session that survives losing signal -- is worth nothing if the app cannot
+   be opened on the vessel at all.
+
+   Registered relative to this page, so the scope is /calculator/ and the rest
+   of the site is untouched. It cannot work from file:// and does not pretend
+   to: a build opened straight off disk simply has no worker, which is why
+   every failure here is swallowed rather than reported. */
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+/* What the last session never managed to send. bootCloud pushes the queue
+   before it pulls, so this has to be back in place before it runs. */
+(state.unsentProjects || []).forEach(id => pendingPush.add(id));
+(state.unsentActs || []).forEach(id => pendingActs.add(id));
+
 normaliseProjects();
 migrateDefaults();
 migrateCurrency();
