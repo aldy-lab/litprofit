@@ -998,6 +998,10 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 /* Not an error. On a vessel it is the normal state, and it says what is true:
    this browser has it and the database does not yet. */
 .act-wait{color:var(--warning)}
+/* A refusal is a different thing from a wait: nothing about it improves on
+   its own, so it is not the colour of something in progress. */
+.act-bad{font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--critical);white-space:nowrap;cursor:help}
 .act-sync{font-size:11px;letter-spacing:.06em;text-transform:uppercase;
   color:var(--warning);white-space:nowrap}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
@@ -1475,7 +1479,10 @@ en: {
     hLines:'Items',hWritten:'Written by',hRep:'Customer\u2019s representative',
     repNote:'Printed under the signature line, as the record of who signed.',
     signHere:'Sign here',sign:'Sign',clear:'Clear',undo:'Undo',
-    signed:'Signed',notSigned:'not signed',unsent:'not sent',
+    signed:'Signed',notSigned:'not signed',unsent:'not sent',refused:'refused',
+    refusedWhy:'The database would not take this act: {why}',
+    renumbered:'That number had been taken. This act is {n}.',
+    needWork:'Put at least one line of work on it before signing.',
     sendFailed:'Could not reach the database. Nothing is lost \u2014 it goes up when there is a connection.',
     signedAt:'{when} \u00b7 witnessed by {who}',
     signNote:'The customer\u2019s representative signs on the screen. The signature is printed onto the act, and the act is then locked \u2014 changing anything on it means clearing the signature first.',
@@ -1697,7 +1704,10 @@ lt: {
     hLines:'Pozicijos',hWritten:'Surašė',hRep:'Kliento atstovas',
     repNote:'Spausdinama po parašo linija \u2014 įrašas, kas pasirašė.',
     signHere:'Pasirašykite čia',sign:'Pasirašyti',clear:'Išvalyti',undo:'Atšaukti',
-    signed:'Pasirašyta',notSigned:'nepasirašyta',unsent:'neišsiųsta',
+    signed:'Pasirašyta',notSigned:'nepasirašyta',unsent:'neišsiųsta',refused:'atmesta',
+    refusedWhy:'Duomenų bazė nepriėmė šio akto: {why}',
+    renumbered:'Tas numeris jau buvo užimtas. Šis aktas \u2014 {n}.',
+    needWork:'Prieš pasirašant įrašykite bent vieną darbų eilutę.',
     sendFailed:'Nepavyko pasiekti duomenų bazės. Niekas neprarasta \u2014 bus išsiųsta atsiradus ryšiui.',
     signedAt:'{when} \u00b7 liudijo {who}',
     signNote:'Kliento atstovas pasirašo ekrane. Parašas atspausdinamas akte, o aktas užrakinamas \u2014 kad ką nors pakeistumėte, parašą pirma reikia pašalinti.',
@@ -1918,7 +1928,10 @@ ru: {
     hLines:'Позиций',hWritten:'Составил',hRep:'Представитель заказчика',
     repNote:'Печатается под линией подписи \u2014 запись о том, кто подписал.',
     signHere:'Подпишите здесь',sign:'Подписать',clear:'Очистить',undo:'Отменить',
-    signed:'Подписано',notSigned:'без подписи',unsent:'не отправлено',
+    signed:'Подписано',notSigned:'без подписи',unsent:'не отправлено',refused:'отклонено',
+    refusedWhy:'База не приняла этот акт: {why}',
+    renumbered:'Тот номер уже был занят. Этот акт \u2014 {n}.',
+    needWork:'Перед подписанием впишите хотя бы одну строку работ.',
     sendFailed:'Не удалось связаться с базой. Ничего не потеряно \u2014 уйдёт, когда появится связь.',
     signedAt:'{when} \u00b7 засвидетельствовал {who}',
     signNote:'Представитель заказчика подписывает на экране. Подпись печатается в акте, после чего акт блокируется \u2014 чтобы что-то изменить, подпись нужно сначала снять.',
@@ -6505,7 +6518,8 @@ function viewActs(){
            sent is both, and that is the row somebody has to see. The
            unsigned one still wants pointing at on its own -- an act nobody
            has signed is work that cannot be invoiced. */
-        actUnsent(x) ? ` <i class="act-wait">${esc(a.unsent)}</i>`
+        x.error ? ` <i class="act-bad" title="${esc(x.error)}">${esc(a.refused)}</i>`
+          : actUnsent(x) ? ` <i class="act-wait">${esc(a.unsent)}</i>`
           : (x_signed(x) ? '' : ` <i class="act-todo">${esc(a.notSigned)}</i>`)}</td>
       <td>${esc(x.act_date || '')}</td>
       <td>${esc(x.object || '\u2014')}</td>
@@ -6599,8 +6613,8 @@ function actEditor(x, t){
       <button id="actPrint" class="primary">${esc(a.printPdf)}</button>
     </div>
 
-    <h2 class="sheet">${esc(a.title)} <span class="muted" style="font-weight:400">// ${
-      esc(x.number || '')}</span></h2>
+    <h2 class="sheet">${esc(a.title)} <span class="muted" id="actNumEcho"
+      style="font-weight:400">// ${esc(x.number || '')}</span></h2>
     ${lock ? `<div class="act-locked"><b>${esc(a.signed)}</b><span>${
       esc(a.lockedNote)}</span></div>` : ''}
 
@@ -6815,9 +6829,12 @@ async function printAct(x){
       <td class="num">${i + 1}</td><td>${esc(l.work || '')}</td>
       <td>${esc(l.unit || '')}</td><td class="num">${esc(l.qty || '')}</td>
       <td>${esc(l.remarks || '')}</td></tr>`).join('')
-    /* Never an empty table: a signed sheet with no rows is a document somebody
-       has to explain. */
-    : `<tr><td class="num">1</td><td colspan="4">${esc(a.none)}</td></tr>`;
+    /* Never an empty table: a sheet with no rows at all reads as a printing
+       fault. This used to put the LIST screen's "no acts on this job yet" in
+       the work column of a document a customer signs -- the right string in
+       the wrong place, and it reached paper. An unsigned act is printed to be
+       filled in with a pen, so what belongs here is an empty ruled row. */
+    : `<tr><td class="num">1</td><td></td><td></td><td class="num"></td><td></td></tr>`;
 
   const hd = (en, lt, v) => `<tr><th>${two(en, lt)}</th><td>${esc(v || '')}</td></tr>`;
 
@@ -6907,6 +6924,12 @@ function wireActs(){
     const nameEl = document.querySelector('[data-af="rep_name"]');
     const name = String((nameEl && nameEl.value) || x.rep_name || '').trim();
     if(!name){ toast(tr().act.needName, 'bad'); if(nameEl) nameEl.focus(); return; }
+    /* A signed act with no work on it is a document nobody can explain, and
+       one was signed that way in the first week. The printed sheet had the
+       list screen's "no acts on this job yet" sitting in the work column. */
+    const filled = (Array.isArray(x.lines) ? x.lines : [])
+      .filter(l => (l.work || '').trim());
+    if(!filled.length){ toast(tr().act.needWork, 'bad'); return; }
     const png = PAD.png();
     if(!png){ toast(tr().act.needInk, 'bad'); return; }
     actSign(x, png, name);
@@ -6996,6 +7019,9 @@ function actUnsent(a){
 function unsentCount(){ return (state.acts || []).filter(actUnsent).length; }
 
 function actQueue(a){
+  /* Editing it is a fresh attempt: whatever the server objected to last time,
+     this is not that any more. */
+  if(a) delete a.error;
   if(a && CLOUD.on) pendingActs.add(a.id);
   persist();
   if(CLOUD.on) actPushSoon(0);
@@ -7100,14 +7126,23 @@ async function pushActs(){
         }
         delete a.dirty;
       } catch(e){
-        /* Put back everything still owed, not only the one that failed --
-           the same trap the projects' queue fell into once. */
-        for(let j = i; j < ids.length; j++) pendingActs.add(ids[j]);
-        failed = true;
-        /* No signal is not an error to shout about. It is the expected state
-           on a vessel, and the list already says what has not been sent. */
-        if(!e || !e.offline){ toast(tr().act.sendFailed, 'bad'); quiet = false; }
-        break;
+        if(e && e.offline){
+          /* No signal. Everything still owed goes back -- not only the one
+             that failed, the same trap the projects' queue fell into once --
+             and it is not an error to shout about: it is the expected state
+             on a vessel, and the list already says what has not been sent. */
+          for(let j = i; j < ids.length; j++) pendingActs.add(ids[j]);
+          failed = true;
+          break;
+        }
+        /* The server REFUSED this one -- a number already used on the job is
+           the way that happens. Retrying forever would toast every thirty
+           seconds and never get anywhere, because nothing about it is going
+           to change without a person. It is marked, it stays out of the
+           queue, and the rest of the queue is not its fault. */
+        a.error = (e && e.message) || 'refused';
+        toast(tr().act.refusedWhy.replace('{why}', a.error), 'bad');
+        quiet = false;
       }
     }
     /* The queue is re-derived from the data before it is written out. A step
@@ -7115,7 +7150,8 @@ async function pushActs(){
        still owing something with its id no longer in the set, and it would
        then sit there until the next unrelated edit happened to schedule a
        push. What is unsent is a property of the acts, not of a variable. */
-    (state.acts || []).filter(actUnsent).forEach(z => pendingActs.add(z.id));
+    (state.acts || []).filter(z => actUnsent(z) && !z.error)
+                      .forEach(z => pendingActs.add(z.id));
     persist();
   } finally {
     actPushing = false;
@@ -7137,11 +7173,24 @@ async function pushActs(){
 function paintUnsent(changed){
   if(state.tab !== 'acts') return;
   if(!state.actId){ if(changed) render(); return; }
+  const a = actOpen();
   const tag = $('#actSync');
   if(tag){
-    const a = actOpen();
-    tag.textContent = a && actUnsent(a) ? tr().act.unsent : '';
+    tag.textContent = a && a.error ? tr().act.refused
+                    : (a && actUnsent(a) ? tr().act.unsent : '');
     tag.hidden = !tag.textContent;
+    tag.title = (a && a.error) || '';
+  }
+  /* The server has the last word on the number, and it uses it when two
+     people ask for the same one. Letting the field keep showing what this
+     browser suggested would mean the header disagrees with what was stored,
+     and nobody would find out until the paper. Not touched while somebody is
+     typing in it. */
+  const num = $('[data-af="number"]'), echo = $('#actNumEcho');
+  if(a && num && document.activeElement !== num && num.value !== (a.number || '')){
+    num.value = a.number || '';
+    if(echo) echo.textContent = '// ' + (a.number || '');
+    toast(tr().act.renumbered.replace('{n}', a.number || ''));
   }
 }
 
