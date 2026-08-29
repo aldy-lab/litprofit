@@ -1004,6 +1004,19 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
   color:var(--critical);white-space:nowrap;cursor:help}
 .act-sync{font-size:11px;letter-spacing:.06em;text-transform:uppercase;
   color:var(--warning);white-space:nowrap}
+.fld-h{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);
+  margin:26px 0 4px;display:flex;gap:10px;align-items:baseline}
+.fld-h .muted{font-family:var(--mono);font-size:11px;letter-spacing:0}
+.fld-list{display:grid;gap:8px;margin:12px 0;max-width:620px}
+.fld-row{display:flex;gap:12px;align-items:center}
+.fld-row input[type=text],.fld-row>input{flex:1 1 auto;min-width:0}
+.fld-num{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-3);
+  white-space:nowrap}
+/* The key is shown because it is what the value is stored under, and somebody
+   will one day need to know it. Quiet, because nobody types it. */
+.fld-key{font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  white-space:nowrap;min-width:88px}
+.fld-none{margin:4px 0}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
 .co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
   border-top:2px solid var(--baseline)}
@@ -1483,6 +1496,18 @@ en: {
     refusedWhy:'The database would not take this act: {why}',
     renumbered:'That number had been taken. This act is {n}.',
     needWork:'Put at least one line of work on it before signing.',
+    fields:'Fields',
+    fLead:'The act carries what the form has always carried. Anything else your yard needs \u2014 a port, an order number, hours, who did the work \u2014 you name here, and it appears on every act and on the printed sheet.',
+    fHeader:'Header fields',
+    fHeaderN:'Printed in the block at the top, beside the customer and the object.',
+    fColumns:'Columns in the work table',
+    fColumnsN:'Printed as columns beside the description. Three is what fits on A4 next to a description wide enough to describe work.',
+    fNumeric:'a number',
+    fAdd:'Add a field',fNew:'New field',
+    fNone:'None yet.',
+    fFull:'That is as many as will print.',
+    fDel:'Remove \u201c{n}\u201d? It stops appearing on new acts. What is already recorded under it is kept, and comes back if you add it again.',
+    fFoot:'Acts already signed keep the fields they were signed under, whatever you change here \u2014 a signed sheet is a document, and renaming a column on it afterwards would make the paper stop matching the record.',
     sendFailed:'Could not reach the database. Nothing is lost \u2014 it goes up when there is a connection.',
     signedAt:'{when} \u00b7 witnessed by {who}',
     signNote:'The customer\u2019s representative signs on the screen. The signature is printed onto the act, and the act is then locked \u2014 changing anything on it means clearing the signature first.',
@@ -1708,6 +1733,18 @@ lt: {
     refusedWhy:'Duomenų bazė nepriėmė šio akto: {why}',
     renumbered:'Tas numeris jau buvo užimtas. Šis aktas \u2014 {n}.',
     needWork:'Prieš pasirašant įrašykite bent vieną darbų eilutę.',
+    fields:'Laukai',
+    fLead:'Akte yra tai, kas visada buvo formoje. Visa kita, ko reikia jūsų įmonei \u2014 uostas, užsakymo numeris, valandos, kas dirbo \u2014 įvardijama čia ir atsiranda kiekviename akte bei atspausdintame lape.',
+    fHeader:'Antraštės laukai',
+    fHeaderN:'Spausdinami viršutiniame bloke, šalia užsakovo ir objekto.',
+    fColumns:'Darbų lentelės stulpeliai',
+    fColumnsN:'Spausdinami kaip stulpeliai šalia aprašymo. Trys \u2014 tiek telpa A4 lape šalia pakankamai plataus aprašymo.',
+    fNumeric:'skaičius',
+    fAdd:'Pridėti lauką',fNew:'Naujas laukas',
+    fNone:'Kol kas nėra.',
+    fFull:'Daugiau nebeišspausdinsime.',
+    fDel:'Pašalinti \u201e{n}\u201c? Naujuose aktuose jo nebebus. Jau įrašyti duomenys išsaugomi ir grįžta, jei lauką pridėsite iš naujo.',
+    fFoot:'Jau pasirašyti aktai išlaiko tuos laukus, su kuriais buvo pasirašyti \u2014 pasirašytas lapas yra dokumentas, ir stulpelio pervadinimas jame vėliau reikštų, kad popierius nebeatitinka įrašo.',
     sendFailed:'Nepavyko pasiekti duomenų bazės. Niekas neprarasta \u2014 bus išsiųsta atsiradus ryšiui.',
     signedAt:'{when} \u00b7 liudijo {who}',
     signNote:'Kliento atstovas pasirašo ekrane. Parašas atspausdinamas akte, o aktas užrakinamas \u2014 kad ką nors pakeistumėte, parašą pirma reikia pašalinti.',
@@ -1932,6 +1969,18 @@ ru: {
     refusedWhy:'База не приняла этот акт: {why}',
     renumbered:'Тот номер уже был занят. Этот акт \u2014 {n}.',
     needWork:'Перед подписанием впишите хотя бы одну строку работ.',
+    fields:'Поля',
+    fLead:'В акте есть то, что всегда было в форме. Всё остальное, что нужно вашей компании \u2014 порт, номер заказа, часы, кто выполнял \u2014 вы называете здесь, и оно появляется в каждом акте и на печатном листе.',
+    fHeader:'Поля шапки',
+    fHeaderN:'Печатаются в верхнем блоке, рядом с заказчиком и объектом.',
+    fColumns:'Столбцы таблицы работ',
+    fColumnsN:'Печатаются столбцами рядом с описанием. Три \u2014 столько помещается на A4 рядом с описанием достаточной ширины.',
+    fNumeric:'число',
+    fAdd:'Добавить поле',fNew:'Новое поле',
+    fNone:'Пока нет.',
+    fFull:'Больше на лист не поместится.',
+    fDel:'Убрать \u00ab{n}\u00bb? В новых актах его не будет. Уже записанное сохраняется и вернётся, если добавите поле снова.',
+    fFoot:'Подписанные акты сохраняют те поля, с которыми были подписаны \u2014 подписанный лист это документ, и переименование столбца в нём задним числом означало бы, что бумага перестала совпадать с записью.',
     sendFailed:'Не удалось связаться с базой. Ничего не потеряно \u2014 уйдёт, когда появится связь.',
     signedAt:'{when} \u00b7 засвидетельствовал {who}',
     signNote:'Представитель заказчика подписывает на экране. Подпись печатается в акте, после чего акт блокируется \u2014 чтобы что-то изменить, подпись нужно сначала снять.',
@@ -2591,8 +2640,9 @@ const CLOUD = (function(){
          would push a few hundred kilobytes of PNG through it each time. The
          image is fetched for the one act somebody is looking at. */
       const cols = ['id','project_id','number','act_date','customer','imo','object',
-        'project_ref','lines','rep_name','note','line_count','signed','signed_at',
-        'sign_log','witnessed_by','written_by','rev','created_at','updated_at'].join(',');
+        'project_ref','lines','rep_name','note','extra','field_defs','line_count',
+        'signed','signed_at','sign_log','witnessed_by','written_by',
+        'rev','created_at','updated_at'].join(',');
       return await rest('acts_v?select=' + cols + '&order=act_date.desc') || [];
     },
     async actSignature(id){
@@ -2611,6 +2661,16 @@ const CLOUD = (function(){
     async actUnsign(id, rev){
       return firstRow(await rest('rpc/unsign_act', { method: 'POST',
         body: JSON.stringify({ p_id: id, p_rev: rev }) }));
+    },
+
+    /* The company's own list of act fields. One row, read by everyone signed
+       in and written only by an owner. */
+    async actFields(){
+      return firstRow(await rest('act_fields_v?select=defs,rev,updated_by'));
+    },
+    async saveActFields(rev, defs){
+      return firstRow(await rest('rpc/save_act_fields', { method: 'POST',
+        body: JSON.stringify({ p_rev: rev, p_defs: defs }) }));
     },
     async actInsert(row){
       return firstRow(await rest('rpc/create_act', {
@@ -6480,6 +6540,54 @@ function actsOf(){
 function actOpen(){
   return (state.acts || []).find(a => a.id === state.actId) || null;
 }
+/* ---- the company's own fields ----
+   The act carries what the paper form carried. Every yard wants one or two
+   more than that, and which two is not something to decide from here, so the
+   list is the company's to write.
+
+   A SIGNED act keeps its own copy of the list, stamped at signing. Read live,
+   renaming a column next March would silently relabel a column on a sheet
+   somebody signed last year: the paper in the customer's folder would stop
+   matching the record, and the record would be the one that moved. */
+const NO_FIELDS = { header: [], columns: [] };
+
+function liveFields(){
+  const f = state.actFields && state.actFields.defs;
+  return { header: (f && f.header) || [], columns: (f && f.columns) || [] };
+}
+function actDefs(x){
+  if(x && x.field_defs) return { header: x.field_defs.header || [],
+                                 columns: x.field_defs.columns || [] };
+  return liveFields();
+}
+
+/* Values are stored under the key and the LABEL is what gets printed. Under
+   the label, correcting a spelling would orphan every value already recorded
+   -- and nothing would say so, because a missing key reads exactly like a
+   field nobody filled in.
+
+   Which is why the key freezes. But it freezes when there is something to
+   protect, not before: a field added a moment ago and named a moment later
+   has nothing stored under it, and freezing at creation time left every act
+   in the company storing its values under new_field_1 and new_field_2. So
+   the key follows the label while the field is still untouched, and stops
+   the instant anything has been recorded under it. */
+function keyInUse(key){
+  return (state.acts || []).some(a =>
+    String((a.extra || {})[key] || '').trim() ||
+    (Array.isArray(a.lines) ? a.lines : [])
+      .some(l => String(l[key] || '').trim()));
+}
+function fieldKey(label, taken){
+  let k = String(label || '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 24);
+  if(!/^[a-z]/.test(k)) k = 'f' + k;
+  k = k.slice(0, 24);
+  let base = k, i = 2;
+  while(taken.indexOf(k) !== -1){ k = (base + '_' + i).slice(0, 24); i++; }
+  return k;
+}
+
 /* One reading of "is this signed", used by the editor, the list, the print
    and the save guard. `signed` is the server's boolean; `signature` is what a
    browser-only copy carries instead. */
@@ -6506,6 +6614,7 @@ function actNextNumber(){
 
 function viewActs(){
   const t = tr(), a = t.act, p = proj();
+  if(state.fieldsOpen) return fieldEditor(t);
   const cur = actOpen();
   if(cur) return actEditor(cur, t);
 
@@ -6540,23 +6649,71 @@ function viewActs(){
         <th>${esc(a.hCustomer)}</th><th class="num">${esc(a.hLines)}</th>
         <th>${esc(a.hWritten)}</th><th></th>
       </tr></thead><tbody>${body}</tbody></table></div>
-    <div class="co-actions"><button id="actNew" class="primary">${esc(a.newAct)}</button></div>
+    <div class="co-actions"><button id="actNew" class="primary">${esc(a.newAct)}</button>${
+      /* Only an owner: this changes the shape of every act the company will
+         issue, which is not a per-job decision. */
+      canPayroll() ? `<button id="actFields" class="ghost">${esc(a.fields)}</button>` : ''}</div>
+  </div>`;
+}
+
+/* ---- the fields the company names for itself ----
+   Two lists, and nothing clever. A field is a label; the key it is stored
+   under is derived once and never changes afterwards, so correcting a
+   spelling does not orphan what has already been recorded under it. */
+function fieldEditor(t){
+  const a = t.act, d = liveFields();
+  const busy = state.fieldsBusy;
+
+  const list = (kind, items, cap) => `
+    <h3 class="fld-h">${esc(kind === 'header' ? a.fHeader : a.fColumns)}
+      <span class="muted">${items.length} / ${cap}</span></h3>
+    <p class="hint">${esc(kind === 'header' ? a.fHeaderN : a.fColumnsN)}</p>
+    <div class="fld-list">
+      ${items.length ? items.map((f, i) => `<div class="fld-row">
+          <input data-fld="${kind}" data-i="${i}" value="${esc(f.label)}"
+                 maxlength="40"${busy ? ' disabled' : ''}>
+          ${kind === 'columns' ? `<label class="fld-num"><input type="checkbox"
+             data-fnum="${kind}" data-i="${i}"${f.num ? ' checked' : ''}${
+             busy ? ' disabled' : ''}> ${esc(a.fNumeric)}</label>` : ''}
+          <code class="fld-key">${esc(f.key)}</code>
+          <button class="ghost co-del" data-fdel="${kind}" data-i="${i}"
+                  title="${esc(t.remove)}"${busy ? ' disabled' : ''}>×</button>
+        </div>`).join('') : `<p class="muted fld-none">${esc(a.fNone)}</p>`}
+    </div>
+    ${items.length < cap ? `<div class="co-actions">
+      <button class="ghost" data-fadd="${kind}"${busy ? ' disabled' : ''}>${
+        esc(a.fAdd)}</button></div>` : `<p class="hint">${esc(a.fFull)}</p>`}`;
+
+  return `${noticeBar()}<div class="card">
+    <div class="act-bar">
+      <button class="doc-back" id="fldBack">${esc(a.backToList)}</button>
+    </div>
+    <h2 class="sheet">${esc(a.fields)}</h2>
+    <p class="hint" style="margin:-8px 0 20px;max-width:78ch">${esc(a.fLead)}</p>
+    ${list('header', d.header, 6)}
+    ${list('columns', d.columns, 3)}
+    <p class="hint co-foot">${esc(a.fFoot)}</p>
   </div>`;
 }
 
 /* One row of the sheet, in one place, because it is written twice: by the
    editor and by the growing sheet below. Two copies of this markup would
    drift the day a column is added and only one of them hears about it. */
-function actRow(l, i, t, lock){
+function actRow(l, i, t, lock, cols){
   const dis = lock ? ' disabled' : '';
-  const used = !!(l.work || l.unit || l.qty || l.remarks);
+  /* A row counts as used if ANY of its cells carry something, the company's
+     own columns included -- otherwise a line with only an entry in "Hours"
+     has no number and no delete button. */
+  const keys = ['work', 'unit', 'qty', 'remarks'].concat((cols || []).map(c => c.key));
+  const used = keys.some(k => String(l[k] || '').trim());
   const cell = (k, cls) => lock
     ? `<td${cls ? ' class="' + cls + '"' : ''}>${esc(l[k] || '')}</td>`
     : `<td${cls ? ' class="' + cls + '"' : ''}><input data-al="${k}" data-i="${i}"${
         k === 'unit' ? ' list="actUnits"' : ''} value="${esc(l[k] || '')}"${dis}></td>`;
   return `<tr data-line="${i}">
       <td class="act-n">${used ? (i + 1) : ''}</td>
-      ${cell('work')}${cell('unit')}${cell('qty', 'num')}${cell('remarks')}
+      ${cell('work')}${cell('unit')}${cell('qty', 'num')}${
+        (cols || []).map(c => cell(c.key, c.num ? 'num' : '')).join('')}${cell('remarks')}
       <td>${!lock && used
             ? `<button class="ghost co-del" data-line-del="${i}" title="${esc(t.remove)}">×</button>`
             : ''}</td>
@@ -6573,7 +6730,7 @@ function actRow(l, i, t, lock){
 
    So the two cells that actually change state are patched and one row is
    appended. Nothing the user is touching is replaced. */
-function actGrowSheet(x, i, t){
+function actGrowSheet(x, i, t, cols){
   const tb = document.querySelector('.act-table tbody');
   if(!tb) return;
   const row = tb.querySelector(`tr[data-line="${i}"]`);
@@ -6587,7 +6744,7 @@ function actGrowSheet(x, i, t){
   }
   if(!tb.querySelector(`tr[data-line="${i + 1}"]`))
     tb.insertAdjacentHTML('beforeend',
-      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false));
+      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false, cols));
 }
 
 function actEditor(x, t){
@@ -6602,7 +6759,16 @@ function actEditor(x, t){
     : `<label class="act-f"><span>${esc(label)}</span>
       <input data-af="${key}" type="${type || 'text'}" value="${esc(x[key] || '')}"${dis}></label>`;
 
-  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock)).join('');
+  const defs = actDefs(x), cols = defs.columns;
+  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock, cols)).join('');
+
+  /* The company's own header fields, after the ones the paper form always
+     had. Written into `extra` and keyed, never into a column of their own. */
+  const xf = (f) => lock
+    ? `<div class="act-f"><span>${esc(f.label)}</span>
+        <b>${esc((x.extra || {})[f.key] || '\u2014')}</b></div>`
+    : `<label class="act-f"><span>${esc(f.label)}</span>
+        <input data-ax="${esc(f.key)}" value="${esc((x.extra || {})[f.key] || '')}"></label>`;
 
   return `${noticeBar()}<div class="card">
     <div class="act-bar">
@@ -6625,13 +6791,16 @@ function actEditor(x, t){
       ${field('imo', a.hImo)}
       ${field('object', a.hObject)}
       ${field('project_ref', a.hProjectNo)}
+      ${defs.header.map(xf).join('')}
     </div>
 
     <datalist id="actUnits">${ACT_UNITS.map(u => `<option value="${u}">`).join('')}</datalist>
     <div class="tablewrap"><table class="sheet-table act-table">
       <thead><tr>
         <th class="act-n">№</th><th>${esc(a.hWork)}</th><th>${esc(a.hUnit)}</th>
-        <th class="num">${esc(a.hQty)}</th><th>${esc(a.hRemarks)}</th><th></th>
+        <th class="num">${esc(a.hQty)}</th>${cols.map(c =>
+          `<th${c.num ? ' class="num"' : ''}>${esc(c.label)}</th>`).join('')}
+        <th>${esc(a.hRemarks)}</th><th></th>
       </tr></thead><tbody>${rows}</tbody></table></div>
 
     <div class="act-head act-sign${lock ? ' act-read' : ''}">
@@ -6823,18 +6992,22 @@ async function printAct(x){
   const two = (en, lt) => `<span class="ac-en">${esc(en)}</span><span class="ac-lt">${esc(lt)}</span>`;
   const L = t.actPrint;
 
+  /* The list the act was SIGNED under, not the one in force today. */
+  const defs = actDefs(x), cols = defs.columns;
   const lines = (Array.isArray(x.lines) ? x.lines : [])
     .filter(l => (l.work || '').trim() || (l.unit || '').trim() || (l.qty || '').trim());
   const body = lines.length ? lines.map((l, i) => `<tr>
       <td class="num">${i + 1}</td><td>${esc(l.work || '')}</td>
       <td>${esc(l.unit || '')}</td><td class="num">${esc(l.qty || '')}</td>
+      ${cols.map(c => `<td${c.num ? ' class="num"' : ''}>${esc(l[c.key] || '')}</td>`).join('')}
       <td>${esc(l.remarks || '')}</td></tr>`).join('')
     /* Never an empty table: a sheet with no rows at all reads as a printing
        fault. This used to put the LIST screen's "no acts on this job yet" in
        the work column of a document a customer signs -- the right string in
        the wrong place, and it reached paper. An unsigned act is printed to be
        filled in with a pen, so what belongs here is an empty ruled row. */
-    : `<tr><td class="num">1</td><td></td><td></td><td class="num"></td><td></td></tr>`;
+    : `<tr><td class="num">1</td><td></td><td></td><td class="num"></td>${
+        cols.map(() => '<td></td>').join('')}<td></td></tr>`;
 
   const hd = (en, lt, v) => `<tr><th>${two(en, lt)}</th><td>${esc(v || '')}</td></tr>`;
 
@@ -6851,6 +7024,12 @@ async function printAct(x){
       ${hd(L.imo, L.imoLt, x.imo)}
       ${hd(L.object, L.objectLt, x.object)}
       ${hd(L.projectNo, L.projectNoLt, x.project_ref)}
+      ${/* The company's own header fields carry ONE label, because the
+           company typed one. Everything the paper form always had is
+           printed in both languages; a field somebody named themselves is
+           printed as they named it. */
+        defs.header.map(f => `<tr><th><span class="ac-en">${esc(f.label)}</span></th>
+          <td>${esc((x.extra || {})[f.key] || '')}</td></tr>`).join('')}
     </table>
 
     <table class="ac-lines"><thead><tr>
@@ -6858,6 +7037,8 @@ async function printAct(x){
       <th>${two(L.work, L.workLt)}</th>
       <th>${two(L.unit, L.unitLt)}</th>
       <th class="num">${two(L.qty, L.qtyLt)}</th>
+      ${cols.map(c => `<th${c.num ? ' class="num"' : ''}><span class="ac-en">${
+        esc(c.label)}</span></th>`).join('')}
       <th>${two(L.remarks, L.remarksLt)}</th>
     </tr></thead><tbody>${body}</tbody></table>
 
@@ -6897,6 +7078,8 @@ function wireActs(){
     });
   });
   on('actBack', 'click', () => { state.actId = null; persist(); render(); });
+  on('actFields', 'click', () => { state.fieldsOpen = true; persist(); render(); });
+  on('fldBack', 'click', () => { state.fieldsOpen = false; persist(); render(); });
   on('actPrint', 'click', () => { const x = actOpen(); if(x) printAct(x); });
 
   /* ---- the pad, rebuilt with the screen ----
@@ -6971,13 +7154,69 @@ function wireActs(){
       return;
     }
     const open = ev.target.closest('[data-act-open]');
-    if(open){ state.actId = open.getAttribute('data-act-open'); persist(); render(); }
+    if(open){ state.actId = open.getAttribute('data-act-open'); persist(); render(); return; }
+
+    const add = ev.target.closest('[data-fadd]');
+    if(add){
+      const kind = add.getAttribute('data-fadd'), d = liveFields();
+      const taken = d.header.concat(d.columns).map(f => f.key);
+      d[kind] = d[kind].concat([{ key: fieldKey('new field', taken),
+                                  label: tr().act.fNew }]);
+      saveFields(d);
+      return;
+    }
+    const fdel = ev.target.closest('[data-fdel]');
+    if(fdel){
+      const kind = fdel.getAttribute('data-fdel'), i = Number(fdel.getAttribute('data-i'));
+      const d = liveFields();
+      /* The values already recorded under this key are NOT deleted. They stop
+         being shown, and they come back if the field is added again with the
+         same key -- which is the kinder way round for something removed by
+         mistake, and costs a few bytes per act. */
+      if(!confirm(tr().act.fDel.replace('{n}', (d[kind][i] || {}).label || ''))) return;
+      d[kind] = d[kind].filter((f, j) => j !== i);
+      saveFields(d);
+      return;
+    }
   });
 
   main.addEventListener('change', ev => {
+    const lab = ev.target.closest('[data-fld]');
+    if(lab){
+      const kind = lab.getAttribute('data-fld'), i = Number(lab.getAttribute('data-i'));
+      const d = liveFields();
+      const cur = d[kind][i];
+      if(!cur) return;
+      let key = cur.key;
+      if(/^new_field/.test(cur.key) && !keyInUse(cur.key)){
+        const taken = d.header.concat(d.columns).map(f => f.key).filter(k => k !== cur.key);
+        key = fieldKey(lab.value, taken);
+      }
+      d[kind] = d[kind].map((f, j) => j === i
+        ? { key: key, label: lab.value, num: f.num } : f);
+      saveFields(d);
+      return;
+    }
+    const num = ev.target.closest('[data-fnum]');
+    if(num){
+      const kind = num.getAttribute('data-fnum'), i = Number(num.getAttribute('data-i'));
+      const d = liveFields();
+      if(!d[kind][i]) return;
+      d[kind] = d[kind].map((f, j) => j === i ? Object.assign({}, f, { num: num.checked }) : f);
+      saveFields(d);
+      return;
+    }
+
     const x = actOpen(); if(!x || x_signed(x)) return;
     const hf = ev.target.closest('[data-af]');
     if(hf){ actSave(x, { [hf.getAttribute('data-af')]: hf.value }); return; }
+    const xf = ev.target.closest('[data-ax]');
+    if(xf){
+      const extra = Object.assign({}, x.extra || {});
+      extra[xf.getAttribute('data-ax')] = xf.value;
+      actSave(x, { extra: extra });
+      return;
+    }
     const lf = ev.target.closest('[data-al]');
     if(lf){
       const i = Number(lf.getAttribute('data-i')), key = lf.getAttribute('data-al');
@@ -6988,7 +7227,7 @@ function wireActs(){
          place, so the field being tabbed into survives. */
       const wasLast = i === l.length - 1;
       actSave(x, { lines: l }, false);
-      if(wasLast) actGrowSheet(x, i, tr());
+      if(wasLast) actGrowSheet(x, i, tr(), actDefs(x).columns);
     }
   });
 }
@@ -7036,7 +7275,7 @@ function actPayload(a){
   return { project_id: a.project_id, number: a.number, act_date: a.act_date,
            customer: a.customer, imo: a.imo, object: a.object,
            project_ref: a.project_ref, lines: a.lines,
-           rep_name: a.rep_name, note: a.note };
+           rep_name: a.rep_name, note: a.note, extra: a.extra || {} };
 }
 
 /* The server's row replaces the local one, except for what is local by
@@ -7044,7 +7283,7 @@ function actPayload(a){
    have just been honoured. An id changes here exactly once -- when an act
    created with no signal is finally inserted -- and everything keyed by the
    old one has to move with it. */
-function adoptAct(a, row){
+function adoptAct(a, row, sent){
   const was = a.id;
   /* What is still owed has to survive the server's answer. An act created
      with no signal is inserted first and signed second, and the insert comes
@@ -7057,11 +7296,31 @@ function adoptAct(a, row){
     ? { png: a.signature || SIG[a.id], at: a.signed_at, rep: a.rep_name }
     : null;
 
+  /* And what was TYPED while the write was in flight has to survive the
+     answer to it. The row coming back describes the act as it was when the
+     request left; anything changed since is newer, and copying the response
+     over it loses keystrokes -- silently, because nothing errors and the
+     field simply goes back to what it was a second ago.
+
+     `sent` is what this push actually carried, so a field that no longer
+     matches it has been touched since and is kept. Found with two extra
+     columns defined and a value typed into every cell of a row: the first
+     one, and only the first one, came back empty. The gap was the round
+     trip. */
+  const keep = {};
+  let newer = false;
+  if(sent) Object.keys(sent).forEach(k => {
+    if(JSON.stringify(a[k]) !== JSON.stringify(sent[k])){ keep[k] = a[k]; newer = true; }
+  });
+
   stripSig(row);
   Object.keys(row).forEach(k => { a[k] = row[k]; });
   a.serverSigned = !!row.signed;
   delete a.dirty;
   delete a.signature;
+
+  Object.keys(keep).forEach(k => { a[k] = keep[k]; });
+  if(newer) a.dirty = true;
 
   if(was !== a.id){
     if(state.actId === was) state.actId = a.id;
@@ -7102,27 +7361,30 @@ async function pushActs(){
         if(a.gone){ await CLOUD.actDelete(a.id); dropAct(a.id); changed = true; continue; }
 
         if(!a.rev){
-          const row = await CLOUD.actInsert(actPayload(a));
-          if(row){ adoptAct(a, row); changed = true; }
+          const sent = actPayload(a);
+          const row = await CLOUD.actInsert(sent);
+          if(row){ adoptAct(a, row, sent); changed = true; }
         }
         /* The order is the order the things happened in. save_act refuses a
            signed act, so an edit still owed has to go up before the
            signature does -- otherwise an act filled in and signed in one
            session on board arrives with its lines missing. */
         if(a.dirty && !a.signed && a.rev){
-          const row = await CLOUD.actSave(a.id, a.rev, actPayload(a));
+          const sent = actPayload(a);
+          const row = await CLOUD.actSave(a.id, a.rev, sent);
           if(!row){ toast(tr().co.conflict, 'bad'); quiet = false; }
-          else { adoptAct(a, row); changed = true; }
+          else { adoptAct(a, row, sent); changed = true; }
         }
         if(a.signed && !a.serverSigned && a.rev){
+          const sent = { rep_name: a.rep_name };
           const row = await CLOUD.actSign(a.id, a.rev, a.signature || SIG[a.id],
                                           a.rep_name, a.signed_at);
           if(!row){ toast(tr().co.conflict, 'bad'); quiet = false; }
-          else { adoptAct(a, row); changed = true; }
+          else { adoptAct(a, row, sent); changed = true; }
         }
         if(!a.signed && a.serverSigned && a.rev){
           const row = await CLOUD.actUnsign(a.id, a.rev);
-          if(row){ adoptAct(a, row); changed = true; }
+          if(row){ adoptAct(a, row, null); changed = true; }
         }
         delete a.dirty;
       } catch(e){
@@ -7235,6 +7497,28 @@ function actSave(x, patch, redraw){
   x.dirty = true;
   actQueue(x);
   if(redraw) render();
+}
+
+/* Defining fields is an office job, not a job on a vessel, so this one write
+   is not queued: it goes straight up and says so if it cannot. Queuing it
+   would mean two people redefining the company's act form out of contact with
+   each other, which is a merge nobody wants to arbitrate. */
+async function saveFields(defs){
+  const clean = { header: defs.header || [], columns: defs.columns || [] };
+  if(!CLOUD.on){
+    state.actFields = { defs: clean, rev: (state.actFields || {}).rev || 1 };
+    persist(); render(); return;
+  }
+  state.fieldsBusy = true; render();
+  try {
+    const saved = await CLOUD.saveActFields((state.actFields || {}).rev || null, clean);
+    if(!saved) toast(tr().co.conflict, 'bad');
+    else state.actFields = saved;
+  } catch(e){
+    toast(tr().act.refusedWhy.replace('{why}', (e && e.message) || ''), 'bad');
+  } finally {
+    state.fieldsBusy = false; persist(); render();
+  }
 }
 
 /* ---- signing ----
@@ -8799,6 +9083,10 @@ async function cloudPull(){
      register and no register look the same here -- which is the point. */
   /* Not inside canMoney(): the acts are the one thing on this screen a
      fitter is meant to write. */
+  /* Not gated on a role: a fitter cannot fill in a column he cannot see. */
+  CLOUD.actFields()
+    .then(f => { if(f){ state.actFields = f; if(state.tab === 'acts') render(); } })
+    .catch(() => {});
   CLOUD.acts()
     .then(list => { state.acts = mergeActs(list); if(state.tab === 'acts') render(); })
     /* An empty list on failure would erase acts signed on board and not yet
