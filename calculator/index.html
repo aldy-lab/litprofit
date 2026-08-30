@@ -201,6 +201,10 @@ main[data-view="sheet"]{max-width:1760px}
    overflow-x container is a scroll container on BOTH axes, so page-relative
    sticky would never resolve here. */
 .tablewrap{
+  /* Without this a grid or flex ancestor sizes the wrapper to its widest
+     child instead of the space available, so `overflow:auto` scrolls nothing
+     and the page goes sideways instead. */
+  min-width:0;
   overflow:auto;
   max-height:max(330px, calc(100vh - var(--chrome-h, 110px) - 210px));
   border:1px solid var(--grid);
@@ -610,6 +614,10 @@ svg text{font-family:var(--mono)}
    browser ignores `page:`, the rule below shrinks them to fit instead, so the
    worst case is small type rather than missing figures. */
 @page detail{ size:A4 landscape; margin:12mm; }
+/* The act, when the company has given itself more columns than portrait
+   holds. Its own named page rather than reusing `detail`, so changing one
+   never quietly changes the other. */
+@page actwide{ size:A4 landscape; margin:12mm 13mm; }
 
 /* ---- the act, on paper ----
    Plain, ruled and bilingual. It is a document somebody signs, so nothing on
@@ -642,7 +650,33 @@ svg text{font-family:var(--mono)}
   .ac-lines tr{break-inside:avoid}
   .ac-lines thead{display:table-header-group}
   .ac-note{margin:7mm 0 10mm;font-size:8.6pt;line-height:1.5;max-width:150mm}
+  /* Sideways there is less height to spend and the same words to fit. */
+  .ac-wide .ac-note{margin:4mm 0 5mm}
+  .ac-wide .ac-line{height:10mm}
   .ac-note i{color:#4a4d63}
+  .ac-wide{page:actwide}
+  /* Sideways, A4 is 87mm SHORTER, and the header block is what spends it: a
+     stacked list of eight rows with a two-line label on each ran the sheet
+     44px past the page and pushed the signature -- the one thing that must be
+     on the same paper as the work -- onto a second page on its own. Measured,
+     not guessed: 747px of content against 703px of printable height.
+
+     So sideways the block uses the width it has just been given. Two columns,
+     and the English and Lithuanian labels share a line instead of stacking. */
+  /* A column WIDTH rather than a count, so the block takes as many columns as
+     the paper allows and gets shorter as the company adds fields -- which is
+     the direction it needs to shrink in. */
+  .ac-wide .ac-head{display:block;columns:78mm;column-gap:12mm;margin-bottom:4mm}
+  .ac-wide .ac-head tbody{display:block}
+  /* Wide enough for the longest label pair the form has, "Project number /
+     Projekto numeris", which at 36mm wrapped onto two lines and shunted the
+     row below it out of alignment. */
+  .ac-wide .ac-head tr{display:grid;grid-template-columns:44mm 1fr;
+    break-inside:avoid;border-bottom:.2mm solid #c9ccd8;align-items:baseline}
+  .ac-wide .ac-head th,.ac-wide .ac-head td{display:block;border:0;
+    padding:1.3mm 2mm 1.3mm 0;width:auto}
+  .ac-wide .ac-head th .ac-en{display:inline}
+  .ac-wide .ac-head th .ac-lt{display:inline;margin-left:1.5mm}
   .ac-sign{width:100%;border-collapse:collapse;break-inside:avoid}
   .ac-sign td{width:50%;padding:0 8mm 0 0;vertical-align:top;border:0}
   /* The rule the pen goes on, and the typed name under it -- the name is a
@@ -925,22 +959,45 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
    Without this a signed act collapses to the width of its own text and the
    description runs straight into the unit. */
 .act-table{width:100%}
-/* Fixed columns only where there is room for six of them. On a phone the
-   fixed layout obediently squeezed the work description down to three
-   characters, and a min-width to stop it pushed the whole app sideways
-   instead -- the wrapper could not contain it. Below this width the table
-   sizes to its content and .tablewrap scrolls, which is a scrollbar inside
-   the card rather than a page that moves. */
-@media (min-width: 760px){
-  .act-table{table-layout:fixed}
-        }
 .act-table td.act-n,.act-table th.act-n{width:36px;text-align:right;color:var(--ink-3);
   font-family:var(--mono);font-variant-numeric:tabular-nums}
-.act-table th:nth-child(3),.act-table td:nth-child(3){width:96px}
-.act-table th:nth-child(4),.act-table td:nth-child(4){width:84px}
-.act-table th:nth-child(5),.act-table td:nth-child(5){width:24%}
-.act-table th:nth-child(6),.act-table td:nth-child(6){width:46px}
 .act-table td{overflow-wrap:anywhere}
+/* Fixed columns only where there is room for them. On a phone the fixed
+   layout obediently squeezed the work description down to three characters;
+   below this width the table sizes to its content and .tablewrap scrolls,
+   which is a scrollbar inside the card rather than a page that moves.
+
+   By CLASS, not by position. These were nth-child rules, which was fine while
+   the sheet had exactly six columns and wrong the moment the company could
+   add its own: the fifth column stopped being Remarks, so one of the
+   company's own columns took a quarter of the sheet and the delete button
+   fell off the right-hand edge. The table's own min-width grows with the
+   column count, so what gives is the wrapper's scrollbar and never the
+   description. */
+/* The act sheet keeps a scroller of its own at EVERY width. The general rule
+   above turns .tablewrap's scrolling off below 860px and lets the sheet push
+   the page instead -- a compromise the thirteen-column spreadsheets make on a
+   phone. An act with six of the company's own columns would then move the
+   whole page sideways, and that is not a compromise, it is the bug this file
+   has already been told about twice. Later in the source than that rule, at
+   the same specificity, which is what makes it win. */
+.tablewrap-act{overflow:auto;max-height:none;border:1px solid var(--grid)}
+
+@media (min-width: 760px){
+  /* The width the columns actually need, handed over by the markup because
+     only the markup knows how many the company has defined. Consumed here
+     rather than set inline so that below this width there is no minimum at
+     all and the sheet simply fits. */
+  .act-table{table-layout:fixed;min-width:var(--act-min, 0)}
+  .act-table .act-c-unit{width:96px}
+  .act-table .act-c-qty{width:84px}
+  .act-table .act-c-x{width:112px}
+  /* Fixed rather than a percentage: as a percentage it grew with the table
+     and ate the slack the DESCRIPTION needs, which is the one column that
+     must stay wide enough to describe work. */
+  .act-table .act-c-rem{width:220px}
+  .act-table .act-c-act{width:46px}
+}
 /* A th is centred by default, which only showed once the columns stopped
    being the width of their own contents. */
 .act-table th{text-align:left}
@@ -1017,6 +1074,27 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .fld-key{font-family:var(--mono);font-size:11px;color:var(--ink-3);
   white-space:nowrap;min-width:88px}
 .fld-none{margin:4px 0}
+/* A field name edited in place. It has to read as the heading it is, not as
+   a form field sitting on top of one -- so no box until it is touched. */
+.fld-inline{border:1px solid transparent;background:transparent;color:inherit;
+  font:inherit;letter-spacing:inherit;text-transform:inherit;padding:1px 3px;
+  width:100%;min-width:0;border-radius:2px}
+.fld-inline:hover{border-color:var(--grid)}
+.fld-inline:focus{border-color:var(--series-1);background:var(--panel,transparent);
+  outline:none}
+.fld-th{display:flex;align-items:center;gap:2px}
+.fld-x{padding:0 5px;line-height:1.1;opacity:0;transition:opacity .15s;
+  font-size:13px;color:var(--ink-3)}
+.act-f:hover .fld-x,.fld-th:hover .fld-x,.fld-x:focus{opacity:1}
+@media (hover: none){ .fld-x{opacity:1} }
+/* The + sits in the head where the next column will appear. */
+.act-table th.act-addc,.act-table td.act-addc{width:34px;padding-left:2px;padding-right:2px}
+.act-table th.act-addc button{padding:2px 7px;line-height:1.1;font-size:14px}
+.act-addf{align-self:end;justify-self:start;margin-bottom:6px;
+  background:transparent;border:1px dashed var(--baseline);color:var(--ink-3);
+  padding:8px 12px;border-radius:2px;cursor:pointer;font:inherit;font-size:12px}
+.act-addf:hover{border-color:var(--series-1);color:var(--ink-1)}
+.act-fnote{margin-top:10px;max-width:78ch}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
 .co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
   border-top:2px solid var(--baseline)}
@@ -1497,6 +1575,10 @@ en: {
     renumbered:'That number had been taken. This act is {n}.',
     needWork:'Put at least one line of work on it before signing.',
     fields:'Fields',
+    fAddField:'field',fAddColumn:'Add a column',
+    fRename:'Rename this field',fRemove:'Remove this field',
+    fShared:'These are the company\u2019s fields, not this act\u2019s \u2014 naming one here names it on every act. Acts already signed keep the fields they were signed under.',
+    fSideways:'Past three of your own columns the printed act turns sideways so they all fit. Acts already signed keep the fields they were signed under.',
     fLead:'The act carries what the form has always carried. Anything else your yard needs \u2014 a port, an order number, hours, who did the work \u2014 you name here, and it appears on every act and on the printed sheet.',
     fHeader:'Header fields',
     fHeaderN:'Printed in the block at the top, beside the customer and the object.',
@@ -1734,6 +1816,10 @@ lt: {
     renumbered:'Tas numeris jau buvo užimtas. Šis aktas \u2014 {n}.',
     needWork:'Prieš pasirašant įrašykite bent vieną darbų eilutę.',
     fields:'Laukai',
+    fAddField:'laukas',fAddColumn:'Pridėti stulpelį',
+    fRename:'Pervadinti šį lauką',fRemove:'Pašalinti šį lauką',
+    fShared:'Tai įmonės laukai, o ne šio akto \u2014 pavadinę čia, pavadinate juos visuose aktuose. Jau pasirašyti aktai išlaiko tuos laukus, su kuriais buvo pasirašyti.',
+    fSideways:'Nuo ketvirto savo stulpelio atspausdintas aktas pasukamas gulsčiai, kad visi tilptų. Jau pasirašyti aktai išlaiko tuos laukus, su kuriais buvo pasirašyti.',
     fLead:'Akte yra tai, kas visada buvo formoje. Visa kita, ko reikia jūsų įmonei \u2014 uostas, užsakymo numeris, valandos, kas dirbo \u2014 įvardijama čia ir atsiranda kiekviename akte bei atspausdintame lape.',
     fHeader:'Antraštės laukai',
     fHeaderN:'Spausdinami viršutiniame bloke, šalia užsakovo ir objekto.',
@@ -1970,6 +2056,10 @@ ru: {
     renumbered:'Тот номер уже был занят. Этот акт \u2014 {n}.',
     needWork:'Перед подписанием впишите хотя бы одну строку работ.',
     fields:'Поля',
+    fAddField:'поле',fAddColumn:'Добавить столбец',
+    fRename:'Переименовать это поле',fRemove:'Убрать это поле',
+    fShared:'Это поля компании, а не этого акта \u2014 назвав здесь, вы называете их во всех актах. Подписанные акты сохраняют те поля, с которыми были подписаны.',
+    fSideways:'Начиная с четвёртого своего столбца печатный акт разворачивается горизонтально, чтобы все поместились. Подписанные акты сохраняют те поля, с которыми были подписаны.',
     fLead:'В акте есть то, что всегда было в форме. Всё остальное, что нужно вашей компании \u2014 порт, номер заказа, часы, кто выполнял \u2014 вы называете здесь, и оно появляется в каждом акте и на печатном листе.',
     fHeader:'Поля шапки',
     fHeaderN:'Печатаются в верхнем блоке, рядом с заказчиком и объектом.',
@@ -6550,6 +6640,14 @@ function actOpen(){
    somebody signed last year: the paper in the customer's folder would stop
    matching the record, and the record would be the one that moved. */
 const NO_FIELDS = { header: [], columns: [] };
+/* Six either way. Header fields print in a block with room to spare; columns
+   past three turn the printed sheet landscape, and past six even landscape
+   stops leaving a description column wide enough to describe work. Matched
+   by check_act_fields(), which is what makes it true of the document rather
+   than true of one screen. */
+const FIELD_CAP = 6;
+/* Past this many extra columns the act prints sideways. */
+const PORTRAIT_COLS = 3;
 
 function liveFields(){
   const f = state.actFields && state.actFields.defs;
@@ -6690,8 +6788,8 @@ function fieldEditor(t){
     </div>
     <h2 class="sheet">${esc(a.fields)}</h2>
     <p class="hint" style="margin:-8px 0 20px;max-width:78ch">${esc(a.fLead)}</p>
-    ${list('header', d.header, 6)}
-    ${list('columns', d.columns, 3)}
+    ${list('header', d.header, FIELD_CAP)}
+    ${list('columns', d.columns, FIELD_CAP)}
     <p class="hint co-foot">${esc(a.fFoot)}</p>
   </div>`;
 }
@@ -6699,7 +6797,7 @@ function fieldEditor(t){
 /* One row of the sheet, in one place, because it is written twice: by the
    editor and by the growing sheet below. Two copies of this markup would
    drift the day a column is added and only one of them hears about it. */
-function actRow(l, i, t, lock, cols){
+function actRow(l, i, t, lock, cols, addCol){
   const dis = lock ? ' disabled' : '';
   /* A row counts as used if ANY of its cells carry something, the company's
      own columns included -- otherwise a line with only an entry in "Hours"
@@ -6707,14 +6805,17 @@ function actRow(l, i, t, lock, cols){
   const keys = ['work', 'unit', 'qty', 'remarks'].concat((cols || []).map(c => c.key));
   const used = keys.some(k => String(l[k] || '').trim());
   const cell = (k, cls) => lock
-    ? `<td${cls ? ' class="' + cls + '"' : ''}>${esc(l[k] || '')}</td>`
-    : `<td${cls ? ' class="' + cls + '"' : ''}><input data-al="${k}" data-i="${i}"${
+    ? `<td class="${cls}">${esc(l[k] || '')}</td>`
+    : `<td class="${cls}"><input data-al="${k}" data-i="${i}"${
         k === 'unit' ? ' list="actUnits"' : ''} value="${esc(l[k] || '')}"${dis}></td>`;
   return `<tr data-line="${i}">
       <td class="act-n">${used ? (i + 1) : ''}</td>
-      ${cell('work')}${cell('unit')}${cell('qty', 'num')}${
-        (cols || []).map(c => cell(c.key, c.num ? 'num' : '')).join('')}${cell('remarks')}
-      <td>${!lock && used
+      ${cell('work', 'act-c-work')}${cell('unit', 'act-c-unit')}${
+        cell('qty', 'act-c-qty num')}${
+        (cols || []).map(c => cell(c.key, 'act-c-x' + (c.num ? ' num' : ''))).join('')}${
+        /* the column under the + in the head, so the body keeps its shape */
+        addCol ? '<td class="act-addc"></td>' : ''}${cell('remarks', 'act-c-rem')}
+      <td class="act-c-act">${!lock && used
             ? `<button class="ghost co-del" data-line-del="${i}" title="${esc(t.remove)}">×</button>`
             : ''}</td>
     </tr>`;
@@ -6744,7 +6845,8 @@ function actGrowSheet(x, i, t, cols){
   }
   if(!tb.querySelector(`tr[data-line="${i + 1}"]`))
     tb.insertAdjacentHTML('beforeend',
-      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false, cols));
+      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false, cols,
+              canPayroll() && (cols || []).length < FIELD_CAP));
 }
 
 function actEditor(x, t){
@@ -6760,14 +6862,26 @@ function actEditor(x, t){
       <input data-af="${key}" type="${type || 'text'}" value="${esc(x[key] || '')}"${dis}></label>`;
 
   const defs = actDefs(x), cols = defs.columns;
-  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock, cols)).join('');
+  const addCol = !lock && canPayroll() && cols.length < FIELD_CAP;
+  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock, cols, addCol)).join('');
 
   /* The company's own header fields, after the ones the paper form always
-     had. Written into `extra` and keyed, never into a column of their own. */
-  const xf = (f) => lock
+     had. Written into `extra` and keyed, never into a column of their own.
+
+     An owner names them HERE, on the act, rather than on a screen of its own:
+     this is where somebody realises a field is missing. The label is the
+     company's, so editing it changes the form for every act -- which is why
+     it is the owner's to do and why the note under the sheet says so. */
+  const own = !lock && canPayroll();
+  const xf = (f, i) => lock
     ? `<div class="act-f"><span>${esc(f.label)}</span>
         <b>${esc((x.extra || {})[f.key] || '\u2014')}</b></div>`
-    : `<label class="act-f"><span>${esc(f.label)}</span>
+    : `<label class="act-f"><span>${own
+        ? `<input class="fld-inline" data-fld="header" data-i="${i}" maxlength="40"
+             value="${esc(f.label)}" aria-label="${esc(a.fRename)}">
+           <button class="ghost fld-x" data-fdel="header" data-i="${i}"
+             title="${esc(a.fRemove)}">×</button>`
+        : esc(f.label)}</span>
         <input data-ax="${esc(f.key)}" value="${esc((x.extra || {})[f.key] || '')}"></label>`;
 
   return `${noticeBar()}<div class="card">
@@ -6792,16 +6906,30 @@ function actEditor(x, t){
       ${field('object', a.hObject)}
       ${field('project_ref', a.hProjectNo)}
       ${defs.header.map(xf).join('')}
+      ${own && defs.header.length < FIELD_CAP
+        ? `<button class="act-addf" data-fadd="header">+ ${esc(a.fAddField)}</button>` : ''}
     </div>
 
     <datalist id="actUnits">${ACT_UNITS.map(u => `<option value="${u}">`).join('')}</datalist>
-    <div class="tablewrap"><table class="sheet-table act-table">
+    <div class="tablewrap tablewrap-act"><table class="sheet-table act-table"
+      style="--act-min:${730 + cols.length * 112 + (addCol ? 34 : 0)}px">
       <thead><tr>
-        <th class="act-n">№</th><th>${esc(a.hWork)}</th><th>${esc(a.hUnit)}</th>
-        <th class="num">${esc(a.hQty)}</th>${cols.map(c =>
-          `<th${c.num ? ' class="num"' : ''}>${esc(c.label)}</th>`).join('')}
-        <th>${esc(a.hRemarks)}</th><th></th>
+        <th class="act-n">№</th><th class="act-c-work">${esc(a.hWork)}</th>
+        <th class="act-c-unit">${esc(a.hUnit)}</th>
+        <th class="act-c-qty num">${esc(a.hQty)}</th>${cols.map((c, i) =>
+          `<th class="act-c-x${c.num ? ' num' : ''}">${own
+            ? `<span class="fld-th"><input class="fld-inline" data-fld="columns"
+                 data-i="${i}" maxlength="40" value="${esc(c.label)}"
+                 aria-label="${esc(a.fRename)}"><button class="ghost fld-x"
+                 data-fdel="columns" data-i="${i}" title="${esc(a.fRemove)}">×</button></span>`
+            : esc(c.label)}</th>`).join('')}
+        ${own && cols.length < FIELD_CAP
+          ? `<th class="act-addc"><button class="ghost" data-fadd="columns"
+               title="${esc(a.fAddColumn)}">+</button></th>` : ''}
+        <th class="act-c-rem">${esc(a.hRemarks)}</th><th class="act-c-act"></th>
       </tr></thead><tbody>${rows}</tbody></table></div>
+    ${own ? `<p class="hint act-fnote">${esc(cols.length > PORTRAIT_COLS
+        ? a.fSideways : a.fShared)}</p>` : ''}
 
     <div class="act-head act-sign${lock ? ' act-read' : ''}">
       ${field('rep_name', a.hRep)}
@@ -7054,6 +7182,11 @@ async function printAct(x){
           <span class="ac-name">${esc(LEGAL_NAME)}</span></td>
     </tr></table>`;
 
+  /* Past three of the company's own columns the sheet stops fitting across
+     A4 portrait, so it turns. Under that it stays portrait, because portrait
+     is what this form has always looked like and turning every act sideways
+     for the sake of one extra column would be the wrong default. */
+  $('#print-area').classList.toggle('ac-wide', cols.length > PORTRAIT_COLS);
   printAs(['Litprofit', L.title, x.number || '', x.act_date || ''].filter(Boolean).join(' \u2014 '));
 }
 
@@ -7162,6 +7295,10 @@ function wireActs(){
       const taken = d.header.concat(d.columns).map(f => f.key);
       d[kind] = d[kind].concat([{ key: fieldKey('new field', taken),
                                   label: tr().act.fNew }]);
+      /* Added and then named, so the caret goes to the name. A column called
+         "New field" that somebody has to hunt for afterwards is a column that
+         stays called New field. */
+      state.focusField = { kind: kind, i: d[kind].length - 1 };
       saveFields(d);
       return;
     }
@@ -7518,6 +7655,13 @@ async function saveFields(defs){
     toast(tr().act.refusedWhy.replace('{why}', (e && e.message) || ''), 'bad');
   } finally {
     state.fieldsBusy = false; persist(); render();
+    const f = state.focusField;
+    if(f){
+      state.focusField = null;
+      const el = document.querySelector(
+        `[data-fld="${f.kind}"][data-i="${f.i}"]`);
+      if(el){ el.focus(); el.select(); }
+    }
   }
 }
 
