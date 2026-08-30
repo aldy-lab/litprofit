@@ -38,7 +38,37 @@ the schema but is a middle tier nobody asked for here, and a typo silently
 becoming 'staff' is how somebody ends up unable to do their job.
 """
 
-import json, os, sys, urllib.error, urllib.request
+import json, os, ssl, sys, urllib.error, urllib.request
+
+
+def ca_context():
+    """An SSL context that can actually verify a certificate.
+
+    A python.org build on macOS does not use the system keychain. It looks for
+    a cert.pem that the installer's "Install Certificates.command" is supposed
+    to link to certifi -- and when nobody has run it, that file is simply not
+    there. Verification then fails against every https host on the machine,
+    with an error that reads like a wrong key or a wrong address:
+
+        [SSL: CERTIFICATE_VERIFY_FAILED] unable to get local issuer certificate
+
+    certifi ships with that same Python and holds Mozilla's CA list, which is
+    exactly what the installer would have pointed at. Falling back to it is
+    not a workaround around verification, it is verification with the roots
+    the machine failed to hand over.
+    """
+    ctx = ssl.create_default_context()
+    if ctx.get_ca_certs():
+        return ctx
+    try:
+        import certifi
+        ctx.load_verify_locations(certifi.where())
+    except Exception:
+        pass
+    return ctx
+
+
+SSL_CTX = ca_context()
 
 URL = (os.environ.get("CALC_SUPABASE_URL") or "").rstrip("/")
 KEY = os.environ.get("CALC_SUPABASE_SERVICE_KEY") or ""
@@ -66,7 +96,7 @@ def call(method, path, body=None):
         headers={"apikey": KEY, "Authorization": "Bearer " + KEY,
                  "Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(req) as r:
+        with urllib.request.urlopen(req, context=SSL_CTX) as r:
             raw = r.read().decode()
             return r.status, (json.loads(raw) if raw else None)
     except urllib.error.HTTPError as e:
@@ -78,7 +108,12 @@ def call(method, path, body=None):
     except urllib.error.URLError as e:
         # No network, wrong host, DNS gone. A stack trace here tells the
         # person running this nothing they can act on.
-        sys.exit("Could not reach %s -- %s" % (URL, e.reason))
+        msg = "Could not reach %s -- %s" % (URL, e.reason)
+        if "CERTIFICATE_VERIFY_FAILED" in str(e.reason):
+            msg += ("\n\nThis machine's Python cannot verify any certificate at all."
+                    "\nThe one-time fix, which also mends every other Python tool here:"
+                    "\n    open '/Applications/Python 3.12/Install Certificates.command'")
+        sys.exit(msg)
 
 
 def existing():
