@@ -1090,31 +1090,7 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .fld-key{font-family:var(--mono);font-size:11px;color:var(--ink-3);
   white-space:nowrap;min-width:88px}
 .fld-none{margin:4px 0}
-/* A field name edited in place. It has to read as the heading it is, not as
-   a form field sitting on top of one -- so no box until it is touched. */
-.fld-inline{border:1px solid transparent;background:transparent;color:inherit;
-  font:inherit;letter-spacing:inherit;text-transform:inherit;padding:1px 3px;
-  width:100%;min-width:0;border-radius:2px}
-.fld-inline:hover{border-color:var(--grid)}
-.fld-inline:focus{border-color:var(--series-1);background:var(--panel,transparent);
-  outline:none}
-.fld-th{display:flex;align-items:center;gap:2px}
-/* The label and its remove button are one line. Left to flow, the button
-   wrapped underneath and read as a stray × floating between a heading and
-   the field it belongs to. */
-.act-f span{display:flex;align-items:center;gap:4px}
-.fld-x{padding:0 5px;line-height:1.1;opacity:0;transition:opacity .15s;
-  font-size:13px;color:var(--ink-3)}
-.act-f:hover .fld-x,.fld-th:hover .fld-x,.fld-x:focus{opacity:1}
-@media (hover: none){ .fld-x{opacity:1} }
-/* The + sits in the head where the next column will appear. */
-.act-table th.act-addc,.act-table td.act-addc{width:34px;padding-left:2px;padding-right:2px}
-.act-table th.act-addc button{padding:2px 7px;line-height:1.1;font-size:14px}
-.act-addf{align-self:end;justify-self:start;margin-bottom:6px;
-  background:transparent;border:1px dashed var(--baseline);color:var(--ink-3);
-  padding:8px 12px;border-radius:2px;cursor:pointer;font:inherit;font-size:12px}
-.act-addf:hover{border-color:var(--series-1);color:var(--ink-1)}
-.act-fnote{margin-top:10px;max-width:78ch}
+.act-rowhint{align-self:center;color:var(--ink-3)}
 /* ---- our own signature, chosen rather than drawn ----
    The options are the signatures themselves. A list of names would be a list
    of names; what somebody is picking is a mark, so the mark is the button. */
@@ -1138,19 +1114,8 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
    button out of a sheet that has none to spare -- squeezed to where only the
    × of each heading was still legible. The th and the td go together, or the
    header row and the body rows stop having the same number of cells. */
-/* The heading is written twice on purpose: an editable copy and a plain one.
-   A width:100% input inside an auto-layout table cell has no intrinsic width
-   at all, so on a phone -- where the fixed layout is off -- each of the
-   company's own columns collapsed to a sliver with its name nowhere on the
-   screen. There is no CSS that turns an input back into text. */
-.fld-plain{display:none}
 @media (max-width: 759px){
-  .fld-plain{display:inline}
-  .fld-inline{display:none}
-  .fld-x{display:none}
-  .act-addf{display:none}
-  .act-table th.act-addc,.act-table td.act-addc{display:none}
-  .act-fnote{display:none}
+  .act-rowhint{display:none}
 }
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
 .co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
@@ -1632,6 +1597,8 @@ en: {
     renumbered:'That number had been taken. This act is {n}.',
     needWork:'Put at least one line of work on it before signing.',
     fields:'Fields',
+    addRow:'Add a line',
+    rowHint:'An act can run to as many lines as the work did.',
     execFor:'Signed for the executor',
     execApply:'Put this one on the act',
     execNone:'You have no signature on file yet.',
@@ -1885,6 +1852,8 @@ lt: {
     renumbered:'Tas numeris jau buvo užimtas. Šis aktas \u2014 {n}.',
     needWork:'Prieš pasirašant įrašykite bent vieną darbų eilutę.',
     fields:'Laukai',
+    addRow:'Pridėti eilutę',
+    rowHint:'Akte gali būti tiek eilučių, kiek buvo darbų.',
     execFor:'Vykdytojo parašas',
     execApply:'Naudoti šį akte',
     execNone:'Kol kas neturite išsaugoto parašo.',
@@ -2137,6 +2106,8 @@ ru: {
     renumbered:'Тот номер уже был занят. Этот акт \u2014 {n}.',
     needWork:'Перед подписанием впишите хотя бы одну строку работ.',
     fields:'Поля',
+    addRow:'Добавить строку',
+    rowHint:'Строк в акте может быть столько, сколько было работ.',
     execFor:'Подпись исполнителя',
     execApply:'Поставить в этот акт',
     execNone:'Сохранённой подписи пока нет.',
@@ -6981,7 +6952,7 @@ function fieldEditor(t){
 /* One row of the sheet, in one place, because it is written twice: by the
    editor and by the growing sheet below. Two copies of this markup would
    drift the day a column is added and only one of them hears about it. */
-function actRow(l, i, t, lock, cols, addCol){
+function actRow(l, i, t, lock, cols){
   const dis = lock ? ' disabled' : '';
   /* A row counts as used if ANY of its cells carry something, the company's
      own columns included -- otherwise a line with only an entry in "Hours"
@@ -6997,8 +6968,7 @@ function actRow(l, i, t, lock, cols, addCol){
       ${cell('work', 'act-c-work')}${cell('unit', 'act-c-unit')}${
         cell('qty', 'act-c-qty num')}${
         (cols || []).map(c => cell(c.key, 'act-c-x' + (c.num ? ' num' : ''))).join('')}${
-        /* the column under the + in the head, so the body keeps its shape */
-        addCol ? '<td class="act-addc"></td>' : ''}${cell('remarks', 'act-c-rem')}
+        cell('remarks', 'act-c-rem')}
       <td class="act-c-act">${!lock && used
             ? `<button class="ghost co-del" data-line-del="${i}" title="${esc(t.remove)}">×</button>`
             : ''}</td>
@@ -7029,8 +6999,7 @@ function actGrowSheet(x, i, t, cols){
   }
   if(!tb.querySelector(`tr[data-line="${i + 1}"]`))
     tb.insertAdjacentHTML('beforeend',
-      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false, cols,
-              canPayroll() && (cols || []).length < FIELD_CAP));
+      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false, cols));
 }
 
 function actEditor(x, t){
@@ -7046,8 +7015,7 @@ function actEditor(x, t){
       <input data-af="${key}" type="${type || 'text'}" value="${esc(x[key] || '')}"${dis}></label>`;
 
   const defs = actDefs(x), cols = defs.columns;
-  const addCol = !lock && canPayroll() && cols.length < FIELD_CAP;
-  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock, cols, addCol)).join('');
+  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock, cols)).join('');
 
   /* The company's own header fields, after the ones the paper form always
      had. Written into `extra` and keyed, never into a column of their own.
@@ -7056,17 +7024,16 @@ function actEditor(x, t){
      this is where somebody realises a field is missing. The label is the
      company's, so editing it changes the form for every act -- which is why
      it is the owner's to do and why the note under the sheet says so. */
-  const own = !lock && canPayroll();
-  const xf = (f, i) => lock
+  /* The act is a sheet to fill IN. Naming the company's own fields is a
+     different job and it has its own screen, reached from the list -- putting
+     it here put a rename box and a delete cross beside every heading on a
+     document, and the label ended up printed twice because `.act-f span`
+     outranks `.fld-plain` on specificity. Removed rather than patched: the
+     controls were answering a question nobody had asked. */
+  const xf = (f) => lock
     ? `<div class="act-f"><span>${esc(f.label)}</span>
         <b>${esc((x.extra || {})[f.key] || '\u2014')}</b></div>`
-    : `<label class="act-f"><span>${own
-        ? `<span class="fld-plain">${esc(f.label)}</span
-           ><input class="fld-inline" data-fld="header" data-i="${i}" maxlength="40"
-             value="${esc(f.label)}" aria-label="${esc(a.fRename)}">
-           <button class="ghost fld-x" data-fdel="header" data-i="${i}"
-             title="${esc(a.fRemove)}">×</button>`
-        : esc(f.label)}</span>
+    : `<label class="act-f"><span>${esc(f.label)}</span>
         <input data-ax="${esc(f.key)}" value="${esc((x.extra || {})[f.key] || '')}"></label>`;
 
   return `${noticeBar()}<div class="card">
@@ -7091,31 +7058,22 @@ function actEditor(x, t){
       ${field('object', a.hObject)}
       ${field('project_ref', a.hProjectNo)}
       ${defs.header.map(xf).join('')}
-      ${own && defs.header.length < FIELD_CAP
-        ? `<button class="act-addf" data-fadd="header">+ ${esc(a.fAddField)}</button>` : ''}
     </div>
 
     <datalist id="actUnits">${ACT_UNITS.map(u => `<option value="${u}">`).join('')}</datalist>
     <div class="tablewrap tablewrap-act"><table class="sheet-table act-table"
-      style="--act-min:${730 + cols.length * 112 + (addCol ? 34 : 0)}px">
+      style="--act-min:${730 + cols.length * 112}px">
       <thead><tr>
         <th class="act-n">№</th><th class="act-c-work">${esc(a.hWork)}</th>
         <th class="act-c-unit">${esc(a.hUnit)}</th>
-        <th class="act-c-qty num">${esc(a.hQty)}</th>${cols.map((c, i) =>
-          `<th class="act-c-x${c.num ? ' num' : ''}">${own
-            ? `<span class="fld-th"><span class="fld-plain">${esc(c.label)}</span
-                 ><input class="fld-inline" data-fld="columns"
-                 data-i="${i}" maxlength="40" value="${esc(c.label)}"
-                 aria-label="${esc(a.fRename)}"><button class="ghost fld-x"
-                 data-fdel="columns" data-i="${i}" title="${esc(a.fRemove)}">×</button></span>`
-            : esc(c.label)}</th>`).join('')}
-        ${own && cols.length < FIELD_CAP
-          ? `<th class="act-addc"><button class="ghost" data-fadd="columns"
-               title="${esc(a.fAddColumn)}">+</button></th>` : ''}
+        <th class="act-c-qty num">${esc(a.hQty)}</th>${cols.map(c =>
+          `<th class="act-c-x${c.num ? ' num' : ''}">${esc(c.label)}</th>`).join('')}
         <th class="act-c-rem">${esc(a.hRemarks)}</th><th class="act-c-act"></th>
       </tr></thead><tbody>${rows}</tbody></table></div>
-    ${own ? `<p class="hint act-fnote">${esc(cols.length > PORTRAIT_COLS
-        ? a.fSideways : a.fShared)}</p>` : ''}
+    ${lock ? '' : `<div class="co-actions">
+      <button class="ghost" id="actAddRow">+ ${esc(a.addRow)}</button>
+      <span class="hint act-rowhint">${esc(a.rowHint)}</span>
+    </div>`}
 
     <div class="act-head act-sign${lock ? ' act-read' : ''}">
       ${field('rep_name', a.hRep)}
@@ -7466,6 +7424,27 @@ function wireActs(){
   });
   on('actBack', 'click', () => { state.actId = null; persist(); render(); });
   on('actFields', 'click', () => { state.fieldsOpen = true; persist(); render(); });
+
+  /* There has always been a spare row waiting at the bottom, and typing in it
+     grows the sheet -- fast, and completely invisible. An act runs to as many
+     lines as the work did, so the way to get the next one has to be something
+     you can see. */
+  const addBtn = $('#actAddRow');
+  if(addBtn){
+    /* pointerdown with the default prevented, NOT click. Clicking this button
+       blurs the line you were typing, which saves it and appends the next row
+       -- and the button sits under the table, so it moves down out from under
+       the pointer before the mouse comes back up. The click then lands on
+       nothing, the caret stays on the BUTTON, and the space in the next thing
+       typed presses it again. Found by typing a line, clicking Add, and
+       watching the first word of the next line go nowhere.
+       On pointerdown nothing has moved yet. */
+    addBtn.addEventListener('pointerdown', ev => { ev.preventDefault(); actAddLine(); });
+    /* And the keyboard, which never sends a pointerdown at all. */
+    addBtn.addEventListener('keydown', ev => {
+      if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); actAddLine(); }
+    });
+  }
   on('fldBack', 'click', () => { state.fieldsOpen = false; persist(); render(); });
   on('actPrint', 'click', () => { const x = actOpen(); if(x) printAct(x); });
 
@@ -7635,7 +7614,7 @@ function wireActs(){
   });
 
   main.addEventListener('change', ev => {
-    const lab = ev.target.closest('[data-fld]');
+    const lab = ev.target.closest('[data-fld]');   /* only on the Fields screen now */
     if(lab){
       const kind = lab.getAttribute('data-fld'), i = Number(lab.getAttribute('data-i'));
       const d = liveFields();
@@ -8009,6 +7988,39 @@ async function saveFields(defs){
       if(el){ el.focus(); el.select(); }
     }
   }
+}
+
+/* Add a line, from the button. Nothing here waits for a blur, because the
+   whole point is that the blur is what moves the ground. */
+function actAddLine(){
+  const x = actOpen(); if(!x || x_signed(x)) return;
+  const t = tr(), cols = actDefs(x).columns;
+  const keys = ['work', 'unit', 'qty', 'remarks'].concat(cols.map(c => c.key));
+
+  /* The line being typed has not blurred, so what is in it lives only in the
+     DOM. Take it before growing the sheet, or the row you just filled in is
+     read back as empty and no new row is added. */
+  const cur = document.activeElement;
+  if(cur && cur.dataset && cur.dataset.al){
+    const i = Number(cur.dataset.i), key = cur.dataset.al;
+    const l = (Array.isArray(x.lines) ? x.lines : []).slice();
+    while(l.length <= i) l.push({ work: '', unit: '', qty: '', remarks: '' });
+    l[i] = Object.assign({}, l[i], { [key]: cur.value });
+    actSave(x, { lines: l });
+  }
+
+  const l = Array.isArray(x.lines) ? x.lines : [];
+  const last = l.length - 1;
+  if(l.length && keys.some(k => String(l[last][k] || '').trim()))
+    actGrowSheet(x, last, t, cols);
+
+  const rows = document.querySelectorAll('.act-table tbody tr');
+  const el = rows.length
+    ? rows[rows.length - 1].querySelector('input[data-al="work"]') : null;
+  /* 'nearest' on both axes and no animation: the sheet is inside a scroll
+     container, and a smooth scroll to 'center' moves it sideways as well as
+     down and keeps moving after the caret has landed. */
+  if(el){ el.focus(); el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
 }
 
 /* ---- signatures kept on file ----
