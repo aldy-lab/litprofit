@@ -6952,13 +6952,20 @@ function fieldEditor(t){
 /* One row of the sheet, in one place, because it is written twice: by the
    editor and by the growing sheet below. Two copies of this markup would
    drift the day a column is added and only one of them hears about it. */
-function actRow(l, i, t, lock, cols){
+function actRow(l, i, t, lock, cols, stored){
   const dis = lock ? ' disabled' : '';
-  /* A row counts as used if ANY of its cells carry something, the company's
-     own columns included -- otherwise a line with only an entry in "Hours"
-     has no number and no delete button. */
-  const keys = ['work', 'unit', 'qty', 'remarks'].concat((cols || []).map(c => c.key));
-  const used = keys.some(k => String(l[k] || '').trim());
+  /* Numbered by POSITION. It used to be numbered by whether the row had
+     anything in it, and an empty line that had got itself stored showed no
+     number at all -- so the sheet read 1, 2, 3, blank, 5, and after the last
+     line was deleted the first one left was called 2. A line is the Nth line
+     because it is in Nth place.
+
+     `stored` is how many lines the act actually has; anything past that is
+     the spare row waiting at the bottom, which is not a line yet. */
+  const used = stored === undefined
+    ? ['work', 'unit', 'qty', 'remarks'].concat((cols || []).map(c => c.key))
+        .some(k => String(l[k] || '').trim())
+    : i < stored;
   const cell = (k, cls) => lock
     ? `<td class="${cls}">${esc(l[k] || '')}</td>`
     : `<td class="${cls}"><input data-al="${k}" data-i="${i}"${
@@ -6999,7 +7006,10 @@ function actGrowSheet(x, i, t, cols){
   }
   if(!tb.querySelector(`tr[data-line="${i + 1}"]`))
     tb.insertAdjacentHTML('beforeend',
-      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false, cols));
+      /* the new one is the spare: it becomes a line when something is typed
+         into it, and the number appears with the next render */
+      actRow({ work: '', unit: '', qty: '', remarks: '' }, i + 1, t, false, cols,
+             i + 1));
 }
 
 function actEditor(x, t){
@@ -7015,7 +7025,8 @@ function actEditor(x, t){
       <input data-af="${key}" type="${type || 'text'}" value="${esc(x[key] || '')}"${dis}></label>`;
 
   const defs = actDefs(x), cols = defs.columns;
-  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock, cols)).join('');
+  const stored = (Array.isArray(x.lines) ? x.lines : []).length;
+  const rows = actLines(x).map((l, i) => actRow(l, i, t, lock, cols, stored)).join('');
 
   /* The company's own header fields, after the ones the paper form always
      had. Written into `extra` and keyed, never into a column of their own.
@@ -7949,10 +7960,27 @@ function actDelete(id){
   render();
 }
 
+/* A line with nothing in any of its cells is not a line. Trailing ones are
+   dropped on the way in, which is what stops the act collecting blanks --
+   they cost nothing to look at, because the sheet always draws one spare row
+   at the bottom anyway, so what the person sees does not change. Only
+   TRAILING ones: a blank row in the middle is somebody halfway through
+   typing, and pulling it out from under them is not tidying. */
+function actTrimLines(lines, cols){
+  if(!Array.isArray(lines)) return lines;
+  const keys = ['work', 'unit', 'qty', 'remarks'].concat((cols || []).map(c => c.key));
+  const has = l => keys.some(k => String((l || {})[k] || '').trim());
+  const out = lines.slice();
+  while(out.length && !has(out[out.length - 1])) out.pop();
+  return out;
+}
+
 function actSave(x, patch, redraw){
   /* Refused here as well as on the server, so a signed act never produces an
      error toast for a save that was never going to be allowed. */
   if(x_signed(x)) return;
+  if(patch && Array.isArray(patch.lines))
+    patch = Object.assign({}, patch, { lines: actTrimLines(patch.lines, actDefs(x).columns) });
   Object.assign(x, patch);
   x.line_count = (Array.isArray(x.lines) ? x.lines : [])
     .filter(l => (l.work || '').trim()).length;
@@ -8004,9 +8032,15 @@ function actAddLine(){
   if(cur && cur.dataset && cur.dataset.al){
     const i = Number(cur.dataset.i), key = cur.dataset.al;
     const l = (Array.isArray(x.lines) ? x.lines : []).slice();
-    while(l.length <= i) l.push({ work: '', unit: '', qty: '', remarks: '' });
-    l[i] = Object.assign({}, l[i], { [key]: cur.value });
-    actSave(x, { lines: l });
+    /* Only if there is something to commit. Pressing the button with the
+       caret resting in the empty spare row used to pad the act with a blank
+       line -- press it three times and the act quietly grew three lines that
+       are not lines, which is what put the holes in the numbering. */
+    if(i < l.length || String(cur.value || '').trim()){
+      while(l.length <= i) l.push({ work: '', unit: '', qty: '', remarks: '' });
+      l[i] = Object.assign({}, l[i], { [key]: cur.value });
+      actSave(x, { lines: l });
+    }
   }
 
   const l = Array.isArray(x.lines) ? x.lines : [];
@@ -8772,7 +8806,14 @@ $('#projMenu').addEventListener('click', async e=>{
       if(act === 'new' || act === 'dup') await cloudCreate(proj());
       else if(act === 'del' && lastDeleted) await CLOUD.remove(lastDeleted);
       render();
-    } catch(err){ cloudErr = err.message; paintSaveState('error'); }
+    } catch(err){
+      cloudErr = err.message; paintSaveState('error');
+      /* The status tag holds the reason in a tooltip, which nobody hovers
+         over. A refusal that the person can DO something about -- a job that
+         will not delete because a signed act is inside it -- has to be said
+         out loud, or the button simply looks broken. */
+      toast(err.message, 'bad');
+    }
   }
 });
 
