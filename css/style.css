@@ -146,6 +146,22 @@
    top and a bottom edge. The rivets in the middle are untouched -- this
    changes only how the row meets everything around it, which is the whole of
    what a seam is for. */
+/* One joint, one row.
+
+   Where a section that ends in a seam is followed by one that begins with
+   one, the page draws two rows of rivets a few pixels apart -- which is not
+   a stronger joint, it is two joints where the sheet has one edge. It
+   happened in six places: the partners band into the machine on the home
+   page, and the same band and the completed-works strip into the call to
+   action on three other pages.
+
+   Fixed here rather than by taking .seam-top off those particular sections,
+   because that is a fact about what happens to sit above them today. Sections
+   get reordered; a rule that reads the arrangement stays right when they do.
+   The BOTTOM seam wins: it belongs to the plate that ends, and it is the one
+   already carrying the fade into the section below it. */
+.seam-bottom + .seam-top::before { content: none; }
+
 .seam-top, .seam-bottom { position: relative; }
 .seam-top::before, .seam-bottom::after {
   content: "";
