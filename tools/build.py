@@ -1236,10 +1236,12 @@ def home():
       </div>
     </section>
 
+{screw}
+
     <section class="section section-alt" id="services">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{svc_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{svc_e}</p>
           <h2>{svc_h}</h2>
           <p class="lead">{svc_l}</p>
         </div>
@@ -1248,7 +1250,6 @@ def home():
         </div>
       </div>
     </section>
-{vessel}
 
     <section class="section">
       <div class="container split">
@@ -1332,7 +1333,11 @@ def home():
       </div>
     </section>
 {cta}""".format(founded=FOUNDED, legal=LEGAL, services=u("/services/"),
-                hero_drawing=hero_drawing(), vessel=vessel_drawing(),
+                hero_drawing=hero_drawing(),
+                # 02, between the partners band and the services grid. The
+                # script tag rides with this one; the reciprocating machine at
+                # 05 asks for the same file and must not emit it twice.
+                screw=recip_3d("screw", num="02", split=True),
                 rail_prev=attr(T("rail_prev")), rail_next=attr(T("rail_next")),
                 hero_drawing_lit=hero_drawing(lit=True),
                 he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
@@ -1360,7 +1365,7 @@ def home():
                 cl_h=T("clients_h2"),
                 refrig_label=i18n.SVC[LANG]["refrigeration-systems"]["title"],
                 cards=cards, logos=logos, cycle=compressor_drawing(),
-                machine=recip_3d(),
+                machine=recip_3d(script=False),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
                 plant_img=u("/assets/photos/plant-room.webp"),
@@ -1713,7 +1718,7 @@ tblock=a_titleblock("04"),
 # the PRS certificate approves them to design refrigeration equipment. It does
 # not approve them to design vessels, and a signed hull would say it did.
 # ============================================================
-def vessel_drawing():
+def vessel_drawing(num="01"):
     P = []
     add = P.append
 
@@ -1808,7 +1813,7 @@ def vessel_drawing():
     <section class="section section-alt vessel-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
           <h2>{h}</h2>
           <p class="lead">{l}</p>
         </div>
@@ -1828,7 +1833,7 @@ def vessel_drawing():
           <li><span>04</span>{lg4}</li>
         </ol>
       </div>
-    </section>""".format(e=T("vsl_eyebrow"), h=T("vsl_h2"), l=T("vsl_lead"),
+    </section>""".format(num=num, e=T("vsl_eyebrow"), h=T("vsl_h2"), l=T("vsl_lead"),
                          alt=attr(T("vsl_h2")), p="".join(P),
                          lg1=text(T("vsl_hold")), lg2=text(T("vsl_er").replace("|", " ")),
                          lg3=text(T("vsl_pipe")), lg4=text(T("vsl_store")))
@@ -2063,7 +2068,14 @@ def services_index():
         </div>
       </div>
     </section>
+{vessel}
 {cta}""".format(rows="\n".join(service_row(s) for s in services()),
+                # It came off the home page, where it was the third section of
+                # eight and the second full-bleed drawing above the fold-and-a-
+                # half. Here it is a recap of the four rows immediately above
+                # it, and its four balloons link to exactly those four pages --
+                # which is the only page on the site where that is true.
+                vessel=vessel_drawing(num="01"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
 
@@ -2158,7 +2170,7 @@ def capacity_chart():
         </div>""".format(alt=attr(T("cap_chart_h2")), p="".join(P))
 
 
-def recip_3d(machine="recip", hero=False):
+def recip_3d(machine="recip", hero=False, num=None, script=True, split=False):
     """The compressor as a live object, above its own elevation.
 
     Same machine, same numbers: the geometry in js/compressor.js is authored in
@@ -2169,6 +2181,22 @@ def recip_3d(machine="recip", hero=False):
     Anchors are model coordinates -- x along the length from the motor end, y
     up from the mounting feet, z across. The renderer projects them every
     frame, so a label follows the casting it points at.
+
+    `num` overrides the section number in the eyebrow. The number used to be
+    derived from the machine, which held only while each machine appeared on
+    exactly one page: the screw was always the first section of About. It is
+    now also the second section of the home page, and a block that numbers
+    itself from its own contents cannot be moved.
+
+    `script` is false for the second block on a page. Two identical <script
+    src> tags both execute -- the browser does not dedupe them -- and the
+    renderer would boot every figure twice.
+
+    `split` lays the section out the way the About hero does: the words in
+    one column, the machine in the other. Nothing in the renderer changes --
+    it is the narrower stage that makes the difference, because isKeyed()
+    then puts the numbers on the machine and the names underneath instead of
+    running seven leaders out to the sheet edge.
     """
     # Anchors are model coordinates, so they belong to the machine, not to the
     # page. A screw compressor has nothing at 470,110,152 and a reciprocating
@@ -2210,7 +2238,7 @@ def recip_3d(machine="recip", hero=False):
         % (at, n, text(label)) for n, label, at in tags)
 
     return """
-    <section class="section section-alt cmp-section{hero}">
+    <section class="section section-alt cmp-section{hero}{split}">
       <div class="container">
 {head}
         <figure class="cmp bleed reveal" data-compressor data-machine="{machine}">
@@ -2226,9 +2254,11 @@ def recip_3d(machine="recip", hero=False):
           <figcaption class="cmp-tb"><span>{tb}</span><b>{tb2}</b></figcaption>
         </figure>
       </div>
-    </section>
-    <script src="{js}" defer></script>""".format(
+    </section>{script}""".format(
         machine=machine, hero=(" cmp-section--hero" if hero else " seam-top"),
+        split=(" cmp-section--split" if split else ""),
+        script=('\n    <script src="%s" defer></script>' % asset("/js/compressor.js")
+                if script else ""),
         # In the About hero the head is gone entirely. A numbered eyebrow and a
         # 58px heading introducing a machine that is right there, already
         # carrying its own title block and seven named callouts, was the page
@@ -2238,7 +2268,7 @@ def recip_3d(machine="recip", hero=False):
           <h2>%s</h2>
           %s
         </div>""" % (
-            ("01" if machine in ("screw", "unit") else "05"),
+            num or ("01" if machine in ("screw", "unit") else "05"),
             text(T("unit_eyebrow" if machine == "unit" else
                    ("scr_eyebrow" if machine == "screw" else "cmp_eyebrow"))),
             text(T("unit_h2" if machine == "unit" else
@@ -2249,8 +2279,7 @@ def recip_3d(machine="recip", hero=False):
         alt=attr(T("unit_alt" if machine == "unit" else ("scr_alt" if machine == "screw" else "cmp_alt"))),
         hint=text(T("cmp_hint")), marks=marks,
         tb=text(T("unit_tb" if machine == "unit" else ("scr_tb" if machine == "screw" else "cmp_tb"))),
-        tb2=text(T("unit_tb2" if machine == "unit" else ("scr_tb2" if machine == "screw" else "cmp_tb2"))),
-        js=asset("/js/compressor.js"))
+        tb2=text(T("unit_tb2" if machine == "unit" else ("scr_tb2" if machine == "screw" else "cmp_tb2"))))
 
 
 def recip_drawing():

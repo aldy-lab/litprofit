@@ -24,9 +24,35 @@
   /* One engine, more than one machine. The alternative was a second file with
      its own copy of project/cull/sort/shade, and two copies of a renderer are
      two renderers that drift: a fix to the culling in one is a bug that
-     survives in the other. The geometry is the only part that differs. */
-  var root = document.querySelector("[data-compressor]");
-  if (!root) return;
+     survives in the other. The geometry is the only part that differs.
+
+     ONE ENGINE, MORE THAN ONE MACHINE *ON A PAGE*
+     ---------------------------------------------
+     This used to take document.querySelector -- the first machine on the
+     page and no others. That was true for as long as no page carried two,
+     and the home page now carries the screw rotors near the top and the
+     reciprocating machine further down. Left as it was, the second canvas
+     would have stayed blank: no error, no warning, just an empty rectangle
+     where a compressor was supposed to be, which is the failure mode that
+     reaches the client rather than the build.
+
+     So the whole renderer is a function of its root and runs once per
+     figure. The body below is deliberately NOT re-indented into it: the
+     change is which elements it runs for, and a 1,150-line whitespace diff
+     would hide that behind noise.
+
+     Two instances mean two resize and scroll listeners and two observers.
+     That is the honest cost and it is small -- both read, neither writes,
+     and each render loop still stops the moment its own figure leaves the
+     screen. */
+  function boot(root) {
+  /* A page could end up with this file linked twice -- two figures, two
+     emitted script tags, and a browser runs both. Booting a canvas twice
+     gives it two animation loops fighting over one context, which looks
+     like a stutter and reads like a performance problem rather than a
+     duplicated tag. Claim the element instead. */
+  if (root.getAttribute("data-compressor-on")) return;
+  root.setAttribute("data-compressor-on", "1");
   var MACHINE = root.getAttribute("data-machine") || "recip";
   var canvas = root.querySelector("canvas");
   if (!canvas || !canvas.getContext) return;
@@ -1186,4 +1212,8 @@
   }
   draw(W, H, DPR);
   drawTags(W, H);
+  }
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll("[data-compressor]"), boot);
 })();

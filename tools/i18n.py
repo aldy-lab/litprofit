@@ -126,8 +126,8 @@ S["en"] = dict(
     # vessel general arrangement -- the four spaces the company works in.
     # vsl_, not ga_: ga_ is the compressor package drawing further down.
     vsl_eyebrow="Where the work is", vsl_h2="A ship, deck to keel",
-    vsl_lead="The same ship, from the side. Every discipline on this page is a "
-             "space you can point at.",
+    vsl_lead="A fishing vessel from the side. Every discipline on this page is "
+             "a space you can point at.",
     vsl_hold="Fish hold // RSW", vsl_er="Ship equipment|and engine repair",
     vsl_pipe="Hull and piping", vsl_store="Stores",
     vsl_wl="Waterline", vsl_tb="Typical fishing vessel",
@@ -299,7 +299,7 @@ S["lt"] = dict(
     rec_terminal="Gnybtų dėžutė",
     hero_eyebrow="Klaipėda, Lietuva", hero_since="nuo",
     vsl_eyebrow="Kur vyksta darbai", vsl_h2="Laivas nuo denio iki kilio",
-    vsl_lead="Tas pats laivas iš šono. Kiekviena šio puslapio sritis — konkreti "
+    vsl_lead="Žvejybos laivas iš šono. Kiekviena šio puslapio sritis — konkreti "
              "laivo erdvė.",
     vsl_hold="Žuvies triumas // RSW", vsl_er="Laivų įrangos ir|variklių remontas",
     vsl_pipe="Korpusas ir vamzdynai", vsl_store="Sandėliai",
@@ -412,7 +412,7 @@ S["ru"] = dict(
 
     hero_eyebrow="Клайпеда, Литва", hero_since="с",
     vsl_eyebrow="Где идёт работа", vsl_h2="Судно от палубы до киля",
-    vsl_lead="То же судно сбоку. Каждое направление на этой странице — "
+    vsl_lead="Рыболовное судно сбоку. Каждое направление на этой странице — "
              "конкретное помещение.",
     vsl_hold="Рыбный трюм // RSW", vsl_er="Ремонт оборудования|и двигателей",
     vsl_pipe="Корпус и трубопроводы", vsl_store="Кладовые",

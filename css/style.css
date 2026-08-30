@@ -2118,6 +2118,56 @@ html.is-frost #frostToggle {
 }
 @media (max-width: 700px) { .cmp-stage { height: min(46vh, 84vw); } }
 
+/* ---------- the machine beside its own words ----------
+   Copied in intent from the About hero, and for the reason that hero exists:
+   at roughly 740px of stage the renderer's own arithmetic flips the key --
+   isKeyed() decides two columns of names no longer fit beside the drawing,
+   so the numbers move onto the machine and the names line up underneath it.
+   Seven leader lines stop crossing an empty half-page to reach the sheet
+   edge, and the machine gets that half-page instead.
+
+   Which is the counter-intuitive part worth writing down: the machine comes
+   out LARGER in half a screen than it was across a whole one, because a full
+   width stage is bound by its height and spends the rest on white space and
+   leaders.
+
+   Only the figure that asks for it. The packaged unit on the refrigeration
+   page is a skid four times longer than it is tall -- half the width there
+   would shrink it, not grow it. */
+@media (min-width: 980px) {
+  .cmp-section--split > .container {
+    display: grid;
+    grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1.3fr);
+    column-gap: clamp(36px, 4.5vw, 84px);
+    align-items: center;
+  }
+  /* One column again inside the left half. The site-wide rule sets every
+     section head as heading-beside-lead; in a half-width column that leaves
+     two 20ch measures side by side, which is a paragraph shape nobody reads.
+     Specificity, not source order, does the overriding here -- .cmp-section--
+     split .section-head:has(.lead) is 0,3,0 against the 0,2,0 it replaces. */
+  .cmp-section--split .section-head,
+  .cmp-section--split .section-head:has(.lead) {
+    display: block;
+    max-width: none;
+    margin-bottom: 0;
+  }
+  .cmp-section--split .section-head h2 { max-width: 15ch; margin-bottom: 20px; }
+  .cmp-section--split .section-head .lead { max-width: 42ch; margin-bottom: 0; }
+
+  /* Undo .bleed. Inside a grid cell, escaping to the viewport width is
+     exactly what must not happen -- it would put the figure back across the
+     whole page and lay it over the column beside it. */
+  .cmp-section--split .cmp {
+    width: auto;
+    max-width: none;
+    left: auto;
+    translate: none;
+    margin-bottom: 0;
+  }
+  .cmp-section--split .cmp-stage { height: min(74vh, 42vw); min-height: 440px; }
+}
+
 /* ============================================================
    ABOUT: the machine IS the first screen
    ============================================================
