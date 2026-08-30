@@ -1115,6 +1115,24 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
   padding:8px 12px;border-radius:2px;cursor:pointer;font:inherit;font-size:12px}
 .act-addf:hover{border-color:var(--series-1);color:var(--ink-1)}
 .act-fnote{margin-top:10px;max-width:78ch}
+/* ---- our own signature, chosen rather than drawn ----
+   The options are the signatures themselves. A list of names would be a list
+   of names; what somebody is picking is a mark, so the mark is the button. */
+.exec-pick,.exec-done{margin-top:26px;border-top:1px solid var(--grid);padding-top:18px}
+.exec-list{display:flex;gap:12px;flex-wrap:wrap;margin:4px 0 12px}
+.exec-opt{display:grid;gap:4px;justify-items:start;background:#fff;
+  border:1px solid rgba(11,13,42,.18);border-radius:2px;padding:8px 12px 6px;
+  cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.exec-opt:hover{border-color:var(--series-1);box-shadow:0 0 0 3px var(--accent-soft,transparent)}
+.exec-opt img{height:44px;width:auto;max-width:190px}
+.exec-opt span{font-size:12px;color:#4b4e66;font-family:var(--font)}
+.exec-draw{margin-top:14px;max-width:430px;display:grid;gap:10px}
+.exec-manage{margin-top:12px;display:grid;gap:8px;max-width:430px}
+.exec-row{display:flex;align-items:center;gap:12px}
+.exec-row img{height:34px;width:auto;max-width:140px;background:#fff;
+  border:1px solid rgba(11,13,42,.14);border-radius:2px;padding:2px 6px}
+.exec-row span{flex:1 1 auto;font-size:13px;color:var(--ink-2)}
+.sig-name{font-weight:600;color:var(--ink-1)}
 /* On a phone the act is filled IN, not designed. Naming the company's
    columns is an office job, and the controls for it cost two columns and a
    button out of a sheet that has none to spare -- squeezed to where only the
@@ -1614,6 +1632,17 @@ en: {
     renumbered:'That number had been taken. This act is {n}.',
     needWork:'Put at least one line of work on it before signing.',
     fields:'Fields',
+    execFor:'Signed for the executor',
+    execApply:'Put this one on the act',
+    execNone:'You have no signature on file yet.',
+    execAdd:'Draw one and keep it',execManage:'Manage',
+    execCancel:'Cancel',execSave:'Keep it',
+    execLabel:'The name to print under it',execLabelHint:'V. Petrauskas',
+    execNeedName:'Give it the name that should print under the line.',
+    execClear:'Take it off this act',
+    execDel:'Forget \u201c{n}\u201d? Acts it is already on keep it.',
+    execKept:'Removing one here does not touch the acts it has already been put on \u2014 the mark was copied onto them, not borrowed.',
+    execNote:'Your own signatures, kept for you alone. The customer\u2019s representative signs live on every act: a stored signature put on a document somebody has not read is not a signature.',
     fAddField:'field',fAddColumn:'Add a column',
     fRename:'Rename this field',fRemove:'Remove this field',
     fShared:'These are the company\u2019s fields, not this act\u2019s \u2014 naming one here names it on every act. Acts already signed keep the fields they were signed under.',
@@ -1856,6 +1885,17 @@ lt: {
     renumbered:'Tas numeris jau buvo užimtas. Šis aktas \u2014 {n}.',
     needWork:'Prieš pasirašant įrašykite bent vieną darbų eilutę.',
     fields:'Laukai',
+    execFor:'Vykdytojo parašas',
+    execApply:'Naudoti šį akte',
+    execNone:'Kol kas neturite išsaugoto parašo.',
+    execAdd:'Nupiešti ir išsaugoti',execManage:'Tvarkyti',
+    execCancel:'Atšaukti',execSave:'Išsaugoti',
+    execLabel:'Vardas, spausdinamas po parašu',execLabelHint:'V. Petrauskas',
+    execNeedName:'Įrašykite vardą, kuris turi būti po linija.',
+    execClear:'Pašalinti iš šio akto',
+    execDel:'Pamiršti \u201e{n}\u201c? Aktuose, kuriuose jis jau yra, jis lieka.',
+    execKept:'Pašalinus čia, jau pasirašyti aktai nesikeičia \u2014 ženklas į juos nukopijuotas, o ne pasiskolintas.',
+    execNote:'Jūsų pačių parašai, matomi tik jums. Kliento atstovas pasirašo gyvai kiekviename akte: išsaugotas parašas, uždėtas ant dokumento, kurio žmogus neskaitė, nėra parašas.',
     fAddField:'laukas',fAddColumn:'Pridėti stulpelį',
     fRename:'Pervadinti šį lauką',fRemove:'Pašalinti šį lauką',
     fShared:'Tai įmonės laukai, o ne šio akto \u2014 pavadinę čia, pavadinate juos visuose aktuose. Jau pasirašyti aktai išlaiko tuos laukus, su kuriais buvo pasirašyti.',
@@ -2097,6 +2137,17 @@ ru: {
     renumbered:'Тот номер уже был занят. Этот акт \u2014 {n}.',
     needWork:'Перед подписанием впишите хотя бы одну строку работ.',
     fields:'Поля',
+    execFor:'Подпись исполнителя',
+    execApply:'Поставить в этот акт',
+    execNone:'Сохранённой подписи пока нет.',
+    execAdd:'Нарисовать и сохранить',execManage:'Управление',
+    execCancel:'Отмена',execSave:'Сохранить',
+    execLabel:'Имя, которое печатается под подписью',execLabelHint:'В. Петраускас',
+    execNeedName:'Впишите имя, которое должно стоять под линией.',
+    execClear:'Убрать из этого акта',
+    execDel:'Забыть \u00ab{n}\u00bb? В актах, где она уже стоит, она останется.',
+    execKept:'Удаление здесь не трогает акты, куда подпись уже поставлена \u2014 знак в них скопирован, а не одолжен.',
+    execNote:'Ваши собственные подписи, видны только вам. Представитель заказчика подписывает живьём в каждом акте: сохранённая подпись, поставленная на документ, который человек не читал, — не подпись.',
     fAddField:'поле',fAddColumn:'Добавить столбец',
     fRename:'Переименовать это поле',fRemove:'Убрать это поле',
     fShared:'Это поля компании, а не этого акта \u2014 назвав здесь, вы называете их во всех актах. Подписанные акты сохраняют те поля, с которыми были подписаны.',
@@ -2774,6 +2825,7 @@ const CLOUD = (function(){
       const cols = ['id','project_id','number','act_date','customer','imo','object',
         'project_ref','lines','rep_name','note','extra','field_defs','line_count',
         'signed','signed_at','sign_log','witnessed_by','written_by',
+        'exec_signed','exec_name','exec_signed_at','executed_by',
         'rev','created_at','updated_at'].join(',');
       return await rest('acts_v?select=' + cols + '&order=act_date.desc') || [];
     },
@@ -2781,6 +2833,34 @@ const CLOUD = (function(){
       const r = firstRow(await rest(
         'acts_v?select=signature&id=eq.' + encodeURIComponent(id)));
       return r ? r.signature : null;
+    },
+    async actExecSignature(id){
+      const r = firstRow(await rest(
+        'acts_v?select=exec_signature&id=eq.' + encodeURIComponent(id)));
+      return r ? r.exec_signature : null;
+    },
+
+    /* ---- signatures kept on file ----
+       signatures_v returns rows where owner = auth.uid() and nothing else, so
+       there is no filter to get wrong here: the list IS yours. */
+    async signatures(){
+      return await rest('signatures_v?select=id,label,image&order=created_at.asc') || [];
+    },
+    async signatureCreate(label, image){
+      return firstRow(await rest('rpc/create_signature', { method: 'POST',
+        body: JSON.stringify({ p_label: label, p_image: image }) }));
+    },
+    async signatureDelete(id){
+      await rest('rpc/delete_signature', { method: 'POST',
+        body: JSON.stringify({ p_id: id }) });
+    },
+    async actSignExec(id, rev, sigId){
+      return firstRow(await rest('rpc/sign_act_exec', { method: 'POST',
+        body: JSON.stringify({ p_id: id, p_rev: rev, p_signature_id: sigId }) }));
+    },
+    async actClearExec(id, rev){
+      return firstRow(await rest('rpc/clear_act_exec', { method: 'POST',
+        body: JSON.stringify({ p_id: id, p_rev: rev }) }));
     },
     /* signed_at goes UP, it is not stamped here. An act signed on board at
        two and synced at six would otherwise be dated six. The server clamps
@@ -2902,7 +2982,11 @@ function persist(){
   state.unsentActs = [...pendingActs];
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(state,
-      (k, v) => k === 'enquiries' ? undefined : v));
+      /* `signatures` for the same reason as `enquiries`: it is fetched on
+         every load anyway, so keeping it saves nothing, and what it would
+         leave behind is a person's own signature sitting in the browser of
+         whatever machine they happened to sign in from. */
+      (k, v) => (k === 'enquiries' || k === 'signatures') ? undefined : v));
     return true;
   }
   catch(e){ return false; }
@@ -6685,6 +6769,11 @@ const SIG = Object.create(null);
 
 function stripSig(row){
   if(row && row.signature){ SIG[row.id] = row.signature; delete row.signature; }
+  /* The executor's, under its own key. Same reason: state.acts goes through
+     JSON.stringify into localStorage on every keystroke. */
+  if(row && row.exec_signature){
+    SIG[row.id + ':x'] = row.exec_signature; delete row.exec_signature;
+  }
   return row;
 }
 
@@ -6701,6 +6790,19 @@ async function sigFor(x){
   try { SIG[x.id] = await CLOUD.actSignature(x.id); } catch(e){ return null; }
   return SIG[x.id];
 }
+
+async function execSigFor(x){
+  if(!x || !x.exec_signed) return null;
+  if(x.exec_signature) return x.exec_signature;
+  if(SIG[x.id + ':x']) return SIG[x.id + ':x'];
+  if(!CLOUD.on) return null;
+  try { SIG[x.id + ':x'] = await CLOUD.actExecSignature(x.id); } catch(e){ return null; }
+  return SIG[x.id + ':x'];
+}
+
+/* The signatures this person keeps. Empty until the pull lands, and empty
+   forever in a browser-only copy, where they live in state instead. */
+function mySignatures(){ return state.signatures || []; }
 
 function actsOf(){
   const pid = proj() && proj().id;
@@ -6771,6 +6873,7 @@ function fieldKey(label, taken){
    and the save guard. `signed` is the server's boolean; `signature` is what a
    browser-only copy carries instead. */
 function x_signed(a){ return !!(a && (a.signed || a.signature)); }
+function x_exec(a){ return !!(a && (a.exec_signed || a.exec_signature)); }
 
 function actLines(a){
   const l = Array.isArray(a.lines) ? a.lines : [];
@@ -7019,6 +7122,7 @@ function actEditor(x, t){
     </div>
     ${lock ? '' : `<p class="hint co-foot">${esc(a.repNote)}</p>`}
     ${lock ? sigDone(x, t) : sigPadHtml(t)}
+    ${execBlock(x, t)}
   </div>`;
 }
 
@@ -7062,13 +7166,74 @@ function sigDone(x, t){
   </div>`;
 }
 
+/* ---- our own side of the sheet ----
+   The customer signs live, every time. This one is ours, and ours can be
+   kept: it goes on the Executor line, which until now printed empty and got
+   a pen afterwards, if anybody remembered.
+
+   Available whether or not the customer has signed. It is a different line
+   and it changes not one word of what was accepted -- in practice the fitter
+   takes the customer's signature on board and the office adds the company's
+   when the sheet comes back. */
+function execBlock(x, t){
+  const a = t.act;
+  const png = SIG[x.id + ':x'] || x.exec_signature || '';
+  const mine = mySignatures();
+
+  if(x_exec(x)) return `<div class="sig-done exec-done">
+    <span class="sig-lab">${esc(a.execFor)}</span>
+    <div class="sig-img" id="execShow">${png
+      ? `<img src="${esc(png)}" alt="${esc(a.execFor)}">` : ''}</div>
+    <div class="sig-name">${esc(x.exec_name || '')}</div>
+    <div class="sig-meta">${esc(LEGAL_NAME)}</div>
+    <div class="sig-acts"><button class="ghost" id="execClear">${esc(a.execClear)}</button></div>
+  </div>`;
+
+  return `<div class="sig exec-pick">
+    <span class="sig-lab">${esc(a.execFor)}</span>
+    ${mine.length
+      ? `<div class="exec-list">${mine.map(sg => `<button type="button"
+            class="exec-opt" data-exec-sig="${esc(sg.id)}" title="${esc(a.execApply)}">
+            <img src="${esc(sg.image)}" alt="">
+            <span>${esc(sg.label)}</span></button>`).join('')}</div>`
+      : `<p class="hint">${esc(a.execNone)}</p>`}
+    <div class="sig-acts">
+      <button class="ghost" id="execAdd">${esc(a.execAdd)}</button>
+      ${mine.length ? `<button class="ghost" id="execManage">${esc(a.execManage)}</button>` : ''}
+    </div>
+    ${state.execDraw ? `<div class="exec-draw">
+      <label class="act-f"><span>${esc(a.execLabel)}</span>
+        <input id="execName" maxlength="40" value="${esc(state.execName || '')}"
+               placeholder="${esc(a.execLabelHint)}"></label>
+      <div class="sig-pad" id="execBox"><canvas id="execPad"></canvas>
+        <span class="sig-rule"></span><span class="sig-x">×</span></div>
+      <div class="sig-acts">
+        <button class="ghost" id="execUndo">${esc(a.undo)}</button>
+        <button class="ghost" id="execWipe">${esc(a.clear)}</button>
+        <span class="sig-sp"></span>
+        <button class="ghost" id="execCancel">${esc(a.execCancel)}</button>
+        <button class="primary" id="execSave" disabled>${esc(a.execSave)}</button>
+      </div>
+    </div>` : ''}
+    ${state.execManage && mine.length ? `<div class="exec-manage">
+      ${mine.map(sg => `<div class="exec-row"><img src="${esc(sg.image)}" alt="">
+        <span>${esc(sg.label)}</span>
+        <button class="ghost co-del" data-exec-del="${esc(sg.id)}"
+          title="${esc(t.remove)}">×</button></div>`).join('')}
+      <p class="hint">${esc(a.execKept)}</p>
+    </div>` : ''}
+    <p class="hint co-foot">${esc(a.execNote)}</p>
+  </div>`;
+}
+
 /* ---- the pad itself ----
    Strokes are kept as points in CSS pixels and REDRAWN, never accumulated
    into the canvas: that is what makes undo, a resize and the export at twice
    the screen resolution all the same operation. The canvas is only ever a
    picture of the strokes. */
 const SIG_INK = '#101010';
-let PAD = null;
+let PAD = null;       /* the customer's, drawn fresh every time */
+let EXEC_PAD = null;  /* ours, drawn once and kept */
 
 function sigPad(canvas, key, onChange){
   const ctx = canvas.getContext('2d');
@@ -7194,12 +7359,14 @@ function sigPad(canvas, key, onChange){
 async function printAct(x){
   const t = tr(), a = t.act;
   const png = await sigFor(x);
+  const execPng = await execSigFor(x);
   /* Decoded BEFORE the print dialog opens. A data URL in fresh markup is
      usually painted in time and "usually" is how a signature goes missing
      from one PDF in twenty with nothing to show it ever happened. */
-  if(png) await new Promise(go => {
-    const im = new Image(); im.onload = im.onerror = go; im.src = png;
-  });
+  for(const src of [png, execPng]){
+    if(!src) continue;
+    await new Promise(go => { const im = new Image(); im.onload = im.onerror = go; im.src = src; });
+  }
   const two = (en, lt) => `<span class="ac-en">${esc(en)}</span><span class="ac-lt">${esc(lt)}</span>`;
   const L = t.actPrint;
 
@@ -7261,8 +7428,12 @@ async function printAct(x){
           <span class="ac-name">${esc(x.rep_name || '')}</span>
           ${x.signed_at ? `<span class="ac-when">${esc(L.signedOn)} / ${
             esc(L.signedOnLt)}: ${esc(String(x.signed_at).slice(0, 10))}</span>` : ''}</td>
-      <td>${two(L.executor, L.executorLt)}<span class="ac-line"></span>
-          <span class="ac-name">${esc(LEGAL_NAME)}</span></td>
+      <td>${two(L.executor, L.executorLt)}<span class="ac-line">${execPng
+            ? `<img class="ac-sig" src="${esc(execPng)}" alt="">` : ''}</span>
+          ${x.exec_name ? `<span class="ac-name">${esc(x.exec_name)}</span>` : ''}
+          <span class="ac-name">${esc(LEGAL_NAME)}</span>
+          ${x.exec_signed_at ? `<span class="ac-when">${esc(L.signedOn)} / ${
+            esc(L.signedOnLt)}: ${esc(String(x.exec_signed_at).slice(0, 10))}</span>` : ''}</td>
     </tr></table>`;
 
   /* Past three of the company's own columns the sheet stops fitting across
@@ -7336,6 +7507,54 @@ function wireActs(){
 
   on('sigClear', 'click', () => { const x = actOpen(); if(x) actUnsign(x); });
 
+  /* ---- our own signature ---- */
+  on('execAdd', 'click', () => {
+    state.execDraw = true; state.execManage = false; persist(); render();
+  });
+  on('execCancel', 'click', () => {
+    const x = actOpen();
+    state.execDraw = false; state.execName = '';
+    if(x) delete SIG_DRAFT[x.id + ':x'];
+    persist(); render();
+  });
+  on('execManage', 'click', () => {
+    state.execManage = !state.execManage; persist(); render();
+  });
+  on('execName', 'input', e => { state.execName = e.target.value; });
+  on('execClear', 'click', () => { const x = actOpen(); if(x) actClearExec(x); });
+
+  EXEC_PAD = null;
+  const ec = $('#execPad'), open2 = actOpen();
+  if(ec && open2){
+    EXEC_PAD = sigPad(ec, open2.id + ':x', () => {
+      const b = $('#execSave'), box = $('#execBox'), has = EXEC_PAD.hasInk();
+      if(b) b.disabled = !has;
+      if(box) box.classList.toggle('is-ink', has);
+    });
+    const b = $('#execSave'); if(b) b.disabled = !EXEC_PAD.hasInk();
+  }
+  on('execUndo', 'click', () => { if(EXEC_PAD) EXEC_PAD.undo(); });
+  on('execWipe', 'click', () => { if(EXEC_PAD) EXEC_PAD.wipe(); });
+  on('execSave', 'click', async () => {
+    if(!EXEC_PAD) return;
+    const el = $('#execName');
+    const label = String((el && el.value) || state.execName || '').trim();
+    if(!label){ toast(tr().act.execNeedName, 'bad'); if(el) el.focus(); return; }
+    const png = EXEC_PAD.png();
+    if(!png){ toast(tr().act.needInk, 'bad'); return; }
+    await signatureCreate(label, png);
+  });
+
+  /* The executor signature of an act opened from the list is not in the
+     payload the list arrived in, same as the customer's. */
+  const eshow = $('#execShow');
+  if(eshow && !eshow.firstChild && open2){
+    execSigFor(open2).then(png => {
+      const el = $('#execShow');
+      if(el && png && !el.firstChild) el.innerHTML = `<img src="${esc(png)}" alt="">`;
+    });
+  }
+
   /* The signature of an act opened from the list is not in the payload the
      list arrived in. Fetched here, once, and dropped into the slip. */
   const show = $('#sigShow');
@@ -7371,6 +7590,21 @@ function wireActs(){
     }
     const open = ev.target.closest('[data-act-open]');
     if(open){ state.actId = open.getAttribute('data-act-open'); persist(); render(); return; }
+
+    const pick = ev.target.closest('[data-exec-sig]');
+    if(pick){
+      const x = actOpen();
+      if(x) actSignExec(x, pick.getAttribute('data-exec-sig'));
+      return;
+    }
+    const sdel = ev.target.closest('[data-exec-del]');
+    if(sdel){
+      const id = sdel.getAttribute('data-exec-del');
+      const sg = mySignatures().find(z => z.id === id);
+      if(!sg || !confirm(tr().act.execDel.replace('{n}', sg.label))) return;
+      signatureDelete(id);
+      return;
+    }
 
     const add = ev.target.closest('[data-fadd]');
     if(add){
@@ -7473,7 +7707,8 @@ var actPushTimer = null, actPushing = false, actPushAgain = false, actBackoff = 
    is no server to be behind, and every act would otherwise wear a permanent
    "not sent" badge about a machine that does not exist. */
 function actUnsent(a){
-  return CLOUD.on && !!(a && (a.dirty || a.gone || !a.rev));
+  return CLOUD.on && !!(a && (a.dirty || a.gone || !a.rev
+                              || a.execPending || a.execClearPending));
 }
 function unsentCount(){ return (state.acts || []).filter(actUnsent).length; }
 
@@ -7515,6 +7750,13 @@ function adoptAct(a, row, sent){
   const owed = (a.signed && !a.serverSigned)
     ? { png: a.signature || SIG[a.id], at: a.signed_at, rep: a.rep_name }
     : null;
+  /* The same for our own line: an act created with no signal is inserted
+     first and gets the executor signature second, and the insert comes back
+     saying exec_signed:false, truthfully. */
+  const owedX = a.execPending
+    ? { png: a.exec_signature || SIG[a.id + ':x'], name: a.exec_name,
+        at: a.exec_signed_at, id: a.execPending }
+    : null;
 
   /* And what was TYPED while the write was in flight has to survive the
      answer to it. The row coming back describes the act as it was when the
@@ -7537,7 +7779,11 @@ function adoptAct(a, row, sent){
   Object.keys(row).forEach(k => { a[k] = row[k]; });
   a.serverSigned = !!row.signed;
   delete a.dirty;
+  /* Both images come off the row. stripSig has already put whichever the
+     server sent into the cache; what is being removed here is the LOCAL copy
+     that was there so the screen had something to show while it was owed. */
   delete a.signature;
+  delete a.exec_signature;
 
   Object.keys(keep).forEach(k => { a[k] = keep[k]; });
   if(newer) a.dirty = true;
@@ -7553,6 +7799,11 @@ function adoptAct(a, row, sent){
     a.signed = true; a.signed_at = owed.at; a.rep_name = owed.rep;
     a.signature = owed.png; SIG[a.id] = owed.png;
     a.dirty = true;
+  }
+  if(owedX && !a.exec_signed){
+    a.exec_signed = true; a.exec_name = owedX.name; a.exec_signed_at = owedX.at;
+    a.exec_signature = owedX.png; SIG[a.id + ':x'] = owedX.png;
+    a.execPending = owedX.id; a.dirty = true;
   }
 }
 
@@ -7605,6 +7856,18 @@ async function pushActs(){
         if(!a.signed && a.serverSigned && a.rev){
           const row = await CLOUD.actUnsign(a.id, a.rev);
           if(row){ adoptAct(a, row, null); changed = true; }
+        }
+        /* Our own signature, by the id of the stored one. The server copies
+           the image out of a row it owns, so nothing a client sends can put
+           an image on the executor line. */
+        if(a.execPending && a.rev){
+          const row = await CLOUD.actSignExec(a.id, a.rev, a.execPending);
+          if(!row){ toast(tr().co.conflict, 'bad'); quiet = false; }
+          else { delete a.execPending; adoptAct(a, row, null); changed = true; }
+        }
+        if(a.execClearPending && a.rev){
+          const row = await CLOUD.actClearExec(a.id, a.rev);
+          if(row){ delete a.execClearPending; adoptAct(a, row, null); changed = true; }
         }
         delete a.dirty;
       } catch(e){
@@ -7746,6 +8009,62 @@ async function saveFields(defs){
       if(el){ el.focus(); el.select(); }
     }
   }
+}
+
+/* ---- signatures kept on file ----
+   Not queued. Keeping a signature is an office act done once, and a queued
+   one would mean the id it is applied by does not exist on the server yet. */
+async function signatureCreate(label, png){
+  if(!CLOUD.on){
+    const row = { id: 'local-' + Math.random().toString(36).slice(2, 10),
+                  label: label, image: png };
+    state.signatures = (state.signatures || []).concat([row]);
+    state.execDraw = false; state.execName = '';
+    persist(); render(); return;
+  }
+  try {
+    const row = await CLOUD.signatureCreate(label, png);
+    if(row){
+      state.signatures = (state.signatures || []).concat([row]);
+      state.execDraw = false; state.execName = '';
+    }
+    persist(); render();
+  } catch(e){ toast(tr().act.refusedWhy.replace('{why}', (e && e.message) || ''), 'bad'); }
+}
+
+async function signatureDelete(id){
+  /* The acts it has already been applied to keep it: the image was copied
+     onto them, not borrowed. */
+  if(CLOUD.on){
+    try { await CLOUD.signatureDelete(id); }
+    catch(e){ toast(tr().co.saveFailed, 'bad'); return; }
+  }
+  state.signatures = (state.signatures || []).filter(z => z.id !== id);
+  persist(); render();
+}
+
+function actSignExec(x, sigId){
+  const sg = mySignatures().find(z => z.id === sigId);
+  if(!sg) return;
+  /* Shown at once and sent after, like everything else on this screen. The
+     ID is what goes up: the server copies the image from the row it owns,
+     so a client cannot put an image on the executor line that it did not
+     get from a signature of its own. */
+  Object.assign(x, { exec_signature: sg.image, exec_name: sg.label,
+                     exec_signed: true, exec_signed_at: new Date().toISOString(),
+                     execPending: sigId, dirty: true });
+  SIG[x.id + ':x'] = sg.image;
+  state.execDraw = false; state.execManage = false;
+  actQueue(x);
+  render();
+}
+
+function actClearExec(x){
+  delete x.exec_signature; delete SIG[x.id + ':x'];
+  Object.assign(x, { exec_signed: false, exec_name: null, exec_signed_at: null,
+                     execPending: null, execClearPending: true, dirty: true });
+  actQueue(x);
+  render();
 }
 
 /* ---- signing ----
@@ -8634,7 +8953,8 @@ function exportCsv(){
 
    These four live in Supabase and are backed up there. What this file is for
    is the browser-only copy of the PROJECTS, which has no server behind it. */
-const NOT_IN_BACKUP = { enquiries: 1, people: 1, overheads: 1, documents: 1 };
+const NOT_IN_BACKUP = { enquiries: 1, people: 1, overheads: 1, documents: 1,
+                        signatures: 1 };
 
 function exportJson(){
   download('LITPROFIT_backup.json',
@@ -9317,6 +9637,10 @@ async function cloudPull(){
   /* Not gated on a role: a fitter cannot fill in a column he cannot see. */
   CLOUD.actFields()
     .then(f => { if(f){ state.actFields = f; if(state.tab === 'acts') render(); } })
+    .catch(() => {});
+  /* Yours, and only ever yours -- the view decides that, not this call. */
+  CLOUD.signatures()
+    .then(list => { state.signatures = list || []; if(state.tab === 'acts') render(); })
     .catch(() => {});
   CLOUD.acts()
     .then(list => { state.acts = mergeActs(list); if(state.tab === 'acts') render(); })
