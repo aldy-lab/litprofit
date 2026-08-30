@@ -1004,6 +1004,22 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .act-table th.num,.act-table td.num{text-align:right}
 .act-table input{width:100%;min-width:0}
 .act-table td.num input{text-align:right;font-family:var(--mono)}
+/* Sized to its content, the list packed six columns against the left edge
+   and left a third of the card empty beside them. */
+.act-list{width:100%}
+/* A th is centred by default. It only showed once the table stopped being
+   the width of its own contents -- the same thing that had to be fixed on
+   the work sheet, in the table beside it. */
+.act-list th{text-align:left}
+.act-list th.num,.act-list td.num{text-align:right}
+.act-list th:first-child,.act-list td:first-child{width:22%}
+.act-list th:last-child,.act-list td:last-child{width:44px}
+/* A right-aligned number and the next column's text meet with nothing between
+   them and read as one value: "14.5 V. Petrauskas", "3 stub user". The same
+   trap the company table already carries a note about, in a table that had
+   no numbers next to text until the company could add its own columns. */
+.act-table td.num,.act-table th.num,
+.act-list td.num,.act-list th.num{padding-right:16px}
 .act-list tr.act-row{cursor:pointer}
 .act-list tr.act-row:hover{background:var(--surface-2,rgba(0,0,0,.03))}
 .act-who{font-size:12px;color:var(--ink-3)}
@@ -1083,6 +1099,10 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .fld-inline:focus{border-color:var(--series-1);background:var(--panel,transparent);
   outline:none}
 .fld-th{display:flex;align-items:center;gap:2px}
+/* The label and its remove button are one line. Left to flow, the button
+   wrapped underneath and read as a stray × floating between a heading and
+   the field it belongs to. */
+.act-f span{display:flex;align-items:center;gap:4px}
 .fld-x{padding:0 5px;line-height:1.1;opacity:0;transition:opacity .15s;
   font-size:13px;color:var(--ink-3)}
 .act-f:hover .fld-x,.fld-th:hover .fld-x,.fld-x:focus{opacity:1}
@@ -1095,6 +1115,25 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
   padding:8px 12px;border-radius:2px;cursor:pointer;font:inherit;font-size:12px}
 .act-addf:hover{border-color:var(--series-1);color:var(--ink-1)}
 .act-fnote{margin-top:10px;max-width:78ch}
+/* On a phone the act is filled IN, not designed. Naming the company's
+   columns is an office job, and the controls for it cost two columns and a
+   button out of a sheet that has none to spare -- squeezed to where only the
+   × of each heading was still legible. The th and the td go together, or the
+   header row and the body rows stop having the same number of cells. */
+/* The heading is written twice on purpose: an editable copy and a plain one.
+   A width:100% input inside an auto-layout table cell has no intrinsic width
+   at all, so on a phone -- where the fixed layout is off -- each of the
+   company's own columns collapsed to a sliver with its name nowhere on the
+   screen. There is no CSS that turns an input back into text. */
+.fld-plain{display:none}
+@media (max-width: 759px){
+  .fld-plain{display:inline}
+  .fld-inline{display:none}
+  .fld-x{display:none}
+  .act-addf{display:none}
+  .act-table th.act-addc,.act-table td.act-addc{display:none}
+  .act-fnote{display:none}
+}
 .co-table tfoot .co-sub td{color:var(--ink-3);border-top:1px solid var(--baseline)}
 .co-table tfoot .co-total td{font-weight:700;color:var(--ink-1);
   border-top:2px solid var(--baseline)}
@@ -6877,7 +6916,8 @@ function actEditor(x, t){
     ? `<div class="act-f"><span>${esc(f.label)}</span>
         <b>${esc((x.extra || {})[f.key] || '\u2014')}</b></div>`
     : `<label class="act-f"><span>${own
-        ? `<input class="fld-inline" data-fld="header" data-i="${i}" maxlength="40"
+        ? `<span class="fld-plain">${esc(f.label)}</span
+           ><input class="fld-inline" data-fld="header" data-i="${i}" maxlength="40"
              value="${esc(f.label)}" aria-label="${esc(a.fRename)}">
            <button class="ghost fld-x" data-fdel="header" data-i="${i}"
              title="${esc(a.fRemove)}">×</button>`
@@ -6918,7 +6958,8 @@ function actEditor(x, t){
         <th class="act-c-unit">${esc(a.hUnit)}</th>
         <th class="act-c-qty num">${esc(a.hQty)}</th>${cols.map((c, i) =>
           `<th class="act-c-x${c.num ? ' num' : ''}">${own
-            ? `<span class="fld-th"><input class="fld-inline" data-fld="columns"
+            ? `<span class="fld-th"><span class="fld-plain">${esc(c.label)}</span
+                 ><input class="fld-inline" data-fld="columns"
                  data-i="${i}" maxlength="40" value="${esc(c.label)}"
                  aria-label="${esc(a.fRename)}"><button class="ghost fld-x"
                  data-fdel="columns" data-i="${i}" title="${esc(a.fRemove)}">×</button></span>`
