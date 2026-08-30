@@ -13,15 +13,23 @@
 *.log
 node_modules/
 
-# The calculator's PLAINTEXT source.
+# The calculator's source USED TO BE ignored here, and the reason was sound
+# while it lasted: the build encrypted the app, tools/ is served by GitHub
+# Pages, and committing the plaintext would have published the very thing
+# calculator/index.html was there to encrypt.
 #
-# tools/ is served by GitHub Pages (verified: tools/build.py returns 200), and
-# this repository is public — so committing the unencrypted app would publish
-# the very thing calculator/index.html encrypts. Only the ciphertext ships.
+# The build moved to database mode and the reason went with it. The published
+# calculator/index.html and tools/calc/app.html are the same bytes apart from
+# a base path and a publishable key, which is public by design — so the rule
+# was hiding a file that was already published, and its only remaining effect
+# was that ten thousand lines had no revision history and lived on one disk.
 #
-# Keep a backup of this file somewhere safe: without it the calculator cannot
-# be rebuilt or edited, only decrypted in a browser.
-tools/calc/app.html
+# So it is tracked. The source carries __SUPABASE_URL__ and
+# __SUPABASE_ANON_KEY__ as placeholders and no secret of any kind — checked,
+# not assumed — so it publishes strictly less than the built page does.
+#
+# If the build ever goes back to encrypting (no database, per-user
+# passphrases), this rule has to come back with it.
 
 # Python bytecode. These were committed by accident back in the trilingual
 # work and rebuilt on every run, so every build showed a spurious diff.
