@@ -5857,14 +5857,23 @@ function coOverheads(){
    fills the frame from rows already in hand and is replaced the moment the
    server answers. */
 function coBurnLocal(){
-  const pay = coPeople().reduce((a, p) => a + (Number(p.monthly_cost) || 0), 0);
+  /* totalCostOf, not p.monthly_cost. monthly_cost is computed by people_v and
+     arrives with the server's answer, so a person typed in a moment ago --
+     or every person, in the browser-only build -- has none. Reading the
+     column directly made this screen say the payroll was zero while the
+     People table one tab away listed all seven salaries and their employer
+     cost: the same rows, two answers, and the wrong one in the headline.
+     totalCostOf uses the stored figure where there is one and falls back to
+     gross + employer contribution where there is not, which is what the
+     table beside it already did. */
+  const pay = coPeople().reduce((a, p) => a + totalCostOf(p), 0);
   const fix = coOverheads().reduce((a, o) => a + (Number(o.amount_month) || 0), 0);
   const hrs = coPeople().filter(p => Number(p.hours_month) > 0);
   return {
     headcount: coPeople().length,
     payroll: pay, overheads: fix, burn: pay + fix,
     hour_cost_avg: hrs.length
-      ? hrs.reduce((a, p) => a + p.monthly_cost / p.hours_month, 0) / hrs.length
+      ? hrs.reduce((a, p) => a + totalCostOf(p) / p.hours_month, 0) / hrs.length
       : null
   };
 }
