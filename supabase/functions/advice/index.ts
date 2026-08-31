@@ -48,7 +48,12 @@ const MODEL = "claude-sonnet-5";
    such thing -- set ANTHROPIC_WORKSPACE_ID only if the key is the other kind,
    and the header appears only when it is set. */
 const WORKSPACE = Deno.env.get("ANTHROPIC_WORKSPACE_ID");
-const MAX_TOKENS = 1600;
+/* 1600 was not enough for five findings and three blocked questions in
+   Russian -- Cyrillic costs roughly twice the tokens of the same sentence in
+   English -- and the reply came back truncated mid-tool-call: `findings` was
+   a 300-character string instead of a list. Nothing errored. The panel would
+   have rendered whatever that was. */
+const MAX_TOKENS = 3000;
 
 // One call per owner per day is the shape of this feature, so the cache is
 // about repeated presses in one afternoon rather than about throughput.
@@ -105,20 +110,37 @@ RULES, in order of importance:
    say the opposite. Getting this wrong sends them chasing a problem that does
    not exist, which is worse than saying nothing.
 
-4. Read the trend block. A business is a direction, not a snapshot, and a fall
+4. THE READER'S STANDING QUESTION IS PROFIT: where the money goes and how to
+   keep more of it. Lead with that whenever the sheet supports it. The blocks
+   that answer it are `money` (share_of_spend says which article each euro of
+   spend went to), `margin`, and `burn` (what the company costs to keep open,
+   which every job has to clear before it earns anything).
+
+   When those blocks say enough:false, do NOT pad the answer with funnel
+   findings and present them as profitability advice. Say plainly that
+   profitability cannot be computed yet, name the one thing that would make it
+   computable, and say what not knowing is worth -- `unknown_profit` carries
+   exactly that: won and delivered work whose cost was never entered, in
+   euros. A number is a reason; "fill in the data" is a chore.
+
+5. Read the trend block. A business is a direction, not a snapshot, and a fall
    in enquiries arriving is upstream of every other number here.
 
-5. Advice must be an action for Monday, tied to the figure it came from.
+6. Cash is not profit and the sheet keeps them apart. delivered_unpaid is
+   money earned and not collected; it belongs in the answer, but do not call
+   it margin.
+
+7. Advice must be an action for Monday, tied to the figure it came from.
    "Improve your margins" is not advice. "Nineteen quoted jobs have been
    undecided over 90 days — call them or close them" is.
 
-6. Say the uncomfortable thing if the sheet says it. You are not here to
+8. Say the uncomfortable thing if the sheet says it. You are not here to
    reassure, and you are not here to congratulate them on a figure either.
 
-7. At most 5 findings, ranked by what it costs them. Fewer is better. If the
+9. At most 5 findings, ranked by what it costs them. Fewer is better. If the
    sheet supports only two real findings, give two.
 
-8. No preamble, no restatement of what you were given, no offer to help
+10. No preamble, no restatement of what you were given, no offer to help
    further. The reader wants the finding and the action.
 
 THE WORDS THIS TOOL USES
@@ -136,6 +158,14 @@ lang = lt: "užklausa"; "pasiūlymas"; "užsakymas"; "savikaina"; "pristatyta";
 "apmokėta".
 
 lang = en: "enquiry"; "quote"; "order"; "cost"; "price"; "delivered"; "paid".
+
+FIELD NAMES BELONG IN `evidence` AND NOWHERE ELSE. The sheet's keys --
+labor_actual, delivered_unpaid_eur, money.projects_with_actuals -- are the
+audit trail and they are printed under the finding as such. In a title or a
+body, name the thing the way the screen names it: the sheet where labour goes
+is "Персонал" / "Personalas" / "Labour", materials are "Материалы" /
+"Medžiagos" / "Materials", and so on. A shipyard owner reading advice about
+labor_actual is reading about somebody else's software.
 
 You must answer by calling the tool. Write in the language given as "lang":
 ru = Russian, lt = Lithuanian, en = English.`;
@@ -244,6 +274,26 @@ function unsupported(reply: unknown, sheet: unknown): string[] {
   return bad;
 }
 
+/* The shape, checked before anything is believed.
+
+   A tool call cut off at the token limit still arrives as a tool call: the
+   field is there and its contents are half a sentence rather than a list.
+   Reading it without looking put a string where the panel expected findings,
+   and the failure surfaced as garbage on screen rather than as an error --
+   which is the class of bug this whole file is arranged against. */
+function wellFormed(a: unknown): boolean {
+  if (!a || typeof a !== "object") return false;
+  const o = a as Record<string, unknown>;
+  if (!Array.isArray(o.findings)) return false;
+  if (o.blocked !== undefined && !Array.isArray(o.blocked)) return false;
+  return (o.findings as unknown[]).every((f) => {
+    if (!f || typeof f !== "object") return false;
+    const g = f as Record<string, unknown>;
+    return typeof g.title === "string" && typeof g.body === "string" &&
+           typeof g.evidence === "string" && typeof g.severity === "string";
+  });
+}
+
 /* One request builder for the first attempt and the retry. Two copies would
    be two prompts, and the second would stop matching the first the day
    somebody edits one of them. */
@@ -343,7 +393,9 @@ Deno.serve(async (req) => {
   if (!block) return json({ ai: false, reason: "no_answer", facts });
 
   let advice = block.input;
-  let invented = unsupported(advice, sheet);
+  /* Two ways a reply can be unusable, and one retry that covers both: figures
+     that are not in the sheet, and a shape that is not an answer. */
+  let invented = wellFormed(advice) ? unsupported(advice, sheet) : ["shape"];
 
   /* Asked again once, told exactly which figures were rejected.
 
@@ -357,21 +409,28 @@ Deno.serve(async (req) => {
       lang,
       facts: sheet,
       rejected: invented,
-      note:
-        "Your previous answer was rejected: these figures do not appear in the " +
-        "fact sheet. Quote only figures that are in it, verbatim.",
+      note: invented[0] === "shape"
+        ? "Your previous answer was cut off before it was complete. Answer " +
+          "again, shorter: fewer findings, shorter bodies."
+        : "Your previous answer was rejected: these figures do not appear in " +
+          "the fact sheet. Quote only figures that are in it, verbatim.",
     });
     const block2 = (again?.content ?? []).find(
       (c: Record<string, unknown>) => c.type === "tool_use",
     );
     if (block2) {
       const retry = block2.input;
-      const bad2 = unsupported(retry, sheet);
+      const bad2 = wellFormed(retry) ? unsupported(retry, sheet) : ["shape"];
       if (!bad2.length) { advice = retry; invented = []; }
       else invented = bad2;
     }
   }
   if (invented.length) {
+    // A truncated reply is not a model inventing figures, and telling the
+    // reader it was would be a second wrong accusation.
+    if (invented[0] === "shape") {
+      return json({ ai: false, reason: "no_answer", facts }, 200);
+    }
     return json({ ai: false, reason: "invented_figures", invented, facts }, 200);
   }
 

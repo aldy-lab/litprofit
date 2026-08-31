@@ -237,6 +237,11 @@ begin
       from public.enquiries
      where status = 'Gautas PO' and cost_ex_vat is not null and price_ex_vat is not null));
 
+  -- Where the money went, and what not knowing it costs. Both computed by
+  -- the two helpers at the foot of this file.
+  j := j || jsonb_build_object('money', public.advice_money());
+  j := j || jsonb_build_object('unknown_profit', public.advice_unknown_profit());
+
   -- The block that earns its place on a register this young. Everything the
   -- model cannot say is downstream of these columns, so the sheet names them
   -- rather than leaving the reader to wonder why the advice is thin.
@@ -303,3 +308,81 @@ begin
 
   raise notice 'advice OK: granted to authenticated, refused without a role';
 end $$;
+
+
+-- ============================================================
+-- WHERE THE MONEY WENT, AND WHAT NOT KNOWING COSTS
+-- ============================================================
+-- Added when the owner asked for advice about profitability rather than about
+-- the sales funnel. Both are called from advice_facts() above and are not
+-- reachable from outside: the fact sheet is the only caller.
+-- ============================================================
+
+create or replace function public.advice_money()
+returns jsonb language sql stable security definer set search_path = ''
+as $$
+-- WHERE THE MONEY WENT, WITHOUT REIMPLEMENTING A SINGLE FORMULA
+--
+-- The plan side of every sheet is computed -- hours times rate times one plus
+-- the burden, quantity times unit price, and so on -- and those formulas live
+-- in the browser, mirroring the Excel workbook the company used before.
+-- Writing them again here would create a second implementation of the same
+-- arithmetic, and two implementations of one formula are two answers as soon
+-- as somebody edits one of them.
+--
+-- The ACTUAL side needs none of that. Every actual on every sheet is a number
+-- a person typed. Summing typed numbers is not a formula, it is a sum -- so
+-- "where did the money go" is answerable here exactly, while "how does that
+-- compare to plan" stays where its arithmetic already lives.
+with rows as (
+  select p.id,
+         k.sheet,
+         sum(coalesce(nullif(e->>'actual','')::numeric, 0)) as actual
+    from public.projects p
+    cross join lateral (values ('revenue'),('labor'),('subs'),
+                               ('travel'),('materials'),('logistics')) as k(sheet)
+    cross join lateral jsonb_array_elements(
+                 coalesce(p.data->k.sheet, '[]'::jsonb)) as e
+   group by p.id, k.sheet
+), tot as (
+  select sheet, sum(actual) as actual from rows group by sheet
+), direct as (
+  select coalesce(sum(actual),0) as d from tot where sheet <> 'revenue'
+)
+select jsonb_build_object(
+  'projects', (select count(*) from public.projects),
+  'projects_with_actuals', (select count(distinct id) from rows where actual > 0),
+  'revenue_actual',   (select coalesce(sum(actual),0) from tot where sheet='revenue'),
+  'labor_actual',     (select coalesce(sum(actual),0) from tot where sheet='labor'),
+  'subs_actual',      (select coalesce(sum(actual),0) from tot where sheet='subs'),
+  'travel_actual',    (select coalesce(sum(actual),0) from tot where sheet='travel'),
+  'materials_actual', (select coalesce(sum(actual),0) from tot where sheet='materials'),
+  'logistics_actual', (select coalesce(sum(actual),0) from tot where sheet='logistics'),
+  'direct_actual',    (select d from direct),
+  -- what share of every euro spent went to each article; the answer to
+  -- "where does the money go" in one line
+  'share_of_spend', (
+    select coalesce(jsonb_object_agg(sheet, round(actual / nullif((select d from direct),0), 4)), '{}'::jsonb)
+      from tot where sheet <> 'revenue' and actual > 0),
+  'enough', (select d from direct) > 0
+) $$;
+
+create or replace function public.advice_unknown_profit()
+returns jsonb language sql stable security definer set search_path = ''
+as $$
+-- The prize for filling the cost column, in euros rather than in scolding.
+-- "Fill in the cost" is a chore; "the profit on 408,352 EUR of work you have
+-- already delivered is unknown" is a reason.
+select jsonb_build_object(
+  'won_no_cost',            count(*) filter (where status='Gautas PO' and cost_ex_vat is null),
+  'won_no_cost_eur',        round(coalesce(sum(price_ex_vat) filter (where status='Gautas PO' and cost_ex_vat is null),0)),
+  'delivered_no_cost',      count(*) filter (where status='Gautas PO' and delivered and cost_ex_vat is null),
+  'delivered_no_cost_eur',  round(coalesce(sum(price_ex_vat) filter (where status='Gautas PO' and delivered and cost_ex_vat is null),0)),
+  'enough', true)
+from public.enquiries $$;
+
+-- Internals: advice_facts() is the only caller, and it is SECURITY DEFINER, so
+-- the current user inside it is the definer. Nothing outside needs these.
+revoke execute on all functions in schema public from public, anon;
+revoke execute on function public.advice_money() from authenticated;
+revoke execute on function public.advice_unknown_profit() from authenticated;
