@@ -1,0 +1,286 @@
+// ============================================================
+// ADVICE — the only place an API key is allowed to be
+// ============================================================
+// The calculator is a static page on GitHub Pages. A model key put anywhere
+// in it is a published key: the page is the file, "view source" is the whole
+// attack, and a key that bills to a card cannot be treated more casually than
+// the service_role key it sits next to. So the key lives here as a function
+// secret and the browser never sees it, exactly as the database is reached
+// through RPCs rather than through a connection string.
+//
+// WHAT THIS FUNCTION IS FOR, AND WHAT IT IS NOT FOR
+// -------------------------------------------------
+// It does not analyse anything. advice_facts() in the database computes every
+// figure; this passes that sheet to a model and asks it to choose which few
+// facts matter and say so in a sentence. The model is told it may not
+// calculate, and that instruction is enforceable rather than hopeful, because
+// every number it is permitted to use is already in the sheet in front of it
+// -- so a figure in the reply that is not in the sheet is detectable, and the
+// check at the bottom of this file does detect it.
+//
+// WHAT LEAVES THE BUILDING
+// ------------------------
+// Aggregates, and no names. Salaries and the people attached to them are not
+// in the sheet at all. Client names ARE in the sheet -- concentration advice
+// is worthless without knowing which client -- so they are replaced here with
+// CLIENT_1..N before the request goes out, and the map comes back to the
+// browser to put the real names on screen. The model reasons about a customer
+// list it never sees; the reader gets the names anyway. The company's client
+// list is the company's.
+//
+// IT WORKS WITHOUT A KEY
+// ----------------------
+// With no ANTHROPIC_API_KEY configured this still answers, with the fact
+// sheet and `ai: false`. The deterministic half is the half that cannot be
+// wrong, and it is worth reading on its own -- a button that dies with
+// "not configured" would take the measured figures down with the unmeasured
+// ones for no reason.
+// ============================================================
+
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+const MODEL = "claude-sonnet-5";
+const MAX_TOKENS = 1600;
+
+// One call per owner per day is the shape of this feature, so the cache is
+// about repeated presses in one afternoon rather than about throughput.
+const CACHE_HOURS = 24;
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type, apikey",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS, "Content-Type": "application/json" },
+  });
+
+/* ---------- the instructions ----------
+   Written as prohibitions because that is what is being bought here. A model
+   asked "how is this company doing" will happily produce a margin from a
+   sheet that says the margin is unknown, and it will format it like the real
+   figures. Every rule below exists because its absence produces a confident
+   sentence about somebody's business that nothing on the page contradicts. */
+const SYSTEM = `You are reading a fact sheet produced by a ship-repair company's own
+project calculator. Every figure in it was computed by their database.
+
+RULES, in order of importance:
+
+1. NEVER compute, estimate, extrapolate or round a number of your own. You may
+   only quote figures that appear verbatim in the fact sheet. If a point needs
+   a number that is not in the sheet, drop the point.
+
+2. Any block with "enough": false does NOT support conclusions. You may say
+   that it cannot yet be answered and what would make it answerable. You may
+   not reason about it as though it were answerable. A margin computed from
+   one enquiry is not a margin.
+
+3. Advice must be an action someone can take on Monday, tied to the figure it
+   came from. "Improve your margins" is not advice. "Nineteen quoted jobs have
+   been undecided for over 90 days — call them or close them" is.
+
+4. Say the uncomfortable thing if the sheet says it. You are not here to
+   reassure. If they win 38% of decisions but only 17% of the money, that is
+   the finding, and it means they win small jobs and lose large ones.
+
+5. At most 5 findings. Fewer is better. Rank by what it costs them.
+
+6. No preamble, no summary of what you were given, no offers to help further.
+
+You must answer by calling the tool. Write in the language given as "lang":
+ru = Russian, lt = Lithuanian, en = English.`;
+
+const TOOL = {
+  name: "advice",
+  description: "The findings, ranked by what they cost the company.",
+  input_schema: {
+    type: "object",
+    properties: {
+      findings: {
+        type: "array",
+        maxItems: 5,
+        items: {
+          type: "object",
+          properties: {
+            title: { type: "string", description: "Six words or fewer." },
+            body: {
+              type: "string",
+              description:
+                "Two or three sentences: what the figure is, why it matters, what to do.",
+            },
+            evidence: {
+              type: "string",
+              description:
+                "The figures this rests on, copied from the sheet. Nothing else.",
+            },
+            severity: { type: "string", enum: ["watch", "act", "urgent"] },
+          },
+          required: ["title", "body", "evidence", "severity"],
+        },
+      },
+      blocked: {
+        type: "array",
+        description:
+          "Questions the data cannot answer yet, and the single thing that would unblock each.",
+        items: {
+          type: "object",
+          properties: {
+            question: { type: "string" },
+            unblock: { type: "string" },
+          },
+          required: ["question", "unblock"],
+        },
+      },
+    },
+    required: ["findings", "blocked"],
+  },
+};
+
+/* Client names out, placeholders in. Returns the sheet to send and the map to
+   put the names back with -- the browser does the restoring, so the real list
+   never travels. */
+function anonymise(facts: Record<string, unknown>) {
+  const map: Record<string, string> = {};
+  const clients = Array.isArray(facts.clients) ? facts.clients : [];
+  const masked = clients.map((c: Record<string, unknown>, i: number) => {
+    const key = `CLIENT_${i + 1}`;
+    map[key] = String(c.client ?? "");
+    return { ...c, client: key };
+  });
+  return { sheet: { ...facts, clients: masked }, map };
+}
+
+/* Every number the model used, checked against the sheet it was given.
+
+   This is the one guard that would catch the failure this whole design is
+   arranged against: an invented figure, formatted exactly like a measured
+   one. It is deliberately crude -- it pulls every number out of the reply and
+   asks whether that string of digits appears anywhere in the sheet. Crude is
+   right here: a false positive costs one finding, and a false negative costs
+   the reader's trust in every figure on the screen. */
+function unsupported(reply: unknown, sheet: unknown): string[] {
+  const sheetText = JSON.stringify(sheet);
+  const replyText = JSON.stringify(reply);
+  const seen = new Set<string>();
+  const bad: string[] = [];
+  for (const m of replyText.matchAll(/\d[\d\s.,]*/g)) {
+    const raw = m[0].replace(/[\s,]/g, "");
+    // A bare 1-2 digit number is a count, a rank or a month; chasing those
+    // rejects "at most 5 findings" and teaches nobody anything.
+    if (raw.length < 3 || seen.has(raw)) continue;
+    seen.add(raw);
+    const plain = raw.replace(/\.0+$/, "");
+    const asPct = (Number(plain) / 100).toString();
+    if (
+      sheetText.includes(plain) ||
+      sheetText.includes(asPct) ||
+      // percentages: the sheet holds 0.1708, the reply says 17 or 17.08
+      sheetText.includes("0." + plain.replace(".", ""))
+    ) continue;
+    bad.push(plain);
+  }
+  return bad;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+
+  const auth = req.headers.get("Authorization") ?? "";
+  if (!auth.startsWith("Bearer ")) return json({ error: "not signed in" }, 401);
+
+  let lang = "en";
+  try {
+    const body = await req.json();
+    if (typeof body?.lang === "string") lang = body.lang;
+  } catch { /* no body is fine */ }
+
+  // The caller's own token, so advice_facts() runs as them and its
+  // sees_money() gate is the same gate as everywhere else. The function has
+  // no elevated client on purpose: there is no path here that reads the
+  // database as anyone other than the person who pressed the button.
+  const supa = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: auth } } },
+  );
+
+  const { data: facts, error } = await supa.rpc("advice_facts");
+  if (error) {
+    const denied = /insufficient_privilege|not allowed/i.test(error.message);
+    return json({ error: denied ? "not allowed" : error.message }, denied ? 403 : 500);
+  }
+
+  const key = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!key) return json({ ai: false, reason: "no_key", facts });
+
+  const { sheet, map } = anonymise(facts as Record<string, unknown>);
+
+  // Cache on the sheet itself: the same figures give the same advice, and the
+  // figures change when somebody edits the register. Nothing to expire by
+  // hand, and pressing the button twice in an afternoon costs nothing.
+  const hash = [...new Uint8Array(
+    await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(JSON.stringify(sheet) + lang + MODEL),
+    ),
+  )].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  // Through functions, not through the table. advice_cache carries no grants
+  // to anon or authenticated -- the same deny-all every other table in this
+  // schema has -- so a direct .from() would read nothing and say nothing about
+  // why. The age check lives in advice_cache_get, where the clock is the
+  // database's rather than this machine's.
+  const { data: hit } = await supa.rpc("advice_cache_get", { p_id: hash });
+  if (hit) {
+    return json({ ai: true, cached: true, facts, clients: map, advice: hit });
+  }
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      system: SYSTEM,
+      tools: [TOOL],
+      tool_choice: { type: "tool", name: "advice" },
+      messages: [{
+        role: "user",
+        content: JSON.stringify({ lang, facts: sheet }),
+      }],
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text();
+    return json({ ai: false, reason: "model_error", detail: detail.slice(0, 300), facts }, 200);
+  }
+
+  const out = await res.json();
+  const block = (out.content ?? []).find((c: Record<string, unknown>) => c.type === "tool_use");
+  if (!block) return json({ ai: false, reason: "no_answer", facts });
+
+  const advice = block.input;
+  const invented = unsupported(advice, sheet);
+  if (invented.length) {
+    // Not shown, not repaired, not silently trimmed. A reply carrying a figure
+    // that is not in the sheet has done the one thing it was told not to, and
+    // the honest move is to say the advice was refused rather than to publish
+    // the parts that happen to check out.
+    return json({ ai: false, reason: "invented_figures", invented, facts }, 200);
+  }
+
+  await supa.rpc("advice_cache_put", {
+    p_id: hash, p_advice: advice, p_lang: lang, p_model: MODEL,
+  });
+
+  return json({ ai: true, cached: false, facts, clients: map, advice });
+});

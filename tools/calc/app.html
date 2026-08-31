@@ -310,6 +310,68 @@ html.is-locked .card table.grid input:disabled{opacity:1}
    a full-screen sheet that was invisible and still swallowed every click.
    Stated explicitly so the attribute means what it says. */
 .signin[hidden],.conflict[hidden]{display:none}
+/* ---------- advice ----------
+   A severity stripe rather than a coloured card: the finding is text, and a
+   block of tinted background behind a paragraph makes three findings look
+   like three warnings when one of them is a note. The stripe carries the
+   grade and the type stays on the page's own ground. */
+.ai-btn{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.ai-btn[disabled]{opacity:.55;cursor:default}
+.ai-scrim{position:fixed;inset:0;z-index:60;background:rgba(6,7,24,.62);
+  display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px 16px;
+  overflow-y:auto}
+.ai-card{background:var(--surface-1);border:1px solid var(--border);border-radius:4px;
+  width:min(760px,100%);max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.ai-head{display:flex;gap:16px;align-items:flex-start;padding:22px 24px 14px;
+  border-bottom:1px solid var(--border)}
+.ai-head h2{margin:0 0 6px;font-size:19px;font-weight:600}
+.ai-lead{margin:0;font-size:12.5px;line-height:1.6;color:var(--ink-3);max-width:62ch}
+.ai-x{flex:none;margin-left:auto}
+.ai-body{padding:6px 24px 4px;overflow-y:auto}
+.ai-note{margin:16px 0;padding:10px 0 10px 14px;border-left:2px solid var(--accent);
+  font-size:13.5px;line-height:1.65}
+.ai-note.bad{border-left-color:var(--critical)}
+.ai-note b{display:block;margin-bottom:3px}
+.ai-find{padding:16px 0 16px 16px;border-top:1px solid var(--border);position:relative}
+.ai-find:first-child{border-top:0}
+.ai-find::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:2px;
+  background:var(--ink-3)}
+.ai-find.act::before{background:var(--accent)}
+.ai-find.urgent::before{background:var(--critical)}
+.ai-find h3{margin:0 0 4px;font-size:15px;font-weight:600;display:flex;gap:10px;
+  align-items:baseline;flex-wrap:wrap}
+.ai-sev{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:400}
+.ai-find.act .ai-sev{color:var(--accent)}
+.ai-find.urgent .ai-sev{color:var(--critical)}
+.ai-find p{margin:0 0 8px;font-size:14px;line-height:1.65}
+.ai-ev{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--ink-3)}
+.ai-ev b{color:var(--ink-1);font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  font-size:10px;margin-right:8px}
+.ai-h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin:22px 0 6px}
+.ai-blocked{margin:0;padding:0;list-style:none}
+.ai-blocked li{padding:9px 0;border-top:1px solid var(--border);font-size:13.5px;line-height:1.6}
+.ai-blocked b{display:block;font-weight:600}
+.ai-blocked span{color:var(--ink-3)}
+.ai-sheet{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:0 22px;margin:0 0 18px}
+.ai-sheet div{border-top:1px solid var(--border);padding:9px 0;display:flex;
+  justify-content:space-between;gap:12px;align-items:baseline}
+.ai-sheet span{font-size:12.5px;color:var(--ink-3)}
+.ai-sheet b{font-family:var(--mono);font-size:13px;font-weight:500;white-space:nowrap}
+.ai-sheet b.dim{color:var(--ink-3);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.ai-foot{display:flex;align-items:center;gap:12px;padding:14px 24px 18px;
+  border-top:1px solid var(--border)}
+.ai-stamp{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.ai-spin{padding:30px 0;text-align:center;font-family:var(--mono);font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+@media (max-width:620px){
+  .ai-scrim{padding:0}
+  .ai-card{max-height:100vh;height:100vh;border:0;border-radius:0;width:100%}
+  .ai-head,.ai-body,.ai-foot{padding-left:16px;padding-right:16px}
+}
 .signin{
   position:fixed;inset:0;z-index:200;display:grid;place-items:center;
   background:var(--navy-900);padding:24px
@@ -1491,6 +1553,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
   </div>
   <span class="savetag" id="saveTag" role="status" aria-live="polite"></span>
   <span class="spacer"></span>
+  <button id="btnAI" class="ghost ai-btn" hidden></button>
   <button id="btnPrint" class="primary"></button>
   <div class="menu-wrap">
     <button id="btnMenu" class="icon ghost" aria-haspopup="true" aria-expanded="false" aria-controls="projMenu">
@@ -1523,6 +1586,27 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 <!-- Shown only when the database is configured and nobody is signed in.
      Dark, like the site: the login is the front door, the tool behind it is a
      spreadsheet people stare at for an hour. -->
+<!-- Advice. A dialog rather than a drawer: it is read once and dismissed,
+     and a drawer that stays open beside the sheets invites somebody to work
+     with advice permanently in the corner of their eye. -->
+<div class="ai-scrim" id="aiPanel" hidden>
+  <div class="ai-card" role="dialog" aria-modal="true" aria-labelledby="aiTitle">
+    <div class="ai-head">
+      <div>
+        <h2 id="aiTitle"></h2>
+        <p class="ai-lead" id="aiLead"></p>
+      </div>
+      <button class="icon ghost ai-x" id="aiClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="ai-body" id="aiBody"></div>
+    <div class="ai-foot">
+      <span class="ai-stamp" id="aiStamp"></span>
+      <span class="sig-sp"></span>
+      <button class="ghost" id="aiAgain"></button>
+    </div>
+  </div>
+</div>
+
 <div class="signin" id="signin" hidden>
   <form class="signin-card" id="signinForm">
     <img src="__BASE__/assets/brand/logo-lockup.svg" alt="LITPROFIT" class="signin-mark">
@@ -1803,7 +1887,32 @@ en: {
   marginByProject:'Margin by project',revenueByClient:'Revenue by client',
   printProject:'Project report',printCompany:'Company report',
   printTitle:'Project Profitability Report',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lithuania',generated:'Generated',
-  puMargin:'Margin',cloud:{
+  puMargin:'Margin',
+  ai:{
+    button:'Advice', title:'What the figures say',
+    lead:'Every number below was computed by the database. The model chose which of them matter and wrote the sentences — it is not allowed to calculate, and a reply carrying a figure that is not in the sheet is refused rather than shown.',
+    thinking:'Reading the register…',
+    again:'Check again', cached:'From this morning',
+    based:'Stands on',
+    blockedH:'Cannot be answered yet',
+    unblock:'To unlock',
+    nothing:'Nothing worth flagging in the figures right now.',
+    noKey:'The advice service has no API key yet. The measured figures are below; the written advice needs a key set in Supabase.',
+    modelErr:'The advice service did not answer. The measured figures are below.',
+    refusedH:'Advice withheld',
+    refused:'The reply quoted figures that are not in the data ({n}). Rather than show the parts that happen to check out, none of it is shown. The measured figures below are unaffected.',
+    denied:'Advice is available to managers and owners.',
+    offline:'No connection. Advice needs the server; everything else here works without it.',
+    sheetH:'The figures it read',
+    fWon:'Won', fLost:'Lost', fOpen:'In progress',
+    fRateN:'Win rate by count', fRateV:'Win rate by value',
+    fDays:'Days to order, median', fUnpaid:'Delivered, not paid',
+    fStale:'Quoted, undecided over 90 days', fNoQuote:'No quote sent, over 14 days',
+    fCost:'Enquiries with no cost', fBurn:'Monthly cost of the company',
+    notEnough:'not enough data',
+    sev:{watch:'watch', act:'act', urgent:'urgent'}
+  },
+  cloud:{
     signInSub:'Project Profitability Calculator',
     importAdds:'Add {n} project(s) from this backup to the shared database? Existing projects are kept — nothing is replaced.',
     importPartial:'Only {n} of {total} projects could be uploaded. Check the connection and import the file again; the ones already added will appear twice, so delete the duplicates.',
@@ -2051,7 +2160,32 @@ lt: {
   marginByProject:'Marža pagal projektą',revenueByClient:'Pajamos pagal klientą',
   printProject:'Projekto ataskaita',printCompany:'Įmonės ataskaita',
   printTitle:'Projekto pelningumo ataskaita',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lietuva',generated:'Sugeneruota',
-  puMargin:'Marža',cloud:{
+  puMargin:'Marža',
+  ai:{
+    button:'Patarimai', title:'Ką sako skaičiai',
+    lead:'Visus žemiau esančius skaičius suskaičiavo duomenų bazė. Modelis tik pasirinko, kurie iš jų svarbūs, ir parašė sakinius — skaičiuoti jam neleidžiama, o atsakymas su skaičiumi, kurio nėra duomenyse, atmetamas, o ne rodomas.',
+    thinking:'Skaitomas registras…',
+    again:'Tikrinti dar kartą', cached:'Nuo šio ryto',
+    based:'Remiasi',
+    blockedH:'Kol kas neatsakoma',
+    unblock:'Kad atsirastų atsakymas',
+    nothing:'Šiuo metu skaičiuose nėra nieko, ką vertėtų iškelti.',
+    noKey:'Patarimų paslaugai dar nenustatytas API raktas. Išmatuoti skaičiai — žemiau; parašytiems patarimams reikia rakto Supabase.',
+    modelErr:'Patarimų paslauga neatsakė. Išmatuoti skaičiai — žemiau.',
+    refusedH:'Patarimai sulaikyti',
+    refused:'Atsakyme buvo skaičių, kurių duomenyse nėra ({n}). Užuot rodžius tas dalis, kurios atsitiktinai sutampa, nerodoma nieko. Žemiau esantiems išmatuotiems skaičiams tai neturi įtakos.',
+    denied:'Patarimai prieinami vadovams ir savininkams.',
+    offline:'Nėra ryšio. Patarimams reikia serverio; visa kita čia veikia ir be jo.',
+    sheetH:'Skaičiai, kuriuos jis perskaitė',
+    fWon:'Laimėta', fLost:'Atmesta', fOpen:'Vykdoma',
+    fRateN:'Laimėjimų dalis pagal skaičių', fRateV:'Laimėjimų dalis pagal pinigus',
+    fDays:'Dienos iki užsakymo, mediana', fUnpaid:'Pristatyta, neapmokėta',
+    fStale:'Pasiūlyta, be sprendimo virš 90 d.', fNoQuote:'Pasiūlymas neišsiųstas, virš 14 d.',
+    fCost:'Užklausos be savikainos', fBurn:'Įmonės kaina per mėnesį',
+    notEnough:'per mažai duomenų',
+    sev:{watch:'stebėti', act:'veikti', urgent:'skubu'}
+  },
+  cloud:{
     signInSub:'Projektų pelningumo skaičiuoklė',
     importAdds:'Įkelti {n} projektą (-us) iš šios kopijos į bendrą duomenų bazę? Esami projektai išliks — niekas nebus pakeista.',
     importPartial:'Pavyko įkelti tik {n} iš {total} projektų. Patikrinkite ryšį ir importuokite failą dar kartą; jau įkelti projektai kartosis, tad dublikatus ištrinkite.',
@@ -2299,7 +2433,32 @@ ru: {
   marginByProject:'Маржа по проектам',revenueByClient:'Выручка по клиентам',
   printProject:'Отчёт по проекту',printCompany:'Отчёт по компании',
   printTitle:'Отчёт о рентабельности проекта',addr:'Svajonės g. 30, LT-94101 Клайпеда, Литва',generated:'Сформировано',
-  puMargin:'Маржа',cloud:{
+  puMargin:'Маржа',
+  ai:{
+    button:'Советы', title:'Что говорят цифры',
+    lead:'Все числа ниже посчитала база данных. Модель только выбрала, какие из них важны, и написала фразы — считать ей не разрешено, а ответ с числом, которого в данных нет, отклоняется, а не показывается.',
+    thinking:'Читаю реестр…',
+    again:'Проверить снова', cached:'С сегодняшнего утра',
+    based:'Опирается на',
+    blockedH:'Пока нельзя ответить',
+    unblock:'Чтобы открылось',
+    nothing:'Сейчас в цифрах нет ничего, о чём стоило бы сказать.',
+    noKey:'У сервиса советов ещё нет ключа API. Измеренные цифры — ниже; для написанных советов нужен ключ в Supabase.',
+    modelErr:'Сервис советов не ответил. Измеренные цифры — ниже.',
+    refusedH:'Советы не показаны',
+    refused:'В ответе оказались числа, которых нет в данных ({n}). Вместо того чтобы показать те части, которые случайно сошлись, не показано ничего. На измеренные цифры ниже это не влияет.',
+    denied:'Советы доступны руководителям и владельцам.',
+    offline:'Нет связи. Советам нужен сервер; всё остальное здесь работает и без него.',
+    sheetH:'Цифры, которые он прочитал',
+    fWon:'Выиграно', fLost:'Отклонено', fOpen:'В работе',
+    fRateN:'Доля выигранных по числу', fRateV:'Доля выигранных по деньгам',
+    fDays:'Дней до заказа, медиана', fUnpaid:'Поставлено, не оплачено',
+    fStale:'Предложено, без решения больше 90 дней', fNoQuote:'Предложение не отправлено, больше 14 дней',
+    fCost:'Запросов без себестоимости', fBurn:'Расходы компании в месяц',
+    notEnough:'мало данных',
+    sev:{watch:'следить', act:'делать', urgent:'срочно'}
+  },
+  cloud:{
     signInSub:'Калькулятор рентабельности проектов',
     importAdds:'Добавить {n} проект(ов) из этой копии в общую базу данных? Существующие проекты сохранятся — ничего не будет заменено.',
     importPartial:'Удалось загрузить только {n} из {total} проектов. Проверьте соединение и импортируйте файл снова; уже загруженные появятся дважды — удалите дубликаты.',
@@ -2555,6 +2714,35 @@ const CLOUD = (function(){
     return r.status === 204 ? null : r.json();
   }
 
+  /* Edge functions are not PostgREST either: /functions/v1 rather than
+     /rest/v1, and the reply is whatever the function returns rather than a
+     row set. Same session, same refresh-once-on-401, taken from here rather
+     than written out again -- a second copy of the Authorization header is
+     the copy that goes stale after a token refresh. */
+  async function fn(name, body, retried){
+    if(session && session.expires_at && Date.now() > session.expires_at && !retried){
+      await refresh();
+    }
+    let r;
+    try {
+      r = await fetch(API + '/functions/v1/' + name, {
+        method: 'POST',
+        headers: { apikey: KEY, 'Content-Type': 'application/json',
+                   Authorization: 'Bearer ' + ((session && session.access_token) || KEY) },
+        body: JSON.stringify(body || {})
+      });
+    } catch(err){ throw offline(); }
+    if(r.status === 401 && !retried && await refresh()) return fn(name, body, true);
+    let j = {};
+    try { j = await r.json(); } catch(e){}
+    if(!r.ok){
+      const e = new Error(j.error || j.message || ('HTTP ' + r.status));
+      e.status = r.status;
+      throw e;
+    }
+    return j;
+  }
+
   /* Storage is not PostgREST: a different host path, and a body that is a
      file rather than JSON, so rest() cannot carry it. The authentication is
      the same though, and it is taken from the same place rather than written
@@ -2587,6 +2775,11 @@ const CLOUD = (function(){
     on: on,
     user: () => session && session.user,
     signedIn: () => !!(session && session.access_token),
+
+    /* The figures in the answer are the database's; see db/migrate-advice.sql
+       and supabase/functions/advice. Nothing is computed in this browser and
+       nothing is computed by the model either. */
+    async advice(lang){ return await fn('advice', { lang: lang }); },
 
     async signIn(email, password){
       keep(await auth('token?grant_type=password', { email: email, password: password }));
@@ -3772,6 +3965,17 @@ function renderChrome(){
      what it is called is what it produces. */
   $('#btnPrint').hidden = !canMoney();
   $('#btnPrint').textContent = t.reportPdf;
+  /* Advice needs a server to ask and money-sight to be told. Hidden rather
+     than disabled for a fitter: a greyed-out button is a standing note that
+     there is something here they are not allowed, which is a worse answer
+     than no button at all. Hidden without a server for the plainer reason
+     that there is nothing behind it. */
+  const bai = $('#btnAI');
+  if(bai){
+    bai.hidden = !(CLOUD.on && canMoney());
+    bai.textContent = t.ai.button;
+    bai.title = t.ai.title;
+  }
   $('#btnPrint').title = state.tab === 'enquiries' ? t.enq.report
                         : state.tab === 'portfolio' ? t.printCompany : t.printProject;
   $('#langSel').value = state.lang;
@@ -8808,6 +9012,164 @@ $('#projMenu').addEventListener('click', async e=>{
 });
 
 $('#langSel').addEventListener('change', e=>{ state.lang = e.target.value; saveState(); render(); });
+/* ================= advice =================
+   The button asks the server; the server asks the database for figures and a
+   model for which of them matter. Nothing here computes anything, which is
+   why every value below is printed straight out of `facts` -- if a number is
+   on this screen it came from Postgres, and the panel says so in its own
+   lead rather than leaving the reader to wonder.
+
+   See db/migrate-advice.sql for the figures and supabase/functions/advice for
+   the part that holds the API key. */
+let AI = { open:false, busy:false, data:null, at:0 };
+
+function aiClose(){
+  AI.open = false;
+  $('#aiPanel').hidden = true;
+  const b = $('#btnAI'); if(b) b.focus();
+}
+
+function aiOpen(){
+  AI.open = true;
+  $('#aiPanel').hidden = false;
+  aiPaint();
+  const x = $('#aiClose'); if(x) x.focus();
+  /* Cached in the tab as well as on the server: reopening the panel in the
+     same session should not spend a round trip, and the server's own cache
+     is keyed on figures that cannot have changed in the meantime. */
+  if(!AI.data && !AI.busy) aiFetch();
+}
+
+async function aiFetch(){
+  const t = tr();
+  AI.busy = true; AI.data = null; aiPaint();
+  try {
+    AI.data = await CLOUD.advice(state.lang);
+    AI.at = Date.now();
+  } catch(e){
+    AI.data = { error: e && e.offline ? 'offline'
+              : (e && e.status === 403) ? 'denied'
+              : (e && e.message) || 'error' };
+  }
+  AI.busy = false;
+  if(AI.open) aiPaint();
+}
+
+/* One row of the fact table. `dim` is for a figure the sheet says is not
+   worth trusting yet -- shown, because hiding it would leave the reader
+   wondering whether it was measured and bad or simply absent, but shown as
+   what it is. */
+function aiRow(label, value, dim){
+  return '<div><span>' + esc(label) + '</span><b' + (dim ? ' class="dim"' : '') +
+         '>' + esc(String(value)) + '</b></div>';
+}
+
+function aiSheet(f){
+  const t = tr(), a = t.ai, L = LOCALES[state.lang] || 'en-GB';
+  const num = v => (v === null || v === undefined) ? '—'
+                 : new Intl.NumberFormat(L).format(Math.round(v));
+  const pc  = v => (v === null || v === undefined) ? '—'
+                 : (Math.round(v * 1000) / 10).toString().replace('.', ',') + ' %';
+  const out = [];
+  const fn = f.funnel || {}, st = f.stale || {}, cv = f.coverage || {},
+        cy = f.cycle || {}, bn = f.burn;
+  out.push(aiRow(a.fWon, num(fn.won) + '  ·  ' + num(fn.won_eur) + ' €'));
+  out.push(aiRow(a.fLost, num(fn.lost) + '  ·  ' + num(fn.lost_eur) + ' €'));
+  out.push(aiRow(a.fOpen, num(fn.open) + '  ·  ' + num(fn.open_eur) + ' €'));
+  out.push(aiRow(a.fRateN, pc(fn.win_rate_count)));
+  out.push(aiRow(a.fRateV, pc(fn.win_rate_value)));
+  if(cy.enough) out.push(aiRow(a.fDays, num(cy.days_to_po)));
+  out.push(aiRow(a.fUnpaid, num(cv.delivered_unpaid) + '  ·  ' +
+                            num(cv.delivered_unpaid_eur) + ' €'));
+  out.push(aiRow(a.fStale, num(st.quoted_undecided_over_90d)));
+  out.push(aiRow(a.fNoQuote, num(st.no_quote_over_14d)));
+  out.push(aiRow(a.fCost, num(cv.missing_cost) + ' / ' + num(cv.rows)));
+  if(bn) out.push(aiRow(a.fBurn, bn.enough ? num(bn.burn_month) + ' €'
+                                           : a.notEnough, !bn.enough));
+  return '<p class="ai-h3">' + esc(a.sheetH) + '</p>' +
+         '<div class="ai-sheet">' + out.join('') + '</div>';
+}
+
+function aiPaint(){
+  const t = tr(), a = t.ai, body = $('#aiBody');
+  if(!body) return;
+  $('#aiTitle').textContent = a.title;
+  $('#aiLead').textContent  = a.lead;
+  $('#aiAgain').textContent = a.again;
+  $('#aiAgain').hidden = AI.busy;
+
+  if(AI.busy){
+    body.innerHTML = '<p class="ai-spin">' + esc(a.thinking) + '</p>';
+    $('#aiStamp').textContent = '';
+    return;
+  }
+  const d = AI.data || {};
+  if(d.error){
+    const msg = d.error === 'offline' ? a.offline
+              : d.error === 'denied'  ? a.denied : d.error;
+    body.innerHTML = '<div class="ai-note bad">' + esc(msg) + '</div>';
+    $('#aiStamp').textContent = '';
+    return;
+  }
+
+  let html = '';
+  /* The reasons the written half is missing, each said plainly. The measured
+     half is printed underneath every one of them: a key that is not set is a
+     reason to lose the sentences, not the figures. */
+  if(d.ai === false){
+    const why = d.reason === 'no_key' ? a.noKey
+              : d.reason === 'invented_figures'
+                ? '<b>' + esc(a.refusedH) + '</b>' +
+                  esc(a.refused.replace('{n}', (d.invented || []).join(', ')))
+              : a.modelErr;
+    html += '<div class="ai-note' + (d.reason === 'invented_figures' ? ' bad' : '') + '">' +
+            (d.reason === 'invented_figures' ? why : esc(why)) + '</div>';
+  }
+
+  const adv = d.advice || {};
+  const finds = adv.findings || [];
+  /* CLIENT_1 goes out, the real name comes back on screen. The model never
+     saw the customer list; the reader was never meant to be without it. */
+  const names = d.clients || {};
+  const restore = s => String(s || '').replace(/CLIENT_\d+/g,
+    m => names[m] || m);
+
+  if(finds.length){
+    html += finds.map(f => {
+      const sev = ({watch:'watch', act:'act', urgent:'urgent'})[f.severity] || 'watch';
+      return '<div class="ai-find ' + sev + '">' +
+        '<h3>' + esc(restore(f.title)) +
+          '<span class="ai-sev">' + esc((a.sev && a.sev[sev]) || sev) + '</span></h3>' +
+        '<p>' + esc(restore(f.body)) + '</p>' +
+        '<p class="ai-ev"><b>' + esc(a.based) + '</b>' + esc(restore(f.evidence)) + '</p>' +
+      '</div>';
+    }).join('');
+  } else if(d.ai !== false){
+    html += '<div class="ai-note">' + esc(a.nothing) + '</div>';
+  }
+
+  const blocked = adv.blocked || [];
+  if(blocked.length){
+    html += '<p class="ai-h3">' + esc(a.blockedH) + '</p><ul class="ai-blocked">' +
+      blocked.map(b => '<li><b>' + esc(restore(b.question)) + '</b>' +
+        '<span>' + esc(a.unblock) + ': ' + esc(restore(b.unblock)) + '</span></li>').join('') +
+      '</ul>';
+  }
+
+  if(d.facts) html += aiSheet(d.facts);
+  body.innerHTML = html;
+  $('#aiStamp').textContent = d.cached ? a.cached
+    : (d.facts && d.facts.generated_at) || '';
+}
+
+$('#btnAI').addEventListener('click', aiOpen);
+$('#aiClose').addEventListener('click', aiClose);
+$('#aiAgain').addEventListener('click', ()=>{ AI.data = null; aiFetch(); });
+$('#aiPanel').addEventListener('click', e => { if(e.target === $('#aiPanel')) aiClose(); });
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && AI.open){ e.stopPropagation(); aiClose(); }
+});
+
 $('#btnTheme').addEventListener('click', ()=>{
   state.theme = currentTheme()==='dark' ? 'light' : 'dark';
   applyTheme(); saveState(); render();
