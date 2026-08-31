@@ -121,6 +121,22 @@ RULES, in order of importance:
 8. No preamble, no restatement of what you were given, no offer to help
    further. The reader wants the finding and the action.
 
+THE WORDS THIS TOOL USES
+Write the way the screen in front of the reader writes, or the advice sounds
+like it is about a different application. Use ONLY the list for the language
+you are writing in, in titles as well as in bodies, and never carry a word
+from one list into the other language.
+
+lang = ru: a row in the register is "запрос" and never "заявка"; the price
+sent to a client is "предложение" and never "квота"; an accepted order is
+"заказ"; cost is "себестоимость"; the sale price is "продажа"; the two ticks
+are "поставлено" and "оплачено".
+
+lang = lt: "užklausa"; "pasiūlymas"; "užsakymas"; "savikaina"; "pristatyta";
+"apmokėta".
+
+lang = en: "enquiry"; "quote"; "order"; "cost"; "price"; "delivered"; "paid".
+
 You must answer by calling the tool. Write in the language given as "lang":
 ru = Russian, lt = Lithuanian, en = English.`;
 
@@ -197,8 +213,20 @@ function unsupported(reply: unknown, sheet: unknown): string[] {
   const replyText = JSON.stringify(reply);
   const seen = new Set<string>();
   const bad: string[] = [];
-  for (const m of replyText.matchAll(/\d[\d\s.,]*/g)) {
-    const raw = m[0].replace(/[\s,]/g, "");
+  /* Thousands groups first, then plain numbers -- and a thousands group must
+     be exactly three digits with no fourth behind it.
+
+     The first version matched \d followed by any run of digits, spaces, dots
+     and commas -- written without its delimiters here, because a regex
+     literal ending in a star and a slash closes the comment it is inside and
+     the bundler refuses the file. That version reads "105 115" correctly and
+     also reads "36, 2026" as one number: strip the comma and the space and it
+     becomes 362026, which is in no fact sheet anywhere. It refused a good
+     answer and told the reader the model had invented a figure. The guard was
+     right and its arithmetic was wrong, which is the worst way for a check to
+     fail, because it accuses. */
+  for (const m of replyText.matchAll(/\d{1,3}(?:[\s\u00a0,]\d{3})+(?!\d)|\d+(?:[.,]\d+)?/g)) {
+    const raw = m[0].replace(/[\s\u00a0,]/g, "");
     // A bare 1-2 digit number is a count, a rank or a month; chasing those
     // rejects "at most 5 findings" and teaches nobody anything.
     if (raw.length < 3 || seen.has(raw)) continue;
@@ -214,6 +242,35 @@ function unsupported(reply: unknown, sheet: unknown): string[] {
     bad.push(plain);
   }
   return bad;
+}
+
+/* One request builder for the first attempt and the retry. Two copies would
+   be two prompts, and the second would stop matching the first the day
+   somebody edits one of them. */
+function callModel(key: string, payload: unknown) {
+  return fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      ...(WORKSPACE ? { "anthropic-workspace-id": WORKSPACE } : {}),
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      system: SYSTEM,
+      tools: [TOOL],
+      tool_choice: { type: "tool", name: "advice" },
+      messages: [{ role: "user", content: JSON.stringify(payload) }],
+    }),
+  });
+}
+
+async function ask(key: string, payload: unknown) {
+  const r = await callModel(key, payload);
+  if (!r.ok) return null;
+  try { return await r.json(); } catch { return null; }
 }
 
 Deno.serve(async (req) => {
@@ -274,26 +331,7 @@ Deno.serve(async (req) => {
     if (hit) return json({ ai: true, cached: true, facts, clients: map, advice: hit });
   }
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-      ...(WORKSPACE ? { "anthropic-workspace-id": WORKSPACE } : {}),
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      system: SYSTEM,
-      tools: [TOOL],
-      tool_choice: { type: "tool", name: "advice" },
-      messages: [{
-        role: "user",
-        content: JSON.stringify({ lang, facts: sheet }),
-      }],
-    }),
-  });
+  const res = await callModel(key, { lang, facts: sheet });
 
   if (!res.ok) {
     const detail = await res.text();
@@ -304,13 +342,36 @@ Deno.serve(async (req) => {
   const block = (out.content ?? []).find((c: Record<string, unknown>) => c.type === "tool_use");
   if (!block) return json({ ai: false, reason: "no_answer", facts });
 
-  const advice = block.input;
-  const invented = unsupported(advice, sheet);
+  let advice = block.input;
+  let invented = unsupported(advice, sheet);
+
+  /* Asked again once, told exactly which figures were rejected.
+
+     Refusing outright is the right answer to a model that will not follow the
+     rule and the wrong answer to one that slipped, and the first reply gives
+     no way to tell them apart. One retry costs two cents and does. Still
+     refused if the second reply is no better: publishing the parts that
+     happen to check out is how a reader learns to distrust the rest. */
   if (invented.length) {
-    // Not shown, not repaired, not silently trimmed. A reply carrying a figure
-    // that is not in the sheet has done the one thing it was told not to, and
-    // the honest move is to say the advice was refused rather than to publish
-    // the parts that happen to check out.
+    const again = await ask(key, {
+      lang,
+      facts: sheet,
+      rejected: invented,
+      note:
+        "Your previous answer was rejected: these figures do not appear in the " +
+        "fact sheet. Quote only figures that are in it, verbatim.",
+    });
+    const block2 = (again?.content ?? []).find(
+      (c: Record<string, unknown>) => c.type === "tool_use",
+    );
+    if (block2) {
+      const retry = block2.input;
+      const bad2 = unsupported(retry, sheet);
+      if (!bad2.length) { advice = retry; invented = []; }
+      else invented = bad2;
+    }
+  }
+  if (invented.length) {
     return json({ ai: false, reason: "invented_figures", invented, facts }, 200);
   }
 
