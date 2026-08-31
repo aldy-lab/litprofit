@@ -362,6 +362,17 @@ html.is-locked .card table.grid input:disabled{opacity:1}
 .ai-sheet span{font-size:12.5px;color:var(--ink-3)}
 .ai-sheet b{font-family:var(--mono);font-size:13px;font-weight:500;white-space:nowrap}
 .ai-sheet b.dim{color:var(--ink-3);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+/* Help reuses the advice furniture; only these three are its own. */
+.help-b{margin:0;padding:0;list-style:none}
+.help-b li{position:relative;padding-left:16px;margin-bottom:6px;font-size:14px;line-height:1.6}
+.help-b li::before{content:"";position:absolute;left:0;top:.72em;width:9px;height:0;
+  border-top:1px solid var(--ink-3)}
+.help-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 20px}
+.help-t{background:none;border:1px solid var(--border);border-radius:2px;
+  padding:6px 11px;font-size:12.5px;color:var(--ink-2);cursor:pointer;
+  min-height:32px;font-family:inherit}
+.help-t:hover{color:var(--ink-1);border-color:var(--ink-3)}
+.help-t.on{color:var(--ink-1);border-color:var(--accent);font-weight:600}
 .ai-foot{display:flex;align-items:center;gap:12px;padding:14px 24px 18px;
   border-top:1px solid var(--border)}
 .ai-stamp{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
@@ -1561,6 +1572,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
     </button>
     <div class="menu" id="projMenu" role="menu" hidden></div>
   </div>
+  <button id="btnHelp" class="icon ghost"></button>
   <button id="btnTheme" class="icon ghost"></button>
   <select id="langSel"><option value="en">EN</option><option value="lt">LT</option><option value="ru">RU</option></select>
   <input type="file" id="importFile" accept=".json" style="display:none">
@@ -1589,6 +1601,22 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 <!-- Advice. A dialog rather than a drawer: it is read once and dismissed,
      and a drawer that stays open beside the sheets invites somebody to work
      with advice permanently in the corner of their eye. -->
+<!-- Help. Same furniture as the advice panel on purpose: two dialogs that
+     look like two different applications is one application that looks
+     unfinished. -->
+<div class="ai-scrim" id="helpPanel" hidden>
+  <div class="ai-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="ai-head">
+      <div>
+        <h2 id="helpTitle"></h2>
+        <p class="ai-lead" id="helpWhere"></p>
+      </div>
+      <button class="icon ghost ai-x" id="helpClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="ai-body" id="helpBody"></div>
+  </div>
+</div>
+
 <div class="ai-scrim" id="aiPanel" hidden>
   <div class="ai-card" role="dialog" aria-modal="true" aria-labelledby="aiTitle">
     <div class="ai-head">
@@ -1888,6 +1916,55 @@ en: {
   printProject:'Project report',printCompany:'Company report',
   printTitle:'Project Profitability Report',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lithuania',generated:'Generated',
   puMargin:'Margin',
+  help:{
+    button:'Help', title:'How this screen works',
+    onThis:'You are here', other:'Other screens', watch:'Easy to get wrong',
+    h:{
+      portfolio:{l:'Every job side by side: plan and actual revenue, cost, profit and margin. Click a row to open that job.',
+        b:['The filter takes jobs whose dates OVERLAP the window, not only those starting inside it.',
+           'The company margin is weighted by revenue, so one tiny job cannot swing it.']},
+      dashboard:{l:'One job\'s profitability, plan against actual. Nothing is typed here — it is all collected from the sheets.',
+        b:['Revenue includes rebilled materials and logistics, not just the Revenue sheet.',
+           'Contingency exists in the plan only. In actual it is always zero: what went wrong lands on the sheet where it went wrong.']},
+      card:{l:'The passport of the job. These fields feed the acts and the report header.',
+        b:['Project days is end minus start plus one — the first day is a working day.',
+           'Contract sum and advance are hidden from restricted access.']},
+      acts:{l:'The sheet the customer signs on board. No prices — description, unit, quantity.',
+        b:['A signed act cannot be edited, renamed or deleted. Clear the signature first, and that is recorded.',
+           'The customer signs afresh every time. Only your own signature can be kept and reused.']},
+      pdocs:{l:'Files attached to this job. The same screen under Company holds everything at once.',
+        b:['Certificates, contracts and quotes count the days to expiry and flag anything under 90 days.',
+           'Opening a file makes a link that dies in a minute — a copied link is not a way in.']},
+      revenue:{l:'What the job sells. Plan against actual, per line.',
+        b:['Mark Paid only when the money has arrived — the dashboard reads it.']},
+      labor:{l:'Hours on the job and what they cost. Hours are the ones paid at the rate.',
+        b:['Employer tax and the daily allowance come from Settings, not from this sheet.',
+           'Actual is what really happened. Leave it empty until it has.']},
+      subs:{l:'Work bought in. Everything after the hourly line is a sum, not a quantity.',
+        b:['Plan is hours times rate plus travel, accommodation, materials and other.']},
+      travel:{l:'Getting people there and keeping them there.',
+        b:['Plan is quantity times unit price. Ten flights at 180 is quantity 10, unit 180.']},
+      materials:{l:'Parts, consumables, tools and hire.',
+        b:['Rebill to client turns a cost into revenue — the sum lands in the dashboard. No separate revenue line is needed.']},
+      logistics:{l:'Freight, customs, port, storage, crane, surveyor and the rest.',
+        b:['Here you enter sums, not quantity and price.']},
+      settings:{l:'Six numbers, separate for every job, like a settings sheet in a workbook.',
+        b:['Employer tax here is a planning uplift on an hour: holidays, sick days, travel, idle time.',
+           'Not the same as the 1.77 / 2.49 % under Company — that is the real Lithuanian contribution. Both are right in their own place.']},
+      enquiries:{l:'Every enquiry from the day it came in to the day it was paid. One row, one enquiry.',
+        b:['Empty cost is not zero. Empty means "not known yet" and stays out of the margin; zero means the supplier gave it away.',
+           'Cost and the ticks are edited straight in the row.']},
+      people:{l:'Who the company employs and what they cost it.',
+        b:['Hours per month are PRODUCTIVE hours, not calendar ones. Holidays, sick days, travel and idle time are paid and not sold. 130 is a sane start.',
+           'What the employee pays out of the same gross is not a company cost and is deliberately not here.']},
+      overheads:{l:'What the company pays every month whether or not anything is sold.',
+        b:['A row has a start and an end date, so a closed cost stops counting from the right month rather than vanishing backwards.']},
+      burn:{l:'What it costs to keep the doors open, and how much must be sold to cover it.',
+        b:['The break-even figure needs a real margin from the enquiry register. Too few priced enquiries and it says so rather than inventing one.']},
+      docs:{l:'Every file in the company, including what belongs to no single job.',
+        b:['Only an owner can delete: object storage has no undo.']}
+    }
+  },
   ai:{
     button:'Advice', title:'What the figures say',
     lead:'Every number below was computed by the database. The model chose which of them matter and wrote the sentences — it is not allowed to calculate, and a reply carrying a figure that is not in the sheet is refused rather than shown.',
@@ -2186,6 +2263,55 @@ lt: {
   printProject:'Projekto ataskaita',printCompany:'Įmonės ataskaita',
   printTitle:'Projekto pelningumo ataskaita',addr:'Svajonės g. 30, LT-94101 Klaipėda, Lietuva',generated:'Sugeneruota',
   puMargin:'Marža',
+  help:{
+    button:'Pagalba', title:'Kaip veikia šis ekranas',
+    onThis:'Jūs čia', other:'Kiti ekranai', watch:'Lengva suklysti',
+    h:{
+      portfolio:{l:'Visi darbai greta: planas ir faktas — pajamos, sąnaudos, pelnas, marža. Spustelėkite eilutę, kad atidarytumėte darbą.',
+        b:['Filtras ima darbus, kurių datos PERSIDENGIA su langu, o ne tik prasidedančius jame.',
+           'Įmonės marža sveriama pagal pajamas, todėl vienas mažas darbas jos neiškraipo.']},
+      dashboard:{l:'Vieno darbo pelningumas, planas prieš faktą. Čia nieko nevedama — viskas surinkta iš lapų.',
+        b:['Į pajamas įskaičiuotas medžiagų ir logistikos perrašymas klientui, ne tik lapas „Pajamos“.',
+           'Rezervas yra tik plane. Fakte jis visada nulis: kas nutiko, patenka į to lapo eilutę, kur nutiko.']},
+      card:{l:'Darbo pasas. Iš šių laukų duomenys patenka į aktus ir ataskaitos antraštę.',
+        b:['Projekto dienos — pabaiga minus pradžia plius viena: pirmoji diena yra darbo diena.',
+           'Sutarties suma ir avansas ribotos prieigos nematomi.']},
+      acts:{l:'Lapas, kurį klientas pasirašo laive. Be kainų — aprašymas, matas, kiekis.',
+        b:['Pasirašyto akto keisti, pervadinti ar ištrinti negalima. Pirma nuimamas parašas, ir tai užfiksuojama.',
+           'Klientas pasirašo iš naujo kiekvieną kartą. Kaupti ir naudoti pakartotinai galima tik savo parašą.']},
+      pdocs:{l:'Prie šio darbo prisegti failai. Tas pats ekranas skiltyje „Įmonė“ rodo viską iš karto.',
+        b:['Sertifikatai, sutartys ir pasiūlymai skaičiuoja dienas iki galiojimo pabaigos ir pažymi tai, kam liko mažiau nei 90.',
+           'Atidarius failą sukuriama nuoroda, kuri nustoja veikti po minutės.']},
+      revenue:{l:'Ką darbas parduoda. Planas prieš faktą, kiekvienoje eilutėje.',
+        b:['„Apmokėta“ žymėkite tik tada, kai pinigai atėjo — suvestinė tai skaito.']},
+      labor:{l:'Valandos darbe ir kiek jos kainuoja. Valandos — tos, kurios apmokamos pagal įkainį.',
+        b:['Darbdavio mokesčiai ir dienpinigiai imami iš „Nustatymų“, ne iš šio lapo.',
+           'Faktas — kas iš tikrųjų įvyko. Kol neįvyko, palikite tuščią.']},
+      subs:{l:'Nupirkti darbai. Viskas po valandine eilute yra sumos, ne kiekiai.',
+        b:['Planas — valandos kart įkainis plius kelionės, apgyvendinimas, medžiagos ir kita.']},
+      travel:{l:'Kaip žmonės nuvyksta ir kaip ten išsilaiko.',
+        b:['Planas — kiekis kart vieneto kaina. Dešimt skrydžių po 180: kiekis 10, kaina 180.']},
+      materials:{l:'Detalės, sunaudojamos medžiagos, įrankiai ir nuoma.',
+        b:['„Perrašyti klientui“ paverčia sąnaudą pajamomis — suma patenka į suvestinę. Atskiros pajamų eilutės nereikia.']},
+      logistics:{l:'Frachtas, muitinė, uostas, sandėliavimas, kranas, siurvejeris ir kita.',
+        b:['Čia vedamos sumos, o ne kiekis ir kaina.']},
+      settings:{l:'Šeši skaičiai, atskiri kiekvienam darbui, kaip nustatymų lapas darbo knygoje.',
+        b:['Darbdavio mokesčiai čia — planavimo antkainis valandai: atostogos, ligos, kelias, prastova.',
+           'Tai ne tas pats, kas 1,77 / 2,49 % skiltyje „Įmonė“ — ten tikroji įmoka. Abu teisingi savo vietoje.']},
+      enquiries:{l:'Kiekviena užklausa nuo atėjimo dienos iki apmokėjimo. Viena eilutė — viena užklausa.',
+        b:['Tuščia savikaina nėra nulis. Tuščia reiškia „dar nežinome“ ir į maržą neįeina; nulis reiškia, kad tiekėjas atidavė veltui.',
+           'Savikaina ir varnelės taisomos tiesiog eilutėje.']},
+      people:{l:'Ką įmonė samdo ir kiek tai jai kainuoja.',
+        b:['Valandos per mėnesį — PRODUKTYVIOS, ne kalendorinės. Atostogos, ligos, kelias ir prastova apmokami, bet neparduodami. 130 — protingas atskaitos taškas.',
+           'Tai, ką iš to paties bruto moka pats darbuotojas, nėra įmonės sąnauda ir čia sąmoningai nerodoma.']},
+      overheads:{l:'Ką įmonė moka kas mėnesį, nesvarbu, ar kas nors parduota.',
+        b:['Eilutė turi pradžios ir pabaigos datas, todėl uždaryta išlaida nustoja skaičiuotis nuo reikiamo mėnesio.']},
+      burn:{l:'Kiek kainuoja laikyti duris atviras ir kiek reikia parduoti, kad tai padengtum.',
+        b:['Nenuostolingumui reikia tikros maržos iš užklausų registro. Jei įkainotų užklausų per mažai, ekranas tai pasako, o ne sugalvoja skaičių.']},
+      docs:{l:'Visi įmonės failai, įskaitant tuos, kurie nepriklauso jokiam darbui.',
+        b:['Trinti gali tik savininkas: objektinėje saugykloje nėra atšaukimo.']}
+    }
+  },
   ai:{
     button:'Patarimai', title:'Ką sako skaičiai',
     lead:'Visus žemiau esančius skaičius suskaičiavo duomenų bazė. Modelis tik pasirinko, kurie iš jų svarbūs, ir parašė sakinius — skaičiuoti jam neleidžiama, o atsakymas su skaičiumi, kurio nėra duomenyse, atmetamas, o ne rodomas.',
@@ -2484,6 +2610,55 @@ ru: {
   printProject:'Отчёт по проекту',printCompany:'Отчёт по компании',
   printTitle:'Отчёт о рентабельности проекта',addr:'Svajonės g. 30, LT-94101 Клайпеда, Литва',generated:'Сформировано',
   puMargin:'Маржа',
+  help:{
+    button:'Справка', title:'Как устроен этот экран',
+    onThis:'Вы здесь', other:'Другие экраны', watch:'Здесь легко ошибиться',
+    h:{
+      portfolio:{l:'Все работы рядом: план и факт — выручка, затраты, прибыль, маржа. Нажатие на строку открывает работу.',
+        b:['Фильтр берёт работы, чьи сроки ПЕРЕСЕКАЮТСЯ с окном, а не только начинающиеся внутри него.',
+           'Маржа по компании взвешена по выручке, поэтому одна мелкая работа её не перекосит.']},
+      dashboard:{l:'Рентабельность одной работы, план против факта. Здесь ничего не вводится — всё собрано с листов.',
+        b:['В выручку входит перевыставление материалов и логистики, а не только лист «Доходы».',
+           'Резерв есть только в плане. В факте он всегда ноль: непредвиденное попадает в строку того листа, где случилось.']},
+      card:{l:'Паспорт работы. Отсюда данные идут в акты и в шапку отчёта.',
+        b:['Дней проекта — окончание минус начало плюс один: день начала считается рабочим.',
+           'Сумма контракта и аванс при ограниченном доступе не показываются.']},
+      acts:{l:'Лист, который заказчик подписывает на борту. Цен нет — описание, единица, количество.',
+        b:['Подписанный акт нельзя изменить, переименовать или удалить. Сначала снимают подпись, и это записывается.',
+           'Заказчик расписывается заново каждый раз. Хранить и ставить повторно можно только свою подпись.']},
+      pdocs:{l:'Файлы этой работы. Такой же экран в разделе «Компания» показывает всё сразу.',
+        b:['Сертификаты, договоры и предложения считают дни до окончания срока и помечают то, чему осталось меньше 90.',
+           'Открытие файла создаёт ссылку, которая перестаёт работать через минуту.']},
+      revenue:{l:'Что работа продаёт. План против факта, по каждой строке.',
+        b:['«Оплачено» отмечайте, только когда деньги пришли — сводка это читает.']},
+      labor:{l:'Часы на работе и во что они обходятся. Часы — те, что оплачиваются по ставке.',
+        b:['Налоги работодателя и суточные берутся из «Настроек», а не из этого листа.',
+           'Факт — это то, что действительно случилось. Пока не случилось, оставляйте пустым.']},
+      subs:{l:'Купленные работы. Всё после часовой строки — суммы, а не количества.',
+        b:['План — часы × ставка плюс проезд, проживание, материалы и прочее.']},
+      travel:{l:'Как людей довезти и на чём они там держатся.',
+        b:['План — количество × цена за единицу. Десять перелётов по 180 — это количество 10 и цена 180.']},
+      materials:{l:'Запчасти, расходники, инструмент и аренда.',
+        b:['«Перевыставить клиенту» превращает затрату в выручку — сумма попадает в сводку. Отдельная строка в «Доходах» не нужна.']},
+      logistics:{l:'Фрахт, таможня, порт, хранение, кран, сюрвейер и прочее.',
+        b:['Здесь вводятся суммы, а не количество и цена.']},
+      settings:{l:'Шесть чисел, отдельные для каждой работы, как лист настроек в книге Excel.',
+        b:['Налоговая нагрузка здесь — планировочная надбавка на час: отпуска, больничные, дорога, простой.',
+           'Это не те 1,77 / 2,49 % из раздела «Компания» — там настоящий взнос по литовскому закону. Обе величины верны каждая на своём месте.']},
+      enquiries:{l:'Каждый запрос от дня поступления до дня оплаты. Одна строка — один запрос.',
+        b:['Пустая себестоимость — не ноль. Пустая значит «пока не знаем» и в расчёт заработка не идёт; ноль значит, что поставщик отдал бесплатно.',
+           'Себестоимость и галочки правятся прямо в строке.']},
+      people:{l:'Кого компания нанимает и во что это ей обходится.',
+        b:['Часы в месяц — ПРОДУКТИВНЫЕ, а не календарные. Отпуска, больничные, дорога и простой оплачиваются, но не продаются. 130 — разумная отправная точка.',
+           'То, что из того же брутто платит сам работник, расходом компании не является и здесь намеренно не показано.']},
+      overheads:{l:'Что компания платит каждый месяц независимо от того, продано ли что-нибудь.',
+        b:['У строки есть даты начала и окончания, поэтому закрытый расход перестаёт учитываться с нужного месяца, а не исчезает задним числом.']},
+      burn:{l:'Во что обходится держать двери открытыми и сколько нужно продать, чтобы это покрыть.',
+        b:['Точке безубыточности нужна настоящая маржа из реестра запросов. Если запросов с себестоимостью мало, экран так и говорит, а не выдумывает цифру.']},
+      docs:{l:'Все файлы компании, включая те, что не относятся ни к одной работе.',
+        b:['Удалять может только владелец: у объектного хранилища нет отмены.']}
+    }
+  },
   ai:{
     button:'Советы', title:'Что говорят цифры',
     lead:'Все числа ниже посчитала база данных. Модель только выбрала, какие из них важны, и написала фразы — считать ей не разрешено, а ответ с числом, которого в данных нет, отклоняется, а не показывается.',
@@ -4047,6 +4222,14 @@ function renderChrome(){
      there is something here they are not allowed, which is a worse answer
      than no button at all. Hidden without a server for the plainer reason
      that there is nothing behind it. */
+  const bh = $('#btnHelp');
+  if(bh){
+    bh.innerHTML = ICON.help;
+    bh.title = t.help.button;
+    bh.setAttribute('aria-label', t.help.button);
+  }
+  if(HELP.open) helpPaint();   /* language switched under an open panel */
+
   const bai = $('#btnAI');
   if(bai){
     bai.hidden = !(CLOUD.on && canMoney());
@@ -4138,7 +4321,11 @@ function menuItems(t, locked){
 
 const ICON = {
   moon: '<svg class="stroke" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8Z"/></svg>',
-  sun:  '<svg class="stroke" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1"/><path d="M8 .9v1.7M8 13.4v1.7M2.9 2.9l1.2 1.2M11.9 11.9l1.2 1.2M.9 8h1.7M13.4 8h1.7M2.9 13.1l1.2-1.2M11.9 4.1l1.2-1.2"/></svg>'
+  sun:  '<svg class="stroke" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1"/><path d="M8 .9v1.7M8 13.4v1.7M2.9 2.9l1.2 1.2M11.9 11.9l1.2 1.2M.9 8h1.7M13.4 8h1.7M2.9 13.1l1.2-1.2M11.9 4.1l1.2-1.2"/></svg>',
+  /* A question mark in a circle, drawn rather than typed: the glyph in a font
+     lands differently in every one of them, and this sits beside two icons
+     that are strokes on a 16 grid. */
+  help: '<svg class="stroke" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M6.1 6.1a1.95 1.95 0 1 1 2.6 1.84c-.45.16-.7.6-.7 1.07v.36"/><path d="M8 11.6v.05"/></svg>'
 };
 
 /* Hidden on the portfolio, which is every project at once, and on the
@@ -9248,6 +9435,86 @@ function aiPaint(){
   $('#aiStamp').textContent = d.cached ? a.cached
     : (d.facts && d.facts.generated_at) || '';
 }
+
+/* ================= help =================
+   The manual is a document and this is not it. What a person wants from a
+   question mark is the screen they are standing on, not fifteen sections to
+   scroll -- so the panel opens on the current tab and lists the others to
+   move between. Everyone gets it, including restricted access: a fitter
+   filling in an act needs this more than an owner does. */
+let HELP = { open:false, tab:null };
+
+function helpClose(){
+  HELP.open = false;
+  $('#helpPanel').hidden = true;
+  const b = $('#btnHelp'); if(b) b.focus();
+}
+
+function helpOpen(tab){
+  HELP.open = true; HELP.tab = tab || state.tab;
+  $('#helpPanel').hidden = false;
+  helpPaint();
+  const x = $('#helpClose'); if(x) x.focus();
+}
+
+function chipTitle(t, k){
+  return k === 'pdocs' ? t.tabs.pdocs + ' \u00b7 ' + t.secProjects
+       : k === 'docs'  ? t.tabs.docs  + ' \u00b7 ' + t.secCompany
+       : t.tabs[k];
+}
+
+function helpPaint(){
+  const t = tr(), H = t.help, body = $('#helpBody');
+  if(!body) return;
+  const key = (H.h && H.h[HELP.tab]) ? HELP.tab : 'dashboard';
+  const e = H.h[key];
+  $('#helpTitle').textContent = H.h[key] ? chipTitle(t, key) : H.title;
+  $('#helpWhere').textContent = H.title;
+
+  /* Only screens this person can actually reach. Offering a fitter the help
+     for Break-even is a description of a room they have no door to. */
+  const mine = tabList().concat(canMoney() ? ['enquiries'] : [])
+                        .concat(canPayroll() ? COMPANY_TABS : [])
+                        .filter((v, i, a) => a.indexOf(v) === i && H.h[v]);
+
+  /* Two tabs are called Documents -- the job's and the company's -- and side
+     by side in a list of chips they are one word twice. Qualified with the
+     section each belongs to, using the words the section switch already
+     uses rather than inventing two more strings to translate. */
+  const chip = k => chipTitle(t, k);
+
+  body.innerHTML =
+    '<div class="ai-find act"><h3>' + esc(chip(key) || '') +
+      '<span class="ai-sev">' + esc(H.onThis) + '</span></h3>' +
+      '<p>' + esc(e.l) + '</p>' +
+      (e.b && e.b.length
+        ? '<p class="ai-h3" style="margin:14px 0 4px">' + esc(H.watch) + '</p><ul class="help-b">' +
+          e.b.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>'
+        : '') +
+    '</div>' +
+    '<p class="ai-h3">' + esc(H.other) + '</p>' +
+    '<div class="help-tabs">' + mine.map(k =>
+      '<button type="button" class="help-t' + (k === key ? ' on' : '') +
+      '" data-help="' + esc(k) + '">' + esc(chip(k)) + '</button>').join('') +
+    '</div>';
+}
+
+$('#helpBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-help]');
+  if(b){ HELP.tab = b.getAttribute('data-help'); helpPaint(); }
+});
+$('#btnHelp').addEventListener('click', ()=> helpOpen());
+$('#helpClose').addEventListener('click', helpClose);
+$('#helpPanel').addEventListener('click', e => {
+  if(e.target === $('#helpPanel')) helpClose();
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && HELP.open){ e.stopPropagation(); helpClose(); }
+  /* The key every application has bound to this since before the web. */
+  if(e.key === '?' && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || '')) && !HELP.open){
+    e.preventDefault(); helpOpen();
+  }
+});
 
 $('#btnAI').addEventListener('click', aiOpen);
 $('#aiClose').addEventListener('click', aiClose);
