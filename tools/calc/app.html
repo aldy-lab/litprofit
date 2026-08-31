@@ -1910,6 +1910,31 @@ en: {
     fStale:'Quoted, undecided over 90 days', fNoQuote:'No quote sent, over 14 days',
     fCost:'Enquiries with no cost', fBurn:'Monthly cost of the company',
     notEnough:'not enough data',
+    byRules:'Read by the calculator itself',
+    byModel:'Read by a language model',
+    ruleLead:'Every number below was computed by the database, and the findings are the calculator\'s own rules — nothing is sent anywhere and nothing costs anything.',
+    r:{
+      noCostT:'Cost is missing on almost everything',
+      noCostB:'{miss} of {rows} enquiries carry a price and no cost. Until a cost is on them, nothing can say whether a job earned money — it blocks the margin, the break-even point and every profitability figure on this screen. Start with the won ones: they are the ones that already happened.',
+      unpaidT:'Delivered and not paid',
+      unpaidB:'{n} enquiries are marked delivered with no payment recorded. That is money already earned and sitting somewhere else. Chase them, or mark the ones that were paid.',
+      staleT:'Quotes nobody ever answered',
+      staleB:'{n} quotes have sat undecided for over 90 days. A quote that old is not pending, it is lost — call them or close them, so the pipeline shows what is really in it.',
+      noQuoteT:'Enquiries with no price sent',
+      noQuoteB:'{n} enquiries have been open over two weeks with no quote sent. Every day one sits is a day the client is asking somebody else.',
+      gapT:'You win the small ones',
+      gapB:'You win {c} of decisions but only {v} of the money. The jobs you lose are worth more than the jobs you win — {lost} lost against {won} won. Worth looking at what the large quotes have in common.',
+      concT:'One client is most of the turnover',
+      concB:'{name} is {share} of everything won. Losing them is not a bad quarter, it is the company. Worth knowing which second client would have to grow.',
+      slowT:'Enquiries take a long time to close',
+      slowB:'The median enquiry takes {d} days to become an order.',
+      emptyT:'The company itself is not entered',
+      emptyB:'There are {people} people and {oh} fixed costs on file. Until the real staff and monthly costs are in, the break-even point cannot be worked out — which is the figure that says how much has to be sold.',
+      qMargin:'How much do we actually earn?', uMargin:'Fill in the cost on won enquiries — {miss} of {rows} have none.',
+      qBurn:'How much must we sell to break even?', uBurn:'Enter the real staff and the monthly fixed costs.',
+      qProj:'Which kind of work pays best?', uProj:'Run the jobs through the calculator — {n} project(s) on file.',
+      qOwner:'Who on the desk closes best?', uOwner:'Fill in Owner on enquiries — {miss} of {rows} have none.'
+    },
     sev:{watch:'watch', act:'act', urgent:'urgent'}
   },
   cloud:{
@@ -2183,6 +2208,31 @@ lt: {
     fStale:'Pasiūlyta, be sprendimo virš 90 d.', fNoQuote:'Pasiūlymas neišsiųstas, virš 14 d.',
     fCost:'Užklausos be savikainos', fBurn:'Įmonės kaina per mėnesį',
     notEnough:'per mažai duomenų',
+    byRules:'Perskaitė pats skaičiuotuvas',
+    byModel:'Perskaitė kalbos modelis',
+    ruleLead:'Visus žemiau esančius skaičius suskaičiavo duomenų bazė, o išvados — paties skaičiuotuvo taisyklės: niekas niekur nesiunčiama ir nieko nekainuoja.',
+    r:{
+      noCostT:'Beveik visur trūksta savikainos',
+      noCostB:'{miss} iš {rows} užklausų turi kainą ir neturi savikainos. Kol jos nėra, niekas negali pasakyti, ar darbas uždirbo — tai blokuoja maržą, nenuostolingumo tašką ir visus pelningumo skaičius. Pradėkite nuo laimėtų: jos jau įvyko.',
+      unpaidT:'Pristatyta ir neapmokėta',
+      unpaidB:'{n} užklausos pažymėtos kaip pristatytos be apmokėjimo. Tai jau uždirbti pinigai, gulintys kitur. Priminkite arba pažymėkite tas, kurios apmokėtos.',
+      staleT:'Pasiūlymai, į kuriuos niekas neatsakė',
+      staleB:'{n} pasiūlymų be sprendimo guli daugiau nei 90 dienų. Toks senas pasiūlymas nėra laukiantis — jis prarastas. Paskambinkite arba uždarykite.',
+      noQuoteT:'Užklausos be išsiųstos kainos',
+      noQuoteB:'{n} užklausų atviros daugiau nei dvi savaites be pasiūlymo. Kiekviena diena — diena, kai klientas klausia ko nors kito.',
+      gapT:'Laimite mažuosius',
+      gapB:'Laimite {c} sprendimų, bet tik {v} pinigų. Prarasti darbai verti daugiau nei laimėti — {lost} prieš {won}. Verta pažiūrėti, kas bendra dideliems pasiūlymams.',
+      concT:'Vienas klientas — didžioji apyvartos dalis',
+      concB:'{name} sudaro {share} visko, kas laimėta. Jo netekti — ne blogas ketvirtis, o įmonė. Verta žinoti, kuris antras klientas turėtų paaugti.',
+      slowT:'Užklausos ilgai virsta užsakymais',
+      slowB:'Mediana — {d} dienos iki užsakymo.',
+      emptyT:'Pati įmonė neįvesta',
+      emptyB:'Įvesta {people} žm. ir {oh} pastovių išlaidų. Kol nėra tikrų darbuotojų ir mėnesio išlaidų, nenenuostolingumo taško apskaičiuoti negalima.',
+      qMargin:'Kiek iš tikrųjų uždirbame?', uMargin:'Įrašyti savikainą laimėtose užklausose — {miss} iš {rows} jos neturi.',
+      qBurn:'Kiek reikia parduoti, kad išeitume į nulį?', uBurn:'Įvesti tikrus darbuotojus ir mėnesio pastovias išlaidas.',
+      qProj:'Kokie darbai pelningiausi?', uProj:'Vesti darbus per skaičiuotuvą — įvesta projektų: {n}.',
+      qOwner:'Kas geriausiai uždaro?', uOwner:'Pildyti „Atsakingas“ — {miss} iš {rows} tuščios.'
+    },
     sev:{watch:'stebėti', act:'veikti', urgent:'skubu'}
   },
   cloud:{
@@ -2456,6 +2506,31 @@ ru: {
     fStale:'Предложено, без решения больше 90 дней', fNoQuote:'Предложение не отправлено, больше 14 дней',
     fCost:'Запросов без себестоимости', fBurn:'Расходы компании в месяц',
     notEnough:'мало данных',
+    byRules:'Прочитал сам калькулятор',
+    byModel:'Прочитала языковая модель',
+    ruleLead:'Все числа ниже посчитала база данных, а выводы — собственные правила калькулятора: ничего никуда не отправляется и ничего не стоит.',
+    r:{
+      noCostT:'Себестоимости почти нигде нет',
+      noCostB:'У {miss} запросов из {rows} есть цена и нет себестоимости. Пока её нет, никто не может сказать, заработали на работе или нет — это блокирует маржу, точку безубыточности и все цифры прибыльности на этом экране. Начните с выигранных: они уже случились.',
+      unpaidT:'Поставлено и не оплачено',
+      unpaidB:'{n} запросов помечены как поставленные, оплата не отмечена. Это уже заработанные деньги, лежащие не у вас. Напомните — или отметьте те, что оплачены.',
+      staleT:'Предложения, на которые не ответили',
+      staleB:'{n} предложений висят без решения больше 90 дней. Такое старое предложение не «в работе», оно потеряно — позвоните или закройте, чтобы воронка показывала то, что в ней правда есть.',
+      noQuoteT:'Запросы без отправленной цены',
+      noQuoteB:'{n} запросов открыты больше двух недель, предложение не отправлено. Каждый день такого запроса — день, когда клиент спрашивает кого-то другого.',
+      gapT:'Выигрываете мелкое',
+      gapB:'Вы выигрываете {c} решений, но только {v} денег. Работы, которые вы теряете, дороже тех, что выигрываете — {lost} против {won}. Стоит посмотреть, что общего у крупных предложений.',
+      concT:'Один клиент даёт большую часть выручки',
+      concB:'{name} — это {share} всего выигранного. Потерять его — не плохой квартал, а компания. Стоит понимать, какой второй клиент должен вырасти.',
+      slowT:'Запросы долго превращаются в заказы',
+      slowB:'Медиана — {d} дней от запроса до заказа.',
+      emptyT:'Сама компания не заведена',
+      emptyB:'В базе {people} чел. и {oh} строк постоянных расходов. Пока не внесены настоящие люди и месячные расходы, точку безубыточности посчитать нельзя — а это та цифра, которая говорит, сколько нужно продать.',
+      qMargin:'Сколько мы на самом деле зарабатываем?', uMargin:'Заполнить себестоимость в выигранных запросах — её нет у {miss} из {rows}.',
+      qBurn:'Сколько нужно продать, чтобы выйти в ноль?', uBurn:'Внести настоящих людей и месячные постоянные расходы.',
+      qProj:'Какие работы прибыльнее?', uProj:'Вести работы через калькулятор — сейчас проектов: {n}.',
+      qOwner:'Кто из менеджеров закрывает лучше?', uOwner:'Заполнять «Ответственный» — его нет у {miss} из {rows}.'
+    },
     sev:{watch:'следить', act:'делать', urgent:'срочно'}
   },
   cloud:{
@@ -2779,7 +2854,9 @@ const CLOUD = (function(){
     /* The figures in the answer are the database's; see db/migrate-advice.sql
        and supabase/functions/advice. Nothing is computed in this browser and
        nothing is computed by the model either. */
-    async advice(lang){ return await fn('advice', { lang: lang }); },
+    async advice(lang, fresh){
+      return await fn('advice', { lang: lang, fresh: !!fresh });
+    },
 
     async signIn(email, password){
       keep(await auth('token?grant_type=password', { email: email, password: password }));
@@ -9040,11 +9117,11 @@ function aiOpen(){
   if(!AI.data && !AI.busy) aiFetch();
 }
 
-async function aiFetch(){
+async function aiFetch(fresh){
   const t = tr();
   AI.busy = true; AI.data = null; aiPaint();
   try {
-    AI.data = await CLOUD.advice(state.lang);
+    AI.data = await CLOUD.advice(state.lang, fresh);
     AI.at = Date.now();
   } catch(e){
     AI.data = { error: e && e.offline ? 'offline'
@@ -9117,13 +9194,23 @@ function aiPaint(){
      half is printed underneath every one of them: a key that is not set is a
      reason to lose the sentences, not the figures. */
   if(d.ai === false){
-    const why = d.reason === 'no_key' ? a.noKey
-              : d.reason === 'invented_figures'
-                ? '<b>' + esc(a.refusedH) + '</b>' +
-                  esc(a.refused.replace('{n}', (d.invented || []).join(', ')))
-              : a.modelErr;
+    let why;
+    if(d.reason === 'no_key'){
+      why = esc(a.noKey);
+    } else if(d.reason === 'invented_figures'){
+      why = '<b>' + esc(a.refusedH) + '</b>' +
+            esc(a.refused.replace('{n}', (d.invented || []).join(', ')));
+    } else {
+      /* Whatever the service actually said, verbatim. "It did not answer" is
+         true of a wrong key, an exhausted balance and a model name that no
+         longer exists, and the person who can fix it is reading this panel --
+         so the sentence that tells them which one it is belongs here rather
+         than in a log they will never open. */
+      why = esc(a.modelErr) + (d.detail
+            ? '<br><span class="ai-ev">' + esc(String(d.detail)) + '</span>' : '');
+    }
     html += '<div class="ai-note' + (d.reason === 'invented_figures' ? ' bad' : '') + '">' +
-            (d.reason === 'invented_figures' ? why : esc(why)) + '</div>';
+            why + '</div>';
   }
 
   const adv = d.advice || {};
@@ -9164,7 +9251,7 @@ function aiPaint(){
 
 $('#btnAI').addEventListener('click', aiOpen);
 $('#aiClose').addEventListener('click', aiClose);
-$('#aiAgain').addEventListener('click', ()=>{ AI.data = null; aiFetch(); });
+$('#aiAgain').addEventListener('click', ()=>{ AI.data = null; aiFetch(true); });
 $('#aiPanel').addEventListener('click', e => { if(e.target === $('#aiPanel')) aiClose(); });
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && AI.open){ e.stopPropagation(); aiClose(); }

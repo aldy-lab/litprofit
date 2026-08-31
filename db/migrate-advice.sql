@@ -43,6 +43,23 @@
 -- model sees CLIENT_1 and the browser puts the real name back. The company's
 -- customer list is its own.
 --
+-- SHAPE, NOT JUST TOTALS
+-- ----------------------
+-- The sheet carries medians beside means, the largest single loss, and what
+-- share of all lost value that one deal is. That is not thoroughness, it is
+-- the guard against the most confident wrong story this register can tell.
+-- The two win rates disagree here -- 38% by count against 17% by value -- and
+-- the obvious reading is "they win small jobs and lose large ones", which is
+-- systemic, alarming and false: the median WON enquiry is larger than the
+-- median lost one, and the gap is a single rejected enquiry of 1.375m out of
+-- 1.988m of rejections. One deal, not a pattern. A sheet of totals alone
+-- invites that conclusion and gives the reader nothing to catch it with.
+--
+-- The trend block is here for the same reason from the other direction: the
+-- snapshot looks like a going concern and the direction does not. Enquiries
+-- arriving fell from 99 to 34 across two 90-day windows, and won value from
+-- 200,549 to 20,568. Nothing in a total says that.
+--
 -- Requires migrate-enquiries.sql, migrate-company.sql. SAFE TO RUN MORE THAN ONCE.
 -- ============================================================
 
@@ -54,17 +71,10 @@ security definer
 set search_path = ''
 as $$
 declare
-  j          jsonb;
-  n_all      int;
-  n_cost     int;
-  n_decided  int;
-  won_n      int;
-  won_eur    numeric;
-  lost_n     int;
-  lost_eur   numeric;
-  open_n     int;
-  open_eur   numeric;
-  today      date := current_date;
+  j jsonb; n_all int; n_cost int; n_decided int;
+  won_n int; won_eur numeric; lost_n int; lost_eur numeric;
+  open_n int; open_eur numeric; today date := current_date;
+  big_lost numeric;
 begin
   -- Same gate as every other figure on this screen. An employee cannot see
   -- revenue anywhere else in the application and must not receive it wrapped
@@ -74,180 +84,189 @@ begin
   end if;
 
   select count(*), count(cost_ex_vat) into n_all, n_cost from public.enquiries;
-
   select
     count(*) filter (where status = 'Gautas PO'),
     coalesce(sum(price_ex_vat) filter (where status = 'Gautas PO'), 0),
     count(*) filter (where status = 'Atmesta užklausa'),
     coalesce(sum(price_ex_vat) filter (where status = 'Atmesta užklausa'), 0),
     count(*) filter (where status = 'Vykdoma'),
-    coalesce(sum(price_ex_vat) filter (where status = 'Vykdoma'), 0)
-  into won_n, won_eur, lost_n, lost_eur, open_n, open_eur
+    coalesce(sum(price_ex_vat) filter (where status = 'Vykdoma'), 0),
+    coalesce(max(price_ex_vat) filter (where status = 'Atmesta užklausa'), 0)
+  into won_n, won_eur, lost_n, lost_eur, open_n, open_eur, big_lost
   from public.enquiries;
-
   n_decided := won_n + lost_n;
 
-  j := jsonb_build_object(
-    'generated_at', to_char(now(), 'YYYY-MM-DD'),
-    'currency', 'EUR'
-  );
+  j := jsonb_build_object('generated_at', to_char(now(), 'YYYY-MM-DD'), 'currency', 'EUR');
 
-  -- ---------- period ----------
   j := j || jsonb_build_object('period', (
-    select jsonb_build_object(
-             'from', min(enquiry_date), 'to', max(enquiry_date),
-             'months', greatest(1, (extract(year from age(max(enquiry_date), min(enquiry_date))) * 12
-                                  + extract(month from age(max(enquiry_date), min(enquiry_date))))::int))
+    select jsonb_build_object('from', min(enquiry_date), 'to', max(enquiry_date),
+      'months', greatest(1, (extract(year from age(max(enquiry_date), min(enquiry_date))) * 12
+                           + extract(month from age(max(enquiry_date), min(enquiry_date))))::int))
       from public.enquiries));
 
-  -- ---------- the funnel ----------
   -- Two win rates on purpose. By count answers "how often do we win"; by
   -- value answers "do we win the ones worth winning", and they can disagree
-  -- sharply -- a desk that wins nine small jobs and loses one large one looks
-  -- excellent by count and is not. Only decided rows are counted either way:
-  -- treating everything still open as a loss reports a collapsing hit rate
-  -- every time the desk gets busy, which is exactly backwards.
+  -- sharply. Only decided rows are counted either way: treating everything
+  -- still open as a loss reports a collapsing hit rate every time the desk
+  -- gets busy, which is exactly backwards.
   j := j || jsonb_build_object('funnel', jsonb_build_object(
-    'enquiries', n_all,
-    'won', won_n, 'won_eur', round(won_eur),
+    'enquiries', n_all, 'won', won_n, 'won_eur', round(won_eur),
     'lost', lost_n, 'lost_eur', round(lost_eur),
-    'open', open_n, 'open_eur', round(open_eur),
-    'decided', n_decided,
-    'win_rate_count', case when n_decided > 0
-                      then round(won_n::numeric / n_decided, 4) end,
+    'open', open_n, 'open_eur', round(open_eur), 'decided', n_decided,
+    'win_rate_count', case when n_decided > 0 then round(won_n::numeric / n_decided, 4) end,
     'win_rate_value', case when (won_eur + lost_eur) > 0
                       then round(won_eur / (won_eur + lost_eur), 4) end,
     'enough', n_decided >= 20));
 
-  -- ---------- who buys ----------
+  -- WHY THE SIZES ARE HERE
+  -- The two win rates disagree on this register -- 38% by count, 17% by
+  -- value -- and the obvious reading is "they win small jobs and lose large
+  -- ones", which is a systemic finding somebody would act on. It is wrong.
+  -- The MEDIAN won enquiry is larger than the median lost one; the value gap
+  -- is one rejected enquiry of 1.375m against 1.988m of rejections in total.
+  -- One deal, not a pattern.
+  --
+  -- A sheet carrying only the two rates invites exactly that wrong story, and
+  -- a model has no way to find the outlier that would stop it. So the shape
+  -- of the distribution goes in the sheet: medians beside means, the largest
+  -- single loss, and what share of all lost value that one deal is.
+  j := j || jsonb_build_object('deal_size', (
+    select jsonb_build_object(
+      'won_median', round(percentile_cont(0.5) within group (order by price_ex_vat)
+                          filter (where status = 'Gautas PO')),
+      'won_mean', round(avg(price_ex_vat) filter (where status = 'Gautas PO')),
+      'won_max', round(max(price_ex_vat) filter (where status = 'Gautas PO')),
+      'lost_median', round(percentile_cont(0.5) within group (order by price_ex_vat)
+                           filter (where status = 'Atmesta užklausa')),
+      'lost_mean', round(avg(price_ex_vat) filter (where status = 'Atmesta užklausa')),
+      'lost_max', round(big_lost),
+      'lost_max_share_of_lost', case when lost_eur > 0 then round(big_lost / lost_eur, 4) end,
+      'open_median', round(percentile_cont(0.5) within group (order by price_ex_vat)
+                           filter (where status = 'Vykdoma')))
+      from public.enquiries where price_ex_vat is not null));
+
+  -- Asked against won, per client. "Who buys" is half the question; the other
+  -- half is who costs a lot of quoting and buys nothing.
   j := j || jsonb_build_object('clients', (
     select coalesce(jsonb_agg(x order by (x->>'won_eur')::numeric desc), '[]'::jsonb) from (
-      select jsonb_build_object(
-               'client', client,
-               'won', count(*) filter (where status = 'Gautas PO'),
-               'won_eur', round(coalesce(sum(price_ex_vat)
-                                 filter (where status = 'Gautas PO'), 0)),
+      select jsonb_build_object('client', client,
                'asked', count(*),
-               'share', case when won_eur > 0
-                        then round(coalesce(sum(price_ex_vat)
+               'won', count(*) filter (where status = 'Gautas PO'),
+               'won_eur', round(coalesce(sum(price_ex_vat) filter (where status = 'Gautas PO'), 0)),
+               'lost_eur', round(coalesce(sum(price_ex_vat) filter (where status = 'Atmesta užklausa'), 0)),
+               'share', case when won_eur > 0 then round(coalesce(sum(price_ex_vat)
                              filter (where status = 'Gautas PO'), 0) / won_eur, 4) end) as x
         from public.enquiries
-       where coalesce(client, '') <> ''
-       group by client
-      having count(*) filter (where status = 'Gautas PO') > 0) s));
+       where coalesce(client, '') <> '' group by client
+      having count(*) >= 3) s));
 
-  -- ---------- how long it takes ----------
+  -- Which supplier's quotes turn into orders. The company buys through these
+  -- names, so a supplier whose quotes never win is either priced wrong or
+  -- asked for the wrong things.
+  j := j || jsonb_build_object('suppliers', (
+    select coalesce(jsonb_agg(x order by (x->>'asked')::int desc), '[]'::jsonb) from (
+      select jsonb_build_object('supplier', supplier, 'asked', count(*),
+               'won', count(*) filter (where status = 'Gautas PO'),
+               'won_eur', round(coalesce(sum(price_ex_vat) filter (where status = 'Gautas PO'), 0))) as x
+        from public.enquiries
+       where coalesce(supplier, '') <> '' group by supplier
+      having count(*) >= 5) s));
+
+  -- Recent against the run before it, so "is it getting better" has an
+  -- answer that is not the reader eyeballing a bar chart.
+  j := j || jsonb_build_object('trend', (
+    select jsonb_build_object(
+      'last_90d_enquiries', count(*) filter (where enquiry_date > today - 90),
+      'last_90d_won', count(*) filter (where enquiry_date > today - 90 and status = 'Gautas PO'),
+      'last_90d_won_eur', round(coalesce(sum(price_ex_vat)
+          filter (where enquiry_date > today - 90 and status = 'Gautas PO'), 0)),
+      'prev_90d_enquiries', count(*) filter (where enquiry_date <= today - 90 and enquiry_date > today - 180),
+      'prev_90d_won', count(*) filter (where enquiry_date <= today - 90
+          and enquiry_date > today - 180 and status = 'Gautas PO'),
+      'prev_90d_won_eur', round(coalesce(sum(price_ex_vat)
+          filter (where enquiry_date <= today - 90 and enquiry_date > today - 180
+                  and status = 'Gautas PO'), 0)))
+      from public.enquiries));
+
   -- Median, not mean. In a register kept by hand there is always one enquiry
   -- that sat for two years, and it drags an average far enough to be useless.
   j := j || jsonb_build_object('cycle', (
     select jsonb_build_object(
              'days_to_po', percentile_cont(0.5) within group (order by (po_date - enquiry_date)),
-             'n', count(*),
-             'enough', count(*) >= 10)
+             'n', count(*), 'enough', count(*) >= 10)
       from public.enquiries
      where po_date is not null and enquiry_date is not null
        and po_date >= enquiry_date and po_date - enquiry_date < 3650));
 
-  -- ---------- what is going stale ----------
-  -- The register's own overdue list, in the two shapes it actually takes: a
-  -- price never sent, and a price sent that nobody ever answered.
   -- An enquiry with no quote sent has no price yet, so the value of that pile
   -- is not zero -- it is unknown, and those are not the same sentence. The
   -- euro figure here reported 0 against 23 rows on the live register, which
-  -- reads as a broken sum rather than as "nobody has priced these". Count
-  -- them, and say how many carry a price at all.
+  -- reads as a broken sum rather than as "nobody has priced these".
   j := j || jsonb_build_object('stale', jsonb_build_object(
     'no_quote_over_14d', (select count(*) from public.enquiries
-       where not coalesce(quoted_to_client, false) and status = 'Vykdoma'
-         and enquiry_date < today - 14),
+       where not coalesce(quoted_to_client, false) and status = 'Vykdoma' and enquiry_date < today - 14),
     'no_quote_over_14d_priced', (select count(*) from public.enquiries
        where not coalesce(quoted_to_client, false) and status = 'Vykdoma'
          and enquiry_date < today - 14 and coalesce(price_ex_vat, 0) > 0),
     'quoted_undecided_over_30d', (select count(*) from public.enquiries
-       where coalesce(quoted_to_client, false) and status = 'Vykdoma'
-         and enquiry_date < today - 30),
-    'quoted_undecided_over_30d_eur', (select round(coalesce(sum(price_ex_vat), 0))
-       from public.enquiries
-       where coalesce(quoted_to_client, false) and status = 'Vykdoma'
-         and enquiry_date < today - 30),
+       where coalesce(quoted_to_client, false) and status = 'Vykdoma' and enquiry_date < today - 30),
+    'quoted_undecided_over_30d_eur', (select round(coalesce(sum(price_ex_vat), 0)) from public.enquiries
+       where coalesce(quoted_to_client, false) and status = 'Vykdoma' and enquiry_date < today - 30),
     'quoted_undecided_over_90d', (select count(*) from public.enquiries
-       where coalesce(quoted_to_client, false) and status = 'Vykdoma'
-         and enquiry_date < today - 90)));
+       where coalesce(quoted_to_client, false) and status = 'Vykdoma' and enquiry_date < today - 90)));
 
-  -- ---------- the season ----------
   j := j || jsonb_build_object('by_month', (
-    select coalesce(jsonb_agg(jsonb_build_object(
-             'month', m, 'enquiries', n, 'won', w, 'won_eur', e) order by m), '[]'::jsonb)
-      from (select to_char(enquiry_date, 'YYYY-MM') as m,
-                   count(*) as n,
+    select coalesce(jsonb_agg(jsonb_build_object('month', m, 'enquiries', n, 'won', w,
+             'won_eur', e) order by m), '[]'::jsonb)
+      from (select to_char(enquiry_date, 'YYYY-MM') as m, count(*) as n,
                    count(*) filter (where status = 'Gautas PO') as w,
-                   round(coalesce(sum(price_ex_vat)
-                         filter (where status = 'Gautas PO'), 0)) as e
-              from public.enquiries
-             where enquiry_date is not null
-             group by 1) s));
+                   round(coalesce(sum(price_ex_vat) filter (where status = 'Gautas PO'), 0)) as e
+              from public.enquiries where enquiry_date is not null group by 1) s));
 
-  -- ---------- margin, if it can be answered at all ----------
   -- One priced row out of two hundred is not a margin, it is an anecdote.
-  -- The threshold is deliberately blunt: below it the block says so and says
-  -- what would fix it, and the model is told it may not reason about
-  -- profitability from a block whose `enough` is false.
+  -- Below the threshold the block says so and says what would fix it, and the
+  -- model is told it may not reason about a block whose `enough` is false.
   j := j || jsonb_build_object('margin', (
-    select jsonb_build_object(
-             'rows_with_cost', n_cost,
-             'rows_total', n_all,
+    select jsonb_build_object('rows_with_cost', n_cost, 'rows_total', n_all,
              'coverage', case when n_all > 0 then round(n_cost::numeric / n_all, 4) end,
-             'won_with_cost', count(*),
-             'sold_eur', round(coalesce(sum(price_ex_vat), 0)),
+             'won_with_cost', count(*), 'sold_eur', round(coalesce(sum(price_ex_vat), 0)),
              'cost_eur', round(coalesce(sum(cost_ex_vat), 0)),
              'margin_pct', case when coalesce(sum(price_ex_vat), 0) > 0
-                           then round((sum(price_ex_vat) - sum(cost_ex_vat))
-                                      / sum(price_ex_vat), 4) end,
+                           then round((sum(price_ex_vat) - sum(cost_ex_vat)) / sum(price_ex_vat), 4) end,
              'enough', count(*) >= 15)
       from public.enquiries
      where status = 'Gautas PO' and cost_ex_vat is not null and price_ex_vat is not null));
 
-  -- ---------- what is not filled in ----------
   -- The block that earns its place on a register this young. Everything the
-  -- model cannot say is downstream of these three columns, so the sheet names
-  -- them rather than leaving the reader to wonder why the advice is thin.
+  -- model cannot say is downstream of these columns, so the sheet names them
+  -- rather than leaving the reader to wonder why the advice is thin.
   j := j || jsonb_build_object('coverage', jsonb_build_object(
-    'rows', n_all,
-    'missing_cost', n_all - n_cost,
+    'rows', n_all, 'missing_cost', n_all - n_cost,
     'missing_owner', (select count(*) from public.enquiries where coalesce(owner, '') = ''),
     'delivered_unpaid', (select count(*) from public.enquiries
                           where coalesce(delivered, false) and not coalesce(paid, false)),
-    'delivered_unpaid_eur', (select round(coalesce(sum(price_ex_vat), 0))
-                               from public.enquiries
+    'delivered_unpaid_eur', (select round(coalesce(sum(price_ex_vat), 0)) from public.enquiries
                               where coalesce(delivered, false) and not coalesce(paid, false)),
     'people', (select count(*) from public.people),
     'overheads', (select count(*) from public.overheads),
     'projects', (select count(*) from public.projects)));
 
-  -- ---------- what it costs to open the doors ----------
   -- Totals only, and only to an owner. sees_payroll() rather than
   -- sees_money(): this is the payroll gate everywhere else in the schema and
   -- a sum is still a payroll figure.
   if public.sees_payroll() then
     j := j || jsonb_build_object('burn', (
-      select jsonb_build_object(
-               'headcount', b.headcount,
-               'payroll_month', round(b.payroll),
-               'overheads_month', round(b.overheads),
-               'burn_month', round(b.burn),
-               -- one person and one overhead row is a database somebody has
-               -- started filling in, not a company's cost base
-               'enough', b.headcount >= 3)
-        from public.company_burn() b));
+      select jsonb_build_object('headcount', b.headcount, 'payroll_month', round(b.payroll),
+               'overheads_month', round(b.overheads), 'burn_month', round(b.burn),
+               'enough', b.headcount >= 3) from public.company_burn() b));
   end if;
 
-  -- ---------- the jobs themselves ----------
   j := j || jsonb_build_object('projects', (
-    select jsonb_build_object('n', count(*), 'enough', count(*) >= 3)
-      from public.projects));
+    select jsonb_build_object('n', count(*), 'enough', count(*) >= 3) from public.projects));
 
   return j;
 end $$;
+
 
 revoke execute on all functions in schema public from public, anon;
 grant execute on function public.advice_facts() to authenticated;

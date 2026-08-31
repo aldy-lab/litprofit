@@ -64,31 +64,54 @@ const json = (body: unknown, status = 200) =>
    sheet that says the margin is unknown, and it will format it like the real
    figures. Every rule below exists because its absence produces a confident
    sentence about somebody's business that nothing on the page contradicts. */
-const SYSTEM = `You are reading a fact sheet produced by a ship-repair company's own
-project calculator. Every figure in it was computed by their database.
+const SYSTEM = `You are reading a fact sheet from the project calculator of UAB
+"Litprofit", a Klaipeda ship-repair company. They overhaul marine refrigeration
+plant, engines and piping on fishing vessels and shore installations, and they
+are the authorised BITZER and DANFOSS service partner for the region — so a
+large part of the business is: a shipowner asks for a part or a job, they price
+it (often against a supplier quote), and it either becomes an order or does not.
+That register of enquiries is most of what you are looking at.
+
+WHAT THE READER CAN ACTUALLY DO
+The reader is the owner or a manager, sitting in front of this tool. Inside it
+they can: chase or close an enquiry, send a quote that was never sent, fill in
+a cost, mark an invoice paid, add staff and fixed costs, and run a job through
+the project sheets. Advice they cannot act on from that chair is wasted.
 
 RULES, in order of importance:
 
 1. NEVER compute, estimate, extrapolate or round a number of your own. You may
    only quote figures that appear verbatim in the fact sheet. If a point needs
-   a number that is not in the sheet, drop the point.
+   a number that is not in the sheet, drop the point. A reply containing a
+   figure that is not in the sheet is discarded in full, not corrected.
 
-2. Any block with "enough": false does NOT support conclusions. You may say
-   that it cannot yet be answered and what would make it answerable. You may
-   not reason about it as though it were answerable. A margin computed from
-   one enquiry is not a margin.
+2. Any block with "enough": false does NOT support conclusions. Say it cannot
+   be answered yet and what would make it answerable. Do not reason about it as
+   though it were answerable.
 
-3. Advice must be an action someone can take on Monday, tied to the figure it
-   came from. "Improve your margins" is not advice. "Nineteen quoted jobs have
-   been undecided for over 90 days — call them or close them" is.
+3. BEFORE calling anything a pattern, check the sheet for the one deal that
+   explains it. deal_size carries medians beside means and the largest single
+   loss for exactly this reason. If win_rate_value is far below win_rate_count,
+   look at lost_max_share_of_lost before concluding they lose large jobs: one
+   outsized rejected enquiry moves that rate on its own, and the medians may
+   say the opposite. Getting this wrong sends them chasing a problem that does
+   not exist, which is worse than saying nothing.
 
-4. Say the uncomfortable thing if the sheet says it. You are not here to
-   reassure. If they win 38% of decisions but only 17% of the money, that is
-   the finding, and it means they win small jobs and lose large ones.
+4. Read the trend block. A business is a direction, not a snapshot, and a fall
+   in enquiries arriving is upstream of every other number here.
 
-5. At most 5 findings. Fewer is better. Rank by what it costs them.
+5. Advice must be an action for Monday, tied to the figure it came from.
+   "Improve your margins" is not advice. "Nineteen quoted jobs have been
+   undecided over 90 days — call them or close them" is.
 
-6. No preamble, no summary of what you were given, no offers to help further.
+6. Say the uncomfortable thing if the sheet says it. You are not here to
+   reassure, and you are not here to congratulate them on a figure either.
+
+7. At most 5 findings, ranked by what it costs them. Fewer is better. If the
+   sheet supports only two real findings, give two.
+
+8. No preamble, no restatement of what you were given, no offer to help
+   further. The reader wants the finding and the action.
 
 You must answer by calling the tool. Write in the language given as "lang":
 ru = Russian, lt = Lithuanian, en = English.`;
@@ -193,9 +216,13 @@ Deno.serve(async (req) => {
   if (!auth.startsWith("Bearer ")) return json({ error: "not signed in" }, 401);
 
   let lang = "en";
+  let fresh = false;
   try {
     const body = await req.json();
     if (typeof body?.lang === "string") lang = body.lang;
+    // "Check again" means check again. Without this the button re-served the
+    // same cached answer for a day and looked broken.
+    fresh = body?.fresh === true;
   } catch { /* no body is fine */ }
 
   // The caller's own token, so advice_facts() runs as them and its
@@ -234,9 +261,9 @@ Deno.serve(async (req) => {
   // schema has -- so a direct .from() would read nothing and say nothing about
   // why. The age check lives in advice_cache_get, where the clock is the
   // database's rather than this machine's.
-  const { data: hit } = await supa.rpc("advice_cache_get", { p_id: hash });
-  if (hit) {
-    return json({ ai: true, cached: true, facts, clients: map, advice: hit });
+  if (!fresh) {
+    const { data: hit } = await supa.rpc("advice_cache_get", { p_id: hash });
+    if (hit) return json({ ai: true, cached: true, facts, clients: map, advice: hit });
   }
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
