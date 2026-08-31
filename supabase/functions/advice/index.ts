@@ -40,6 +40,14 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const MODEL = "claude-sonnet-5";
+
+/* Anthropic issues two kinds of key. A workspace key carries its workspace
+   with it; an identity-linked key belongs to a person and does not, so the
+   request has to name the workspace it acts in or the API refuses it before
+   the model is ever reached. Optional here, because a workspace key needs no
+   such thing -- set ANTHROPIC_WORKSPACE_ID only if the key is the other kind,
+   and the header appears only when it is set. */
+const WORKSPACE = Deno.env.get("ANTHROPIC_WORKSPACE_ID");
 const MAX_TOKENS = 1600;
 
 // One call per owner per day is the shape of this feature, so the cache is
@@ -272,6 +280,7 @@ Deno.serve(async (req) => {
       "x-api-key": key,
       "anthropic-version": "2023-06-01",
       "content-type": "application/json",
+      ...(WORKSPACE ? { "anthropic-workspace-id": WORKSPACE } : {}),
     },
     body: JSON.stringify({
       model: MODEL,
