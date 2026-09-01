@@ -63,7 +63,12 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SERVE = os.path.dirname(ROOT)
 PREFIX = "/" + os.path.basename(ROOT)
 
-BASE = "/litprofit"          # keep in step with tools/build.py
+# Kept in step with tools/build.py by hand, which is how it went stale: the
+# site moved to the domain and this file still prefixed /litprofit/, so the
+# calculator asked for its logo and its fonts at an address that no longer
+# exists. Neither is fatal -- a missing font falls back and a missing logo is
+# a gap in the header -- which is exactly why nobody would have noticed.
+BASE = ""
 OUT_DIR = os.path.join(ROOT, "calculator")
 ITERATIONS = 310000
 

@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /litprofit/calculator/
+Disallow: /calculator/
 
-Sitemap: https://aldy-lab.github.io/litprofit/sitemap.xml
+Sitemap: https://litprofit.com/sitemap.xml

@@ -4,9 +4,10 @@ Audits the built site with real device emulation.
 
     python3 tools/audit.py
 
-Serves the PARENT directory, so the site is reached at /litprofit/ — the same
-path GitHub Pages serves it from. Serving the repo root instead would test a
-base path the live site does not have, and every absolute URL would 404.
+Serves the repo root, because the site is served from litprofit.com itself and
+every absolute URL now starts at /. It used to serve the PARENT directory to
+reproduce the /litprofit/ project path; testing under a prefix the live site
+no longer has would make every absolute URL a false 404.
 
 Checks, per page:
   structure   one <h1>, no heading-level jumps, no img without alt, no link
@@ -27,8 +28,8 @@ import threading
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SERVE = os.path.dirname(ROOT)
-PREFIX = "/" + os.path.basename(ROOT)
+SERVE = ROOT
+PREFIX = ""
 
 BASE_PATHS = ["/", "/about/", "/services/", "/services/ship-engine-repair/",
               "/services/refrigeration-systems/", "/services/hull-and-piping/",
@@ -140,8 +141,15 @@ MOBILE_JS = """() => {
 def main():
     port = free_port()
     handler = functools.partial(Quiet, directory=SERVE)
-    socketserver.TCPServer.allow_reuse_address = True
-    httpd = socketserver.TCPServer(("127.0.0.1", port), handler)
+    # Threading, not TCPServer. A browser opens several connections to one
+    # page and a single-threaded server serves them one at a time; with
+    # keep-alive holding a socket, the next request waits behind it and
+    # `networkidle` never arrives. The audit then fails as a 30-second
+    # timeout on whichever page happened to be next, which reads as a broken
+    # page rather than as a broken harness -- it hung on /contacts/ first,
+    # and /contacts/ was fine.
+    http.server.ThreadingHTTPServer.allow_reuse_address = True
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     base = "http://127.0.0.1:%d%s" % (port, PREFIX)
     print("serving %s at %s\n" % (SERVE, base))

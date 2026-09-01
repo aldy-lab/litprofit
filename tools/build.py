@@ -28,12 +28,17 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SITE CONFIG
 # ============================================================
 
-# GitHub Pages serves this repo at aldy-lab.github.io/litprofit/, so every
-# absolute path needs that prefix. When the real domain is pointed at the
-# repo, set BASE = "" and ORIGIN to the domain, add the CNAME file, and
-# rebuild — that is the whole migration.
-BASE = "/litprofit"
-ORIGIN = "https://aldy-lab.github.io"
+# Served from litprofit.com itself, so absolute paths need no prefix. It ran
+# under aldy-lab.github.io/litprofit/ until the domain was pointed here, which
+# is what BASE was for; leaving it as a constant rather than deleting it keeps
+# the option of going back to a project path without hunting through 3,000
+# lines for the assumption.
+#
+# CNAME is emitted by this file rather than placed by hand. GitHub Pages reads
+# that file to learn its custom domain, and a hand-placed one is a file the
+# next person deletes while tidying, taking the domain with it.
+BASE = ""
+ORIGIN = "https://litprofit.com"
 
 NAME = "LITPROFIT"
 LEGAL = 'UAB "Litprofit"'
@@ -1315,7 +1320,10 @@ def home():
     <!-- The clients were the second half of the section above: a statement
          with a photograph, then a rail of logos, 1162px of one screenful. Two
          statements, so two sections. -->
-    <section class="section">
+    <!-- id, because the old site had a page per customer and those URLs
+         redirect to /#clients. An anchor that points at nothing lands the
+         reader at the top of the home page wondering what they clicked. -->
+    <section class="section" id="clients">
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow"><span class="eyebrow-num">08</span><span class="sep">//</span>{cl_e}</p>
@@ -3393,6 +3401,103 @@ def sitemap_xml():
             + "\n".join(rows) + "\n</urlset>\n")
 
 
+# ============================================================
+# THE OLD SITE
+# ============================================================
+# litprofit.com served a different site until this one replaced it: 69 URLs in
+# three languages, with Lithuanian slugs at the root and /lt/ and /ru/ copies.
+# They are in Google. Pointing the domain here without doing anything about
+# them turns every one into a 404 -- including nine pages named after actual
+# customers, which are exactly the ones somebody searches for by name.
+#
+# GitHub Pages cannot issue a 301: there is no server to configure. A meta
+# refresh with a canonical is the honest substitute -- search engines follow
+# it and pass the page on, browsers act on it immediately, and a reader with
+# neither still sees a link that says where the page went.
+#
+# The Russian third of the list goes to English. This site is built for two
+# languages; the Russian strings still exist but 70 of them are missing since
+# it was switched off, and T() raises on a missing key, so turning it back on
+# is a real translation job rather than a flag. Recorded here rather than
+# quietly resolved: those 23 URLs had Russian readers.
+OLD_URLS = {
+    "/about-us":     "/about/",
+    # /contacts is deliberately absent: both sites use it, so there is nothing
+    # to redirect. Listing it wrote a stub OVER the real contacts page that
+    # pointed at itself -- a redirect loop where a phone number used to be.
+    # The guard below now refuses to write a stub onto an existing file, so
+    # the next overlapping path fails the build instead of eating a page.
+    "/sertifikatai": "/certificates/",
+    "/paslaugos":    "/services/",
+    "/paslaugos/laivu-irangos-ir-varikliu-remontas":  "/services/ship-engine-repair/",
+    "/paslaugos/saldymo-sistemos-ir-iranga":          "/services/refrigeration-systems/",
+    "/paslaugos/laivu-korpusu-ir-vamzdynu-darbai":    "/services/hull-and-piping/",
+    "/paslaugos/atsarginiu-daliu-tiekimas":           "/services/spare-parts/",
+    "/projektai":                          "/completed-works/",
+    "/projektai/laivu-varikliu-remontas":  "/completed-works/",
+    "/projektai/saldymo-iranga":           "/completed-works/",
+    # The old site had a page per customer. This one does not, and inventing
+    # nine pages to catch nine redirects would be building a section to house
+    # a redirect. The home page names them all in one strip, which is the
+    # nearest true thing.
+    "/clients":                      "/#clients",
+    "/clients/alliance-marine":      "/#clients",
+    "/clients/baltreids":            "/#clients",
+    "/clients/limarko-group":        "/#clients",
+    "/clients/lzk":                  "/#clients",
+    "/clients/norebo":               "/#clients",
+    "/clients/ocean-whale-company":  "/#clients",
+    "/clients/owh":                  "/#clients",
+    "/clients/santavilte":           "/#clients",
+    "/clients/seafish-trade":        "/#clients",
+    "/clients/sealord":              "/#clients",
+}
+
+
+def redirect_stubs():
+    """One file per retired URL, for every language the old site had."""
+    made = 0
+    for prefix, target_prefix in (("", ""), ("/lt", "/lt"), ("/ru", "")):
+        for old, new in OLD_URLS.items():
+            src = prefix + old
+            dst = (target_prefix + new) if new.startswith("/") else new
+            # /lt and /ru bare roots: /lt/ is a real page here, /ru/ is not
+            if src.rstrip("/") == dst.rstrip("/"):
+                continue                      # same address on both sites
+            path = src.strip("/") + "/index.html"
+            if os.path.exists(os.path.join(ROOT, path)):
+                raise SystemExit(
+                    "redirect %s would overwrite the real page at %s -- both "
+                    "sites use this path, so remove it from OLD_URLS" % (src, path))
+            write(path, redirect_html(u(dst)))
+            made += 1
+    # the old /ru/ home, and its differently-spelled contacts
+    write("ru/index.html", redirect_html(u("/")))
+    write("ru/kontakty/index.html", redirect_html(u("/contacts/")))
+    made += 2
+    print("wrote %-44s %6d files" % ("(redirects from the old site)", made))
+
+
+def redirect_html(target):
+    """Canonical first, then the refresh, then a link for whoever has neither."""
+    return ("""<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>%s</title>
+<link rel="canonical" href="%s">
+<meta http-equiv="refresh" content="0; url=%s">
+<meta name="robots" content="noindex, follow">
+<style>body{font:16px/1.6 system-ui,sans-serif;margin:14vh auto;max-width:34em;padding:0 24px;
+color:#26293d}a{color:#15196d}</style>
+<p>This page has moved.
+<p><a href="%s">%s</a>
+""" % (NAME, ORIGIN + target, target, target, ORIGIN + target))
+
+
+redirect_stubs()
+
+write("CNAME", "litprofit.com\n")
+
 write("sitemap.xml", sitemap_xml())
 # The calculator is private and encrypted; it is in no sitemap and no menu,
 # and crawlers are asked to leave it alone. Its contents are unreadable
@@ -3402,4 +3507,4 @@ write("robots.txt",
       % (BASE, ORIGIN + BASE + "/sitemap.xml"))
 
 print("\nBASE=%r ORIGIN=%r  languages=%s" % (BASE, ORIGIN, ",".join(i18n.LANGS)))
-print("Set BASE='' and ORIGIN to the live domain, add CNAME, and rebuild to migrate.")
+print("Serving from the domain itself. CNAME is written by this build.")

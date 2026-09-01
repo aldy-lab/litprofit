@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>LITPROFIT — Project Calculator</title>
-<link rel="stylesheet" href="/litprofit/css/fonts.css">
+<link rel="stylesheet" href="/css/fonts.css">
 <style>
 /* ============================================================
    LITPROFIT — Project Calculator
@@ -1559,7 +1559,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 <div class="chrome" id="chrome">
 <header class="app">
   <div class="brand">
-    <img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT">
+    <img src="/assets/brand/logo-lockup.svg" alt="LITPROFIT">
     <small data-i18n="appSub"></small>
   </div>
   <span class="savetag" id="saveTag" role="status" aria-live="polite"></span>
@@ -1637,7 +1637,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 
 <div class="signin" id="signin" hidden>
   <form class="signin-card" id="signinForm">
-    <img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT" class="signin-mark">
+    <img src="/assets/brand/logo-lockup.svg" alt="LITPROFIT" class="signin-mark">
     <p class="signin-sub" id="siSub"></p>
     <label for="siEmail" id="siEmailL"></label>
     <input type="email" id="siEmail" autocomplete="username" required>
@@ -9895,7 +9895,7 @@ function printProjectReport(){
 
   $('#print-area').innerHTML = `
     <div class="rp-band">
-      <div><img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT">
+      <div><img src="/assets/brand/logo-lockup.svg" alt="LITPROFIT">
         <h1>${esc(t.printTitle)}</h1>
         <p class="rp-sub">${esc(dd.control)} // ${esc(cur)}</p></div>
       <div class="rp-id"><b>${esc(c.projectId)||dash}</b>${esc(c.client)||''}</div>
@@ -10014,7 +10014,7 @@ function printCompanyReport(){
 
   $('#print-area').innerHTML = `
     <div class="rp-band">
-      <div><img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT">
+      <div><img src="/assets/brand/logo-lockup.svg" alt="LITPROFIT">
         <h1>${esc(t.companyTitle)}</h1>
         <p class="rp-sub">${esc(t.pfTotal)} // ${rows.length} ${esc(t.projectsN)}</p></div>
       <div class="rp-id"><b>${rows.length}</b>${open} ${esc(t.openN)} &middot; ${onT} ${esc(dd.onTarget)}</div>
@@ -10104,7 +10104,7 @@ function printEnquiryReport(){
 
   $('#print-area').innerHTML = `
     <div class="rp-band">
-      <div><img src="/litprofit/assets/brand/logo-lockup.svg" alt="LITPROFIT">
+      <div><img src="/assets/brand/logo-lockup.svg" alt="LITPROFIT">
         <h1>${esc(e.title)}</h1>
         <p class="rp-sub">${esc(e.reportSub)}</p></div>
       <div class="rp-id"><b>${rows.length}</b>${esc(e.kReceived)}</div>
