@@ -131,13 +131,6 @@ declare
     -- definer, and migrate-advice.sql revokes them on purpose.
     'create_signature','delete_signature','sign_act_exec','clear_act_exec',
     'advice_facts','advice_cache_get','advice_cache_put',
-    -- THE PARTS STORE (litprofit.store, its own repository).
-    -- Added by db/migrate-parts.sql in that repository. parts_public() is
-    -- also granted to anon there -- the generator runs with the publishable
-    -- key and no session, and it returns only what is already on a public
-    -- web page. The other four refuse anyone who is not admin or manager on
-    -- their first line.
-    'parts_public','parts_admin','save_part','create_part','delete_part',
     'sees_money','sees_payroll','my_role'
   ];
   fn record;
@@ -214,7 +207,6 @@ begin
         'sign_act','unsign_act',
         'create_signature','delete_signature','sign_act_exec','clear_act_exec',
         'advice_facts','advice_cache_get','advice_cache_put',
-        'parts_public','parts_admin','save_part','create_part','delete_part',
         'sees_money','sees_payroll','my_role')
      and not has_function_privilege('authenticated', p.oid, 'EXECUTE');
   if n > 0 then raise exception 'the app lost EXECUTE on: %', bad; end if;
@@ -252,7 +244,7 @@ begin
      and grantee='authenticated' and privilege_type='SELECT';
   if n <> 1 then raise exception 'authenticated lost SELECT on profiles'; end if;
 
-  raise notice 'hardening OK: paths pinned, table grants gone, anon executes nothing, thirty-seven names in';
+  raise notice 'hardening OK: paths pinned, table grants gone, anon executes nothing, thirty-two names in';
 end $$;
 
 
