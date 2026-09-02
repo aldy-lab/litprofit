@@ -112,6 +112,25 @@ declare
     'delete_project','save_act','save_act_fields','save_document',
     'save_enquiry','save_overhead','save_person','save_project',
     'sign_act','unsign_act',
+    -- ADDED AFTER THE FACT, AND THE REASON IS WORTH KEEPING.
+    -- The list above was built with `grep -o "rpc/[a-z_]*"` over the source,
+    -- which finds every call the calculator makes over the REST path and
+    -- misses two whole categories:
+    --
+    --   * the four act-signing functions, which arrived after this file did;
+    --   * the three the Edge Function calls, because it calls them as
+    --     supa.rpc("advice_facts") rather than through a URL, AND WITH THE
+    --     CALLER'S OWN TOKEN -- so they are executed by `authenticated`, and
+    --     the grep for a URL path could never have seen them.
+    --
+    -- All seven work today. Re-running this file without them would revoke
+    -- EXECUTE and break signing and every piece of advice at once, which is
+    -- exactly the failure a file headed "SAFE TO RUN MORE THAN ONCE" must
+    -- not have. advice_money and advice_unknown_profit stay OUT: they are
+    -- called from inside advice_facts, where the current user is the
+    -- definer, and migrate-advice.sql revokes them on purpose.
+    'create_signature','delete_signature','sign_act_exec','clear_act_exec',
+    'advice_facts','advice_cache_get','advice_cache_put',
     'sees_money','sees_payroll','my_role'
   ];
   fn record;
@@ -185,7 +204,10 @@ begin
         'delete_document','delete_enquiry','delete_overhead','delete_person',
         'delete_project','save_act','save_act_fields','save_document',
         'save_enquiry','save_overhead','save_person','save_project',
-        'sign_act','unsign_act','sees_money','sees_payroll','my_role')
+        'sign_act','unsign_act',
+        'create_signature','delete_signature','sign_act_exec','clear_act_exec',
+        'advice_facts','advice_cache_get','advice_cache_put',
+        'sees_money','sees_payroll','my_role')
      and not has_function_privilege('authenticated', p.oid, 'EXECUTE');
   if n > 0 then raise exception 'the app lost EXECUTE on: %', bad; end if;
 
@@ -222,7 +244,7 @@ begin
      and grantee='authenticated' and privilege_type='SELECT';
   if n <> 1 then raise exception 'authenticated lost SELECT on profiles'; end if;
 
-  raise notice 'hardening OK: paths pinned, table grants gone, anon executes nothing, twenty-five names in';
+  raise notice 'hardening OK: paths pinned, table grants gone, anon executes nothing, thirty-two names in';
 end $$;
 
 
