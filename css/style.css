@@ -54,6 +54,19 @@
   --font: "Montserrat", "Montserrat Fallback", system-ui, -apple-system,
           "Segoe UI", Helvetica, Arial, sans-serif;
 
+  /* --mono was used forty times in this stylesheet and defined nowhere, so
+     every eyebrow, sheet number, pager direction and drawing label -- the
+     whole title-block voice of the site -- silently fell back to Montserrat.
+     An undefined custom property is not an error: the declaration computes to
+     nothing and the element simply inherits, which is why it survived so long.
+
+     The stack is the one .pg-of already spelled out literally, so this makes
+     the site agree with itself rather than introducing a face. No webfont: a
+     monospace file is another request, another licence and another line in the
+     GDPR story, and the system stack is what a drawing label wants anyway. */
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+          "Liberation Mono", monospace;
+
   /* min(vw, vh): the headline is the tallest thing in the hero, and sizing
      it on width alone made a wide, short laptop the worst case -- the screen
      inflated the type exactly where there was no room for it. */

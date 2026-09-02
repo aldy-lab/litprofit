@@ -255,8 +255,22 @@ def text(v):
 # ============================================================
 
 
+# The placeholder the store entry carries in i18n.NAV. It is swapped for
+# STORE_URL here rather than written into i18n, so the label stays where every
+# other label lives and the address stays with every other address.
+STORE_SLOT = "/shop/"
+
+
 def nav_items():
-    return i18n.NAV[LANG]
+    out = []
+    for label, href in i18n.NAV[LANG]:
+        if href == STORE_SLOT:
+            if not STORE_URL:
+                continue          # blank removes the entry, it does not stub it
+            out.append((label, STORE_URL))
+        else:
+            out.append((label, href))
+    return out
 
 
 def lang_switch(path):
@@ -279,10 +293,17 @@ def lang_switch(path):
 
 
 def header(active, path="/"):
-    items = "\n".join(
-        '        <a href="%s"%s>%s</a>' % (
+    def nav_link(label, href):
+        # An absolute URL is another site: it must not take a language prefix,
+        # and it says so by opening in a new tab. u() would have turned
+        # https://litprofit.store into /lt/https://litprofit.store.
+        if href.startswith("http"):
+            return ('        <a href="%s" target="_blank" rel="noopener">%s</a>'
+                    % (attr(href), label))
+        return '        <a href="%s"%s>%s</a>' % (
             u(href), ' aria-current="page"' if href == active else "", label)
-        for label, href in nav_items())
+
+    items = "\n".join(nav_link(l, h) for l, h in nav_items())
     return """  <a class="skip-link" href="#main">{skip}</a>
 
   <header class="site-header">
@@ -323,6 +344,13 @@ def header(active, path="/"):
 # is the sign-in and row level security, never the fact that nobody had the
 # address.
 CALCULATOR_URL = "/calculator/"
+
+# The parts store, which is its own site on its own domain and its own
+# repository (litprofit-store). It is a menu entry here and nothing more.
+# Blank and the entry is removed from the menu and the footer -- never left
+# pointing at "#", and never left pointing at a domain that has not been
+# connected yet.
+STORE_URL = "https://litprofit.store"
 
 
 def pres_link():
@@ -405,16 +433,22 @@ def footer():
     f_address=T("f_address"), f_contacts=T("f_contacts"), f_details=T("f_details"),
     f_site=T("f_site"), l_privacy=T("f_privacy"), l_cid=T("company_no"), l_vat=T("vat"),
     preslink=pres_link(),
-    navlinks="\n".join('            <li><a href="%s">%s</a></li>' % (u(h), l)
-                        for l, h in nav_items()))
+    navlinks="\n".join(
+        '            <li><a href="%s" target="_blank" rel="noopener">%s</a></li>'
+        % (attr(h), l) if h.startswith("http")
+        else '            <li><a href="%s">%s</a></li>' % (u(h), l)
+        for l, h in nav_items()))
 
 
 # The site read as a set of sheets, after the drawing's own title block
 # (DWG 04 // 06). Gives every interior page a position in a sequence and
 # somewhere obvious to go next, instead of dead-ending at the footer.
 def sheets():
-    """Home plus the six nav entries, in the language being built."""
-    return [("/", T("home"))] + [(h, l) for l, h in nav_items()]
+    """Home plus the nav entries that are pages OF THIS SITE. The store is on
+    another domain, so it is not a sheet in this set -- numbering it would
+    promise a "next" that leaves the site."""
+    return [("/", T("home"))] + [(h, l) for l, h in nav_items()
+                                 if not h.startswith("http")]
 
 
 def sheet_index(path):
@@ -565,12 +599,22 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
            pager=pager(path), footer=footer(), og=og_image(path))
 
 
+# Every path this run has written. The redirect guard below tests against
+# this and NOT against the filesystem, which is what broke it: the stubs are
+# committed, so on the second run the guard found its own previous output
+# sitting at about-us/index.html, called it a real page, and refused. The
+# build then worked exactly once per clean tree -- on a site whose whole
+# premise is that everything is generated.
+WRITTEN = set()
+
+
 def write(path, html):
     full = os.path.join(ROOT, path)
     d = os.path.dirname(full)
     if d:
         os.makedirs(d, exist_ok=True)
     io.open(full, "w", encoding="utf-8").write(html)
+    WRITTEN.add(path)
     print("wrote %-44s %6d bytes" % (path, len(html)))
 
 
@@ -650,7 +694,8 @@ def crumb_ld(trail, path=None):
                           "itemListElement": items}, ensure_ascii=False))
 
 
-def page_head(eyebrow, h1, lead, trail=None, path=None, wrap=None, aside=None):
+def page_head(eyebrow, h1, lead, trail=None, path=None, wrap=None, aside=None,
+              cls=""):
     """wrap opens a div the caller closes itself; aside adds a second column.
 
     Only About uses either, and only so the page title and the compressor can
@@ -685,9 +730,10 @@ def page_head(eyebrow, h1, lead, trail=None, path=None, wrap=None, aside=None):
         <p class="lead lead--sub">%s</p>
       </div>""" % aside
     return ("""
-    %s<section class="container page-head%s">""" % (
+    %s<section class="container page-head%s%s">""" % (
         '<div class="%s">\n    ' % wrap if wrap else "",
-        " page-head--split" if aside else "") + body + """
+        " page-head--split" if aside else "",
+        (" " + cls) if cls else "") + body + """
     </section>
 {ld}""").format(crumb=crumb(trail) if trail else "", eyebrow=eyebrow, h1=h1, lead=lead,
            sheet=sheet_tag(path) if path else "", ld=crumb_ld(trail, path))
@@ -3363,7 +3409,6 @@ for _lang in i18n.LANGS:
         _p = project_url(_pr)
         write(outfile(_p), page(_p, _pr["title"], _pr["lead"], project_page(_pr)))
         SITEMAP_ROWS.append((_lang, _p))
-
 # 404 is served by GitHub Pages for any unmatched path anywhere on the host, so
 # there is one, in English, at the root.
 LANG = "en"
@@ -3465,10 +3510,11 @@ def redirect_stubs():
             if src.rstrip("/") == dst.rstrip("/"):
                 continue                      # same address on both sites
             path = src.strip("/") + "/index.html"
-            if os.path.exists(os.path.join(ROOT, path)):
+            if path in WRITTEN:
                 raise SystemExit(
-                    "redirect %s would overwrite the real page at %s -- both "
-                    "sites use this path, so remove it from OLD_URLS" % (src, path))
+                    "redirect %s would overwrite %s, which this build already "
+                    "wrote -- both sites use this path, so remove it from "
+                    "OLD_URLS" % (src, path))
             write(path, redirect_html(u(dst)))
             made += 1
     # the old /ru/ home, and its differently-spelled contacts

@@ -31,15 +31,15 @@ LANG_NAME = {"en": "English", "lt": "Lietuvių", "ru": "Русский"}
 # set of slugs means one sitemap shape and one place to add a page; hreflang
 # tells search engines which is which.
 NAV = {
-    "en": [("About", "/about/"), ("Services", "/services/"),
+    "en": [("About", "/about/"), ("Services", "/services/"), ("Parts", "/shop/"),
            ("Completed works", "/completed-works/"), ("Partners", "/partners/"),
            ("Certificates", "/certificates/"), ("Contacts", "/contacts/"),
            ("Careers", "/careers/")],
-    "lt": [("Apie mus", "/about/"), ("Paslaugos", "/services/"),
+    "lt": [("Apie mus", "/about/"), ("Paslaugos", "/services/"), ("Dalys", "/shop/"),
            ("Atlikti darbai", "/completed-works/"), ("Partneriai", "/partners/"),
            ("Sertifikatai", "/certificates/"), ("Kontaktai", "/contacts/"),
            ("Karjera", "/careers/")],
-    "ru": [("О нас", "/about/"), ("Услуги", "/services/"),
+    "ru": [("О нас", "/about/"), ("Услуги", "/services/"), ("Запчасти", "/shop/"),
            ("Выполненные работы", "/completed-works/"),
            ("Партнёры", "/partners/"),
            ("Сертификаты", "/certificates/"),
