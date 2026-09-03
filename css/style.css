@@ -4169,6 +4169,34 @@ a.card:active,
   text-transform: uppercase;
   color: var(--muted-2);
 }
+/* The pay sits in the same mono meta row as the headcount and the location,
+   because that is the row a reader scans, but it is the one figure in it and
+   it earns the page's text colour instead of the muted grey the rest of the
+   row carries. No accent and no chip: this is a salary on an industrial
+   careers page, not a promotion. */
+.job-pay { color: var(--text); font-variant-numeric: tabular-nums; }
+/* What the company offers, under what it asks for. Same list as the
+   requirements so the two read as one specification with two halves, with a
+   mono label between them rather than a second heading level. */
+.job-offers-h {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.job-offers { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-width: 78ch; }
+.job-offers li { position: relative; padding-left: 26px; color: var(--muted); font-size: var(--text-m); }
+.job-offers li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(0.825em - 1px);
+  top: calc(0.5lh - 1px);
+  width: 10px; height: 1px;
+  background: var(--grey-500);
+}
 .job-summary { margin: 0; max-width: 78ch; }
 .job-needs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-width: 78ch; }
 .job-needs li { position: relative; padding-left: 26px; color: var(--muted); font-size: var(--text-m); }

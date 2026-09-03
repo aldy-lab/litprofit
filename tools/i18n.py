@@ -128,7 +128,7 @@ S["en"] = dict(
     vsl_eyebrow="Where the work is", vsl_h2="A ship, deck to keel",
     vsl_lead="A fishing vessel from the side. Every discipline on this page is "
              "a space you can point at.",
-    vsl_hold="Fish hold // RSW", vsl_er="Ship equipment|and engine repair",
+    vsl_hold="Fish hold // RSW", vsl_er="Refrigerant pumps|and valves",
     vsl_pipe="Hull and piping", vsl_store="Stores",
     vsl_wl="Waterline", vsl_tb="Typical fishing vessel",
     vsl_tb2="Arrangement // not to scale",
@@ -301,7 +301,7 @@ S["lt"] = dict(
     vsl_eyebrow="Kur vyksta darbai", vsl_h2="Laivas nuo denio iki kilio",
     vsl_lead="Žvejybos laivas iš šono. Kiekviena šio puslapio sritis — konkreti "
              "laivo erdvė.",
-    vsl_hold="Žuvies triumas // RSW", vsl_er="Laivų įrangos ir|variklių remontas",
+    vsl_hold="Žuvies triumas // RSW", vsl_er="Šaltnešio siurbliai|ir armatūra",
     vsl_pipe="Korpusas ir vamzdynai", vsl_store="Sandėliai",
     vsl_wl="Vaterlinija", vsl_tb="Tipinis žvejybos laivas",
     vsl_tb2="Išdėstymas // ne mastelyje",
@@ -414,7 +414,7 @@ S["ru"] = dict(
     vsl_eyebrow="Где идёт работа", vsl_h2="Судно от палубы до киля",
     vsl_lead="Рыболовное судно сбоку. Каждое направление на этой странице — "
              "конкретное помещение.",
-    vsl_hold="Рыбный трюм // RSW", vsl_er="Ремонт оборудования|и двигателей",
+    vsl_hold="Рыбный трюм // RSW", vsl_er="Фреоновые насосы|и арматура",
     vsl_pipe="Корпус и трубопроводы", vsl_store="Кладовые",
     vsl_wl="Ватерлиния", vsl_tb="Типовое рыболовное судно",
     vsl_tb2="Схема // вне масштаба",
@@ -531,6 +531,15 @@ PART_ENGINES = ["MAN", "VOLVO PENTA", "Wartsila", "STX", "Yanmar", "MTU",
 PART_COMPRESSORS = ["STALL", "Sabroe", "Bitzer", "Howden", "Mycom", "J&amp;E Hall"]
 TURBO = ["ABB", "KBB", "MET", "NAPIER", "MAN"]
 PUMPS = ["HERMETIC", "WITT"]
+# Refrigerant pumps and the valve makers whose bodies come across the bench.
+# TAKEN FROM THE PAGE MOCK-UP, NOT FROM THE CLIENT'S COPY DOCUMENT, which
+# lists no manufacturers at all. Naming a maker is a capability claim, so
+# these want confirming before they stay -- "Carly" in particular is read
+# from a logo cropped to "CARL" in the mock-up.
+REF_PUMPS = ["HERMETIC", "EDUR", "Teikoku", "Cornell",
+             "Warrender", "Nikkiso", "Hydrodyne", "F.N. Engineering"]
+REF_VALVES = ["Danfoss", "Castel", "Parker", "Emerson",
+              "Sporlan", "Carly", "Henry Technologies", "Alco Controls"]
 
 SVC = {}
 
@@ -560,31 +569,34 @@ SVC["en"] = {
         sys_note="Modernisation and repair of refrigeration systems for fishing "
                  "vessels and shore installations:"),
     "ship-engine-repair": dict(
-        title="Ship equipment and engine repair",
-        short="Overhaul of 2-stroke and 4-stroke diesel engines, engine room "
-              "machinery and deck equipment.",
-        lead="Keeping a vessel's machinery inside its operating envelope — main "
-             "engines, auxiliaries, and the deck equipment the crew depends on.",
-        meta="Overhaul and repair of 4-stroke and 2-stroke marine diesel engines, "
-             "engine room machinery and deck equipment. MAN, Wartsila, Yanmar, "
-             "Hyundai Himsen, MAK, Caterpillar, Deutz, Daihatsu.",
-        h_engines="Diesel engine overhaul", h_machinery="Engine room machinery",
-        h_deck="Deck equipment", h_how="How we work",
-        engines="We overhaul and repair <strong>4-stroke and 2-stroke diesel "
-                "engines</strong> of most types and models. Work runs from diagnostics "
-                "through to the upgrades that restore efficiency and extend service "
-                "life, on main and auxiliary engines alike.",
-        engines_note="Engines we work on regularly:",
-        machinery="Beyond the engines themselves, we maintain and repair the rest of "
-                  "the machinery space — reduction gears, shafting and the auxiliary "
-                  "equipment that surrounds the main plant.",
-        deck="Deck equipment is maintained on a regular cycle so that it works when "
-             "it is needed: deck systems, ladders and steps, life-saving appliances "
-             "and associated gear. Where equipment has been damaged, we repair it "
-             "back to full working condition.",
+        title="Refrigeration pump and valve repair",
+        short="Repair and selection of refrigerant pumps and of shut-off and "
+              "control valves for marine and shore systems.",
+        lead="Keeping refrigeration pumps and valves inside their operating range "
+             "\u2014 for marine and shore systems, and for the pipework the crew "
+             "depends on.",
+        meta="Repair and selection of refrigerant pumps and of shut-off and "
+             "regulating valves for marine and shore refrigeration systems, "
+             "including pipework connection, installation, pressure testing and "
+             "evacuation.",
+        h_pumps="Refrigerant pump repair", h_valves="Valve repair and selection",
+        h_piping="Pipework connection and installation", h_how="How we work",
+        pumps="We repair and select <strong>refrigerant pumps</strong> for marine "
+              "and shore systems. Work runs from diagnostics through to full "
+              "restoration of working condition, including sourcing equivalent "
+              "spare parts and components where they are needed.",
+        pumps_note="Pump manufacturers we work with:",
+        valves="We repair and select shut-off and regulating valves for "
+               "refrigeration systems, matching them to the existing pipework and "
+               "to the requirements of the project.",
+        valves_note="Valve manufacturers we work with:",
+        piping="We carry out pipework connection and equipment installation for "
+               "projects of any size, allowing for what marine and shore systems "
+               "each require.",
         how="We use quality tooling and vetted sources of spare parts, and every "
-            "repair is carried out to meet the applicable safety standards. All work "
-            "and equipment carries our warranty."),
+            "repair is carried out to meet the applicable safety standards. After "
+            "installation we pressure-test and evacuate the whole system before it "
+            "is put into service. All work and equipment carries our warranty."),
     "hull-and-piping": dict(
         title="Hull and piping works",
         short="Steel and stainless steel pipe systems for shipbuilding, ship repair "
@@ -659,31 +671,33 @@ SVC["lt"] = {
         sys_note="Žvejybinių laivų ir kranto įrenginių šaldymo sistemų modernizavimas "
                  "ir remontas:"),
     "ship-engine-repair": dict(
-        title="Laivų įrangos ir variklių remontas",
-        short="2-takčių ir 4-takčių dyzelinių variklių, mašinų skyriaus mechanizmų "
-              "ir denio įrangos remontas.",
-        lead="Kad laivo mechanizmai veiktų optimaliai ir saugiai — pagrindiniai ir "
-             "pagalbiniai varikliai bei denio įranga, kuria pasitiki įgula.",
-        meta="4-takčių ir 2-takčių laivų dyzelinių variklių, mašinų skyriaus mechanizmų "
-             "ir denio įrangos remontas. MAN, Wartsila, Yanmar, Hyundai Himsen, MAK, "
-             "Caterpillar, Deutz, Daihatsu.",
-        h_engines="Variklių remontas", h_machinery="Mašinų skyriaus mechanizmai",
-        h_deck="Denio įranga", h_how="Kaip dirbame",
-        engines="Remontuojame įvairių tipų ir modelių <strong>4-takčius ir 2-takčius "
-                "dyzelinius variklius</strong>. Atliekame išsamią diagnostiką ir "
-                "atnaujinimus, kad užtikrintume variklio efektyvumą ir ilgaamžiškumą — "
-                "tiek pagrindinių, tiek pagalbinių variklių.",
-        engines_note="Varikliai, su kuriais dirbame nuolat:",
-        machinery="Specializuojamės ne tik laivų variklių, bet ir kitų mašinų skyriaus "
-                  "mechanizmų aptarnavime — reduktorių, velenų ir kitų mechanizmų "
-                  "priežiūroje bei remonte.",
-        deck="Denio įranga yra esminė laivo dalis, todėl siūlome reguliarią priežiūrą, "
-             "kad užtikrintume jos tinkamą veikimą: denio sistemų, laiptelių, gelbėjimo "
-             "priemonių ir kitos denio įrangos aptarnavimą. Jei įranga patyrė pažeidimų, "
-             "atliekame remonto darbus.",
-        how="Naudojame tik kokybiškus įrankius ir patikimus atsarginių dalių šaltinius. "
-            "Visi remonto darbai atliekami laikantis aukščiausių saugos standartų. "
-            "Visiems darbams ir įrangai suteikiama garantija."),
+        title="Šaldymo siurblių ir armatūros remontas",
+        short="Šaltnešio siurblių bei uždaromosios ir reguliuojamosios armatūros "
+              "remontas ir parinkimas laivų ir krantinės sistemoms.",
+        lead="Kad šaldymo siurbliai ir armatūra veiktų darbiniame diapazone \u2014 "
+             "laivų ir krantinės sistemoms bei vamzdynams, nuo kurių priklauso "
+             "įgulos darbas.",
+        meta="Šaltnešio siurblių bei uždaromosios ir reguliuojamosios armatūros "
+             "remontas ir parinkimas laivų ir krantinės šaldymo sistemoms, įskaitant "
+             "vamzdynų prijungimą, montavimą, slėgio bandymą ir vakuumavimą.",
+        h_pumps="Šaltnešio siurblių remontas", h_valves="Armatūros remontas ir parinkimas",
+        h_piping="Vamzdynų prijungimas ir montavimas", h_how="Kaip dirbame",
+        pumps="Remontuojame ir parenkame <strong>šaltnešio siurblius</strong> laivų "
+              "ir krantinės sistemoms. Darbai atliekami nuo diagnostikos iki visiško "
+              "darbingumo atkūrimo, prireikus parenkame analogiškas atsargines dalis "
+              "ir komponentus.",
+        pumps_note="Siurblių gamintojai, su kuriais dirbame:",
+        valves="Remontuojame ir parenkame uždaromąją bei reguliuojamąją armatūrą "
+               "šaldymo sistemoms, užtikrindami suderinamumą su esamais vamzdynais "
+               "ir projekto reikalavimais.",
+        valves_note="Armatūros gamintojai, su kuriais dirbame:",
+        piping="Atliekame vamzdynų prijungimą ir įrangos montavimą bet kokiems "
+               "projektams, atsižvelgdami į laivų ar krantinės sistemų ypatumus.",
+        how="Naudojame tik kokybiškus įrankius ir patikimus atsarginių dalių "
+            "šaltinius. Visi remonto darbai atliekami laikantis taikomų saugos "
+            "standartų. Po montavimo atliekame visos sistemos slėgio bandymą ir "
+            "vakuumavimą prieš pradedant eksploatuoti. Visiems darbams ir įrangai "
+            "suteikiama mūsų garantija."),
     "hull-and-piping": dict(
         title="Laivų korpusų ir vamzdynų darbai",
         short="Pagrindiniai laivų korpusų ir kitų plieno konstrukcijų remonto darbai, "
@@ -761,30 +775,33 @@ SVC["ru"] = {
         sys_note="Модернизация и ремонт холодильных систем рыболовных судов и береговых "
                  "установок:"),
     "ship-engine-repair": dict(
-        title="Ремонт судового оборудования и двигателей",
-        short="Ремонт 2-х тактных и 4-х тактных дизельных двигателей, механизмов "
-              "машинного отделения и палубного оборудования.",
-        lead="Чтобы механизмы судна работали оптимально и безопасно — главные и "
-             "вспомогательные двигатели и палубное оборудование, на которое полагается экипаж.",
-        meta="Ремонт 4-х тактных и 2-х тактных судовых дизельных двигателей, механизмов "
-             "машинного отделения и палубного оборудования. MAN, Wartsila, Yanmar, Hyundai "
-             "Himsen, MAK, Caterpillar, Deutz, Daihatsu.",
-        h_engines="Ремонт двигателей", h_machinery="Механизмы машинного отделения",
-        h_deck="Палубное оборудование", h_how="Как мы работаем",
-        engines="Ремонтируем <strong>4-х тактные и 2-х тактные дизельные двигатели</strong> "
-                "разных типов и моделей. Выполняем тщательную диагностику и процедуры по "
-                "обновлению для обеспечения эффективности и долговечности двигателя — как "
-                "главных, так и вспомогательных.",
-        engines_note="Двигатели, с которыми мы работаем постоянно:",
-        machinery="Мы специализируемся в обслуживании не только судовых двигателей, но и "
-                  "других механизмов машинного отделения — редукторов, валов и прочих "
-                  "механизмов.",
-        deck="Палубное оборудование — основная часть судна, поэтому мы предлагаем "
-             "регулярное обслуживание: палубных систем, трапов, спасательных средств и "
-             "другого палубного оборудования. При повреждениях выполняем необходимый ремонт.",
-        how="Мы используем только качественный инструмент и проверенные источники запасных "
-            "частей, а каждый ремонт выполняется в соответствии с действующими стандартами "
-            "безопасности. На все работы и оборудование предоставляется гарантия."),
+        title="Ремонт фреоновых насосов и запорной арматуры",
+        short="Ремонт и подбор фреоновых насосов, запорной и регулирующей арматуры "
+              "для судовых и береговых систем.",
+        lead="Поддержание холодильных насосов и арматуры в рабочем диапазоне \u2014 "
+             "для судовых и береговых систем, а также трубопроводов, от которых "
+             "зависит работа экипажа.",
+        meta="Ремонт и подбор фреоновых насосов, запорной и регулирующей арматуры "
+             "для судовых и береговых холодильных систем, включая подключение "
+             "трубопроводов, монтаж, опрессовку и вакуумирование.",
+        h_pumps="Ремонт фреоновых насосов", h_valves="Ремонт и подбор арматуры",
+        h_piping="Подключение трубопроводов и монтаж", h_how="Как мы работаем",
+        pumps="Мы ремонтируем и подбираем <strong>фреоновые насосы</strong> для "
+              "судовых и береговых систем. Работы выполняются от диагностики до "
+              "полного восстановления работоспособности, включая подбор аналогичных "
+              "запасных частей и компонентов при необходимости.",
+        pumps_note="Производители насосов, с которыми мы работаем:",
+        valves="Мы ремонтируем и подбираем запорную и регулирующую арматуру для "
+               "холодильных систем, обеспечивая совместимость с существующими "
+               "трубопроводами и требованиями проекта.",
+        valves_note="Производители арматуры, с которыми мы работаем:",
+        piping="Мы выполняем подключение трубопроводов и монтаж оборудования для "
+               "любых проектов с учётом особенностей судовых или береговых систем.",
+        how="Мы используем качественный инструмент и проверенные источники запасных "
+            "частей, а каждый ремонт выполняется в соответствии с применимыми "
+            "стандартами безопасности. После монтажа мы проводим опрессовку и "
+            "вакуумирование всей системы перед вводом в эксплуатацию. На все работы "
+            "и оборудование предоставляется наша гарантия."),
     "hull-and-piping": dict(
         title="Судокорпусные и трубопроводные работы",
         short="Основные работы по ремонту судокорпусных и других стальных конструкций, "
@@ -837,25 +854,25 @@ IMG = {
     # look it -- replace them as soon as there are photographs of an engine
     # job and a pipe weld
     "refrigeration-systems": ("workshop-overhaul.webp", 1320, 877),
-    "ship-engine-repair": ("svc-engine-repair.webp", 600, 410),
+    "ship-engine-repair": ("svc-ref-pumps.webp", 1200, 675),
     "hull-and-piping": ("svc-hull-piping.webp", 800, 533),
     "spare-parts": ("workshop-valves.webp", 1313, 444),
 }
 ALT = {
     "en": {"refrigeration-systems": "A screw compressor stripped for overhaul, "
            "rotor set and bearings laid out on the bench",
-           "ship-engine-repair": "Marine diesel engine in a ship's engine room",
+           "ship-engine-repair": "A refrigerant pump sectioned on the bench, with shut-off, solenoid and regulating valves laid out beside it",
            "hull-and-piping": "Welder joining a steel pipe bend",
            "spare-parts": "Stop, solenoid and regulating valves held in stock"},
     "lt": {"refrigeration-systems": "Sraigtinis kompresorius, išardytas kapitaliniam "
            "remontui: rotoriai ir guoliai ant stalo",
-           "ship-engine-repair": "Laivo dyzelinis variklis mašinų skyriuje",
+           "ship-engine-repair": "Perpjautas šaltnešio siurblys ant stalo, šalia \u2014 uždaromieji, elektromagnetiniai ir reguliuojamieji vožtuvai",
            "hull-and-piping": "Suvirintojas jungia plieninę vamzdžio alkūnę",
            "spare-parts": "Sandėlyje laikomi uždaromieji, elektromagnetiniai ir "
            "reguliuojamieji vožtuvai"},
     "ru": {"refrigeration-systems": "Винтовой компрессор, разобранный для капитального "
            "ремонта: роторы и подшипники на верстаке",
-           "ship-engine-repair": "Судовой дизельный двигатель в машинном отделении",
+           "ship-engine-repair": "Фреоновый насос в разрезе на верстаке, рядом \u2014 запорные, электромагнитные и регулирующие клапаны",
            "hull-and-piping": "Сварщик соединяет стальной отвод трубы",
            "spare-parts": "Запорные, электромагнитные и регулирующие клапаны на складе"},
 }
@@ -1439,6 +1456,7 @@ CAR = {
    f_role="Trade or position", f_exp="Experience and availability",
    f_exp_ph="Your trade, years of experience, certifications, and when you could start.",
    sample="Example",
+   offers_h="What we offer",
    f_send="Send application", f_open="Open application",
    consent='I agree that %(legal)s may keep these details on file to consider me '
            'for current and future positions, as described in the %(privacy)s.'),
@@ -1481,6 +1499,7 @@ CAR = {
    f_role="Specialybė ar pareigos", f_exp="Patirtis ir galimybės",
    f_exp_ph="Specialybė, patirtis metais, sertifikatai ir kada galėtumėte pradėti.",
    sample="Pavyzdys",
+   offers_h="Ką siūlome",
    f_send="Siųsti kandidatūrą", f_open="Atvira kandidatūra",
    consent='Sutinku, kad %(legal)s saugotų šiuos duomenis vertindama mane esamoms ir '
            'būsimoms pozicijoms, kaip nurodyta %(privacy)s.'),
@@ -1524,6 +1543,7 @@ CAR = {
    f_role="Специальность или должность", f_exp="Опыт и возможности",
    f_exp_ph="Специальность, стаж, сертификаты и когда могли бы приступить.",
    sample="Пример",
+   offers_h="Что мы предлагаем",
    f_send="Отправить заявку", f_open="Открытая заявка",
    consent='Я соглашаюсь, что %(legal)s может хранить эти данные для рассмотрения моей '
            'кандидатуры на текущие и будущие позиции, как описано в %(privacy)s.'),

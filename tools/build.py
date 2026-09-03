@@ -811,12 +811,17 @@ def _refrig_blocks(d):
     ]
 
 
-def _engine_blocks(d):
+def _pump_blocks(d):
+    """Refrigerant pumps and valves. Four blocks, the same shape the engine page
+    had -- the client's brief replaced the text of this service and asked for the
+    structure to stay put, so the slug, the layout and the position in the grid
+    are all unchanged and only the subject moved."""
     return [
-        (d["h_engines"], ["<p>%s</p>" % d["engines"],
-                          "<p>%s</p>" % d["engines_note"], tags(i18n.ENGINES)]),
-        (d["h_machinery"], ["<p>%s</p>" % d["machinery"]]),
-        (d["h_deck"], ["<p>%s</p>" % d["deck"]]),
+        (d["h_pumps"], ["<p>%s</p>" % d["pumps"],
+                        "<p>%s</p>" % d["pumps_note"], tags(i18n.REF_PUMPS)]),
+        (d["h_valves"], ["<p>%s</p>" % d["valves"],
+                         "<p>%s</p>" % d["valves_note"], tags(i18n.REF_VALVES)]),
+        (d["h_piping"], ["<p>%s</p>" % d["piping"]]),
         (d["h_how"], ["<p>%s</p>" % d["how"]]),
     ]
 
@@ -844,7 +849,7 @@ def _parts_blocks(d):
 
 SERVICE_BLOCKS = {
     "refrigeration-systems": _refrig_blocks,
-    "ship-engine-repair": _engine_blocks,
+    "ship-engine-repair": _pump_blocks,
     "hull-and-piping": _hull_blocks,
     "spare-parts": _parts_blocks,
 }
@@ -3009,9 +3014,72 @@ def privacy():
 # per language key. Set open=False to retire it without deleting it.
 # ============================================================
 POSITIONS = [
+    # THE ONLY REAL ONE. Supplied by the client as a finished advert, so
+    # sample=False and it IS published to Google for Jobs. The pay is the
+    # figure in that advert and it is NET -- "нетто" / "į rankas" -- which is
+    # how Lithuanian adverts quote it. schema.org has no net/gross field on
+    # baseSalary, so the page says which it is in words beside the number.
+    #
+    # The advert also carries a telephone number that stops at "+370". It is
+    # not on the page: half a phone number is worse than none, and the form
+    # and the address already give two ways in. Send the rest of it and it
+    # goes into the contact block.
+    dict(
+        id="ref-mechanic",
+        open=True,
+        sample=False,
+        posted="2026-09-04",
+        valid_through="2026-12-31",
+        employment_type="FULL_TIME",
+        pay=dict(min=1200, max=3000, currency="EUR", unit="MONTH"),
+        en=dict(title="Refrigeration Mechanic / Fitter",
+                count="Several positions", location="Klaipeda + travel",
+                contract="Full time",
+                pay="1,200\u20133,000 \u20ac/month net",
+                summary="Repair and servicing of refrigeration systems and plant "
+                        "\u2014 in the workshop, on board, and on travel jobs in "
+                        "Lithuania and abroad.",
+                needs=["Understanding of refrigeration systems, and experience working with them.",
+                       "Motivation, and the wish to learn and develop.",
+                       "Russian and English an advantage."],
+                offers=["Stable, long-term work \u2014 in Lithuania and abroad.",
+                        "Accommodation provided free of charge for the duration of a travel job.",
+                        "Pay depends on qualifications, experience and the hours worked."]),
+        lt=dict(title="\u0160altkalvis-remontininkas, Ref. mechanikas",
+                count="Kelios pozicijos", location="Klaip\u0117da + komandiruot\u0117s",
+                contract="Visa darbo diena",
+                pay="1200\u20133000 \u20ac/m\u0117n. \u012f rankas",
+                summary="\u0160aldymo sistem\u0173 ir \u012frengim\u0173 remontas bei "
+                        "aptarnavimas \u2014 dirbtuv\u0117se, laivuose ir "
+                        "komandiruot\u0117se Lietuvoje bei u\u017esienyje.",
+                needs=["\u0160aldymo \u012frengini\u0173 sistem\u0173 i\u0161manymas ir patirtis.",
+                       "Motyvacija ir noras mokytis bei tobul\u0117ti.",
+                       "Rus\u0173, angl\u0173 kalb\u0173 \u017einios \u2014 privalumas."],
+                offers=["Stabilus ir ilgalaikis darbas \u2014 Lietuvoje ir u\u017esienyje.",
+                        "Nemokamas apgyvendinimas komandiruot\u0117s laikotarpiu.",
+                        "Atlyginimas priklauso nuo kvalifikacijos, patirties ir i\u0161dirbt\u0173 valand\u0173."]),
+        ru=dict(title="\u0420\u0435\u0444. \u043c\u0435\u0445\u0430\u043d\u0438\u043a, \u0441\u043b\u0435\u0441\u0430\u0440\u044c",
+                count="\u041d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0437\u0438\u0446\u0438\u0439",
+                location="\u041a\u043b\u0430\u0439\u043f\u0435\u0434\u0430 + \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440\u043e\u0432\u043a\u0438",
+                contract="\u041f\u043e\u043b\u043d\u0430\u044f \u0437\u0430\u043d\u044f\u0442\u043e\u0441\u0442\u044c",
+                pay="1200\u20133000 \u20ac/\u043c\u0435\u0441 \u043d\u0435\u0442\u0442\u043e",
+                summary="\u0420\u0435\u043c\u043e\u043d\u0442 \u0438 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435 \u0445\u043e\u043b\u043e\u0434\u0438\u043b\u044c\u043d\u044b\u0445 \u0441\u0438\u0441\u0442\u0435\u043c \u0438 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043e\u043a \u2014 \u0432 \u043c\u0430\u0441\u0442\u0435\u0440\u0441\u043a\u043e\u0439, \u043d\u0430 \u0441\u0443\u0434\u0430\u0445 \u0438 \u0432 \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440\u043e\u0432\u043a\u0430\u0445 \u0432 \u041b\u0438\u0442\u0432\u0435 \u0438 \u0437\u0430 \u0440\u0443\u0431\u0435\u0436\u043e\u043c.",
+                needs=["\u041f\u043e\u043d\u0438\u043c\u0430\u043d\u0438\u0435 \u0438 \u043e\u043f\u044b\u0442 \u0440\u0430\u0431\u043e\u0442\u044b \u0441 \u0445\u043e\u043b\u043e\u0434\u0438\u043b\u044c\u043d\u044b\u043c\u0438 \u0441\u0438\u0441\u0442\u0435\u043c\u0430\u043c\u0438.",
+                       "\u041c\u043e\u0442\u0438\u0432\u0430\u0446\u0438\u044f, \u0436\u0435\u043b\u0430\u043d\u0438\u0435 \u0440\u0430\u0437\u0432\u0438\u0432\u0430\u0442\u044c\u0441\u044f \u0438 \u043e\u0431\u0443\u0447\u0430\u0442\u044c\u0441\u044f.",
+                       "\u0417\u043d\u0430\u043d\u0438\u0435 \u0440\u0443\u0441\u0441\u043a\u043e\u0433\u043e \u0438 \u0430\u043d\u0433\u043b\u0438\u0439\u0441\u043a\u043e\u0433\u043e \u044f\u0437\u044b\u043a\u043e\u0432 \u2014 \u043f\u0440\u0435\u0438\u043c\u0443\u0449\u0435\u0441\u0442\u0432\u043e."],
+                offers=["\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u0430\u044f \u0438 \u0434\u043e\u043b\u0433\u043e\u0441\u0440\u043e\u0447\u043d\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430 \u2014 \u0432 \u041b\u0438\u0442\u0432\u0435 \u0438 \u0434\u0440\u0443\u0433\u0438\u0445 \u0441\u0442\u0440\u0430\u043d\u0430\u0445.",
+                        "\u0411\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e\u0435 \u043f\u0440\u043e\u0436\u0438\u0432\u0430\u043d\u0438\u0435 \u0432\u043e \u0432\u0440\u0435\u043c\u044f \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440\u043e\u0432\u043a\u0438.",
+                        "\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0437\u0430\u0432\u0438\u0441\u0438\u0442 \u043e\u0442 \u043a\u0432\u0430\u043b\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438, \u043e\u043f\u044b\u0442\u0430 \u0440\u0430\u0431\u043e\u0442\u044b \u0438 \u043e\u0442\u0440\u0430\u0431\u043e\u0442\u0430\u043d\u043d\u044b\u0445 \u0447\u0430\u0441\u043e\u0432."]),
+    ),
+    # RETIRED when the real advert above arrived. They were placeholders, kept
+    # visible only so the layout could be reviewed before there was anything
+    # true to put in it -- and a made-up vacancy standing next to a real one,
+    # badge or no badge, is a reader deciding which of the two to believe. The
+    # second of them recruits for engine work the company has just replaced on
+    # the services page. open=True brings either back.
     dict(
         id="refrigeration-service-engineer",
-        open=True,
+        open=False,
         # SAMPLE. Set sample=False once this is a real, approved vacancy — that
         # single flag is what lets the JobPosting structured data be emitted and
         # removes the EXAMPLE badge. Until then the role is visible on the page
@@ -3058,7 +3126,7 @@ POSITIONS = [
     ),
     dict(
         id="marine-diesel-fitter",
-        open=True,
+        open=False,
         sample=True,
         posted="2026-08-27",
         valid_through="2026-12-31",
@@ -3097,7 +3165,7 @@ POSITIONS = [
                        "Рабочий английский; литовский или русский \u2014 преимущество."])),
     dict(
         id="pipe-fitter-welder",
-        open=True,
+        open=False,
         sample=True,
         posted="2026-08-27",
         valid_through="2026-12-31",
@@ -3162,19 +3230,30 @@ def positions_html():
         needs = "\n".join("            <li>%s</li>" % n for n in d["needs"])
         badge = ('<span class="job-badge">%s</span>' % text(C["sample"])
                  if p.get("sample") else "")
+        # Pay and the offer list are optional: only the client-supplied advert
+        # carries them, and a role without a stated salary must not render an
+        # empty chip where the number would be.
+        pay = ('<span class="job-pay">%s</span>' % text(d["pay"])) if d.get("pay") else ""
+        offers = ""
+        if d.get("offers"):
+            offers = ('\n        <p class="job-offers-h">%s</p>\n'
+                      '        <ul class="job-offers">\n%s\n        </ul>'
+                      % (text(C["offers_h"]),
+                         "\n".join("            <li>%s</li>" % o for o in d["offers"])))
         out.append("""      <li class="job reveal" id="{pid}">
         <div class="job-head">
           <span class="job-num">{num:02d}</span>
           <h3>{title}</h3>
           {badge}
         </div>
-        <p class="job-meta"><span>{count}</span><span>{location}</span><span>{contract}</span></p>
+        <p class="job-meta"><span>{count}</span><span>{location}</span><span>{contract}</span>{pay}</p>
         <p class="job-summary">{summary}</p>
         <ul class="job-needs">
 {needs}
-        </ul>
+        </ul>{offers}
         <a class="job-apply" href="#apply" data-apply="{role}">{cta}</a>
       </li>""".format(pid=p["id"], num=i, needs=needs, badge=badge,
+                      pay=pay, offers=offers,
                       title=text(d["title"]), count=text(d["count"]),
                       location=text(d["location"]), contract=text(d["contract"]),
                       summary=text(d["summary"]), role=attr(d["title"]),
@@ -3236,7 +3315,7 @@ def job_postings_ld():
         if p.get("sample"):
             continue
         d = p.get(LANG, p["en"])
-        out.append(jsonld({
+        ld = {
             "@context": "https://schema.org",
             "@type": "JobPosting",
             "title": d["title"],
@@ -3252,7 +3331,28 @@ def job_postings_ld():
                 "addressLocality": "Klaipeda", "postalCode": "LT-94101",
                 "addressCountry": "LT"}}],
             "directApply": True,
-        }))
+        }
+        # Google shows a salary when it is given and ranks the posting better
+        # for it. The advert states a NET range; schema.org has no field for
+        # that distinction, so the page carries the word beside the figure and
+        # the structured data carries the range.
+        if p.get("pay"):
+            ld["baseSalary"] = {
+                "@type": "MonetaryAmount",
+                "currency": p["pay"]["currency"],
+                "value": {"@type": "QuantitativeValue",
+                          "minValue": p["pay"]["min"],
+                          "maxValue": p["pay"]["max"],
+                          "unitText": p["pay"]["unit"]},
+            }
+        # There is no jsonld() helper in this file -- every other block here
+        # builds the script tag with json.dumps, and this one was written
+        # against a helper that does not exist. It never showed, because the
+        # loop skipped every sample role and so never reached the call: the
+        # build broke on the FIRST REAL VACANCY, which is the worst possible
+        # moment for it to break. Emitted the same way as its three neighbours.
+        out.append('  <script type="application/ld+json">\n  %s\n  </script>\n'
+                   % json.dumps(ld, ensure_ascii=False))
     return "".join(out)
 
 
