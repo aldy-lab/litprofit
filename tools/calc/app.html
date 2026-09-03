@@ -1076,6 +1076,25 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .act-table th{text-align:left}
 .act-table th.num,.act-table td.num{text-align:right}
 .act-table input{width:100%;min-width:0}
+/* The spare row at the bottom is the next line, and there is only ever one of
+   it: a row's data-i has to equal the number of stored lines or typing into it
+   pads the sheet with blanks and puts holes in the numbering. So "add a line"
+   cannot conjure a second empty row -- when one is already waiting it puts the
+   caret there instead. That was the whole behaviour before, and pressing a
+   button labelled ADD A LINE and seeing absolutely nothing is indistinguishable
+   from a broken button. This says "here, this one". */
+.act-table tbody tr.act-waiting input{
+  animation:actWaiting .9s var(--ease) 1;
+  border-color:var(--baseline)
+}
+@keyframes actWaiting{
+  0%{background:var(--accent-soft)}
+  60%{background:var(--accent-soft)}
+  100%{background:transparent}
+}
+@media (prefers-reduced-motion:reduce){
+  .act-table tbody tr.act-waiting input{animation:none;border-color:var(--baseline)}
+}
 .act-table td.num input{text-align:right;font-family:var(--mono)}
 /* Sized to its content, the list packed six columns against the left edge
    and left a third of the card empty beside them. */
@@ -8545,12 +8564,31 @@ function actAddLine(){
 
   const l = Array.isArray(x.lines) ? x.lines : [];
   const last = l.length - 1;
+  /* Counted, not assumed. The first version of this asked "does the last
+     stored line have anything in it" and called that growth -- but pressing
+     the button with the caret already resting in the spare row satisfies that
+     and actGrowSheet then finds row i+1 already present and inserts nothing.
+     The flag said grown, the sheet was unchanged, and the one press that most
+     needed the answer got none. Ask the table what happened instead. */
+  const before = document.querySelectorAll('.act-table tbody tr').length;
   if(l.length && keys.some(k => String(l[last][k] || '').trim()))
     actGrowSheet(x, last, t, cols);
 
   const rows = document.querySelectorAll('.act-table tbody tr');
-  const el = rows.length
-    ? rows[rows.length - 1].querySelector('input[data-al="work"]') : null;
+  const grew = rows.length > before;
+  const tail = rows.length ? rows[rows.length - 1] : null;
+  /* Nothing grew, which means the empty row the button would have created is
+     already sitting there. The caret was being moved into it even then, but a
+     caret arriving in a row that was always on screen is not an answer to a
+     press -- reported as "I cannot add a row" on an act where the row was
+     right there. Say so visibly instead of only moving focus. */
+  if(!grew && tail){
+    tail.classList.remove('act-waiting');
+    void tail.offsetWidth;              /* restart the animation on re-press */
+    tail.classList.add('act-waiting');
+    setTimeout(() => tail.classList.remove('act-waiting'), 950);
+  }
+  const el = tail ? tail.querySelector('input[data-al="work"]') : null;
   /* 'nearest' on both axes and no animation: the sheet is inside a scroll
      container, and a smooth scroll to 'center' moves it sideways as well as
      down and keeps moving after the caret has landed. */
