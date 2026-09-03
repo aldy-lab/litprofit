@@ -3296,18 +3296,55 @@ const CLOUD = (function(){
       await rest('rpc/delete_act', { method: 'POST', body: JSON.stringify({ p_id: id }) });
     },
 
+    /* ---- the three computed columns, and why they need fetching back ----
+
+       save_enquiry and create_enquiry are declared `returns public.enquiries`
+       -- the TABLE. margin_eur, margin_pct and days_unquoted do not exist
+       there; they are computed by enquiries_v. Every caller replaces its row
+       with what came back, so after any save those three arrived as undefined
+       and the register printed an em dash for the earnings and 0 for the days.
+
+       Which lands on the worst possible keystroke. The one column this
+       company most needs filled is the cost, and the moment somebody typed
+       one the earnings it creates went blank. Nothing errored, so the honest
+       reading from the far side of the screen is "it did not take it".
+
+       The fix is a re-read rather than a signature change: making these two
+       return the view would work, but changing the shape of save_enquiry is
+       precisely what once made every save report a conflict, and the note on
+       firstRow() above is the scar. One extra GET on a human keystroke is
+       cheap; a second implementation of the margin formula in JavaScript is
+       not, because it would be a second answer the day either side is edited.
+
+       If the re-read fails -- no signal, mid-save -- the row is merged over
+       the one already on screen instead, so the figures stay as they were
+       rather than vanishing. Stale for a moment beats absent. */
+    async enquiryFresh(saved, previous){
+      if(!saved || !saved.id) return saved;
+      try {
+        const rows = await rest('enquiries_v?select=*&id=eq.' +
+                                encodeURIComponent(saved.id));
+        if(rows && rows[0]) return rows[0];
+      } catch(e){ /* falls through to the merge below */ }
+      return Object.assign({}, previous || {}, saved);
+    },
+
     async enquiryInsert(row){
-      return firstRow(await rest('rpc/create_enquiry', {
+      const saved = firstRow(await rest('rpc/create_enquiry', {
         method: 'POST', body: JSON.stringify({ p_row: row })
       }));
+      return await this.enquiryFresh(saved, null);
     },
 
     /* Same optimistic-concurrency contract as update(): an empty result means
        somebody saved first, not that the call failed. */
     async enquirySave(id, rev, row){
-      return firstRow(await rest('rpc/save_enquiry', {
+      const saved = firstRow(await rest('rpc/save_enquiry', {
         method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
       }));
+      /* null means somebody saved first -- do not turn that into a read */
+      if(!saved) return saved;
+      return await this.enquiryFresh(saved, row && row.__prev);
     },
 
     /* The last few changes to one row. Not loaded with the register: 216 rows
@@ -5825,6 +5862,8 @@ function enqEdit(row){
         const saved = await CLOUD.enquiryInsert(payload);
         if(saved) state.enquiries = [saved].concat(state.enquiries || []);
       } else {
+        /* same memento as the inline path, for the merge fallback */
+        Object.defineProperty(payload, '__prev', { value: r, enumerable: false });
         const saved = await CLOUD.enquirySave(r.id, r.rev, payload);
         /* null is the optimistic-concurrency answer, not a failure: somebody
            saved between this row being read and this form being submitted */
@@ -5948,6 +5987,9 @@ async function enqPatch(row, change, quiet){
     payload.paid_date = change.paid ? (row.paid_date || new Date().toISOString().slice(0,10)) : null;
   }
   try {
+    /* carried for the merge fallback in enquiryFresh, and stripped before the
+       payload is sent: save_enquiry takes a row, not a row plus a memento */
+    Object.defineProperty(payload, '__prev', { value: row, enumerable: false });
     const saved = await CLOUD.enquirySave(row.id, row.rev, payload);
     if(!saved){ toast(t.enq.conflict); return; }
     state.enquiries = (state.enquiries || []).map(x => x.id === saved.id ? saved : x);

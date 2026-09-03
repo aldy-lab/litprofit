@@ -19,6 +19,7 @@ import json
 import hashlib
 import os
 import re
+import subprocess
 
 import i18n
 
@@ -89,7 +90,30 @@ BOOKING_URL = "https://calendly.com/rf-litprofit/30min"
 # rendered as plain text plus the mark, with no dead link.
 ALDY_URL = "https://aldystudio.com"
 
-LASTMOD = datetime.date.today().isoformat()
+# The date the privacy policy TEXT last changed, not the date this script last
+# ran. today() here restamped "Last updated" on every rebuild, so the document
+# claimed a revision every time a CSS colour moved, and a reader had no way to
+# tell a real change from a deploy. Bump this by hand when the pr_* strings in
+# tools/i18n.py change -- that is the whole point of it being a constant.
+POLICY_UPDATED = "2026-08-16"
+
+# Same disease in the sitemap: <lastmod> of today on every URL on every build
+# tells a crawler the entire site changed daily, which is both untrue and the
+# reason Google learns to ignore the field. The last commit is the last time
+# anything here actually changed. Outside a checkout there is nothing better
+# to say than today.
+def _last_change():
+    try:
+        out = subprocess.run(["git", "log", "-1", "--format=%cd", "--date=short"],
+                             cwd=ROOT, capture_output=True, text=True, timeout=5)
+        d = out.stdout.strip()
+        if out.returncode == 0 and len(d) == 10:
+            return d
+    except Exception:
+        pass
+    return datetime.date.today().isoformat()
+
+LASTMOD = _last_change()
 
 # The language currently being generated. Set once per pass in the build loop;
 # u() and every page builder read it. A module global rather than a parameter
@@ -2955,7 +2979,7 @@ def privacy():
       <h2>6. {h5}</h2><p>{rights}</p>
       <h2>7. {h6}</h2><p>{changes}</p>
     </section>
-""".format(l_upd=PT("pr_updated"), today=datetime.date.today().isoformat(),
+""".format(l_upd=PT("pr_updated"), today=POLICY_UPDATED,
            h0=h[0], h1=h[1], h2=h[2], h3=h[3], h4=h[4], h5=h[5], h6=h[6],
            who=PT("pr_who", legal=LEGAL), street=T("addr_street"), city=T("addr_city"),
            country=COUNTRY, email=EMAIL, phone=PHONE, phone_href=PHONE_HREF,

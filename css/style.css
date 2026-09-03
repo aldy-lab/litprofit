@@ -328,6 +328,14 @@ ul, ol { list-style: none; }
   max-width: var(--container);
   margin-inline: auto;
   padding-inline: var(--pad);
+  /* A grid or flex child refuses to shrink below its own content, and .bleed
+     inside here is a DEFINITE width (100vw - 48px), so the container's minimum
+     became that width PLUS its two text gutters -- wider than the screen. That
+     is where the sideways scrollbar on 1180/1280/1366 came from, and why 1440
+     was clean: there max-width clamps the same minimum back to the viewport.
+     For a block in normal flow this is already the behaviour, so the line only
+     does anything where the container is laid out as an item. */
+  min-width: 0;
 }
 
 .skip-link {
