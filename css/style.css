@@ -1096,6 +1096,25 @@ a.card { position: relative; }
   inset: 0;
   background: linear-gradient(180deg, rgba(8,8,31,0.15), rgba(8,8,31,0.85));
 }
+@media (hover: none) {
+  /* A touch screen never hovers, so the resting state IS the only state and
+     the photographs sat at 0.62 opacity behind a gradient reaching 0.85 for
+     the entire life of the page -- 32 of 255 measured, an eighth of their
+     brightness. Copying the hover values across would have been the tempting
+     fix and a useless one: hover only lifts 34 to 39, because the darkening
+     is mostly the overlay, not the image. So the image wakes up further than
+     hover ever takes it, and the overlay gives back most of what it took. */
+  /* Brightness up, saturation NOT up. The complaint was that the photos
+     were dark, and letting the colour come back with the light turned a
+     near-monochrome page into stock photography -- a pink welding visor
+     and brown cardboard where the rest of the site is grey-blue. 0.68
+     sits between the desktop's resting 0.6 and its hover 0.78, so the
+     picture reads without changing what the page is made of. */
+  .card-media img { opacity: 0.94; filter: saturate(0.68); }
+  .card-media::after {
+    background: linear-gradient(180deg, rgba(8,8,31,0.03), rgba(8,8,31,0.30));
+  }
+}
 /* The number used to be a solid brand chip with a diagonal cut, pinned to the
    corner of the photograph. That is a sticker on a stock image, and it is the
    detail that made the block read as cheap. It is a mono eyebrow above the
@@ -3480,6 +3499,14 @@ html.is-frost::after {
     aspect-ratio: auto;
     align-self: stretch;
   }
+  /* The overlay is a top-to-bottom fade because the photograph sits ABOVE the
+     text and has to melt into it. Here the card is a row and the text is
+     beside the photo, so the fade blends into nothing and only darkens a
+     strip 112px wide. What the edge needs now is separation from the card
+     body, which is one line down the right side, not a wash over the whole
+     picture. */
+  .card-media::after { background: none; }
+  .card-media { border-right: 1px solid var(--line); }
   .card-body, .card--feature .card-body { padding: 15px 16px 14px; }
   .card h2, .card h3, .card--feature h2, .card--feature h3 {
     font-size: var(--text-l);
