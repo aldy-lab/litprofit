@@ -374,7 +374,12 @@ CALCULATOR_URL = "/calculator/"
 # Blank and the entry is removed from the menu and the footer -- never left
 # pointing at "#", and never left pointing at a domain that has not been
 # connected yet.
-STORE_URL = "https://litprofit.store"
+# Blanked 2026-09-03: litprofit.store is registered but not connected, so
+# the entry was sending visitors to a GoDaddy parking page from the main
+# navigation of every page in two languages. Put the address back on the
+# line below the day the store actually answers, and the menu entry, the
+# footer link and both translations return with it.
+STORE_URL = ""
 
 
 def pres_link():
