@@ -4183,7 +4183,12 @@ const $ = sel => document.querySelector(sel);
    looking the tab up in COMPANY_TABS, and 'docs' is already the company's
    one. Reusing the name would have put the whole navigation in the Company
    section every time somebody opened a job's paperwork. */
-const ALL_TABS = ['portfolio','dashboard','card','acts','pdocs','revenue','labor','subs','travel','materials','logistics','settings'];
+/* 'acts' sits last of the sheets, after Logistics. It is the one tab that
+   is filled in away from a desk -- on the vessel, by the person who did
+   the work -- so it is a destination rather than a step on the way to the
+   costs, and it was splitting Project Card off from the sheets that
+   follow it. Settings stays after it: it is not a sheet. */
+const ALL_TABS = ['portfolio','dashboard','card','pdocs','revenue','labor','subs','travel','materials','logistics','acts','settings'];
 /* Portfolio and Dashboard are the company's position, Revenue is the company's
    income, and Settings holds the target margin. None of them is an employee's
    business, and all four would be blank or misleading with the figures gone. */
@@ -4191,7 +4196,7 @@ const ALL_TABS = ['portfolio','dashboard','card','acts','pdocs','revenue','labor
    is filled in by the person who did the work, standing on the vessel, and
    that person is staff -- the role the cost list exists to serve. It carries
    no prices, so there is nothing here to withhold from them. */
-const COST_TABS = ['card','acts','labor','subs','travel','materials','logistics'];
+const COST_TABS = ['card','labor','subs','travel','materials','logistics','acts'];
 
 /* The third subject. Projects are one job, the register is the order book,
    and this is the company itself: what it costs to open the doors. Its own
