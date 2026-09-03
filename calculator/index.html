@@ -4305,7 +4305,11 @@ function renderChrome(){
      depending on the tab, which meant the label changed under the cursor and
      still could not say "register". What it prints is whatever is on screen;
      what it is called is what it produces. */
-  $('#btnPrint').hidden = !canMoney();
+  /* The project report is a profit-and-margin document: gross profit, actual
+     margin, the target beside it and a waterfall that ends in the profit. It
+     is the strip above, on paper. Hiding one and leaving the other would be
+     the same half-restriction the company report already taught. */
+  $('#btnPrint').hidden = !canCompanyWide();
   $('#btnPrint').textContent = t.reportPdf;
   /* Advice needs a server to ask and money-sight to be told. Hidden rather
      than disabled for a fitter: a greyed-out button is a standing note that
@@ -4398,7 +4402,7 @@ function menuItems(t, locked){
     item('lock', locked ? t.reopenProj : t.closeProj),
     '<div class="menu-sep"></div>',
     `<div class="menu-head">${esc(t.grpData)}</div>`,
-    item('printProject', t.printProject),
+    wide ? item('printProject', t.printProject) : '',
     /* The company report IS the portfolio, printed, and Export CSV and Backup
        JSON are the whole state in a file -- every job's revenue at once. Taking
        the portfolio off a manager's tab strip and leaving three doors to the
@@ -4441,7 +4445,11 @@ function paintPulse(){
   /* Every figure on this strip belongs to ONE project, so it has no business
      over the company screens: it sat above the payroll reading a margin from
      whichever job happened to be selected. */
-  const hide = !p || !canMoney() || PULSE_OFF[state.tab]
+  /* canCompanyWide() and not canMoney(): the target margin is the number the
+     whole company is measured against, and it was still riding this strip
+     onto every screen after Settings and the Dashboard had been taken off a
+     manager's navigation -- the one place it had left to appear. */
+  const hide = !p || !canCompanyWide() || PULSE_OFF[state.tab]
                || COMPANY_TABS.indexOf(state.tab) !== -1;
   if(el.hidden !== hide){ el.hidden = hide; measureChrome(); }
   if(hide) return;
