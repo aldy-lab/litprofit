@@ -11,7 +11,12 @@
 -- nothing goes stale in a way a reader can notice, because the only thing
 -- that could make it stale is the thing the key is made of.
 --
--- Requires migrate-advice.sql. SAFE TO RUN MORE THAN ONCE.
+-- The cache stores the advice sheet itself, so it is gated the same way it
+-- is: sees_company(), not sees_money(). A cache that answers a wider
+-- audience than the thing it caches is a hole with a timestamp on it.
+--
+-- Requires migrate-advice.sql (which defines sees_company()).
+-- SAFE TO RUN MORE THAN ONCE.
 -- ============================================================
 
 create table if not exists public.advice_cache (
@@ -36,7 +41,7 @@ language plpgsql stable security definer set search_path = ''
 as $$
 declare a jsonb;
 begin
-  if not public.sees_money() then
+  if not public.sees_company() then
     raise exception 'not allowed' using errcode = 'insufficient_privilege';
   end if;
   -- The age check lives here rather than in the edge function, so the clock
@@ -53,7 +58,7 @@ returns void
 language plpgsql security definer set search_path = ''
 as $$
 begin
-  if not public.sees_money() then
+  if not public.sees_company() then
     raise exception 'not allowed' using errcode = 'insufficient_privilege';
   end if;
   insert into public.advice_cache (id, advice, lang, model, created_at)

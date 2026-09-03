@@ -63,6 +63,28 @@
 -- Requires migrate-enquiries.sql, migrate-company.sql. SAFE TO RUN MORE THAN ONCE.
 -- ============================================================
 
+-- ------------------------------------------------------------
+-- THE COMPANY'S POSITION, as distinct from the money on one job
+-- ------------------------------------------------------------
+-- sees_money() answers "may this person see the figures on a job" and that is
+-- what a project manager is trusted with. This answers a different question:
+-- may they see how the COMPANY is doing -- every job at once, the order book,
+-- the trend. The advice sheet is exactly that, so the manager's own revenue
+-- gate is the wrong one to hold this door.
+--
+-- Hiding the button and leaving the function open would have been theatre: the
+-- panel is one RPC call, and anything the browser may call, its owner may call
+-- by hand. The gate has to be here or it is nowhere.
+--
+-- Same test as sees_payroll() today, because admin is the only role above
+-- manager. Named for its own question so the fourth role can answer the two
+-- differently.
+create or replace function public.sees_company()
+returns boolean
+language sql stable
+security definer set search_path = ''
+as $$ select public.my_role() = 'admin' $$;
+
 create or replace function public.advice_facts()
 returns jsonb
 language plpgsql
@@ -76,10 +98,11 @@ declare
   open_n int; open_eur numeric; today date := current_date;
   big_lost numeric;
 begin
-  -- Same gate as every other figure on this screen. An employee cannot see
-  -- revenue anywhere else in the application and must not receive it wrapped
-  -- in a paragraph of advice either.
-  if not public.sees_money() then
+  -- An employee cannot see revenue anywhere else in the application and must
+  -- not receive it wrapped in a paragraph of advice either -- and neither may
+  -- a manager, whose money gate stops at one job. This sheet is the whole
+  -- company. See sees_company() above.
+  if not public.sees_company() then
     raise exception 'not allowed' using errcode = 'insufficient_privilege';
   end if;
 

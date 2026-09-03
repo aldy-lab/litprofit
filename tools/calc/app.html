@@ -4169,6 +4169,25 @@ function rememberRole(role){
 }
 function canMoney(){ return !CLOUD.on || CAN_MONEY; }
 function canPayroll(){ return !CLOUD.on || CAN_PAYROLL; }
+/* THE COMPANY'S POSITION, as opposed to the money on one job.
+
+   The portfolio is every job at once, the dashboard is the plan-against-actual
+   verdict, Settings holds the target margin the whole company is measured
+   against, the register is the order book, and the company report, the exports
+   and the advice panel all answer "how is the company doing". That is the
+   owner's question.
+
+   A manager is trusted with the money on a job he runs -- its revenue, its
+   costs, its paperwork -- and that is the entire reason the role sits between
+   staff and admin. Before this the app did not draw the distinction: one bit
+   said "may see money" and opened all of it at once, so appointing a project
+   manager meant handing over the company's position as well.
+
+   Today this is the same test as canPayroll(), because admin is the only role
+   above manager. It is written out separately regardless: what somebody earns
+   and how the company is doing are two different questions, and the fourth
+   role that eventually exists will answer them differently. */
+function canCompanyWide(){ return !CLOUD.on || CAN_PAYROLL; }
 
 /* ================= rendering ================= */
 const $ = sel => document.querySelector(sel);
@@ -4198,6 +4217,13 @@ const ALL_TABS = ['portfolio','dashboard','card','pdocs','revenue','labor','subs
    no prices, so there is nothing here to withhold from them. */
 const COST_TABS = ['card','labor','subs','travel','materials','logistics','acts'];
 
+/* The cost tabs plus the two a project manager is trusted with: the job's
+   paperwork and the job's income. Not Portfolio, not the Dashboard, and not
+   Settings -- see canCompanyWide(). Written as its own list rather than
+   ALL_TABS minus three, because the order is a decision and a subtraction
+   would silently adopt whatever order ALL_TABS grows into. */
+const MANAGER_TABS = ['card','pdocs','revenue','labor','subs','travel','materials','logistics','acts'];
+
 /* The third subject. Projects are one job, the register is the order book,
    and this is the company itself: what it costs to open the doors. Its own
    tab strip rather than an eleventh project tab, because none of it is
@@ -4213,7 +4239,8 @@ function tabList(){
      the section row to leave by. Nothing leaked, because the views return
      nothing to that role; it was simply a room with no door. */
   if(section() === 'company' && canPayroll()) return COMPANY_TABS;
-  return canMoney() ? ALL_TABS : COST_TABS;
+  if(!canMoney()) return COST_TABS;
+  return canCompanyWide() ? ALL_TABS : MANAGER_TABS;
 }
 
 /* Which of the two subjects is on screen. Derived from the tab rather than
@@ -4228,9 +4255,11 @@ function section(){
 function renderSections(){
   const t = tr(), el = $('#sections');
   if(!el) return;
-  /* An employee has no register and no company figures, so there is no choice
-     to offer and a switch with one option is furniture. */
-  if(!canMoney()){ el.hidden = true; return; }
+  /* An employee has no register and no company figures, and neither has a
+     manager: both are the company's position rather than a job's. Either way
+     there is no choice left to offer, and a switch with one option is
+     furniture. */
+  if(!canCompanyWide()){ el.hidden = true; return; }
   el.hidden = false;
   const cur = section();
   const item = (k, label) =>
@@ -4293,7 +4322,7 @@ function renderChrome(){
 
   const bai = $('#btnAI');
   if(bai){
-    bai.hidden = !(CLOUD.on && canMoney());
+    bai.hidden = !(CLOUD.on && canCompanyWide());
     bai.textContent = t.ai.button;
     bai.title = t.ai.title;
   }
@@ -4319,7 +4348,7 @@ function renderChrome(){
      it must not be treated as an unknown tab and thrown back to Portfolio.
      It is still gated on canMoney(), the same as every tab carrying a figure. */
   const off = tabs.indexOf(state.tab) === -1
-              && !(state.tab === 'enquiries' && canMoney())
+              && !(state.tab === 'enquiries' && canCompanyWide())
               && !(COMPANY_TABS.indexOf(state.tab) !== -1 && canPayroll());
   if(off) state.tab = tabs[0];
   renderSections();
@@ -4361,6 +4390,7 @@ function menuItems(t, locked){
     ].join('');
   }
 
+  const wide = canCompanyWide();
   return [
     `<div class="menu-head">${esc(t.grpProject)}</div>`,
     item('new', t.newProj),
@@ -4369,11 +4399,15 @@ function menuItems(t, locked){
     '<div class="menu-sep"></div>',
     `<div class="menu-head">${esc(t.grpData)}</div>`,
     item('printProject', t.printProject),
-    item('printCompany', t.printCompany),
-
-    item('csv', t.csv),
-    item('json', t.json),
-    item('import', t.importJson + '\u2026'),   /* the ellipsis says a file dialog follows */
+    /* The company report IS the portfolio, printed, and Export CSV and Backup
+       JSON are the whole state in a file -- every job's revenue at once. Taking
+       the portfolio off a manager's tab strip and leaving three doors to the
+       same figures in the menu behind it would be a hidden screen, not a
+       restriction. Import is the owner's too: it replaces everything. */
+    wide ? item('printCompany', t.printCompany) : '',
+    wide ? item('csv', t.csv) : '',
+    wide ? item('json', t.json) : '',
+    wide ? item('import', t.importJson + '\u2026') : '',   /* the ellipsis says a file dialog follows */
     '<div class="menu-sep"></div>',
     item('del', t.delProj, 'danger'),
     CLOUD.on ? '<div class="menu-sep"></div>' + item('refresh', t.cloud.refresh) + item('signout', t.cloud.signOut) : ''
@@ -9558,7 +9592,7 @@ function helpPaint(){
 
   /* Only screens this person can actually reach. Offering a fitter the help
      for Break-even is a description of a room they have no door to. */
-  const mine = tabList().concat(canMoney() ? ['enquiries'] : [])
+  const mine = tabList().concat(canCompanyWide() ? ['enquiries'] : [])
                         .concat(canPayroll() ? COMPANY_TABS : [])
                         .filter((v, i, a) => a.indexOf(v) === i && H.h[v]);
 
