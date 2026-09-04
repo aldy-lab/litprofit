@@ -855,6 +855,31 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
   background:
     radial-gradient(62% 46% at 88% 48%, rgba(45, 53, 190, 0.38), transparent 66%);
 }
+
+.hero + .partners-band {
+  background:
+    /* The step at the top edge, and why it is fixed HERE and not on the hero.
+       body carries two FIXED glows at z-index -1. Any in-flow box that paints a
+       background covers them, and the hero does; this band does not, so the
+       glow appeared at the band's first pixel and the seam read as a rule
+       across the page. Measured, repeatably, before anything was changed:
+       rgb(7,8,36) above the seam, rgb(12,13,52) below -- eighteen points of
+       blue in one pixel.
+       Ramping the HERO's own background to transparent is the tidier-sounding
+       fix and does not work: painted red it does not show through at all, so
+       something in that stack is over it, and a fix whose mechanism you cannot
+       demonstrate is a guess. This layer is on the side where the change is
+       visible. It starts as the hero's own ground and lets go of it over
+       200px, so the glow arrives at the same rate the eye would expect it to.
+
+       ADJACENCY, not the class. The same band opens the partners page, where
+       the section above it is transparent and the glow is already showing --
+       there this fill made a step of its own, eighteen points the other way.
+       Measured on both pages, which is the only reason it was caught: a fix
+       that repairs one seam and breaks its twin is not a fix. */
+    linear-gradient(180deg, var(--navy-900) 0, transparent 200px),
+    radial-gradient(62% 46% at 88% 48%, rgba(45, 53, 190, 0.38), transparent 66%);
+}
 .partners-band > * { position: relative; z-index: 1; }
 
 .partner-grid {
