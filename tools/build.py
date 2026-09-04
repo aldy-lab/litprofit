@@ -1146,11 +1146,7 @@ def hero_drawing(lit=False):
         the direction the refrigerant actually travels. The delay staggers them
         so the pips do not march in lockstep."""
         add('<path class="rp-pipe %s" d="%s"/>' % (kind, d))
-        # --f, not animation-delay: an inline declaration beats a stylesheet,
-        # and the sheet needs to add the plot sweep on top of this phase offset
-        # so the refrigerant does not start running along pipes that have not
-        # been drawn yet. As a custom property the two compose.
-        add('<path class="rp-pipe rp-flow %s" d="%s" style="--f:%.1fs"/>'
+        add('<path class="rp-pipe rp-flow %s" d="%s" style="animation-delay:%.1fs"/>'
             % (kind, d, -1.7 * i))
 
     # discharge: compressors -> condensers (high pressure)
@@ -1211,50 +1207,7 @@ def hero_drawing(lit=False):
     cls = "hero-drawing hero-drawing--lit" if lit else "hero-drawing"
     return ('      <svg class="%s" viewBox="0 0 1600 940" aria-hidden="true"\n'
             '           preserveAspectRatio="xMidYMid meet">%s</svg>'
-            % (cls, plot_order("".join(P))))
-
-
-# ------------------------------------------------------------
-# THE SHEET DRAWS ITSELF
-# ------------------------------------------------------------
-# A plotter works through a sheet in the order the drawing was authored, and
-# this drawing is authored in that order already: the room, then the pipe runs,
-# then the equipment, then the symbols, then the annotation. So the stagger is
-# the document order -- no class taxonomy to keep in step with the drawing, and
-# a symbol added later takes its place in the sweep by being where it is.
-#
-# pathLength="1" is what makes one rule fit every shape: it renormalises the
-# geometry so a dasharray of 1 is the whole outline whether that outline is a
-# 6px tick or the room. Verified by measuring painted pixels rather than
-# trusting it -- at dashoffset .5 a path, a line, a rect and a circle each
-# paint exactly half their ink.
-#
-# The flow dashes are skipped. They carry their own dasharray, which is the
-# refrigerant moving; overwriting it would stop the plant.
-_PLOT_SHAPES = re.compile(r'<(path|line|rect|circle|polyline|ellipse)\b([^>]*)>')
-_PLOT_TEXT = re.compile(r'<text\b([^>]*)>')
-PLOT_SWEEP = 1050      # ms the pen takes to cross the sheet
-PLOT_INK_AT = 880      # ms before the annotation starts appearing
-PLOT_INK_SPREAD = 420
-
-
-def plot_order(svg):
-    """Stamp each element with its place in the sweep, as --d in milliseconds."""
-    shapes = [m for m in _PLOT_SHAPES.finditer(svg)
-              if "rp-flow" not in m.group(2)]
-    texts = list(_PLOT_TEXT.finditer(svg))
-    n, m_ = max(len(shapes) - 1, 1), max(len(texts) - 1, 1)
-    edits = []
-    for i, mt in enumerate(shapes):
-        edits.append((mt.end() - 1,
-                      ' pathLength="1" style="--d:%dms"' % round(i * PLOT_SWEEP / n)))
-    for j, mt in enumerate(texts):
-        edits.append((mt.end() - 1,
-                      ' style="--d:%dms"' % round(PLOT_INK_AT + j * PLOT_INK_SPREAD / m_)))
-    # right to left, so every offset still points where it did
-    for at, ins in sorted(edits, reverse=True):
-        svg = svg[:at] + ins + svg[at:]
-    return svg
+            % (cls, "".join(P)))
 
 
 # ============================================================
