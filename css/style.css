@@ -3663,9 +3663,48 @@ html.is-frost::after {
 .rp-flow {
   stroke-dasharray: 16 210;
   stroke-width: 2.8;
-  animation: rp-flow 9s linear infinite;
+  /* --f is this run's phase offset, set per path. It used to be an inline
+     animation-delay, which no stylesheet can add to; as a custom property the
+     plot sweep below can push the whole plant back until the sheet is drawn. */
+  animation: rp-flow 9s linear var(--f, 0s) infinite;
 }
 .hero.is-idle .rp-flow { animation-play-state: paused; }
+
+/* ============================================================
+   THE SHEET DRAWS ITSELF
+   ------------------------------------------------------------
+   No script and no class to toggle. animation-fill-mode: both holds the "from"
+   state through the delay, so an element that has not been reached yet is
+   already undrawn without anybody having to hide it first -- which is what
+   keeps a deferred script from being able to flash the finished drawing, and
+   what leaves the drawing simply visible if the animation never runs at all.
+
+   Each element carries its place in the sweep as --d, stamped at build time in
+   document order, because that is the order the drawing was authored in: the
+   room, the pipe runs, the equipment, the symbols, the annotation. pathLength
+   normalises every outline to 1, so one duration suits a 6px tick and the room
+   alike -- the pen moves across the sheet rather than lingering on whatever is
+   longest.
+
+   The whole thing is off under prefers-reduced-motion, where the drawing is
+   simply there. That is also why stroke-dasharray lives inside the query: left
+   outside it, a reader who asked for no motion would get a dotted plant.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-drawing [pathLength] {
+    stroke-dasharray: 1;
+    animation: rp-plot 0.8s cubic-bezier(0.4, 0, 0.2, 1) var(--d, 0ms) both;
+  }
+  .hero-drawing text {
+    animation: rp-ink 0.5s cubic-bezier(0.4, 0, 0.2, 1) var(--d, 0ms) both;
+  }
+  /* The refrigerant waits for its pipes. */
+  .hero-drawing .rp-flow {
+    animation-delay: calc(var(--f, 0s) + 1750ms);
+  }
+}
+@keyframes rp-plot { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes rp-ink  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rp-flow { to { stroke-dashoffset: -226; } }
 
 .rp-flow.rp-hp { stroke: rgba(255, 214, 176, 0.95); }
