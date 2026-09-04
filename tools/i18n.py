@@ -510,14 +510,18 @@ S["ru"] = dict(
 # they are proper nouns — so they are defined once and shared. Only the prose
 # differs. The Lithuanian and Russian are the company's own service copy.
 # ============================================================
-COMPRESSORS = ["SABROE", "BITZER", "HOWDEN", "KUHLAUTOMAT",
+# COUNTRIES IS PAIRED WITH THIS LIST BY POSITION, not by name -- _refrig_blocks
+# zips the two. Reorder one and the other must move in the same step, in all
+# three languages, or every maker silently acquires its neighbour's country and
+# the page reads as confidently wrong rather than broken.
+COMPRESSORS = ["BITZER", "SABROE", "HOWDEN", "KUHLAUTOMAT",
                "STAL", "HALLSCREW", "GRASSO", "MYCOM"]
 COUNTRIES = {
-    "en": ["Denmark", "Germany", "Scotland", "Germany", "Sweden", "England",
+    "en": ["Germany", "Denmark", "Scotland", "Germany", "Sweden", "England",
            "Netherlands", "Japan"],
-    "lt": ["Danija", "Vokietija", "Škotija", "Vokietija", "Švedija", "Anglija",
+    "lt": ["Vokietija", "Danija", "Škotija", "Vokietija", "Švedija", "Anglija",
            "Olandija", "Japonija"],
-    "ru": ["Дания", "Германия", "Шотландия", "Германия", "Швеция", "Англия",
+    "ru": ["Германия", "Дания", "Шотландия", "Германия", "Швеция", "Англия",
            "Голландия", "Япония"],
 }
 SYSTEMS = ["GRASSO / KUHLAUTOMAT", "HOWDEN", "MYCOM", "SABROE", "STAL",
@@ -528,7 +532,7 @@ PART_ENGINES = ["MAN", "VOLVO PENTA", "Wartsila", "STX", "Yanmar", "MTU",
                 "Hyundai Himsen", "CUMMINS", "MAK", "SULZER", "Caterpillar",
                 "DETROIT DIESEL", "Deutz", "ROLLS ROYCE", "Daihatsu", "SCANIA",
                 "WICHMANN", "GUASCOR"]
-PART_COMPRESSORS = ["STALL", "Sabroe", "Bitzer", "Howden", "Mycom", "J&amp;E Hall"]
+PART_COMPRESSORS = ["Bitzer", "STALL", "Sabroe", "Howden", "Mycom", "J&amp;E Hall"]
 TURBO = ["ABB", "KBB", "MET", "NAPIER", "MAN"]
 PUMPS = ["HERMETIC", "WITT"]
 # Refrigerant pumps and the valve makers whose bodies come across the bench.
@@ -552,7 +556,7 @@ SVC["en"] = {
              "a decade of refrigeration work on fishing vessels and shore plant.",
         meta="Marine and industrial refrigeration: compressor overhaul, system "
              "modernisation, class-approved design documentation, installation and "
-             "commissioning. SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM.",
+             "commissioning. BITZER, SABROE, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM.",
         h_works="What we carry out", h_compressors="Compressors we service",
         h_systems="Systems we modernise",
         works=["Diagnostics and repair of refrigeration compressors, at all levels of complexity.",
@@ -625,7 +629,7 @@ SVC["en"] = {
         lead="Selecting, ordering and delivering the parts a repair needs — with "
              "stock held in Klaipeda so the common ones do not wait on a supplier.",
         meta="Supply of spare parts for marine engines and refrigeration compressors "
-             "— MAN, Wartsila, Caterpillar, SULZER, Sabroe, Bitzer, Howden, Mycom, "
+             "— MAN, Wartsila, Caterpillar, SULZER, Bitzer, Sabroe, Howden, Mycom, "
              "Danfoss valves. Warehouse in Klaipeda.",
         h_source="What we source", h_delivery="Delivery time",
         intro="On request we will select, order and deliver spare parts and special "
@@ -652,7 +656,7 @@ SVC["lt"] = {
              "dešimtmetis šaldymo darbų žvejybiniuose laivuose ir kranto įrenginiuose.",
         meta="Laivų ir pramoninė šaldymo įranga: kompresorių remontas, sistemų "
              "modernizavimas, klasifikacinių bendrovių patvirtinti projektiniai "
-             "dokumentai, montavimas ir paleidimas. SABROE, BITZER, HOWDEN, "
+             "dokumentai, montavimas ir paleidimas. BITZER, SABROE, HOWDEN, "
              "KUHLAUTOMAT, STAL, GRASSO, MYCOM.",
         h_works="Kompanija LITPROFIT atlieka šiuos darbus",
         h_compressors="Aptarnaujami kompresoriai", h_systems="Modernizuojamos sistemos",
@@ -725,7 +729,7 @@ SVC["lt"] = {
         lead="Parenkame, užsakome ir pristatome remontui reikalingas dalis — sandėlis "
              "Klaipėdoje reiškia, kad dažniausiai naudojamų dalių laukti nereikia.",
         meta="Atsarginių dalių tiekimas laivų varikliams ir šaldymo kompresoriams — MAN, "
-             "Wartsila, Caterpillar, SULZER, Sabroe, Bitzer, Howden, Mycom, Danfoss "
+             "Wartsila, Caterpillar, SULZER, Bitzer, Sabroe, Howden, Mycom, Danfoss "
              "vožtuvai. Sandėlis Klaipėdoje.",
         h_source="Ką tiekiame", h_delivery="Pristatymo terminai",
         intro="Jūsų pageidavimu parinksime, užsakysime bei pristatysime reikiamas "
@@ -751,7 +755,7 @@ SVC["ru"] = {
              "более десяти лет холодильных работ на рыболовных судах и береговых установках.",
         meta="Судовое и промышленное холодильное оборудование: ремонт компрессоров, "
              "модернизация систем, проектная документация по требованиям "
-             "классификационных обществ, монтаж и пусконаладка. SABROE, BITZER, HOWDEN, "
+             "классификационных обществ, монтаж и пусконаладка. BITZER, SABROE, HOWDEN, "
              "KUHLAUTOMAT, STAL, GRASSO, MYCOM.",
         h_works="Компания LITPROFIT выполняет следующие работы",
         h_compressors="Обслуживаемые компрессоры", h_systems="Модернизируемые системы",
@@ -829,7 +833,7 @@ SVC["ru"] = {
         lead="Подбираем, заказываем и доставляем детали, нужные для ремонта — склад в "
              "Клайпеде означает, что самые ходовые позиции не приходится ждать.",
         meta="Поставка запасных частей для судовых двигателей и холодильных компрессоров — "
-             "MAN, Wartsila, Caterpillar, SULZER, Sabroe, Bitzer, Howden, Mycom, клапаны "
+             "MAN, Wartsila, Caterpillar, SULZER, Bitzer, Sabroe, Howden, Mycom, клапаны "
              "Danfoss. Склад в Клайпеде.",
         h_source="Что мы поставляем", h_delivery="Сроки поставки",
         intro="По вашему желанию подберём, закажем и доставим необходимые запасные части и "
@@ -1365,7 +1369,7 @@ PARTS = {
         coupling=("Coupling", "Where misalignment turns into vibration and a wrecked bearing. "
                   "Set cold, then checked again once the package has run up to temperature."),
         screw=("Screw compressor", "Rotors, slide valve, shaft seal and bearings. This is the "
-               "overhaul itself &mdash; SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM."),
+               "overhaul itself &mdash; BITZER, SABROE, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM."),
         separator=("Oil separator", "Takes the oil back out of the discharge gas and returns it. "
                    "Carry-over here shows up much later as poor heat transfer in the condenser."),
         lines=("Suction &amp; discharge", "Refrigerant piping to class requirements, then "
@@ -1376,7 +1380,7 @@ PARTS = {
         coupling=("Mova", "Čia necentruotumas virsta vibracija ir sugadintu guoliu. Nustatoma "
                   "šaltoje būsenoje ir patikrinama vėl, agregatui įšilus."),
         screw=("Sraigtinis kompresorius", "Rotoriai, sklendė, veleno riebokšlis ir guoliai. Tai "
-               "ir yra pats kapitalinis remontas &mdash; SABROE, BITZER, HOWDEN, KUHLAUTOMAT, "
+               "ir yra pats kapitalinis remontas &mdash; BITZER, SABROE, HOWDEN, KUHLAUTOMAT, "
                "STAL, GRASSO, MYCOM."),
         separator=("Alyvos separatorius", "Išskiria alyvą iš išmetamų dujų ir grąžina ją atgal. "
                    "Alyvos pernešimas čia vėliau pasireiškia prastu šilumos perdavimu kondensatoriuje."),
@@ -1388,7 +1392,7 @@ PARTS = {
         coupling=("Муфта", "Здесь несоосность превращается в вибрацию и разрушенный подшипник. "
                   "Выставляется на холодную и проверяется снова, когда агрегат прогрелся."),
         screw=("Винтовой компрессор", "Роторы, золотник, торцевое уплотнение и подшипники. Это и "
-               "есть сам капитальный ремонт &mdash; SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, "
+               "есть сам капитальный ремонт &mdash; BITZER, SABROE, HOWDEN, KUHLAUTOMAT, STAL, "
                "GRASSO, MYCOM."),
         separator=("Маслоотделитель", "Отделяет масло от нагнетаемого газа и возвращает его. Унос "
                    "масла здесь позже проявляется как плохой теплообмен в конденсаторе."),

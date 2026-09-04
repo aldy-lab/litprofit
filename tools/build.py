@@ -1484,7 +1484,7 @@ _UNUSED_PARTS = [
               "Set cold, then checked again once the package has run up to temperature."),
     dict(n="03", key="screw", title="Screw compressor",
          text="Rotors, slide valve, shaft seal and bearings. This is the overhaul "
-              "itself &mdash; SABROE, BITZER, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM."),
+              "itself &mdash; BITZER, SABROE, HOWDEN, KUHLAUTOMAT, STAL, GRASSO, MYCOM."),
     dict(n="04", key="separator", title="Oil separator",
          text="Takes the oil back out of the discharge gas and returns it. Carry-over "
               "here shows up much later as poor heat transfer in the condenser."),
