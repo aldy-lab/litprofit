@@ -19,6 +19,8 @@ Checks, per page:
 """
 import functools
 import http.server
+import io
+import re
 import os
 import socket
 import socketserver
@@ -50,9 +52,43 @@ BASE_PATHS += ["/completed-works/%s/" % _pr["slug"] for _pr in _i18n_p.PROJECTS]
 # off the audit spent its run reporting 404s for pages the site had correctly
 # stopped building -- a second copy of a fact is a second thing to forget.
 import i18n as _i18n
-PATHS = []
-for _lang in [""] + ["/" + lg for lg in _i18n.LANGS if lg != "en"]:
-    PATHS += [_lang + p for p in BASE_PATHS]
+
+
+def _published():
+    """Every URL the build actually published, from the sitemap it wrote.
+
+    BASE_PATHS above is a hand-written list, which is the third copy of this
+    fact in this file after the languages and the completed jobs -- and this
+    file argues against exactly that, twice, in the comments above. It caught
+    up with itself: a new page was added, the audit reported the same 27 as
+    before, and the number not moving was the only sign that the new page had
+    never been opened. A PASS over a list that does not include the page you
+    just wrote is worse than no PASS at all.
+
+    The sitemap is written by the same build from the same page table, so
+    anything published is swept without anybody remembering to come here. If
+    it is missing -- audit run before a build -- fall back to the list, which
+    is stale but better than sweeping nothing.
+    """
+    sm = os.path.join(ROOT, "sitemap.xml")
+    if not os.path.exists(sm):
+        return None
+    xml = io.open(sm, encoding="utf-8").read()
+    out, seen = [], set()
+    for loc in re.findall(r"<loc>([^<]+)</loc>", xml):
+        path = re.sub(r"^https?://[^/]+", "", loc.strip()) or "/"
+        if path not in seen:
+            seen.add(path)
+            out.append(path)
+    return out or None
+
+
+PATHS = _published()
+if PATHS is None:
+    PATHS = []
+    for _lang in [""] + ["/" + lg for lg in _i18n.LANGS if lg != "en"]:
+        PATHS += [_lang + p for p in BASE_PATHS]
+    print("sitemap.xml not found -- sweeping the hand-written list instead.")
 PATHS.append("/404.html")
 
 WIDTHS = [360, 375, 390, 412, 430]

@@ -445,7 +445,7 @@ FOOTER_TPL = """  <footer class="site-footer">
 
       <div class="footer-bottom">
         <span>&copy; {founded}&ndash;<span data-year>2026</span> {legal}</span>
-        <span class="spacer"><a href="{privacy}">{l_privacy}</a>{calc}</span>
+        <span class="spacer"><a href="{privacy}">{l_privacy}</a><a href="{terms}">{l_terms}</a>{calc}</span>
         <span class="made">{made}</span>
       </div>
     </div>
@@ -458,7 +458,8 @@ def footer():
     street=T("addr_street"), city=T("addr_city"), country=T("addr_country"),
     phone=PHONE, phone_href=PHONE_HREF,
     email=EMAIL, legal=LEGAL, cid=COMPANY_ID, vat=VAT, founded=FOUNDED,
-    privacy=u("/privacy/"), calc=calc_link(), made=aldy_credit(),
+    privacy=u("/privacy/"), terms=u("/terms/"),
+    l_terms=i18n.TERMS_UI[LANG]["h1"], calc=calc_link(), made=aldy_credit(),
     f_address=T("f_address"), f_contacts=T("f_contacts"), f_details=T("f_details"),
     f_site=T("f_site"), l_privacy=T("f_privacy"), l_cid=T("company_no"), l_vat=T("vat"),
     preslink=pres_link(),
@@ -2960,6 +2961,58 @@ def contacts():
 
 
 # ============================================================
+# GENERAL TERMS AND CONDITIONS
+# ============================================================
+TERMS_PDF = "litprofit-general-terms.pdf"
+
+
+def terms_pdf():
+    """(url, size in MB) for the terms as supplied, or None. Same rule as the
+    presentation: no file, no download row, never a link to a 404."""
+    rel = "assets/docs/" + TERMS_PDF
+    full = os.path.join(ROOT, rel)
+    if not TERMS_PDF or not os.path.exists(full):
+        return None
+    return u("/" + rel), os.path.getsize(full) / 1e6
+
+
+def terms():
+    U = i18n.TERMS_UI[LANG]
+    dl = ""
+    pdf = terms_pdf()
+    if pdf:
+        dl = ('<p class="terms-dl"><a class="btn ghost" href="%s" download>%s '
+              '<span class="terms-size">PDF &middot; %.1f MB</span></a></p>'
+              % (pdf[0], text(U["pdf"]), pdf[1]))
+
+    body = []
+    for num, head, clauses in i18n.TERMS:
+        items = "".join(
+            '<li><span class="cl-n">%s</span><span class="cl-t">%s</span></li>'
+            % (text(n), text(t)) for n, t in clauses)
+        body.append('<section class="cl"><h2><span class="cl-h">%s</span>%s</h2>'
+                    '<ol class="cl-list">%s</ol></section>' % (text(num), text(head), items))
+
+    return page_head(text(U["eyebrow"]), text(U["h1"]),
+                     U["lead"] % dict(legal=LEGAL),
+                     [(T("home"), "/"), (text(U["h1"]), None)],
+                     path="/terms/") + """
+    <section class="container prose terms">
+      <!-- NOTE(LITPROFIT): supplied by the client as a finished document and
+           transcribed, not edited. It is NOT translated: clause 25.1 says the
+           English version prevails where the versions differ, so putting an
+           unreviewed Lithuanian text beside that clause would leave a reader
+           unable to tell which of the two binds them. -->
+      <p class="terms-eff"><strong>{sub}.</strong> {eff}</p>
+      <p class="terms-note">{note}</p>
+      {dl}
+{body}
+    </section>
+""".format(sub=text(U["sub"][0].upper() + U["sub"][1:]), eff=text(U["effective"]),
+           note=text(i18n.TERMS_NOTE[LANG]), dl=dl, body="\n".join(body))
+
+
+# ============================================================
 # PRIVACY
 # ============================================================
 def privacy():
@@ -3498,6 +3551,8 @@ def pages():
             phone=PHONE, email=EMAIL), contacts, ""),
         ("/careers/", i18n.CAR[LANG]["nav"],
          i18n.CAR[LANG]["meta"] % dict(legal=LEGAL), careers, job_postings_ld()),
+        ("/terms/", i18n.TERMS_UI[LANG]["eyebrow"],
+         i18n.TERMS_UI[LANG]["meta"] % dict(legal=LEGAL), terms, ""),
         ("/privacy/", PT("pr_h1"), PT("pr_lead", legal=LEGAL), privacy, ""),
     ]
 
@@ -3552,7 +3607,8 @@ FREQ = {"/": ("monthly", "1.0"), "/services/": ("monthly", "0.9"),
         "/about/": ("monthly", "0.8"), "/completed-works/": ("monthly", "0.7"),
         "/partners/": ("monthly", "0.7"), "/certificates/": ("yearly", "0.6"),
         "/contacts/": ("yearly", "0.7"), "/careers/": ("monthly", "0.6"),
-        "/privacy/": ("yearly", "0.2")}
+        "/privacy/": ("yearly", "0.2"),
+        "/terms/": ("yearly", "0.3")}
 
 
 def sitemap_xml():

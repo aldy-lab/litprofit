@@ -1571,3 +1571,358 @@ SECTORS = {
  "ru": {"seafood": "Рыбопромысловая группа", "frozenfish": "Поставщик мороженой рыбы",
         "engineering": "Инженерный партнёр"},
 }
+
+
+# ============================================================
+# GENERAL TERMS AND CONDITIONS
+# ============================================================
+# NOT TRANSLATED, ON PURPOSE. Clause 25.1 of this document says that where it
+# exists in more than one language and the versions differ, the English text
+# prevails. Rendering a Lithuanian version I produced would put a translation
+# nobody has reviewed on the same page as the clause saying it does not count --
+# and a reader would have no way to tell which of the two binds them. The
+# English text stands on every language of the site, with a line above it in the
+# reader's own language saying why.
+#
+# Supplied by the client as a finished document. Transcribed, not edited: if a
+# clause reads oddly it reads oddly in the PDF too, and changing the wording of
+# a contract to make a web page scan better is not a designer's decision.
+TERMS_NOTE = {
+ "en": "These Terms are issued in English. Where they are prepared in more than "
+       "one language and the versions differ, the English text prevails "
+       "(clause 25.1), so the English text is what appears below in every "
+       "language of this site.",
+ "lt": "Šios sąlygos parengtos anglų kalba. Jei jos parengiamos daugiau nei viena "
+       "kalba ir versijos skiriasi, pirmenybė teikiama tekstui anglų kalba "
+       "(25.1 punktas) — todėl žemiau pateikiamas originalus tekstas anglų kalba.",
+ "ru": "Настоящие условия изданы на английском языке. Если они подготовлены более "
+       "чем на одном языке и версии расходятся, преимущественную силу имеет "
+       "английский текст (пункт 25.1) — поэтому ниже приведён оригинальный "
+       "английский текст.",
+}
+TERMS_UI = {
+ "en": dict(eyebrow="Legal", h1="General Terms and Conditions",
+            sub="for the Supply of Goods and Provision of Services",
+            lead="The terms on which %(legal)s quotes, supplies goods and carries "
+                 "out works and services, unless a separate written agreement says "
+                 "otherwise.",
+            meta="General Terms and Conditions for the supply of goods and "
+                 "provision of services by %(legal)s: quotations, payment, "
+                 "warranty, liability, delivery, confidentiality and jurisdiction.",
+            effective="Effective upon incorporation into Litprofit quotations, "
+                      "order confirmations or other contractual documents.",
+            pdf="Download as PDF"),
+ "lt": dict(eyebrow="Teisinė informacija", h1="Bendrosios sąlygos",
+            sub="prekių tiekimui ir paslaugų teikimui",
+            lead="Sąlygos, kuriomis %(legal)s teikia pasiūlymus, tiekia prekes ir "
+                 "atlieka darbus bei paslaugas, jei atskiru rašytiniu susitarimu "
+                 "nesutarta kitaip.",
+            meta="Bendrosios %(legal)s prekių tiekimo ir paslaugų teikimo sąlygos: "
+                 "pasiūlymai, apmokėjimas, garantija, atsakomybė, pristatymas, "
+                 "konfidencialumas ir jurisdikcija.",
+            effective="Įsigalioja įtraukus jas į Litprofit pasiūlymus, užsakymų "
+                      "patvirtinimus ar kitus sutartinius dokumentus.",
+            pdf="Atsisiųsti PDF"),
+ "ru": dict(eyebrow="Юридическая информация", h1="Общие условия",
+            sub="поставки товаров и оказания услуг",
+            lead="Условия, на которых %(legal)s выставляет предложения, поставляет "
+                 "товары и выполняет работы и услуги, если отдельным письменным "
+                 "соглашением не предусмотрено иное.",
+            meta="Общие условия поставки товаров и оказания услуг %(legal)s: "
+                 "предложения, оплата, гарантия, ответственность, поставка, "
+                 "конфиденциальность и юрисдикция.",
+            effective="Вступают в силу с момента включения в предложения, "
+                      "подтверждения заказов или иные договорные документы Litprofit.",
+            pdf="Скачать в PDF"),
+}
+
+# (number, heading, [(clause number, text), ...])
+TERMS = [
+ ("1", "Scope of Application", [
+  ("1.1", "These General Terms and Conditions for the Supply of Goods and Provision "
+          "of Services (the “Terms”) apply to all quotations, order "
+          "confirmations, supplies of goods, performance of works and provision of "
+          "services by UAB Litprofit (“Litprofit”), unless otherwise expressly "
+          "agreed by the parties in writing."),
+  ("1.2", "Placement of an order, issuance of a Purchase Order, written acceptance of "
+          "a Litprofit quotation, or acceptance of goods, works or services shall "
+          "constitute acceptance of these Terms to the extent they have not been "
+          "amended by a separate written agreement between the parties.")]),
+ ("2", "Quotations and Orders", [
+  ("2.1", "The validity period of a quotation shall be specified in the relevant "
+          "Litprofit quotation. An order shall be deemed accepted by Litprofit only "
+          "upon Litprofit’s written confirmation."),
+  ("2.2", "Any terms contained in a Purchase Order, order, specification or other "
+          "document issued by the Customer that amend or supplement Litprofit’s "
+          "quotation or these Terms shall apply only if expressly accepted by "
+          "Litprofit in writing.")]),
+ ("3", "Prices and Payment", [
+  ("3.1", "All prices are exclusive of VAT, taxes, duties, charges and other mandatory "
+          "payments unless expressly stated otherwise in the quotation."),
+  ("3.2", "Payment terms, currency and due dates shall be determined by the relevant "
+          "quotation, order confirmation or invoice. The Customer shall make payment "
+          "in full within the agreed period, without set-off, counterclaim, "
+          "withholding or deduction, except where the relevant counterclaim has been "
+          "expressly accepted by Litprofit in writing or finally determined by a "
+          "competent court."),
+  ("3.3", "Overdue amounts shall bear interest at the rate provided by applicable "
+          "mandatory law or, where legally permissible and specified in the relevant "
+          "quotation or invoice, at the rate stated therein. The Customer shall also "
+          "reimburse reasonable debt recovery and enforcement costs."),
+  ("3.4", "In the event of overdue payment, Litprofit may suspend further supplies or "
+          "performance until all outstanding amounts have been paid, without prejudice "
+          "to any other rights or remedies.")]),
+ ("4", "Customer’s Obligations", [
+  ("4.1", "The Customer shall timely provide complete and accurate technical "
+          "information, drawings, specifications, dimensions, operating data, "
+          "instructions and other information necessary for proper execution of the "
+          "order."),
+  ("4.2", "For works on board a vessel or at another site, the Customer shall provide "
+          "required permits and passes, safe and timely access, reasonable assistance "
+          "from vessel or site personnel, and all other agreed conditions necessary "
+          "for performance."),
+  ("4.3", "Litprofit shall not be liable for consequences resulting from incomplete, "
+          "inaccurate or late information, instructions or assistance provided by the "
+          "Customer.")]),
+ ("5", "Warranty", [
+  ("5.1", "New equipment and components shall be covered by the relevant "
+          "manufacturer’s warranty to the extent and on the terms provided by the "
+          "manufacturer, unless Litprofit expressly provides a different warranty in "
+          "writing."),
+  ("5.2", "For repairs, installation and other works, Litprofit warrants the quality "
+          "of works directly performed by Litprofit within the agreed scope for six "
+          "(6) months from completion of the relevant works or 1,000 operating hours "
+          "of the relevant machinery/equipment, whichever occurs first, unless another "
+          "period is expressly agreed in writing."),
+  ("5.3", "The warranty does not constitute acceptance by Litprofit of responsibility "
+          "for an entire machinery system, vessel or item of equipment where the order "
+          "relates only to specified works, parts or components."),
+  ("5.4", "Upon a valid warranty claim, Litprofit shall have the first right, at its "
+          "option, to inspect the alleged defect and to repair or re-perform the "
+          "affected work, or repair or replace the relevant part supplied by "
+          "Litprofit. The Customer shall not arrange third-party remedial works at "
+          "Litprofit’s cost without first giving Litprofit a reasonable opportunity "
+          "to inspect and remedy the defect, except in a genuine emergency requiring "
+          "immediate action to prevent danger or material further damage.")]),
+ ("6", "Warranty Exclusions and Customer Instructions", [
+  ("6.1", "The warranty shall not cover normal wear and tear, latent or pre-existing "
+          "defects, improper operation or maintenance, failure to follow instructions, "
+          "accidents, external influences, intervention or repair by third parties "
+          "without Litprofit’s approval, or defects in materials, parts, oils, fluids "
+          "or equipment supplied by the Customer."),
+  ("6.2", "If the Customer requires the use of particular materials, parts, procedures "
+          "or a technical solution contrary to Litprofit’s written recommendation, or "
+          "instructs Litprofit to continue assembly, repair, commissioning or operation "
+          "despite a defect, deficiency or risk identified by Litprofit, the Customer "
+          "shall bear the risks and consequences reasonably attributable to that "
+          "instruction."),
+  ("6.3", "Litprofit shall not be liable for failure, damage, delay or additional cost "
+          "resulting from the Customer’s decision to proceed contrary to "
+          "Litprofit’s written warning or recommendation, except to the extent caused "
+          "by Litprofit’s own breach of mandatory obligations.")]),
+ ("7", "Limitation of Liability", [
+  ("7.1", "To the fullest extent permitted by applicable law, Litprofit shall not be "
+          "liable for loss of profit, loss of revenue, loss of contract or use, vessel "
+          "or equipment downtime, voyage delay, loss of or damage to cargo, demurrage, "
+          "detention, loss of production, or any other indirect or consequential loss."),
+  ("7.2", "Litprofit shall only be liable for direct proven loss caused directly by "
+          "Litprofit’s breach of its obligations, subject to the nature and scope of "
+          "the relevant order and applicable law."),
+  ("7.3", "To the fullest extent permitted by applicable law, Litprofit’s aggregate "
+          "liability arising out of or in connection with any individual order, whether "
+          "in contract, tort or otherwise, shall not exceed one hundred percent (100%) "
+          "of the total price paid or payable to Litprofit under that order."),
+  ("7.4", "The exclusions and limitation in this Clause shall not apply to liability "
+          "which cannot lawfully be excluded or limited under mandatory applicable "
+          "law.")]),
+ ("8", "Inspection, Acceptance and Claims", [
+  ("8.1", "The Customer shall inspect delivered goods and completed works without "
+          "undue delay."),
+  ("8.2", "Claims concerning quantity, completeness or defects reasonably discoverable "
+          "by ordinary inspection shall be submitted to Litprofit in writing within "
+          "seven (7) calendar days after delivery or completion."),
+  ("8.3", "Claims concerning latent defects shall be submitted in writing within seven "
+          "(7) calendar days after discovery and, in any event, within the applicable "
+          "warranty period. Each claim shall contain reasonably necessary supporting "
+          "documentation and information enabling Litprofit to investigate the alleged "
+          "defect."),
+  ("8.4", "If no timely written claim is received, the goods or works shall be deemed "
+          "accepted without reservation in respect of defects that could reasonably "
+          "have been identified during ordinary inspection.")]),
+ ("9", "Force Majeure", [
+  ("9.1", "Neither party shall be liable for failure or delay caused by circumstances "
+          "beyond its reasonable control, including war, hostilities, strikes, fire, "
+          "flood, epidemics, governmental restrictions, port closures, transportation "
+          "disruptions, sanctions restrictions, shortages materially affecting supply, "
+          "and comparable events."),
+  ("9.2", "The time for performance shall be extended for the duration of such "
+          "circumstances and their reasonable consequences.")]),
+ ("10", "Governing Law and Jurisdiction", [
+  ("10.1", "Unless otherwise expressly agreed in writing, all contractual and "
+           "non-contractual obligations arising out of or in connection with an order "
+           "or these Terms shall be governed by the laws of the Republic of Lithuania."),
+  ("10.2", "Subject to mandatory jurisdiction rules, the courts of the Republic of "
+           "Lithuania shall have exclusive jurisdiction over any dispute arising out of "
+           "or in connection with an order or these Terms. Where the parties may validly "
+           "agree territorial jurisdiction, the dispute shall be submitted to the "
+           "competent court having jurisdiction at Litprofit’s registered office.")]),
+ ("11", "Priority of Litprofit Terms", [
+  ("11.1", "These Terms, Litprofit’s quotation and Litprofit’s written order "
+           "confirmation shall prevail over the Customer’s standard purchasing terms, "
+           "Purchase Order terms, general terms or other unilateral conditions, unless "
+           "Litprofit expressly accepts such conditions in writing."),
+  ("11.2", "Silence, commencement of works, supply of goods or receipt of a Purchase "
+           "Order shall not by itself constitute Litprofit’s acceptance of additional "
+           "or differing terms proposed by the Customer.")]),
+ ("12", "Changes and Additional Works", [
+  ("12.1", "Changes to the scope, technical specification, schedule, personnel, "
+           "materials or other conditions of an order shall normally be agreed in "
+           "writing."),
+  ("12.2", "Additional works, materials, repeat attendance, waiting time, dismantling, "
+           "diagnostics, testing, remobilization or other activities outside the "
+           "originally agreed scope shall be charged separately at agreed rates or "
+           "under a separate Litprofit quotation."),
+  ("12.3", "Where dismantling, inspection or performance reveals additional defects or "
+           "conditions requiring reasonably necessary immediate work to prevent danger, "
+           "material further damage or deterioration, or to protect dismantled "
+           "machinery/equipment, Litprofit may perform such necessary work where it is "
+           "not reasonably practicable to obtain timely instructions. Litprofit shall "
+           "inform the Customer as soon as reasonably practicable, and such work and "
+           "related materials shall be charged separately at Litprofit’s applicable "
+           "rates.")]),
+ ("13", "Used and Reconditioned Equipment", [
+  ("13.1", "For used, reconditioned or repaired equipment, its condition, scope of "
+           "inspection or repair and applicable warranty shall be determined by the "
+           "relevant quotation."),
+  ("13.2", "Litprofit does not warrant the condition or remaining service life of parts "
+           "not included in the agreed scope of inspection or repair. Litprofit is "
+           "responsible only for the quality of reconditioning or repair work directly "
+           "performed within the agreed scope.")]),
+ ("14", "Subcontractors and Third Parties", [
+  ("14.1", "Litprofit may engage suitably qualified subcontractors for all or part of "
+           "the works and shall remain responsible to the Customer for work performed by "
+           "such subcontractors within Litprofit’s contractual scope as for its own "
+           "work."),
+  ("14.2", "Litprofit shall not be responsible for independent third parties that are "
+           "not its subcontractors and are outside Litprofit’s reasonable control, "
+           "including carriers, ports, terminals, customs authorities, classification "
+           "societies, manufacturers, ship agents, shipowners and governmental "
+           "authorities, except where liability arises under mandatory law or an express "
+           "written undertaking.")]),
+ ("15", "Delivery, Incoterms, Risk and Title", [
+  ("15.1", "Delivery terms shall be specified in Litprofit’s quotation or order "
+           "confirmation by reference to the agreed applicable Incoterms rule."),
+  ("15.2", "Risk of accidental loss of or damage to goods shall pass in accordance with "
+           "the agreed Incoterms rule. If no Incoterms rule is agreed, risk shall pass "
+           "as specified in the quotation or, absent such provision, upon handover to "
+           "the agreed carrier or directly to the Customer."),
+  ("15.3", "Notwithstanding transfer of risk, title to goods supplied by Litprofit "
+           "shall, to the extent permitted by applicable law, remain with Litprofit "
+           "until Litprofit has received full payment of the price due for those goods."),
+  ("15.4", "Delivery dates are estimates unless expressly confirmed by Litprofit in "
+           "writing as binding. Time shall not be of the essence unless expressly agreed "
+           "in writing. Litprofit shall not be liable for delays caused by carriers, "
+           "ports, customs authorities, manufacturers or other circumstances beyond its "
+           "reasonable control.")]),
+ ("16", "Travel, Accommodation and Project Expenses", [
+  ("16.1", "Mobilization and project expenses, including air tickets and other travel "
+           "costs, local transfers, airport pick-up, accommodation, meals, drinking "
+           "water, insurance and other necessary project expenses, shall be allocated in "
+           "accordance with the relevant quotation or other written agreement."),
+  ("16.2", "Such expenses may be arranged and paid directly by the Customer or, by "
+           "agreement, arranged and initially paid by Litprofit. In the latter case "
+           "Litprofit may re-invoice the actual documented costs plus a fifteen percent "
+           "(15%) administration fee, unless another rate is agreed in writing."),
+  ("16.3", "Waiting time, additional travel, remobilization and other additional "
+           "expenses arising through no fault of Litprofit shall be charged separately.")]),
+ ("17", "Customs, Unloading, Storage and Port Charges", [
+  ("17.1", "Unless otherwise agreed in writing, import and customs clearance costs, "
+           "duties, taxes, port and terminal charges, unloading, crane operations and "
+           "storage costs shall be borne by the Customer in accordance with the agreed "
+           "delivery terms."),
+  ("17.2", "By agreement, Litprofit may arrange logistics, customs or port operations. "
+           "Relevant actual costs shall be re-invoiced plus a fifteen percent (15%) "
+           "administration fee, unless otherwise agreed."),
+  ("17.3", "Additional costs resulting from delayed acceptance, missing documents or "
+           "missing/late instructions attributable to the Customer shall be borne by the "
+           "Customer.")]),
+ ("18", "Partial Deliveries and Partial Invoicing", [
+  ("18.1", "Where the nature of the order permits and unless otherwise agreed, "
+           "Litprofit may deliver goods in separate lots or perform the order in "
+           "stages."),
+  ("18.2", "Each completed part of a delivery or stage of works may be invoiced "
+           "separately in accordance with the agreed payment terms.")]),
+ ("19", "Confidentiality", [
+  ("19.1", "The parties shall keep confidential all commercial, technical and other "
+           "non-public information received in connection with their cooperation, "
+           "including prices, calculations, drawings, technical solutions and "
+           "transaction terms."),
+  ("19.2", "Such information shall not be disclosed to third parties or used outside "
+           "the relevant order without prior written consent, except where disclosure is "
+           "required by law or a competent authority, or is made to professional advisers "
+           "bound by confidentiality."),
+  ("19.3", "The confidentiality obligation shall survive completion or termination of "
+           "the relevant order and cooperation.")]),
+ ("20", "Sanctions, Export Control and Compliance", [
+  ("20.1", "Each party shall comply with applicable sanctions regimes, export control "
+           "requirements, anti-corruption rules and other mandatory compliance "
+           "requirements."),
+  ("20.2", "Litprofit may decline an order or suspend or terminate performance without "
+           "liability if performance could result in a breach of applicable sanctions, "
+           "export restrictions or other mandatory requirements, or if a reasonably "
+           "necessary compliance review of the Customer, vessel, cargo, end user, "
+           "destination or transaction identifies a material compliance risk.")]),
+ ("21", "Right to Suspend Works or Supplies", [
+  ("21.1", "Litprofit may suspend works, services or supplies in the event of overdue "
+           "payment or where the Customer fails to provide necessary documents, "
+           "information, access, permits, agreed assistance or safe working conditions."),
+  ("21.2", "Where suspension results from circumstances attributable to the Customer, "
+           "reasonable additional expenses, waiting time, remobilization and other "
+           "documented costs shall be charged separately.")]),
+ ("22", "Health, Safety and Access", [
+  ("22.1", "The Customer shall provide safe working conditions on board the vessel or "
+           "at the site in accordance with applicable occupational health and safety "
+           "requirements, marine safety requirements and reasonable industry practice."),
+  ("22.2", "Litprofit personnel may suspend or refuse a particular operation where, in "
+           "their reasonable assessment, there is an immediate risk to life, health, the "
+           "environment or a risk of material damage to equipment, until the unsafe "
+           "condition has been remedied."),
+  ("22.3", "Such suspension shall not constitute a breach by Litprofit where the unsafe "
+           "conditions were not caused by Litprofit.")]),
+ ("23", "Non-Solicitation of Personnel", [
+  ("23.1", "Without Litprofit’s prior written consent, the Customer shall not "
+           "directly or indirectly employ, solicit or otherwise engage outside Litprofit "
+           "any Litprofit employee, engineer, mechanic, welder, other specialist, "
+           "contractor or subcontractor with whom the Customer materially interacted in "
+           "connection with an order."),
+  ("23.2", "This restriction applies during the cooperation and for twelve (12) months "
+           "after completion of the relevant cooperation, to the extent permitted by "
+           "applicable law."),
+  ("23.3", "In the event of a breach, and to the extent permitted by applicable law, the "
+           "Customer shall pay Litprofit contractual compensation equal to six (6) "
+           "months’ gross remuneration or fees of the relevant person, without "
+           "prejudice to Litprofit’s right to recover any additional proven loss to "
+           "the extent such recovery is permitted by law.")]),
+ ("24", "Documents, Drawings and Technical Solutions", [
+  ("24.1", "Unless otherwise agreed in writing, all calculations, drawings, diagrams, "
+           "specifications, methodologies, technical solutions, working documentation "
+           "and other intellectual property created by Litprofit shall remain the "
+           "property of Litprofit."),
+  ("24.2", "Subject to full payment, the Customer is granted a non-exclusive right to "
+           "use such materials solely for the purposes of operation, maintenance or use "
+           "of the goods or works supplied under the relevant order. Disclosure to third "
+           "parties, copying for manufacture by third parties, or use with another "
+           "contractor shall require Litprofit’s prior written consent, except where "
+           "necessary for safe operation or maintenance of the relevant vessel/equipment "
+           "or otherwise required by mandatory law.")]),
+ ("25", "Language and Final Provisions", [
+  ("25.1", "These Terms may be prepared in more than one language. Unless otherwise "
+           "agreed in writing, in the event of discrepancy the English-language version "
+           "shall prevail."),
+  ("25.2", "If any provision is held invalid or unenforceable, the remaining provisions "
+           "shall remain valid and enforceable."),
+  ("25.3", "Any amendment, deviation from or addition to these Terms shall be valid only "
+           "if agreed in writing by authorized representatives of the parties."),
+  ("25.4", "Failure or delay by Litprofit to exercise any right shall not constitute a "
+           "waiver of that right.")]),
+]
