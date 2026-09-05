@@ -1498,6 +1498,69 @@ a.card { position: relative; }
 .prose > *:first-child { margin-top: 0; }
 
 /* ============================================================
+   THE PORT, DRAWN
+   ------------------------------------------------------------
+   Same ink as the vessel and the compressor package: water darker than the
+   ground, land the ground itself, the quay the one heavy line because that is
+   the line the work happens on. Roads are thinner than the quay on purpose --
+   a reader is placing the yard against the water, not driving to it.
+   ============================================================ */
+.pm-sheet {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--navy-800, rgba(255, 255, 255, 0.02));
+  padding: clamp(10px, 1.6vw, 20px);
+  overflow: hidden;
+}
+.pm { display: block; width: 100%; height: auto; }
+.pm-water { fill: rgba(8, 12, 40, 0.55); }
+.pm-ripple { stroke: rgba(158, 201, 255, 0.16); stroke-width: 1; }
+.pm-land { fill: var(--navy-900, #070824); stroke: rgba(255, 255, 255, 0.16); stroke-width: 1; }
+.pm-tick { stroke: rgba(255, 255, 255, 0.14); stroke-width: 1; }
+/* The one heavy line on the sheet. */
+.pm-quay { stroke: rgba(255, 255, 255, 0.5); stroke-width: 2.2; }
+.pm-bollard { stroke: rgba(255, 255, 255, 0.22); stroke-width: 1; }
+/* A port is a comb. Without the piers the mainland was an empty margin and
+   the drawing read as a coastline with a box on it. */
+.pm-pier rect { fill: var(--navy-900, #070824); stroke: rgba(255, 255, 255, 0.42); stroke-width: 1.4; }
+.pm-road { stroke: rgba(255, 255, 255, 0.09); stroke-width: 1; }
+.pm-plot rect { fill: rgba(158, 201, 255, 0.14); stroke: var(--accent); stroke-width: 1.6; }
+.pm-plot line { stroke: var(--accent); stroke-width: 1; }
+.pm-lead line { stroke: var(--accent); stroke-width: 1; }
+.pm-lead circle { fill: none; stroke: var(--accent); stroke-width: 1.4; }
+.pm-flag, .pm-sub, .pm-name, .pm-n-t, .pm-tb text {
+  font-family: var(--mono);
+  letter-spacing: 0.16em;
+}
+.pm-flag { fill: var(--text); font-size: 19px; }
+.pm-sub { fill: var(--muted-2); font-size: 13px; }
+.pm-name { fill: rgba(255, 255, 255, 0.34); font-size: 14px; text-anchor: middle; }
+.pm-city { fill: rgba(255, 255, 255, 0.42); text-anchor: start; }
+.pm-n line, .pm-n path { stroke: rgba(255, 255, 255, 0.4); fill: rgba(255, 255, 255, 0.4); stroke-width: 1; }
+.pm-n-t { fill: rgba(255, 255, 255, 0.4); font-size: 14px; }
+.pm-tb rect { fill: none; stroke: rgba(255, 255, 255, 0.28); stroke-width: 1; }
+.pm-tb line { stroke: rgba(255, 255, 255, 0.28); stroke-width: 1; }
+.pm-tb text { fill: var(--muted-2); font-size: 13px; }
+.pm-open { margin-top: 26px; }
+/* Below 620px the sheet is 340px of drawing and the mono labels inside it fall
+   under 8px. The names go, the geography stays -- a shape you can place
+   yourself beats four lines of type you cannot read. */
+@media (max-width: 620px) {
+  /* At 390px the sheet is about 330px of drawing, so a 14px label inside a
+     1200-unit viewBox lands at four real pixels. The names go and the shape
+     stays: coast, piers, spit, and the one flag. The title block goes with its
+     text -- an empty framed box reads as a fault, not as restraint. */
+  .pm-name, .pm-sub, .pm-tb { display: none; }
+  /* 28, not 54. The flag starts at x=864 in a 1200-unit box, and mono at
+     0.16em tracking advances about 0.76em a character: 14 characters of
+     SVAJONES G. 30 at 54 ran to 1225 and the address lost its number off
+     the right edge. At 28 it ends near 1162, inside the sheet. */
+  .pm-flag { font-size: 28px; }
+  .pm-n-t { font-size: 34px; }
+  .pm-n line, .pm-n path { stroke-width: 2; }
+}
+
+/* ============================================================
    GENERAL TERMS AND CONDITIONS
    ------------------------------------------------------------
    A contract is read by clause number, not by scrolling, so the numbers get a

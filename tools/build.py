@@ -58,6 +58,11 @@ EMAIL = "info@litprofit.com"
 # The number is 30, not 3. The client's own site says 30 in English and 3 in
 # Lithuanian and Russian; the register settles it -- see the README.
 STREET = "Svajonės g. 30"
+# Searched by address, not by a coordinate pair: there is no survey in this
+# repository and a plausible-looking lat/long is worse than none. A link, so
+# nothing is requested from anyone until a reader asks for it.
+MAPS_URL = "https://www.openstreetmap.org/search?query=" \
+           "Svajon%C4%97s%20g.%2030%2C%20Klaip%C4%97da"
 CITY = "LT-94101 Klaipėda"
 COUNTRY = "Lithuania"
 COMPANY_ID = "302568798"
@@ -2875,6 +2880,95 @@ def booking_block(num):
                          note=text(T("book_note")), load=text(T("book_load")),
                          newtab=text(T("book_newtab")))
 
+
+# ============================================================
+# THE PORT, DRAWN LIKE EVERYTHING ELSE
+# ============================================================
+# A map embed would be the first third-party request on the site and the first
+# thing to put a cookie in a visitor's browser, which is the one promise the
+# privacy page makes. So the harbour is drawn instead, in the same language as
+# the vessel and the compressor package.
+#
+# SCHEMATIC, AND IT SAYS SO. The repository holds no survey and no coordinates,
+# and a plan drawn from memory that presents itself as a plan is a lie with
+# north on it. The title block reads NOT TO SCALE and the arrangement is
+# topological: sea and spit west, the strait north to south, quays and city on
+# the mainland bank, the yard flagged on its street. Everything a reader needs
+# to place us; nothing that pretends to be surveyed.
+#
+# The address link is a LINK, not an embed -- no request until somebody asks
+# for one -- and it searches by street name rather than by a coordinate pair
+# nobody here measured.
+def port_map():
+    t = lambda k: text(T(k))
+    P = []
+    add = P.append
+
+    # ---- water, and the sea west of the spit ----
+    add('<rect class="pm-water" x="0" y="0" width="1200" height="560"/>')
+    for i in range(10):
+        y = 40 + i * 56
+        add('<line class="pm-ripple" x1="52" y1="%d" x2="170" y2="%d"/>' % (y, y))
+        add('<line class="pm-ripple" x1="320" y1="%d" x2="452" y2="%d"/>' % (y + 28, y + 28))
+
+    # ---- the spit ----
+    add('<path class="pm-land" d="M198 0 L296 0 L288 190 L282 320 L290 450 L300 560 '
+        'L206 560 L196 440 L190 300 L194 150 Z"/>')
+    for i in range(13):
+        y = 18 + i * 43
+        add('<line class="pm-tick" x1="214" y1="%d" x2="234" y2="%d"/>' % (y, y + 11))
+
+    # ---- the mainland: ONE coastline, gently bent, with two piers on it ----
+    coast = ("M498 0 L492 96 L486 192 L494 262 "
+             "L488 336 L496 420 L490 494 L498 560")
+    add('<path class="pm-land" d="%s L1200 560 L1200 0 Z"/>' % coast)
+    add('<path class="pm-quay" d="%s" fill="none"/>' % coast)
+    # piers: the port is a comb, and a comb is what makes this read as a port
+    for py, plen in ((132, 128), (300, 96), (448, 140)):
+        add('<g class="pm-pier"><rect x="%d" y="%d" width="%d" height="26"/></g>'
+            % (490 - plen, py, plen))
+        for k in range(plen // 26):
+            x = 496 - plen + k * 26
+            add('<line class="pm-bollard" x1="%d" y1="%d" x2="%d" y2="%d"/>' % (x, py, x, py + 26))
+
+    # ---- the road grid, thinner than the quay ----
+    for x in (620, 760, 906, 1052):
+        add('<line class="pm-road" x1="%d" y1="0" x2="%d" y2="560"/>' % (x, x))
+    for y in (118, 236, 354, 472):
+        add('<line class="pm-road" x1="500" y1="%d" x2="1200" y2="%d"/>' % (y, y))
+
+    # ---- the plot, flagged, one block back from the middle pier ----
+    add('<g class="pm-plot"><rect x="640" y="286" width="92" height="54"/>'
+        '<line x1="640" y1="286" x2="732" y2="340"/>'
+        '<line x1="732" y1="286" x2="640" y2="340"/></g>')
+    add('<g class="pm-lead"><line x1="732" y1="313" x2="854" y2="238"/>'
+        '<circle cx="732" cy="313" r="4"/></g>')
+    add('<text class="pm-flag" x="864" y="234">%s</text>' % text(STREET.upper()))
+    add('<text class="pm-sub" x="864" y="256">%s</text>' % t("map_quays"))
+
+    # ---- place names, none of them near the title block ----
+    add('<text class="pm-name" x="110" y="300" transform="rotate(-90 110 300)">%s</text>' % t("map_sea"))
+    add('<text class="pm-name" x="246" y="300" transform="rotate(-90 246 300)">%s</text>' % t("map_spit"))
+    # x=350, not 392: the middle pier reaches back to 394 and the label was
+    # crossing it. A name written through a structure is a smudge, not a label.
+    add('<text class="pm-name" x="350" y="300" transform="rotate(-90 350 300)">%s</text>' % t("map_water"))
+    add('<text class="pm-name pm-city" x="940" y="86">%s</text>' % t("map_city"))
+
+    # ---- north arrow ----
+    add('<g class="pm-n"><line x1="1136" y1="118" x2="1136" y2="52"/>'
+        '<path d="M1136 44 L1143 64 L1136 58 L1129 64 Z"/>'
+        '<text class="pm-n-t" x="1136" y="140" text-anchor="middle">N</text></g>')
+
+    # ---- title block, bottom right, alone ----
+    add('<g class="pm-tb"><rect x="826" y="482" width="350" height="52"/>'
+        '<line x1="826" y1="508" x2="1176" y2="508"/>'
+        '<text x="840" y="501">%s</text><text x="840" y="527">%s</text></g>'
+        % (t("map_tb1"), t("map_tb2")))
+
+    return ('      <svg class="pm" viewBox="0 0 1200 560" role="img" aria-label="%s">%s</svg>'
+            % (attr(T("map_alt")), "".join(P)))
+
+
 def contacts():
     return page_head(PT("k_eyebrow"), PT("k_h1"), PT("k_lead"),
                      [(T("home"), "/"), (PT("k_eyebrow"), None)],
@@ -2942,8 +3036,25 @@ def contacts():
         </div>
       </div>
     </section>
+
+    <section class="section section-alt seam-top">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{map_e}</p>
+          <h2>{map_h}</h2>
+          <p class="lead">{map_l}</p>
+        </div>
+        <div class="pm-sheet reveal">
+{map_svg}
+        </div>
+        <p class="pm-open"><a class="btn ghost" href="{map_href}" target="_blank" rel="noopener">{map_open}</a></p>
+      </div>
+    </section>
 {booking}
 """.format(dial=dial_select("fPhone"), booking=booking_block("01"),
+           map_e=text(T("map_eyebrow")), map_h=text(T("map_h2")),
+           map_l=text(T("map_lead")), map_svg=port_map(),
+           map_open=text(T("map_open")), map_href=attr(MAPS_URL),
            l_addr=T("f_address"), legal=LEGAL, street=T("addr_street"), city=T("addr_city"),
            country=COUNTRY, l_phone=T("form_phone"), phone=PHONE,
            phone_href=PHONE_HREF, l_email=T("form_email"), email=EMAIL,

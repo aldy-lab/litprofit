@@ -128,6 +128,18 @@ S["en"] = dict(
     vsl_eyebrow="Where the work is", vsl_h2="A ship, deck to keel",
     vsl_lead="A fishing vessel from the side. Every discipline on this page is "
              "a space you can point at.",
+    map_eyebrow="Where we are", map_h2="The yard, on the strait",
+    map_lead="Klaipėda sits on the strait between the Curonian Spit and the "
+             "mainland, and the yard is on the mainland bank among the quays. "
+             "A schematic, drawn like everything else here — not a survey.",
+    map_water="KLAIPĖDA STRAIT", map_spit="CURONIAN SPIT", map_quays="QUAYS",
+    map_city="KLAIPĖDA", map_sea="BALTIC SEA",
+    map_tb1="KLAIPEDA // PORT AREA", map_tb2="SITE PLAN // NOT TO SCALE",
+    map_open="Open in your maps app",
+    map_alt="Schematic plan of the Klaipeda port area: the Baltic Sea and the "
+            "Curonian Spit to the west, the strait running north to south, the "
+            "quays and the city on the mainland bank, and the yard marked on "
+            "Svajones street.",
     vsl_hold="Fish hold // RSW", vsl_er="Refrigerant pumps|and valves",
     vsl_pipe="Hull and piping", vsl_store="Stores",
     vsl_wl="Waterline", vsl_tb="Typical fishing vessel",
@@ -301,6 +313,17 @@ S["lt"] = dict(
     vsl_eyebrow="Kur vyksta darbai", vsl_h2="Laivas nuo denio iki kilio",
     vsl_lead="Žvejybos laivas iš šono. Kiekviena šio puslapio sritis — konkreti "
              "laivo erdvė.",
+    map_eyebrow="Kur mus rasti", map_h2="Dirbtuvės prie sąsiaurio",
+    map_lead="Klaipėda stovi ant sąsiaurio tarp Kuršių nerijos ir žemyno, o "
+             "dirbtuvės — žemyno krante tarp krantinių. Tai schema, nubraižyta "
+             "taip pat kaip ir viskas čia, o ne matavimų planas.",
+    map_water="KLAIPĖDOS SĄSIAURIS", map_spit="KURŠIŲ NERIJA", map_quays="KRANTINĖS",
+    map_city="KLAIPĖDA", map_sea="BALTIJOS JŪRA",
+    map_tb1="KLAIPEDA // UOSTO RAJONAS", map_tb2="SKLYPO PLANAS // NE MASTELIU",
+    map_open="Atidaryti žemėlapių programoje",
+    map_alt="Klaipėdos uosto rajono schema: vakaruose Baltijos jūra ir Kuršių "
+            "nerija, sąsiauris iš šiaurės į pietus, krantinės ir miestas žemyno "
+            "krante, dirbtuvės pažymėtos Svajonių gatvėje.",
     vsl_hold="Žuvies triumas // RSW", vsl_er="Šaltnešio siurbliai|ir armatūra",
     vsl_pipe="Korpusas ir vamzdynai", vsl_store="Sandėliai",
     vsl_wl="Vaterlinija", vsl_tb="Tipinis žvejybos laivas",
@@ -414,6 +437,17 @@ S["ru"] = dict(
     vsl_eyebrow="Где идёт работа", vsl_h2="Судно от палубы до киля",
     vsl_lead="Рыболовное судно сбоку. Каждое направление на этой странице — "
              "конкретное помещение.",
+    map_eyebrow="Где мы", map_h2="Мастерские у пролива",
+    map_lead="Клайпеда стоит на проливе между Куршской косой и материком, а "
+             "мастерские — на материковом берегу среди причалов. Это схема, "
+             "вычерченная так же, как всё остальное здесь, а не съёмка.",
+    map_water="КЛАЙПЕДСКИЙ ПРОЛИВ", map_spit="КУРШСКАЯ КОСА", map_quays="ПРИЧАЛЫ",
+    map_city="КЛАЙПЕДА", map_sea="БАЛТИЙСКОЕ МОРЕ",
+    map_tb1="KLAIPEDA // ПОРТОВЫЙ РАЙОН", map_tb2="ПЛАН УЧАСТКА // БЕЗ МАСШТАБА",
+    map_open="Открыть в приложении карт",
+    map_alt="Схема портового района Клайпеды: на западе Балтийское море и "
+            "Куршская коса, пролив с севера на юг, причалы и город на "
+            "материковом берегу, мастерские отмечены на улице Свайонес.",
     vsl_hold="Рыбный трюм // RSW", vsl_er="Фреоновые насосы|и арматура",
     vsl_pipe="Корпус и трубопроводы", vsl_store="Кладовые",
     vsl_wl="Ватерлиния", vsl_tb="Типовое рыболовное судно",
