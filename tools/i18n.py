@@ -140,6 +140,8 @@ S["en"] = dict(
             "Curonian Spit to the west, the strait running north to south, the "
             "quays and the city on the mainland bank, and the yard marked on "
             "Svajones street.",
+    nf_missing="PART NOT FOUND", nf_tb1="DWG 404", nf_tb2="SHEET NOT IN SET",
+    nf_alt="A shaft assembly drawn in section. Two bearings are in place and the third is missing: a dashed outline where the part should be, flagged 404.",
     vsl_hold="Fish hold // RSW", vsl_er="Refrigerant pumps|and valves",
     vsl_pipe="Hull and piping", vsl_store="Stores",
     vsl_wl="Waterline", vsl_tb="Typical fishing vessel",
@@ -324,6 +326,8 @@ S["lt"] = dict(
     map_alt="Klaipėdos uosto rajono schema: vakaruose Baltijos jūra ir Kuršių "
             "nerija, sąsiauris iš šiaurės į pietus, krantinės ir miestas žemyno "
             "krante, dirbtuvės pažymėtos Svajonių gatvėje.",
+    nf_missing="DETALĖ NERASTA", nf_tb1="BRĖŽ. 404", nf_tb2="LAPO KOMPLEKTE NĖRA",
+    nf_alt="Veleno mazgas pjūvyje. Du guoliai savo vietose, trečiojo nėra: brūkšninis kontūras ten, kur turėtų būti detalė, pažymėtas 404.",
     vsl_hold="Žuvies triumas // RSW", vsl_er="Šaltnešio siurbliai|ir armatūra",
     vsl_pipe="Korpusas ir vamzdynai", vsl_store="Sandėliai",
     vsl_wl="Vaterlinija", vsl_tb="Tipinis žvejybos laivas",
@@ -448,6 +452,8 @@ S["ru"] = dict(
     map_alt="Схема портового района Клайпеды: на западе Балтийское море и "
             "Куршская коса, пролив с севера на юг, причалы и город на "
             "материковом берегу, мастерские отмечены на улице Свайонес.",
+    nf_missing="ДЕТАЛЬ НЕ НАЙДЕНА", nf_tb1="ЧЕРТ. 404", nf_tb2="ЛИСТА В КОМПЛЕКТЕ НЕТ",
+    nf_alt="Узел вала в разрезе. Два подшипника на местах, третьего нет: штриховой контур там, где должна быть деталь, с выноской 404.",
     vsl_hold="Рыбный трюм // RSW", vsl_er="Фреоновые насосы|и арматура",
     vsl_pipe="Корпус и трубопроводы", vsl_store="Кладовые",
     vsl_wl="Ватерлиния", vsl_tb="Типовое рыболовное судно",

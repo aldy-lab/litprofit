@@ -1498,6 +1498,57 @@ a.card { position: relative; }
 .prose > *:first-child { margin-top: 0; }
 
 /* ============================================================
+   404, DRAWN AS THE THING THAT IS MISSING
+   ------------------------------------------------------------
+   The 404 is reached by accident, which makes it the page most likely to be
+   somebody's first look at the site. It was a large number and two buttons.
+   Now the loss is drawn: two bearings seated and hatched, the third an empty
+   dashed outline with a balloon and a dimension across the gap, because the
+   first thing a fitter asks about a missing part is how big the hole is.
+   ============================================================ */
+.nf-dwg {
+  display: block;
+  width: min(100%, 720px);
+  height: auto;
+  margin: 0 auto clamp(18px, 3vw, 34px);
+}
+.nf-cl { stroke: rgba(158, 201, 255, 0.4); stroke-width: 1; stroke-dasharray: 22 5 3 5; }
+.nf-shaft { fill: none; stroke: rgba(255, 255, 255, 0.5); stroke-width: 1.6; }
+.nf-part rect { fill: rgba(255, 255, 255, 0.04); stroke: rgba(255, 255, 255, 0.62); stroke-width: 1.6; }
+.nf-part line { stroke: rgba(255, 255, 255, 0.22); stroke-width: 1; }
+/* The absent one: same box, dashed, nothing inside it. */
+.nf-ghost {
+  fill: none;
+  stroke: rgba(158, 201, 255, 0.55);
+  stroke-width: 1.4;
+  stroke-dasharray: 7 6;
+}
+.nf-bal line { stroke: rgba(255, 255, 255, 0.34); stroke-width: 1; }
+.nf-bal circle { fill: none; stroke: rgba(255, 255, 255, 0.5); stroke-width: 1.2; }
+.nf-bal text {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  fill: var(--muted);
+}
+.nf-bal--miss line, .nf-bal--miss circle { stroke: var(--accent); }
+.nf-bal--miss text { fill: var(--accent); }
+.nf-miss {
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  fill: var(--accent);
+}
+.nf-dim line { stroke: rgba(158, 201, 255, 0.5); stroke-width: 1; }
+.nf-tb rect, .nf-tb line { fill: none; stroke: rgba(255, 255, 255, 0.28); stroke-width: 1; }
+.nf-tb text {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  fill: var(--muted-2);
+}
+
+/* ============================================================
    THE PORT, DRAWN
    ------------------------------------------------------------
    Same ink as the vessel and the compressor package: water darker than the

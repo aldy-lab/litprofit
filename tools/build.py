@@ -3668,11 +3668,61 @@ def pages():
     ]
 
 
+def notfound_drawing():
+    """A shaft assembly with one item missing.
+
+    The 404 is the page a reader reaches by accident, so it is the page most
+    likely to be somebody's first look at the site. It was a number and two
+    buttons. Here the loss is drawn instead of announced: two bearings seated,
+    the third an empty dashed outline with a balloon on it. The joke is the
+    drawing's, not a caption's.
+    """
+    t = lambda k: text(T(k))
+    P = []
+    add = P.append
+    add('<line class="nf-cl" x1="40" y1="150" x2="860" y2="150"/>')
+
+    def bearing(x, num):
+        g = ['<g class="nf-part"><rect x="%d" y="106" width="96" height="88" rx="4"/>' % x]
+        for k in range(5):
+            g.append('<line x1="%d" y1="110" x2="%d" y2="190"/>' % (x + 12 + k * 18, x + 24 + k * 18))
+        g.append('</g>')
+        g.append('<g class="nf-bal"><line x1="%d" y1="106" x2="%d" y2="62"/>'
+                 '<circle cx="%d" cy="50" r="15"/>'
+                 '<text x="%d" y="55" text-anchor="middle">%s</text></g>'
+                 % (x + 48, x + 48, x + 48, x + 48, num))
+        return "".join(g)
+
+    add('<rect class="nf-shaft" x="70" y="136" width="760" height="28" rx="6"/>')
+    add(bearing(120, "01"))
+    add(bearing(646, "02"))
+
+    # the gap
+    add('<rect class="nf-ghost" x="384" y="106" width="132" height="88" rx="4"/>')
+    add('<g class="nf-bal nf-bal--miss"><line x1="450" y1="106" x2="450" y2="62"/>'
+        '<circle cx="450" cy="50" r="15"/>'
+        '<text x="450" y="55" text-anchor="middle">03</text></g>')
+    add('<text class="nf-miss" x="450" y="238" text-anchor="middle">%s</text>' % t("nf_missing"))
+
+    # dimension across the gap, the way a fitter would ask how big the hole is
+    add('<g class="nf-dim"><line x1="384" y1="212" x2="516" y2="212"/>'
+        '<line x1="384" y1="204" x2="384" y2="220"/>'
+        '<line x1="516" y1="204" x2="516" y2="220"/></g>')
+
+    add('<g class="nf-tb"><rect x="612" y="248" width="248" height="42"/>'
+        '<line x1="736" y1="248" x2="736" y2="290"/>'
+        '<text x="624" y="274">%s</text><text x="748" y="274">%s</text></g>'
+        % (t("nf_tb1"), t("nf_tb2")))
+
+    return ('<svg class="nf-dwg" viewBox="0 0 900 300" role="img" aria-label="%s">%s</svg>'
+            % (attr(T("nf_alt")), "".join(P)))
+
+
 def notfound_body():
     return """
     <section class="container notfound">
       <div>
-        <p class="code">404</p>
+        {dwg}
         <h1>{h1}</h1>
         <p class="lead" style="margin: 20px auto 0">{lead}</p>
         <div class="btn-row" style="justify-content: center">
@@ -3681,7 +3731,7 @@ def notfound_body():
         </div>
       </div>
     </section>
-""".format(h1=PT("nf_h1"), lead=PT("nf_lead"), home=u("/"),
+""".format(h1=PT("nf_h1"), lead=PT("nf_lead"), home=u("/"), dwg=notfound_drawing(),
            contacts=u("/contacts/"), b1=PT("nf_home"), b2=PT("nf_contact"))
 
 
