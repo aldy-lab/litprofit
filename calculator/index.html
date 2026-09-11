@@ -315,6 +315,10 @@ html.is-locked .card table.grid input:disabled{opacity:1}
 .pay-p{display:grid;gap:5px}
 .pay-acts{display:flex;gap:10px;margin:14px 0 0}
 @media (max-width:560px){.pay-segs{width:100%}.pay-seg{flex:1}}
+/* Yes is paid and no is not, and on a revenue sheet that is the column an
+   owner runs a finger down. The colour is on the value, not the word. */
+.nice.nice-yes>span,.nice-pop button.nice-yes{color:var(--good-text)}
+.nice.nice-no>span,.nice-pop button.nice-no{color:var(--critical)}
 .savetag.flash{color:var(--good-text)}
 /* the dot pulses only while a write is pending, which is a few hundred ms */
 /* the dot is defined once, above; this only makes it breathe while a write is
@@ -1822,6 +1826,7 @@ en: {
     needsCloud:'Files need the database. This browser-only copy has nowhere to put them.',
     linkFailed:'Could not open that file.',
     confirmDel:'Delete {name}? The file goes with it and there is no undo.',
+    noDelete:'Only an owner can delete documents. Nothing was changed.',
     foot:'Every file is stored privately. Opening one mints a link that stops working after a minute, so a copied link is not a way in.'},
   co:{people:'People',overheads:'Fixed costs',burn:'What it costs to exist',
     peopleLead:'The salary you agreed, what the company pays on top of it, and what each person therefore costs a month.',
@@ -1941,7 +1946,7 @@ en: {
     admin:'Admin overhead rate',adminN:'% of direct project cost',
     margin:'Target margin',marginN:'% of total revenue',
     note:'Settings are stored per project — the same way the Excel file keeps them per workbook.'},
-  cols:{category:'Category',description:'Description',planRev:'Plan Revenue',actRev:'Actual Revenue',diff:'Difference',status:'Status',invoice:'Invoice No.',paid:'Paid?',
+  cols:{category:'Category',description:'Description',planRev:'Plan Revenue',actRev:'Actual Revenue',diff:'Difference',revenue:'Revenue',status:'Status',invoice:'Invoice No.',paid:'Paid?',
     employee:'Employee',role:'Role',days:'Days',hours:'Hours',grossRate:'Gross Rate / h',grossSalary:'Gross Salary',burdenPct:'Employer Burden %',empCost:'Employer Cost',travelDays:'Travel Days',allowance:'Daily Allowance',planTotal:'Plan Total',actTotal:'Actual Total',
     company:'Company / Person',scope:'Scope',rate:'Rate / h',travel:'Travel',accom:'Accommodation',materials:'Materials',other:'Other',
     type:'Type',qty:'Qty',unitCost:'Unit Cost',supplier:'Supplier / Note',
@@ -2189,6 +2194,7 @@ lt: {
     needsCloud:'Failams reikia duomenų bazės. Šioje naršyklės kopijoje jų padėti nėra kur.',
     linkFailed:'Nepavyko atidaryti failo.',
     confirmDel:'Ištrinti {name}? Failas dings kartu, atkurti nebus galima.',
+    noDelete:'Dokumentus gali trinti tik savininkas. Niekas nepakeista.',
     foot:'Visi failai saugomi privačiai. Atidarant sukuriama nuoroda, nustojanti veikti po minutės \u2014 nukopijuota nuoroda nėra būdas patekti.'},
   co:{people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Kiek kainuoja egzistuoti',
     peopleLead:'Sutartas atlyginimas, kiek įmonė moka papildomai ir kiek dėl to kainuoja kiekvienas žmogus per mėnesį.',
@@ -2308,7 +2314,7 @@ lt: {
     admin:'Administracinių išlaidų tarifas',adminN:'% nuo tiesioginių sąnaudų',
     margin:'Tikslinė marža',marginN:'% nuo visų pajamų',
     note:'Nustatymai saugomi kiekvienam projektui atskirai — kaip Excel faile.'},
-  cols:{category:'Kategorija',description:'Aprašymas',planRev:'Planuojamos pajamos',actRev:'Faktinės pajamos',diff:'Skirtumas',status:'Būsena',invoice:'Sąskaitos Nr.',paid:'Apmokėta?',
+  cols:{category:'Kategorija',description:'Aprašymas',planRev:'Planuojamos pajamos',actRev:'Faktinės pajamos',diff:'Skirtumas',revenue:'Pajamos',status:'Būsena',invoice:'Sąskaitos Nr.',paid:'Apmokėta?',
     employee:'Darbuotojas',role:'Pareigos',days:'Dienos',hours:'Valandos',grossRate:'Bruto įkainis / val.',grossSalary:'Bruto atlyginimas',burdenPct:'Darbdavio mokesčiai %',empCost:'Darbdavio kaina',travelDays:'Kelionės dienos',allowance:'Dienpinigiai',planTotal:'Planas iš viso',actTotal:'Faktas iš viso',
     company:'Įmonė / asmuo',scope:'Darbų apimtis',rate:'Įkainis / val.',travel:'Kelionė',accom:'Apgyvendinimas',materials:'Medžiagos',other:'Kita',
     type:'Tipas',qty:'Kiekis',unitCost:'Vieneto kaina',supplier:'Tiekėjas / pastaba',
@@ -2556,6 +2562,7 @@ ru: {
     needsCloud:'Для файлов нужна база данных. В этой браузерной копии их некуда положить.',
     linkFailed:'Не удалось открыть файл.',
     confirmDel:'Удалить {name}? Файл исчезнет вместе с записью, отменить нельзя.',
+    noDelete:'Удалять документы может только владелец. Ничего не изменено.',
     foot:'Все файлы хранятся приватно. При открытии создаётся ссылка, которая перестаёт работать через минуту \u2014 скопированная ссылка не даёт доступа.'},
   co:{people:'Люди',overheads:'Постоянные расходы',burn:'Во что обходится существовать',
     peopleLead:'Оговорённая зарплата, сколько компания платит сверху и во сколько из-за этого обходится каждый человек в месяц.',
@@ -2675,7 +2682,7 @@ ru: {
     admin:'Административные накладные',adminN:'% от прямых затрат',
     margin:'Целевая маржа',marginN:'% от общей выручки',
     note:'Настройки хранятся для каждого проекта отдельно — как в файле Excel.'},
-  cols:{category:'Категория',description:'Описание',planRev:'План доходов',actRev:'Факт доходов',diff:'Разница',status:'Статус',invoice:'№ счёта',paid:'Оплачено?',
+  cols:{category:'Категория',description:'Описание',planRev:'План доходов',actRev:'Факт доходов',diff:'Разница',revenue:'Доход',status:'Статус',invoice:'№ счёта',paid:'Оплачено?',
     employee:'Сотрудник',role:'Должность',days:'Дни',hours:'Часы',grossRate:'Ставка брутто / ч',grossSalary:'Зарплата брутто',burdenPct:'Налоги работодателя %',empCost:'Затраты работодателя',travelDays:'Дни в командировке',allowance:'Суточные',planTotal:'План итого',actTotal:'Факт итого',
     company:'Компания / лицо',scope:'Объём работ',rate:'Ставка / ч',travel:'Проезд',accom:'Проживание',materials:'Материалы',other:'Прочее',
     type:'Тип',qty:'Кол-во',unitCost:'Цена за ед.',supplier:'Поставщик / примечание',
@@ -3299,11 +3306,28 @@ const CLOUD = (function(){
         method: 'POST', body: JSON.stringify({ p_id: id, p_rev: rev, p_row: row })
       }));
     },
-    /* The object first, then the row -- see above. */
+    /* THE ROW FIRST, and the comment this replaces had it the other way for a
+       reason that does not survive the permission check.
+
+       It argued that a row pointing at a missing file is worse than a file
+       nobody references, so delete the object first. True on its own, and it
+       ignored who is asking: only an admin may delete the ROW, while the
+       object went first and unguarded. Somebody without the right therefore
+       destroyed the file and was then refused the row -- producing exactly the
+       orphan row the ordering existed to prevent, and losing the document.
+
+       Row first, the permission is enforced before anything is destroyed, and
+       the worst case left is an orphan FILE, which is the outcome that comment
+       already judged acceptable.
+
+       The storage response is checked now too. It was thrown away, so a
+       refusal there was indistinguishable from a success. 404 is fine: the
+       object is gone, which is what we asked for. */
     async docDelete(id, path){
-      await fetch(API + '/storage/v1/object/documents/' + encodeURI(path),
-                  { method: 'DELETE', headers: authHeaders() });
       await rest('rpc/delete_document', { method: 'POST', body: JSON.stringify({ p_id: id }) });
+      const res = await fetch(API + '/storage/v1/object/documents/' + encodeURI(path),
+                              { method: 'DELETE', headers: authHeaders() });
+      if(!res.ok && res.status !== 404) throw new Error('storage ' + res.status);
     },
     /* A signed URL rather than a public one: the bucket is private, and a
        link that works forever is a link that leaks forever. Sixty seconds is
@@ -3769,10 +3793,15 @@ function projectDays(c){
 function computeDash(p){
   const s = p.settings;
   const sum = (arr, fn) => arr.reduce((a,r)=>a+fn(r), 0);
-  const revPlan = sum(p.revenue, r=>N(r.plan));                                   // E4 =SUM(Revenue!C4:C43)
-  const revActual = sum(p.revenue, r=>N(r.actual))                                 // F4 =SUM(Revenue!D)+SUM(Materials!I)+SUM(Logistics!G)
-                  + sum(p.materials, r=>N(r.rebillAmt))
-                  + sum(p.logistics, r=>N(r.rebill));
+  /* Revenue is ONE number now. The sheet carries a single money column and the
+     rebilled materials and freight still count as income, so they are added
+     here exactly as they were. revPlan and revActual are kept as names because
+     a dozen screens read them, and they are the same figure: what moves
+     against a plan on this job is the cost side. */
+  const revenue = sum(p.revenue, r=>N(r.plan))
+                + sum(p.materials, r=>N(r.rebillAmt))
+                + sum(p.logistics, r=>N(r.rebill));
+  const revPlan = revenue, revActual = revenue;
   const laborPlan = sum(p.labor, r=>F.laborPlan(r,s));                             // E5 =SUM(Labor!K)
   const laborActual = sum(p.labor, r=>N(r.actual));                                // F5 =SUM(Labor!L)
   const subsPlan = sum(p.subs, F.subPlan), subsActual = sum(p.subs, r=>N(r.actual));
@@ -4058,9 +4087,16 @@ function sheetConfigsAll(){
     revenue: { key:'revenue', cols:[
       {k:'cat',t:'text',l:c.category,w:'12%',ac:1},
       {k:'desc',t:'text',l:c.description,w:'18%',ac:1},
-      {k:'plan',t:'num',l:c.planRev,sum:true},
-      {k:'actual',t:'num',l:c.actRev,sum:true},
-      {k:'_diff',t:'calc',l:c.diff,f:F.simpleDiff,sum:true,cls:diffCls},
+      /* ONE figure, not a plan and an actual with a difference between them.
+         A yard is paid what the contract says; the thing that moves against a
+         plan here is the COST, and that is where the comparison stayed.
+
+         Still bound to `plan`, which reads oddly and is deliberate: that is the
+         column people have been typing into, and rebinding the sheet to
+         `actual` would have made every figure already entered vanish from the
+         screen without deleting anything. The stored name is invisible; a
+         disappeared contract value is not. */
+      {k:'plan',t:'num',l:c.revenue,sum:true},
       {k:'status',t:'sel',l:c.status,opts:'status'},
       {k:'invoice',t:'text',l:c.invoice,w:'9%'},
       {k:'paid',t:'sel',l:c.paid,opts:'bool'}
@@ -4629,10 +4665,12 @@ function niceOpen(sel, host){
   const pop = document.createElement('div');
   pop.className = 'nice-pop';
   pop.setAttribute('role', 'listbox');
+  const boolish = sel.dataset.opts === 'bool';
   pop.innerHTML = [...sel.options].map((o, i) =>
     `<button role="option" data-i="${i}" aria-selected="${i === sel.selectedIndex}"
-       class="${i === sel.selectedIndex ? 'on' : ''}"${o.disabled ? ' disabled' : ''}>${
-       esc(o.textContent)}</button>`).join('');
+       class="${i === sel.selectedIndex ? 'on' : ''}${
+         boolish ? (o.value === '1' ? ' nice-yes' : ' nice-no') : ''}"${
+       o.disabled ? ' disabled' : ''}>${esc(o.textContent)}</button>`).join('');
   document.body.appendChild(pop);
 
   /* On a phone it is a sheet across the bottom, not a box pinned to a 63px
@@ -4666,9 +4704,21 @@ function niceOpen(sel, host){
 
   const pick = b => {
     sel.selectedIndex = +b.dataset.i;
-    /* bubbles, because some of these are listened for on a container rather
-       than on the element itself */
+    /* BOTH events, in the order a browser sends them. The comment above this
+       section promises that from the application's side nothing has changed,
+       and for a while that was not true: a native <select> fires input AND
+       change when somebody picks, this fired only change, and the sheet cell
+       writer listens on input. So every dropdown inside a sheet -- paid,
+       status, rebillable -- looked like it changed and wrote nothing. Reported
+       as "да/нет не меняется вообще", and it did not.
+       bubbles, because several of these are listened for on a container. */
+    sel.dispatchEvent(new Event('input', { bubbles: true }));
     sel.dispatchEvent(new Event('change', { bubbles: true }));
+    /* The twin is refreshed by the pass that runs on render, and picking a
+       value in a sheet does not re-render the sheet -- so the label and the
+       yes/no colour stayed on the previous answer while the model already
+       held the new one. Refresh it here, where the change actually happened. */
+    enhanceSelects(sel.parentElement || document);
     niceClose(true);
   };
   pop.addEventListener('click', e => {
@@ -4717,6 +4767,7 @@ function enhanceLangPill(sel){
     pill.addEventListener('click', e => {
       const b = e.target.closest('button[data-lang]'); if(!b) return;
       sel.value = b.dataset.lang;
+      sel.dispatchEvent(new Event('input', { bubbles: true }));
       sel.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
@@ -4774,6 +4825,14 @@ function enhanceSelects(root){
     if(host.dataset.label !== label){
       host.dataset.label = label;
       host.innerHTML = `<span>${esc(label)}</span>${ICON_CHEV}`;
+    }
+    /* A yes/no on an invoice line is the one answer on the sheet somebody
+       scans a whole column for, so it carries its own colour. Keyed on the
+       VALUE, not on the label: the same control reads Taip and Да on the other
+       two languages and neither is spelled like the English. */
+    if(sel.dataset.opts === 'bool'){
+      host.classList.toggle('nice-yes', sel.value === '1');
+      host.classList.toggle('nice-no', sel.value !== '1');
     }
   });
 }
@@ -6300,6 +6359,12 @@ function viewDashboard(){
   const x = computeExtra(proj());
   const dd = t.dash;
   const deltaRev = d.revPlan ? (d.revActual-d.revPlan)/d.revPlan : null;
+  /* Revenue has one figure now, so it gets one cell spanning the plan and
+     actual columns and no difference: printing the same number twice with a
+     zero between them is the comparison this change removed. */
+  const oneRow = (label, v) =>
+    `<tr class="section"><td>${label}</td>` +
+    `<td class="num" colspan="2">${fmt(v)}</td><td class="num calc">&nbsp;</td></tr>`;
   const kpiRow = (label, plan, actual, isPct, strong) => {
     const diff = actual - plan;
     return `<tr class="${strong?'section':''}"><td>${label}</td>
@@ -6381,7 +6446,7 @@ function viewDashboard(){
       <table class="grid kpi-table">
         <thead><tr><th>${dd.kpi}</th><th class="num">${dd.plan}</th><th class="num">${dd.actual}</th><th class="num">${dd.diff}</th></tr></thead>
         <tbody>
-          ${kpiRow(dd.totalRevenue, d.revPlan, d.revActual)}
+          ${oneRow(dd.totalRevenue, d.revActual)}
           ${kpiRow(dd.laborCost, d.laborPlan, d.laborActual)}
           ${kpiRow(t.tabs.subs, d.subsPlan, d.subsActual)}
           ${kpiRow(t.tabs.travel, d.travelPlan, d.travelActual)}
@@ -6889,7 +6954,7 @@ function coDocsView(){
         ${fields.map(x => docCell(r, x, t)).join('')}
         <td class="doc-who">${r.uploaded_by ? esc(r.uploaded_by) : '\u2014'}
             <span class="doc-when">${esc((r.created_at || '').slice(0, 10))}</span></td>
-        <td><button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button></td>
+        <td>${canPayroll() ? `<button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button>` : ''}</td>
       </tr>`).join('')
       : `<tr><td colspan="${fields.length + 4}" class="muted">${esc(d.none)}</td></tr>`;
 
@@ -9086,7 +9151,13 @@ function wireCompany(){
          for the mirror reason: a row pointing at a file that is gone is worse
          than a file nobody references. */
       try { if(CLOUD.on) await CLOUD.docDelete(id, rec.path); }
-      catch(e){ toast(tr().co.saveFailed, 'bad'); return; }
+      catch(e){
+        /* "Could not save" for a refusal sent somebody back to try again, and
+           again. A permission is not a failure to retry, it is an answer. */
+        const denied = /42501|not permitted|permission/i.test((e && e.message) || '');
+        toast(denied ? tr().doc.noDelete : tr().co.saveFailed, 'bad');
+        return;
+      }
       state.documents = (state.documents || []).filter(x => x.id !== id);
       persist(); render();
       return;
@@ -10192,7 +10263,7 @@ function exportCsv(){
   }
   row([dd.title]);
   row([dd.kpi, dd.plan, dd.actual]);
-  const kv = [[dd.totalRevenue,d.revPlan,d.revActual],[dd.laborCost,d.laborPlan,d.laborActual],[t.tabs.subs,d.subsPlan,d.subsActual],[t.tabs.travel,d.travelPlan,d.travelActual],[t.tabs.materials,d.matPlan,d.matActual],[t.tabs.logistics,d.logPlan,d.logActual],[dd.directCost,d.directPlan,d.directActual],[dd.adminOh,d.adminPlan,d.adminActual],[dd.contingency,d.contPlan,d.contActual],[dd.totalCost,d.costPlan,d.costActual],[dd.grossProfit,d.profitPlan,d.profitActual]];
+  const kv = [[dd.totalRevenue,d.revActual,d.revActual],[dd.laborCost,d.laborPlan,d.laborActual],[t.tabs.subs,d.subsPlan,d.subsActual],[t.tabs.travel,d.travelPlan,d.travelActual],[t.tabs.materials,d.matPlan,d.matActual],[t.tabs.logistics,d.logPlan,d.logActual],[dd.directCost,d.directPlan,d.directActual],[dd.adminOh,d.adminPlan,d.adminActual],[dd.contingency,d.contPlan,d.contActual],[dd.totalCost,d.costPlan,d.costActual],[dd.grossProfit,d.profitPlan,d.profitActual]];
   kv.forEach(r=>L.push([q(r[0]),num(r[1]),num(r[2])].join(';')));
   L.push([q(dd.margin),q(pct(d.marginPlan)),q(pct(d.marginActual))].join(';'));
   download(`LITPROFIT_${p.card.projectId||'project'}.csv`, '﻿'+L.join('\r\n'), 'text/csv;charset=utf-8');
@@ -10411,7 +10482,7 @@ function printProjectReport(){
     </div>
 
     <div class="rp-kpis">
-      ${kpi(dd.totalRevenue, m(d.revActual), `${esc(dd.plan)}: ${m(d.revPlan)}`)}
+      ${kpi(dd.totalRevenue, m(d.revActual), '&nbsp;')}
       ${kpi(dd.totalCost, m(d.costActual), `${esc(dd.plan)}: ${m(d.costPlan)}`)}
       ${kpi(dd.grossProfit, m(d.profitActual), `${esc(dd.plan)}: ${m(d.profitPlan)}`)}
       ${kpi(dd.margin, pct(d.marginActual),
@@ -10442,7 +10513,8 @@ function printProjectReport(){
     <h3>${esc(dd.title)}</h3>
     <table><thead><tr><th>${esc(dd.kpi)}</th><th class="num">${esc(dd.plan)}</th>
       <th class="num">${esc(dd.actual)}</th><th class="num">${esc(dd.diff)}</th></tr></thead><tbody>
-      ${row(dd.totalRevenue,d.revPlan,d.revActual)}
+      <!-- one figure, one cell: revenue no longer has a plan to differ from -->
+      <tr class="section"><td>${esc(dd.totalRevenue)}</td><td class="num" colspan="2">${fmt(d.revActual)}</td><td class="num">&nbsp;</td></tr>
       ${row(dd.laborCost,d.laborPlan,d.laborActual)}
       ${row(t.tabs.subs,d.subsPlan,d.subsActual)}
       ${row(t.tabs.travel,d.travelPlan,d.travelActual)}
