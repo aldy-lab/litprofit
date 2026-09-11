@@ -1104,22 +1104,34 @@ a.card { position: relative; }
 .card-media img {
   width: 100%; height: 100%;
   object-fit: cover;
-  opacity: 0.62;
-  filter: saturate(0.6);
-  transition: transform 0.26s var(--ease), opacity 0.26s var(--ease);
+  /* 0.88, not 0.62. At 0.62 behind an overlay reaching 0.85 these measured
+     around 34 of 255 on a desktop -- an eighth of the photograph -- and the
+     touch rules below had already been raised for exactly that reason. A
+     pointer is not a reason to keep the picture in the dark.
+     Saturation goes up far less than brightness, and deliberately: letting the
+     colour back in with the light turned a near-monochrome page into stock
+     photography, which is the thing this palette exists to avoid. */
+  opacity: 0.88;
+  filter: saturate(0.7);
+  transition: transform 0.26s var(--ease), opacity 0.26s var(--ease),
+              filter 0.26s var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
   /* No scale. A slow zoom on a thumbnail is the other half of the template
      look, and it moved the one thing on the card worth looking at. The photo
      brightens and loses a little of its desaturation instead -- it wakes up
      without going anywhere. */
-  a.card:hover .card-media img { opacity: 0.82; filter: saturate(0.78); }
+  a.card:hover .card-media img { opacity: 1; filter: saturate(0.84); }
 }
 .card-media::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(8,8,31,0.15), rgba(8,8,31,0.85));
+  /* This, not the image opacity, was most of the darkness: a wash reaching
+     0.85 over the bottom of every card. Its job is to melt the photograph into
+     the card body underneath, and 0.42 still does that -- nothing is written
+     on the picture, so it never had to carry text. */
+  background: linear-gradient(180deg, rgba(8,8,31,0.03), rgba(8,8,31,0.34));
 }
 @media (hover: none) {
   /* A touch screen never hovers, so the resting state IS the only state and
@@ -1211,8 +1223,8 @@ a.card { position: relative; }
 .media-panel img {
   width: 100%;
   object-fit: cover;
-  opacity: 0.62;
-  filter: saturate(0.6);
+  opacity: 0.88;
+  filter: saturate(0.7);
   transition: opacity 0.26s var(--ease), filter 0.26s var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -1461,8 +1473,8 @@ a.card { position: relative; }
 .page-media img {
   width: 100%; height: 100%;
   object-fit: cover;
-  opacity: 0.72;
-  filter: saturate(0.6);
+  opacity: 0.92;
+  filter: saturate(0.7);
 }
 /* The workshop frames are roughly 4:3 and the banner is 21:8, so the crop is
    severe and centring it is wrong: in these photographs the machine sits above
@@ -1473,7 +1485,15 @@ a.card { position: relative; }
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(8,8,31,0.2), rgba(8,8,31,0.75));
+  /* Was 0.2 to 0.75, and the note further down this file explains it as room
+     for a headline to sit on top. Nothing sits on top: the block holds an
+     image and nothing else on every page that uses it, checked in the built
+     markup. So the scrim was paying for a legibility problem that does not
+     exist, and it was doing most of the darkening -- raising the image from
+     0.72 to 0.92 moved the rendered photograph by three points because this
+     was over it. It keeps a light foot so the banner still lands on the page
+     rather than floating. */
+  background: linear-gradient(180deg, rgba(8,8,31,0.03), rgba(8,8,31,0.34));
 }
 
 .prose { max-width: 74ch; padding-bottom: clamp(50px, 7vw, 100px); }
@@ -1978,8 +1998,8 @@ html.is-frost #frostToggle {
 
 /* ============================================================
    WORKSHOP SHOTS
-   The opposite of .page-media. That one holds a photograph back
-   to 72% and desaturates it so a headline can sit on top; these
+   The opposite of .page-media. That one still holds a photograph
+   back a little and desaturates it; these
    are the evidence a ship repair company is actually asked for,
    so they are shown at full strength and given room.
    ============================================================ */
