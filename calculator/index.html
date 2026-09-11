@@ -352,7 +352,31 @@ html.is-locked .card table.grid input:disabled{opacity:1}
   border-bottom:1px solid var(--border)}
 .ai-head h2{margin:0 0 6px;font-size:19px;font-weight:600}
 .ai-lead{margin:0;font-size:12.5px;line-height:1.6;color:var(--ink-3);max-width:62ch}
-.ai-x{flex:none;margin-left:auto}
+/* ---------- the way out of a panel ----------
+   It was a 34px button with the &times; CHARACTER in it, so the cross was
+   whatever the body font felt like at that size -- small, off-centre, and
+   thicker on one diagonal than the other. This file already learned that once:
+   the note above ICON.help says the glyph lands differently in every font,
+   which is why the question mark is drawn. So is this now.
+
+   40px, and 44 under a finger, which is the smallest target worth putting a
+   destructive-feeling action on. It carries a hairline frame because a bare
+   cross in a roomy panel header reads as a mark on the page rather than as a
+   control -- the frame is what says it can be pressed. */
+/* button.icon.ai-x, not .ai-x: button.icon sets 34x34 and outranks a lone
+   class, so the first version of this measured 34 on screen while the comment
+   above it claimed 40. Measured, not read off the diff. */
+button.icon.ai-x{
+  flex:none;margin-left:auto;
+  width:40px;height:40px;
+  border:1px solid var(--border);
+  color:var(--ink-2);
+  transition:border-color .18s var(--ease),color .18s var(--ease),background .18s var(--ease)
+}
+button.icon.ai-x svg{width:18px;height:18px}
+button.icon.ai-x:hover{border-color:var(--baseline);color:var(--ink-1);background:var(--accent-soft)}
+button.icon.ai-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (hover:none){button.icon.ai-x{width:44px;height:44px}}
 .ai-body{padding:6px 24px 4px;overflow-y:auto}
 .ai-note{margin:16px 0;padding:10px 0 10px 14px;border-left:2px solid var(--accent);
   font-size:13.5px;line-height:1.65}
@@ -1655,7 +1679,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
         <h2 id="helpTitle"></h2>
         <p class="ai-lead" id="helpWhere"></p>
       </div>
-      <button class="icon ghost ai-x" id="helpClose" aria-label="Close">&times;</button>
+      <button class="icon ghost ai-x" id="helpClose" aria-label="Close"><svg class="stroke" viewBox="0 0 18 18" aria-hidden="true"><path d="M5 5 13 13M13 5 5 13"/></svg></button>
     </div>
     <div class="ai-body" id="helpBody"></div>
   </div>
@@ -1668,7 +1692,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
         <h2 id="aiTitle"></h2>
         <p class="ai-lead" id="aiLead"></p>
       </div>
-      <button class="icon ghost ai-x" id="aiClose" aria-label="Close">&times;</button>
+      <button class="icon ghost ai-x" id="aiClose" aria-label="Close"><svg class="stroke" viewBox="0 0 18 18" aria-hidden="true"><path d="M5 5 13 13M13 5 5 13"/></svg></button>
     </div>
     <div class="ai-body" id="aiBody"></div>
     <div class="ai-foot">
@@ -1686,7 +1710,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
         <h2 id="payTitle"></h2>
         <p class="ai-lead" id="payLead"></p>
       </div>
-      <button class="icon ghost ai-x" id="payClose" aria-label="Close">&times;</button>
+      <button class="icon ghost ai-x" id="payClose" aria-label="Close"><svg class="stroke" viewBox="0 0 18 18" aria-hidden="true"><path d="M5 5 13 13M13 5 5 13"/></svg></button>
     </div>
     <div class="ai-body" id="payBody"></div>
   </div>
