@@ -294,6 +294,27 @@ html.is-locked .card table.grid input:disabled{opacity:1}
 }
 .savetag.on{opacity:1}
 .savetag.warn{color:var(--warning);opacity:1}
+.pay-in{display:grid;gap:14px;margin-bottom:20px}
+.pay-segs{display:flex;gap:0;border:1px solid var(--line);width:fit-content}
+.pay-seg{border:0;background:transparent;padding:8px 15px;font-family:var(--mono);
+  font-size:var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);cursor:pointer}
+.pay-seg+.pay-seg{border-left:1px solid var(--line)}
+.pay-seg.on{background:var(--accent-soft);color:var(--ink-1)}
+.pay-amt{display:grid;gap:6px;max-width:320px}
+.pay-amt>span,.pay-ck>span,.pay-p>span{font-family:var(--mono);font-size:var(--label);
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.pay-ck{display:flex;gap:10px;align-items:center}
+.pay-out{width:100%;border-collapse:collapse}
+.pay-out td{padding:7px 0;border-bottom:1px solid var(--line)}
+.pay-out td.num{text-align:right;font-variant-numeric:tabular-nums}
+/* The three lines a reader is actually looking for: gross, in hand, and what
+   it costs. Everything between them is the arithmetic that gets there. */
+.pay-out tr.section td{font-weight:600;color:var(--ink-1)}
+.pay-year{font-family:var(--mono);font-size:var(--label);letter-spacing:.12em;color:var(--ink-3)}
+.pay-pars{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:10px 0 4px}
+.pay-p{display:grid;gap:5px}
+.pay-acts{display:flex;gap:10px;margin:14px 0 0}
+@media (max-width:560px){.pay-segs{width:100%}.pay-seg{flex:1}}
 .savetag.flash{color:var(--good-text)}
 /* the dot pulses only while a write is pending, which is a few hundred ms */
 /* the dot is defined once, above; this only makes it breathe while a write is
@@ -1654,6 +1675,20 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
   </div>
 </div>
 
+<div class="ai-scrim" id="payPanel" hidden>
+  <div class="ai-card" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+    <div class="ai-head">
+      <div>
+        <h2 id="payTitle"></h2>
+        <p class="ai-lead" id="payLead"></p>
+      </div>
+      <button class="icon ghost ai-x" id="payClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="ai-body" id="payBody"></div>
+  </div>
+</div>
+
+
 <div class="signin" id="signin" hidden>
   <form class="signin-card" id="signinForm">
     <img src="/assets/brand/logo-lockup.svg" alt="LITPROFIT" class="signin-mark">
@@ -1983,6 +2018,26 @@ en: {
       docs:{l:'Every file in the company, including what belongs to no single job.',
         b:['Only an owner can delete: object storage has no undo.']}
     }
+  },
+  pay:{
+    menu:'Salary calculator',
+    title:'Salary and taxes',
+    lead:'Lithuania. Gross, net and what the company pays, from any one of the three.',
+    from:'Start from', fGross:'Gross', fNet:'Net', fTotal:'Company cost',
+    amount:'Amount, \u20ac / month',
+    contract:'Contract', permanent:'Indefinite', fixed:'Fixed term',
+    pension:'Pays the extra 3% pension accumulation',
+    outGross:'Gross salary', outNpd:'Tax-exempt amount (NPD)',
+    outGpm:'Income tax (GPM)', outSodra:'Employee Sodra',
+    outNet:'Net, in hand', outEmp:'Employer Sodra', outTotal:'Total company cost',
+    par:'Rates used', parYear:'Year', parEdit:'Edit rates', parSave:'Save rates',
+    parReset:'Back to built-in',
+    stale:'These rates are from {y} and it is now {n}. Check them against VMI and Sodra before anybody relies on a figure here \u2014 the fields are below.',
+    unverified:'The built-in rates are the {y} set. They have not been checked against this year\u2019s VMI and Sodra tables.',
+    note:'The employer share is the same rate the staff register uses, so the total here is the figure that register would hold. The income-tax ceiling is applied monthly as a twelfth of the annual one.',
+    pMma:'Minimum wage', pNpdMax:'NPD maximum', pNpdCoef:'NPD taper',
+    pSodra:'Employee Sodra', pGpm:'GPM', pGpmHigh:'GPM above ceiling',
+    pCap:'Ceiling, per month'
   },
   ai:{
     button:'Advice', title:'What the figures say',
@@ -2331,6 +2386,26 @@ lt: {
         b:['Trinti gali tik savininkas: objektinėje saugykloje nėra atšaukimo.']}
     }
   },
+  pay:{
+    menu:'Atlyginimo skai\u010diuokl\u0117',
+    title:'Atlyginimas ir mokes\u010diai',
+    lead:'Lietuva. Ant popieriaus, \u012f rankas ir \u012fmon\u0117s kaina \u2014 nuo bet kurio i\u0161 tri\u0173.',
+    from:'Skai\u010diuoti nuo', fGross:'Ant popieriaus', fNet:'\u012e rankas', fTotal:'\u012emon\u0117s kaina',
+    amount:'Suma, \u20ac / m\u0117n.',
+    contract:'Sutartis', permanent:'Neterminuota', fixed:'Terminuota',
+    pension:'Moka papildomus 3% pensijai',
+    outGross:'Atlyginimas ant popieriaus', outNpd:'NPD',
+    outGpm:'GPM', outSodra:'Darbuotojo Sodra',
+    outNet:'\u012e rankas', outEmp:'Darbdavio Sodra', outTotal:'Visa \u012fmon\u0117s kaina',
+    par:'Naudojami tarifai', parYear:'Metai', parEdit:'Keisti tarifus', parSave:'\u012era\u0161yti',
+    parReset:'Gr\u0105\u017einti numatytuosius',
+    stale:'\u0160ie tarifai yra i\u0161 {y} m., o dabar {n}. Patikrinkite juos VMI ir Sodros lentel\u0117se, kol niekas nesir\u0117m\u0117 \u0161iais skai\u010diais \u2014 laukeliai \u017eemiau.',
+    unverified:'\u012ediegti tarifai yra {y} m. rinkinys. Jie nebuvo sutikrinti su \u0161i\u0173 met\u0173 VMI ir Sodros lentel\u0117mis.',
+    note:'Darbdavio dalis skai\u010diuojama tuo pa\u010diu tarifu kaip ir darbuotoj\u0173 registre, tod\u0117l bendra suma sutampa su ten saugoma. GPM riba taikoma m\u0117nesiui kaip metin\u0117s dvyliktoji.',
+    pMma:'MMA', pNpdMax:'Didžiausias NPD', pNpdCoef:'NPD ma\u017e\u0117jimas',
+    pSodra:'Darbuotojo Sodra', pGpm:'GPM', pGpmHigh:'GPM vir\u0161 ribos',
+    pCap:'Riba per m\u0117nes\u012f'
+  },
   ai:{
     button:'Patarimai', title:'Ką sako skaičiai',
     lead:'Visus žemiau esančius skaičius suskaičiavo duomenų bazė. Modelis tik pasirinko, kurie iš jų svarbūs, ir parašė sakinius — skaičiuoti jam neleidžiama, o atsakymas su skaičiumi, kurio nėra duomenyse, atmetamas, o ne rodomas.',
@@ -2677,6 +2752,26 @@ ru: {
       docs:{l:'Все файлы компании, включая те, что не относятся ни к одной работе.',
         b:['Удалять может только владелец: у объектного хранилища нет отмены.']}
     }
+  },
+  pay:{
+    menu:'\u041a\u0430\u043b\u044c\u043a\u0443\u043b\u044f\u0442\u043e\u0440 \u0437\u0430\u0440\u043f\u043b\u0430\u0442\u044b',
+    title:'\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043d\u0430\u043b\u043e\u0433\u0438',
+    lead:'\u041b\u0438\u0442\u0432\u0430. \u041d\u0430\u0447\u0438\u0441\u043b\u0435\u043d\u043e, \u043d\u0430 \u0440\u0443\u043a\u0438 \u0438 \u0437\u0430\u0442\u0440\u0430\u0442\u044b \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438 \u2014 \u043e\u0442 \u043b\u044e\u0431\u043e\u0433\u043e \u0438\u0437 \u0442\u0440\u0451\u0445.',
+    from:'\u0421\u0447\u0438\u0442\u0430\u0442\u044c \u043e\u0442', fGross:'\u041d\u0430\u0447\u0438\u0441\u043b\u0435\u043d\u043e', fNet:'\u041d\u0430 \u0440\u0443\u043a\u0438', fTotal:'\u0417\u0430\u0442\u0440\u0430\u0442\u044b \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438',
+    amount:'\u0421\u0443\u043c\u043c\u0430, \u20ac / \u043c\u0435\u0441',
+    contract:'\u0414\u043e\u0433\u043e\u0432\u043e\u0440', permanent:'\u0411\u0435\u0441\u0441\u0440\u043e\u0447\u043d\u044b\u0439', fixed:'\u0421\u0440\u043e\u0447\u043d\u044b\u0439',
+    pension:'\u041f\u043b\u0430\u0442\u0438\u0442 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 3% \u043d\u0430 \u043f\u0435\u043d\u0441\u0438\u044e',
+    outGross:'\u041d\u0430\u0447\u0438\u0441\u043b\u0435\u043d\u043e', outNpd:'\u041d\u0435\u043e\u0431\u043b\u0430\u0433\u0430\u0435\u043c\u044b\u0439 \u043c\u0438\u043d\u0438\u043c\u0443\u043c (NPD)',
+    outGpm:'\u041f\u043e\u0434\u043e\u0445\u043e\u0434\u043d\u044b\u0439 (GPM)', outSodra:'Sodra \u0441 \u0440\u0430\u0431\u043e\u0442\u043d\u0438\u043a\u0430',
+    outNet:'\u041d\u0430 \u0440\u0443\u043a\u0438', outEmp:'Sodra \u0440\u0430\u0431\u043e\u0442\u043e\u0434\u0430\u0442\u0435\u043b\u044f', outTotal:'\u0412\u0441\u0435\u0433\u043e \u0434\u043b\u044f \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438',
+    par:'\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u043c\u044b\u0435 \u0441\u0442\u0430\u0432\u043a\u0438', parYear:'\u0413\u043e\u0434', parEdit:'\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0441\u0442\u0430\u0432\u043a\u0438', parSave:'\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c',
+    parReset:'\u0412\u0435\u0440\u043d\u0443\u0442\u044c \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u044b\u0435',
+    stale:'\u042d\u0442\u0438 \u0441\u0442\u0430\u0432\u043a\u0438 \u0437\u0430 {y} \u0433\u043e\u0434, \u0430 \u0441\u0435\u0439\u0447\u0430\u0441 {n}. \u0421\u0432\u0435\u0440\u044c\u0442\u0435 \u0438\u0445 \u0441 VMI \u0438 Sodra, \u043f\u0440\u0435\u0436\u0434\u0435 \u0447\u0435\u043c \u043a\u0442\u043e-\u0442\u043e \u043d\u0430 \u043d\u0438\u0445 \u043e\u0431\u043e\u043f\u0440\u0451\u0442\u0441\u044f \u2014 \u043f\u043e\u043b\u044f \u043d\u0438\u0436\u0435.',
+    unverified:'\u0412\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u044b\u0435 \u0441\u0442\u0430\u0432\u043a\u0438 \u2014 \u043d\u0430\u0431\u043e\u0440 {y} \u0433\u043e\u0434\u0430. \u041e\u043d\u0438 \u043d\u0435 \u0441\u0432\u0435\u0440\u0435\u043d\u044b \u0441 \u0442\u0430\u0431\u043b\u0438\u0446\u0430\u043c\u0438 VMI \u0438 Sodra \u044d\u0442\u043e\u0433\u043e \u0433\u043e\u0434\u0430.',
+    note:'\u0414\u043e\u043b\u044f \u0440\u0430\u0431\u043e\u0442\u043e\u0434\u0430\u0442\u0435\u043b\u044f \u0441\u0447\u0438\u0442\u0430\u0435\u0442\u0441\u044f \u0442\u043e\u0439 \u0436\u0435 \u0441\u0442\u0430\u0432\u043a\u043e\u0439, \u0447\u0442\u043e \u0438 \u0432 \u0440\u0435\u0435\u0441\u0442\u0440\u0435 \u043b\u044e\u0434\u0435\u0439, \u043f\u043e\u044d\u0442\u043e\u043c\u0443 \u0438\u0442\u043e\u0433 \u0441\u043e\u0432\u043f\u0430\u0434\u0430\u0435\u0442 \u0441 \u0445\u0440\u0430\u043d\u0438\u043c\u044b\u043c \u0442\u0430\u043c. \u041f\u043e\u0442\u043e\u043b\u043e\u043a GPM \u043f\u0440\u0438\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f \u043a \u043c\u0435\u0441\u044f\u0446\u0443 \u043a\u0430\u043a \u0434\u0432\u0435\u043d\u0430\u0434\u0446\u0430\u0442\u0430\u044f \u0447\u0430\u0441\u0442\u044c \u0433\u043e\u0434\u043e\u0432\u043e\u0433\u043e.',
+    pMma:'MMA', pNpdMax:'\u041c\u0430\u043a\u0441. NPD', pNpdCoef:'\u0421\u043f\u0430\u0434 NPD',
+    pSodra:'Sodra \u0440\u0430\u0431\u043e\u0442\u043d\u0438\u043a\u0430', pGpm:'GPM', pGpmHigh:'GPM \u0432\u044b\u0448\u0435 \u043f\u043e\u0442\u043e\u043b\u043a\u0430',
+    pCap:'\u041f\u043e\u0442\u043e\u043b\u043e\u043a \u0432 \u043c\u0435\u0441\u044f\u0446'
   },
   ai:{
     button:'Советы', title:'Что говорят цифры',
@@ -4412,6 +4507,9 @@ function menuItems(t, locked){
     wide ? item('csv', t.csv) : '',
     wide ? item('json', t.json) : '',
     wide ? item('import', t.importJson + '\u2026') : '',   /* the ellipsis says a file dialog follows */
+    /* Payroll, so it sits behind the payroll gate rather than the money one:
+       the panel is about what a person costs and what a person takes home. */
+    wide ? item('payroll', t.pay.menu) : '',
     '<div class="menu-sep"></div>',
     item('del', t.delProj, 'danger'),
     CLOUD.on ? '<div class="menu-sep"></div>' + item('refresh', t.cloud.refresh) + item('signout', t.cloud.signOut) : ''
@@ -6397,6 +6495,114 @@ function employerCostOf(p){ return grossOf(p) * employerRate(p.contract); }
 function totalCostOf(p){
   return p.monthly_cost != null ? (Number(p.monthly_cost) || 0)
                                 : grossOf(p) + employerCostOf(p);
+}
+
+/* ============================================================
+   THE OTHER HALF OF THE PAYSLIP
+   ------------------------------------------------------------
+   The note above says the employee's side is deliberately not modelled,
+   because the NPD formula changes every January and a net figure quietly a
+   year out of date is worse than none. That objection is right and it is the
+   reason this is built the way it is rather than a reason not to build it:
+   the parameters are not buried in the code, they are ON SCREEN, EDITABLE,
+   and STAMPED WITH THE YEAR THEY BELONG TO. When the browser's year is past
+   that stamp the panel says so before it shows a number.
+
+   So the failure mode is not a wrong net salary presented confidently. It is
+   a banner saying the rates are from last year, with the fields to fix them
+   underneath, and one edit makes it right for the next twelve months.
+
+   THE EMPLOYER SIDE IS NOT DUPLICATED HERE. employerRate() above is the one
+   that computes every stored cost in this company, and this panel calls it,
+   so the total it shows for a person is the same number the register holds --
+   not a second opinion that happens to agree today.
+
+   VALUES BELOW ARE THE 2025 SET. I could not verify the 2026 figures, and a
+   plausible guess at an NPD coefficient is exactly the thing this comment
+   exists to prevent. They are stamped 2025 on purpose so the staleness line
+   fires on first open and asks for the check, rather than looking current and
+   being wrong. Correct them in the panel (they persist) or here. */
+const LT_PAY_DEFAULT = {
+  year: 2025,
+  sodra: 0.195,        /* employee Sodra out of gross */
+  pension2: 0.03,      /* voluntary second-pillar accumulation, if joined */
+  gpm: 0.20,           /* employment income, below the ceiling */
+  gpmHigh: 0.32,       /* above it */
+  gpmHighFrom: 8100,   /* MONTHLY equivalent of the annual 60-VDU ceiling */
+  mma: 1038,           /* minimum monthly wage */
+  npdMax: 747,         /* largest monthly NPD */
+  npdCoef: 0.49,       /* taper, per euro of gross above the MMA */
+  npdHiFrom: 2387,     /* above this the second formula applies */
+  npdHiBase: 400,
+  npdHiCoef: 0.18,
+  npdHiFloor: 642
+};
+const LT_PAY_KEY = 'litprofit_ltpay';
+
+function ltPay(){
+  let o = {};
+  try { o = JSON.parse(localStorage.getItem(LT_PAY_KEY) || '{}') || {}; } catch(e){}
+  return Object.assign({}, LT_PAY_DEFAULT, o);
+}
+function ltPaySave(o){
+  try { localStorage.setItem(LT_PAY_KEY, JSON.stringify(o)); } catch(e){}
+}
+function ltPayStale(o){
+  /* The whole safety of this feature is this one line. */
+  return new Date().getFullYear() > (Number(o.year) || 0);
+}
+
+/* The allowance. Two formulas and a floor, which is the shape it has had for
+   years even as the numbers moved -- so a year's change is six fields above
+   and nothing here. */
+function ltNpd(gross, o, disability){
+  if(disability) return Number(o['npdDis' + disability]) || 0;
+  let npd;
+  if(gross <= o.mma) npd = o.npdMax;
+  else if(gross <= o.npdHiFrom) npd = o.npdMax - o.npdCoef * (gross - o.mma);
+  else npd = o.npdHiBase - o.npdHiCoef * (gross - o.npdHiFloor);
+  return Math.max(0, npd);
+}
+
+/* gross -> the whole payslip, both sides of it. */
+function ltFromGross(gross, opt){
+  const o = ltPay();
+  opt = opt || {};
+  gross = Math.max(0, Number(gross) || 0);
+  const npd = ltNpd(gross, o, opt.disability);
+  const taxable = Math.max(0, gross - npd);
+  const overCap = Math.max(0, gross - o.gpmHighFrom);
+  const gpm = (taxable - Math.min(taxable, overCap)) * o.gpm + Math.min(taxable, overCap) * o.gpmHigh;
+  const sodraRate = o.sodra + (opt.pension2 ? o.pension2 : 0);
+  const sodra = gross * sodraRate;
+  const employer = gross * employerRate(opt.contract || 'permanent');
+  return {
+    gross: gross, npd: npd, gpm: gpm, sodra: sodra,
+    net: gross - gpm - sodra,
+    employer: employer, total: gross + employer,
+    sodraRate: sodraRate, params: o
+  };
+}
+
+/* net -> gross. There is no closed form once the NPD tapers and the ceiling
+   bites, so it is bisected. Fifty halvings of a window that starts at ten
+   times the target is exact to far below a cent, and it cannot loop: the
+   count is the bound, not the tolerance. */
+function ltFromNet(net, opt){
+  net = Math.max(0, Number(net) || 0);
+  let lo = 0, hi = Math.max(100, net * 10);
+  for(let i = 0; i < 50; i++){
+    const mid = (lo + hi) / 2;
+    if(ltFromGross(mid, opt).net < net) lo = mid; else hi = mid;
+  }
+  return ltFromGross((lo + hi) / 2, opt);
+}
+
+/* what the company pays out -> the same payslip, so a budget can be worked
+   backwards from the line the register already holds */
+function ltFromTotal(total, opt){
+  total = Math.max(0, Number(total) || 0);
+  return ltFromGross(total / (1 + employerRate((opt || {}).contract || 'permanent')), opt);
 }
 
 function coState(){
@@ -9358,6 +9564,7 @@ const MENU_ACTS = {
     return 'noop';
   },
   printProject(){ printProjectReport(); return 'noop'; },
+  payroll(){ payOpen(); return 'noop'; },
   printCompany(){ printCompanyReport(); return 'noop'; },
   /* these three change no state, so they neither save nor re-render */
   csv(){ exportCsv(); return 'noop'; },
@@ -9575,6 +9782,145 @@ function helpClose(){
   HELP.open = false;
   $('#helpPanel').hidden = true;
   const b = $('#btnHelp'); if(b) b.focus();
+}
+
+/* ============================================================
+   SALARY PANEL
+   ------------------------------------------------------------
+   Three ways in, because the three questions a yard actually asks are
+   different questions: what does this advert's gross come to in hand, what
+   gross do I need to offer to land a fitter on a promised net, and what does
+   the whole thing cost me. The last one is the number the staff register
+   already stores, computed by the same employerRate(), so this panel and that
+   register cannot drift.
+   ============================================================ */
+var PAY = { from: 'gross', amount: 2000, contract: 'permanent',
+            pension2: false, editing: false };
+
+function payOpen(){
+  const el = $('#payPanel'); if(!el) return;
+  el.hidden = false;
+  payPaint();
+  const x = $('#payClose'); if(x) x.focus();
+}
+function payClose(){
+  const el = $('#payPanel'); if(el) el.hidden = true;
+  const b = $('#btnMenu'); if(b) b.focus();
+}
+
+function payPaint(){
+  const t = tr(), a = t.pay, body = $('#payBody');
+  if(!body) return;
+  $('#payTitle').textContent = a.title;
+  $('#payLead').textContent = a.lead;
+
+  const o = ltPay();
+  const r = PAY.from === 'net'   ? ltFromNet(PAY.amount, PAY)
+          : PAY.from === 'total' ? ltFromTotal(PAY.amount, PAY)
+          :                        ltFromGross(PAY.amount, PAY);
+
+  const now = new Date().getFullYear();
+  let warn = '';
+  if(ltPayStale(o)){
+    warn = '<div class="ai-note bad">' +
+           esc(a.stale.replace('{y}', o.year).replace('{n}', now)) + '</div>';
+  } else if(!o.confirmed){
+    warn = '<div class="ai-note">' + esc(a.unverified.replace('{y}', o.year)) + '</div>';
+  }
+
+  const seg = (k, lbl) =>
+    '<button class="pay-seg' + (PAY.from === k ? ' on' : '') + '" data-pay-from="' + k + '">' +
+    esc(lbl) + '</button>';
+
+  const row = (lbl, v, cls) =>
+    '<tr class="' + (cls || '') + '"><td>' + esc(lbl) + '</td>' +
+    '<td class="num">' + fmt(v) + '</td></tr>';
+
+  const pf = (key, lbl, step) =>
+    '<label class="pay-p"><span>' + esc(lbl) + '</span>' +
+    '<input type="number" step="' + step + '" data-pay-par="' + key + '" value="' + o[key] + '"></label>';
+
+  body.innerHTML =
+    warn +
+    '<div class="pay-in">' +
+      '<div class="pay-segs" role="group" aria-label="' + esc(a.from) + '">' +
+        seg('gross', a.fGross) + seg('net', a.fNet) + seg('total', a.fTotal) +
+      '</div>' +
+      '<label class="pay-amt"><span>' + esc(a.amount) + '</span>' +
+        '<input type="number" min="0" step="10" id="payAmt" value="' + PAY.amount + '"></label>' +
+      '<label class="pay-amt"><span>' + esc(a.contract) + '</span>' +
+        '<select id="payContract">' +
+          '<option value="permanent"' + (PAY.contract === 'permanent' ? ' selected' : '') + '>' + esc(a.permanent) + '</option>' +
+          '<option value="fixed"' + (PAY.contract === 'fixed' ? ' selected' : '') + '>' + esc(a.fixed) + '</option>' +
+        '</select></label>' +
+      '<label class="pay-ck"><input type="checkbox" id="payP2"' + (PAY.pension2 ? ' checked' : '') + '>' +
+        '<span>' + esc(a.pension) + '</span></label>' +
+    '</div>' +
+    '<table class="pay-out"><tbody>' +
+      row(a.outGross, r.gross, 'section') +
+      row(a.outNpd, r.npd) +
+      row(a.outGpm, -r.gpm) +
+      row(a.outSodra, -r.sodra) +
+      row(a.outNet, r.net, 'section') +
+      row(a.outEmp, r.employer) +
+      row(a.outTotal, r.total, 'section') +
+    '</tbody></table>' +
+    '<p class="ai-h3" style="margin:18px 0 6px">' + esc(a.par) +
+      ' <span class="pay-year">' + esc(a.parYear) + ' ' + o.year + '</span></p>' +
+    (PAY.editing
+      ? '<div class="pay-pars">' +
+          pf('year', a.parYear, '1') + pf('mma', a.pMma, '1') +
+          pf('npdMax', a.pNpdMax, '1') + pf('npdCoef', a.pNpdCoef, '0.01') +
+          pf('sodra', a.pSodra, '0.001') + pf('gpm', a.pGpm, '0.01') +
+          pf('gpmHigh', a.pGpmHigh, '0.01') + pf('gpmHighFrom', a.pCap, '1') +
+        '</div>' +
+        '<p class="pay-acts"><button class="ghost" id="paySave">' + esc(a.parSave) + '</button>' +
+        '<button class="ghost" id="payReset">' + esc(a.parReset) + '</button></p>'
+      : '<p class="pay-acts"><button class="ghost" id="payEdit">' + esc(a.parEdit) + '</button></p>') +
+    '<p class="ai-foot">' + esc(a.note) + '</p>';
+}
+
+/* One delegated listener on the panel, so a repaint cannot leave a stale
+   handler behind -- the body is replaced wholesale on every keystroke. */
+document.addEventListener('click', ev => {
+  const panel = $('#payPanel');
+  if(!panel || panel.hidden) return;
+  if(ev.target.closest('#payClose') || ev.target === panel){ payClose(); return; }
+  const seg = ev.target.closest('[data-pay-from]');
+  if(seg){ PAY.from = seg.getAttribute('data-pay-from'); payPaint(); return; }
+  if(ev.target.closest('#payEdit')){ PAY.editing = true; payPaint(); return; }
+  if(ev.target.closest('#payReset')){
+    try { localStorage.removeItem(LT_PAY_KEY); } catch(e){}
+    PAY.editing = false; payPaint(); return;
+  }
+  if(ev.target.closest('#paySave')){
+    const o = ltPay();
+    panel.querySelectorAll('[data-pay-par]').forEach(i => {
+      const v = Number(i.value);
+      if(isFinite(v)) o[i.getAttribute('data-pay-par')] = v;
+    });
+    /* Confirming is what clears the "not checked" note: the year alone cannot
+       say whether a human looked. */
+    o.confirmed = true;
+    ltPaySave(o); PAY.editing = false; payPaint(); return;
+  }
+});
+document.addEventListener('input', ev => {
+  const panel = $('#payPanel');
+  if(!panel || panel.hidden) return;
+  if(ev.target.id === 'payAmt'){ PAY.amount = Number(ev.target.value) || 0; payPaint(); repayFocus('payAmt'); }
+  else if(ev.target.id === 'payContract'){ PAY.contract = ev.target.value; payPaint(); }
+  else if(ev.target.id === 'payP2'){ PAY.pension2 = ev.target.checked; payPaint(); }
+});
+document.addEventListener('keydown', ev => {
+  const panel = $('#payPanel');
+  if(panel && !panel.hidden && ev.key === 'Escape'){ ev.preventDefault(); payClose(); }
+});
+/* The amount field is rebuilt by the repaint, so the caret has to be put back
+   or the second digit of a salary goes nowhere. */
+function repayFocus(id){
+  const el = $('#' + id); if(!el) return;
+  const v = el.value; el.focus(); el.value = ''; el.value = v;
 }
 
 function helpOpen(tab){
