@@ -3348,10 +3348,17 @@ const CLOUD = (function(){
        refusal there was indistinguishable from a success. 404 is fine: the
        object is gone, which is what we asked for. */
     async docDelete(id, path){
-      await rest('rpc/delete_document', { method: 'POST', body: JSON.stringify({ p_id: id }) });
+      /* Object first again, and this time it is safe. The reason it was moved
+         behind the row was that the object delete was unguarded: anyone could
+         destroy the file and then be refused the row. The bucket policy now
+         asks the document's own row whether the caller may have it -- which
+         only works while that row still exists -- so the object goes first,
+         its answer is checked, and an unauthorised caller loses nothing.
+         404 is a success: the object is gone, which is what was asked. */
       const res = await fetch(API + '/storage/v1/object/documents/' + encodeURI(path),
                               { method: 'DELETE', headers: authHeaders() });
       if(!res.ok && res.status !== 404) throw new Error('storage ' + res.status);
+      await rest('rpc/delete_document', { method: 'POST', body: JSON.stringify({ p_id: id }) });
     },
     /* A signed URL rather than a public one: the bucket is private, and a
        link that works forever is a link that leaks forever. Sixty seconds is
@@ -6883,7 +6890,24 @@ function docState(){
 function docScoped(){
   const pid = docScope();
   const all = state.documents || [];
-  return pid ? all.filter(x => x.project_id === pid) : all;
+  /* TWO STORES, NOT ONE LIST SEEN TWICE. A job's screen showed that job's
+     files, which was right; the company screen returned everything, so every
+     project invoice and photograph was also sitting in the company's folders.
+     The company's store is the rows belonging to NO job -- the certificates,
+     the flag documents, the things that outlive a project -- and that is all
+     it shows now.
+     The server draws the same line: documents_v hides the company's rows from
+     anyone who is not an owner, so this filter tidies an admin's screen and is
+     not what keeps a manager out. */
+  return pid ? all.filter(x => x.project_id === pid)
+             : all.filter(x => !x.project_id);
+}
+/* Who may delete THIS row. An owner anywhere; anyone else only on a job's
+   file, never on the company's. Mirrors delete_document exactly -- the button
+   must not offer what the server will refuse. */
+function docCanDelete(rec){
+  if(canPayroll()) return true;
+  return !!(canMoney() && rec && rec.project_id);
 }
 function docRows(){
   const f = docState(), q = (f.q || '').toLowerCase();
@@ -6978,7 +7002,7 @@ function coDocsView(){
         ${fields.map(x => docCell(r, x, t)).join('')}
         <td class="doc-who">${r.uploaded_by ? esc(r.uploaded_by) : '\u2014'}
             <span class="doc-when">${esc((r.created_at || '').slice(0, 10))}</span></td>
-        <td>${canPayroll() ? `<button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button>` : ''}</td>
+        <td>${docCanDelete(r) ? `<button class="ghost co-del" data-co-del="doc" title="${esc(t.remove)}">×</button>` : ''}</td>
       </tr>`).join('')
       : `<tr><td colspan="${fields.length + 4}" class="muted">${esc(d.none)}</td></tr>`;
 

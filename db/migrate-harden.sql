@@ -131,7 +131,14 @@ declare
     -- definer, and migrate-advice.sql revokes them on purpose.
     'create_signature','delete_signature','sign_act_exec','clear_act_exec',
     'advice_facts','advice_cache_get','advice_cache_put',
-    'sees_money','sees_payroll','my_role'
+    'sees_money','sees_payroll','my_role',
+    -- A FOURTH THAT MUST STAY, same reason as the three above. The two
+    -- bucket policies in migrate-documents-4.sql call
+    -- doc_is_project_file() to ask whether an object belongs to a job, and
+    -- an RLS policy is evaluated AS THE CALLER. Revoke it and both
+    -- policies answer false for everybody: every signed URL and every
+    -- delete stops working, and it shows up as a file that will not open.
+    'doc_is_project_file'
   ];
   fn record;
 begin
@@ -207,7 +214,7 @@ begin
         'sign_act','unsign_act',
         'create_signature','delete_signature','sign_act_exec','clear_act_exec',
         'advice_facts','advice_cache_get','advice_cache_put',
-        'sees_money','sees_payroll','my_role')
+        'sees_money','sees_payroll','my_role','doc_is_project_file')
      and not has_function_privilege('authenticated', p.oid, 'EXECUTE');
   if n > 0 then raise exception 'the app lost EXECUTE on: %', bad; end if;
 
