@@ -55,8 +55,21 @@ grant execute on function public.doc_is_project_file(text) to authenticated;
 -- ------------------------------------------------------------
 -- THE VIEW: A JOB'S FILES TO EVERYONE WHO SEES MONEY, THE COMPANY'S TO OWNERS
 -- ------------------------------------------------------------
--- Restated in full because dropping the view drops the functions that return
--- it. Identical to the third pass apart from the last line.
+-- THE FUNCTIONS GO FIRST. I had written that dropping the view drops the
+-- functions that return it; Postgres does the opposite -- it REFUSES to drop
+-- the view while anything depends on its type, and both write functions are
+-- declared `returns setof public.documents_v`. The run failed on this line
+-- with 2BP01 and named them. The second and third passes of this file already
+-- knew it and dropped them first; this one had simply lost the two lines.
+--
+-- Asked the database rather than guessed which ones: exactly create_document
+-- and save_document return the view's type. delete_document returns text and
+-- is unaffected.
+--
+-- Both are recreated below, in the same statement run, so the gap in which the
+-- application's writes would fail is the length of this script.
+drop function if exists public.create_document(jsonb);
+drop function if exists public.save_document(uuid, bigint, jsonb);
 drop view if exists public.documents_v;
 
 create view public.documents_v as
