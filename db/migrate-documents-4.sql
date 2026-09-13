@@ -53,6 +53,30 @@ grant execute on function public.doc_is_project_file(text) to authenticated;
 
 
 -- ------------------------------------------------------------
+-- AND SHUT THE DOOR THIS FILE OPENS
+-- ------------------------------------------------------------
+-- A function arrives with EXECUTE granted to PUBLIC, and PUBLIC includes
+-- `anon` -- the role of somebody who has not signed in. migrate-harden.sql
+-- revokes that across the whole schema and asserts, in its own check, that
+-- anon can execute nothing at all.
+--
+-- This file quietly undid that, every time it ran. The view is dropped
+-- below, and dropping a view drops the functions that RETURN it: so
+-- create_document and save_document go with it and come back as NEW
+-- functions carrying the default grant, and doc_is_project_file is new here
+-- for the same reason. Three RPCs open to the unsigned-in, with nothing
+-- behind them but the sees_money() check inside two of the three.
+--
+-- Found by the linter three weeks after the hardening pass declared the door
+-- shut. It is shut here now -- in the file that opens it, not in the one
+-- that has to be remembered afterwards.
+--
+-- These three lines are at the END of this file, after the view and the
+-- functions are rebuilt, because there is nothing to revoke until they
+-- exist. See the block below the bucket policies.
+
+
+-- ------------------------------------------------------------
 -- THE VIEW: A JOB'S FILES TO EVERYONE WHO SEES MONEY, THE COMPANY'S TO OWNERS
 -- ------------------------------------------------------------
 -- THE FUNCTIONS GO FIRST. I had written that dropping the view drops the
@@ -202,11 +226,37 @@ create policy documents_delete on storage.objects
 
 
 -- ------------------------------------------------------------
+-- THE DOOR, SHUT
+-- ------------------------------------------------------------
+-- The three names this file creates or recreates, closed to everybody who
+-- has not signed in, and open to everybody who has. Explained in full above.
+revoke execute on function public.doc_is_project_file(text)             from public, anon;
+revoke execute on function public.create_document(jsonb)                from public, anon;
+revoke execute on function public.save_document(uuid, bigint, jsonb)    from public, anon;
+grant  execute on function public.doc_is_project_file(text)             to authenticated;
+grant  execute on function public.create_document(jsonb)                to authenticated;
+grant  execute on function public.save_document(uuid, bigint, jsonb)    to authenticated;
+
+
+-- ------------------------------------------------------------
 -- CHECK IT LANDED
 -- ------------------------------------------------------------
 do $$
 declare n int;
 begin
+  -- The whole schema, not only the three above: this is the assertion
+  -- migrate-harden.sql makes, restated here so that the file which reopened
+  -- the hole is also the file that would fail if it ever did again.
+  if exists (select 1 from pg_proc p
+               join pg_namespace ns on ns.oid = p.pronamespace
+              where ns.nspname = 'public'
+                and has_function_privilege('anon', p.oid, 'EXECUTE')) then
+    raise exception 'anon can execute something in public -- run db/migrate-harden.sql';
+  end if;
+  if not has_function_privilege('authenticated', 'public.create_document(jsonb)', 'EXECUTE')
+     or not has_function_privilege('authenticated', 'public.save_document(uuid, bigint, jsonb)', 'EXECUTE') then
+    raise exception 'the cabinet lost EXECUTE on the document functions';
+  end if;
   if not exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
                   where ns.nspname = 'public' and p.proname = 'doc_is_project_file') then
     raise exception 'doc_is_project_file is missing';
