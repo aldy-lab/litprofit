@@ -7041,8 +7041,20 @@ function coDocsView(){
     <div class="pf-filters co-bar">
       <label>${esc(d.search)}<input type="search" id="docQ" value="${esc(f.q)}"
         placeholder="${esc(pid ? d.searchJob : d.searchAll)}"></label>
-      ${(inFolder || searching)
-        ? `<span class="muted">${rows.length} / ${mine.length}</span>` : ''}
+      ${/* TWO NUMBERS THAT ARE NOT THE SAME THING.
+             Standing in Certificates on a job with six files it read "2 / 6",
+             and the only sensible way to read that is two certificates out of
+             six certificates -- so four of them look missing. They are not:
+             the six are the job's whole store and the two are this folder.
+             Reported as "why 2/6, delete those four", where the four were the
+             signed contract, the offer and two invoices.
+             A fraction now appears only when SEARCHING, where both numbers do
+             mean the same thing -- matches, out of the files searched -- and
+             it is spelled out in words. A folder just says how many are in
+             it. */ ''}
+      ${searching
+        ? `<span class="muted">${esc(t.showing)} ${rows.length} ${esc(t.of)} ${mine.length}</span>`
+        : (inFolder ? `<span class="muted">${rows.length}</span>` : '')}
     </div>
 
     ${table}
