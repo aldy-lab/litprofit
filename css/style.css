@@ -4631,8 +4631,6 @@ a.card:active,
 }
 .iso-hint { color: var(--muted-2); }
 .iso-readout { color: var(--iso-accent); font-variant-numeric: tabular-nums; min-height: 1.4em; }
-.iso-credit { margin-top: 10px; font-size: 11px; color: var(--muted-2); }
-.iso-credit a { color: inherit; }
 
 /* The light still switches; it just does not travel. */
 @media (prefers-reduced-motion: reduce) {

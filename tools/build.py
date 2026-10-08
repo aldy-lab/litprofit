@@ -2574,12 +2574,11 @@ def iso_plate(slug):
           <span class="iso-readout" data-iso-readout aria-live="polite"></span>
         </figcaption>
       </figure>
-      <p class="iso-credit">{credit} <a href="https://iso-glow.vercel.app" rel="noopener" target="_blank">ISO-GLOW&nbsp;\u2197</a></p>
     </div>
     <script src="{js}" defer></script>
 """.format(fig=fig, aria=attr(f["aria"]),
            t=attr(json.dumps(f["t"], ensure_ascii=False)), hint=f["hint"],
-           credit=I["credit"], js=asset("/js/iso.js"))
+           js=asset("/js/iso.js"))
 
 
 def service_page(s):
