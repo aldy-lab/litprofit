@@ -4513,3 +4513,212 @@ a.card:active,
 }
 .select:focus-visible { border-color: var(--line-2); outline: none; }
 .select option { background: var(--navy-800); color: var(--text); }
+
+/* ============================================================
+   ISOMETRIC WORKING DRAWINGS (js/iso.js)
+   ------------------------------------------------------------
+   One machine per service page that did not have one. Monochrome hairline
+   on the site's own ground; ONE accent, and only on what is live -- an open
+   valve, a welded joint, the pipe the refrigerant has actually reached, the
+   bins of the category you picked. That contrast is the whole effect, so
+   nothing else here is allowed a colour.
+
+   The accent is the cool line colour the other drawings already use for
+   flow, not a warm one: amber reads as cheap on this site.
+   Every colour is a token on the plate, so the accent changes in one line.
+   ============================================================ */
+/* On :root, not the plate: the home figure lights the service cards beside
+   it, and they sit outside the plate. */
+:root {
+  --iso-ground:     var(--navy-900);
+  --iso-body:       #0d1044;
+  --iso-side:       #090b33;
+  --iso-deck:       #141858;
+  --iso-recess:     #05061c;
+  --iso-line:       rgba(214, 226, 255, 0.62);
+  --iso-detail:     rgba(214, 226, 255, 0.22);
+  --iso-ink:        rgba(214, 226, 255, 0.74);
+  --iso-ink-hi:     #ffffff;
+  --iso-accent:     #9ec9ff;
+  --iso-accent-hi:  #e4f1ff;
+  --iso-accent-dim: rgba(158, 201, 255, 0.22);
+}
+.iso-fig {
+  position: relative;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.015);
+  padding: clamp(8px, 1.4vw, 18px);
+}
+.iso-fig svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(68vh, 620px);
+  margin-inline: auto;
+  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.iso-fig svg:focus-visible { outline: 1px solid var(--iso-accent); outline-offset: 4px; }
+.iso-fig svg * { vector-effect: non-scaling-stroke; }
+
+.iso-face { fill: var(--iso-body); stroke: var(--iso-line); stroke-width: 1; stroke-linejoin: round; }
+.iso-face.iso-top  { fill: var(--iso-deck); }
+.iso-face.iso-side { fill: var(--iso-side); }
+.iso-detail { fill: none; stroke: var(--iso-detail); stroke-width: 1; }
+.iso-label, .iso-tag-t, .iso-screen-t {
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  fill: var(--iso-ink);
+}
+
+/* pipes */
+.iso-wire-under { fill: none; stroke: var(--iso-ground); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.iso-wire { fill: none; stroke: var(--iso-line); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.iso-glow-wire, .iso-pulse { fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity 0.35s var(--ease); }
+.iso-glow-wire { stroke: var(--iso-accent); stroke-width: 2.8; }
+.iso-pulse { stroke: var(--iso-accent-hi); stroke-width: 3.4; stroke-dasharray: 70 930; }
+.iso-flow.hot .iso-glow-wire { opacity: 1; }
+.iso-flow.hot .iso-pulse { opacity: 1; animation: iso-run 1.9s linear infinite; }
+@keyframes iso-run { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
+.iso-paused .iso-pulse { animation-play-state: paused; }
+
+/* things you press */
+.iso-press { cursor: pointer; transition: transform 0.12s var(--ease); }
+.iso-press.down { transform: translateY(3px); }
+@media (hover: hover) and (pointer: fine) {
+  .iso-press:hover .iso-face { stroke: var(--iso-ink-hi); }
+}
+.iso-halo { fill: var(--iso-accent); opacity: 0; transition: opacity 0.35s var(--ease); }
+.iso-press.lit .iso-halo,
+.iso-screen.hot .iso-halo { opacity: 0.5; }
+.iso-press.lit .iso-face { stroke: var(--iso-accent); }
+/* Opaque on purpose: a translucent lit top lets whatever is behind the part
+   show through it, and paint order is the only depth this drawing has. */
+.iso-press.lit .iso-face.iso-top { fill: color-mix(in srgb, var(--iso-accent) 24%, var(--iso-deck)); }
+.iso-wheel { fill: var(--iso-deck); stroke: var(--iso-line); stroke-width: 1.2; }
+.iso-press.lit .iso-wheel { stroke: var(--iso-accent-hi); fill: var(--iso-accent-dim); }
+
+/* a joint before it is welded: a prepared bevel, drawn dashed */
+.iso-joint:not(.lit) .iso-face { stroke-dasharray: 3 3; }
+
+/* indicators, tags, screens */
+.iso-led { fill: var(--iso-recess); stroke: var(--iso-line); stroke-width: 1; }
+.iso-led.hot { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.iso-tag { fill: var(--iso-recess); stroke: var(--iso-detail); stroke-width: 1; }
+.iso-press.lit .iso-tag { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.iso-press.lit .iso-tag-t { fill: var(--iso-ground); }
+.iso-glass { fill: var(--iso-recess); stroke: var(--iso-line); stroke-width: 1; }
+.iso-screen.hot .iso-glass { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.iso-screen.hot .iso-screen-t { fill: var(--iso-ground); }
+.iso-tick { stroke: var(--iso-detail); stroke-width: 1; }
+.iso-needle { stroke: var(--iso-ink); stroke-width: 1.4; stroke-linecap: round; }
+.iso-screen.hot .iso-needle { stroke: var(--iso-ground); }
+
+/* the strip under the drawing: what to press, and what it is doing now */
+.iso-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 14px;
+  /* Clear the corner rivets (.cornered: 14px in, 6px up, one pitch tall). */
+  padding: 0 calc(14px + var(--rivet-pitch)) calc(6px + var(--rivet-pitch));
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.iso-hint { color: var(--muted-2); }
+.iso-readout { color: var(--iso-accent); font-variant-numeric: tabular-nums; min-height: 1.4em; }
+.iso-credit { margin-top: 10px; font-size: 11px; color: var(--muted-2); }
+.iso-credit a { color: inherit; }
+
+/* The light still switches; it just does not travel. */
+@media (prefers-reduced-motion: reduce) {
+  .iso-flow.hot .iso-pulse { animation: none; opacity: 0; }
+  .iso-press, .iso-halo, .iso-glow-wire { transition: none; }
+}
+
+/* In place of a service banner the figure keeps the banner's footprint: 504px
+   tall at 1440 like the 21:8 photo it replaces, with the same gap below. On a
+   phone it stays taller than the photo was -- at 133px nothing is clickable. */
+.iso-plate { margin-bottom: clamp(36px, 5vw, 64px); }
+.iso-plate .iso-fig svg { max-height: min(66vh, 560px); }
+
+/* A pipe is two pixels wide; this is what the finger actually hits. */
+.iso-hit { fill: none; stroke: transparent; stroke-width: 16; pointer-events: stroke; }
+/* Home: the engine room indexes the four service cards under it. The card
+   whose zone is lit takes the same cool line, nothing more. */
+.card { transition: box-shadow 0.35s var(--ease); }
+.card.is-iso-lit { box-shadow: inset 0 0 0 1px var(--iso-accent), 0 0 28px -10px var(--iso-accent); }
+.card.is-iso-lit .card-num { color: var(--iso-accent); }
+.iso-plate--home { margin-bottom: 0; }
+.iso-plate--home .iso-fig svg { max-height: min(70vh, 620px); }
+
+/* Home services: the four services are the engine room's callouts. Each
+   sits beside its zone -- 01 and 04 left, 03 and 02 right -- with a leader
+   line drawn by the script. Below 1080 there is no room beside the drawing,
+   so the leaders go and the callouts line up under it in number order. */
+.iso-annot { display: grid; gap: 22px clamp(16px, 2vw, 32px); }
+/* Room inside the rivets: a callout's rule otherwise runs into a corner. */
+.iso-fig.iso-annot { padding: clamp(28px, 3vw, 44px) clamp(18px, 3vw, 44px) 4px; }
+.iso-annot-fig { min-width: 0; }
+.iso-annot svg.iso-leaders { display: none; }
+.iso-call {
+  display: block;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: inherit;
+  transition: border-color 0.35s var(--ease);
+}
+.iso-call h3 { font-size: clamp(17px, 1.35vw, 20px); margin-bottom: 8px; letter-spacing: -0.01em; transition: color 0.35s var(--ease); }
+.iso-call p { color: var(--muted); font-size: var(--text-s); }
+.iso-call .card-more { display: inline-block; margin-top: 10px; padding-top: 0; }
+.iso-call.is-iso-lit { border-top-color: var(--iso-accent); box-shadow: none; }
+.iso-call.is-iso-lit .card-num { color: var(--iso-accent); }
+/* Stacked, the status line belongs under the drawing it describes, not
+   under the fourth callout. */
+@media (max-width: 1079px) {
+  .iso-annot .iso-bar { order: 1; margin-top: 0; padding: 0; }
+  .iso-call { order: 2; }
+  .iso-fig.iso-annot { padding-bottom: calc(10px + var(--rivet-pitch)); }
+}
+@media (min-width: 640px) and (max-width: 1079px) {
+  .iso-annot { grid-template-columns: 1fr 1fr; }
+  .iso-annot-fig, .iso-annot .iso-bar { grid-column: 1 / -1; }
+}
+@media (min-width: 1080px) {
+  .iso-annot {
+    grid-template-columns: clamp(190px, 17vw, 240px) minmax(0, 1fr) clamp(190px, 17vw, 240px);
+    grid-template-areas: "c1 fig c3" "c4 fig c2" "bar bar bar";
+    grid-template-rows: auto auto auto;
+    position: relative;
+  }
+  .iso-annot-fig { grid-area: fig; align-self: center; }
+  .iso-plate--home .iso-annot-fig svg { max-height: min(78vh, 720px); }
+  .iso-call--1 { grid-area: c1; align-self: start; margin-top: 8%; }
+  .iso-call--4 { grid-area: c4; align-self: end; margin-bottom: 4%; }
+  .iso-call--3 { grid-area: c3; align-self: start; margin-top: 8%; }
+  .iso-call--2 { grid-area: c2; align-self: end; margin-bottom: 4%; }
+  .iso-annot .iso-bar { grid-area: bar; }
+  /* svg.iso-leaders: the plain .iso-fig svg rule (display, height:auto, a
+     max-height) outranks a bare class and would hide or squash the layer. */
+  .iso-annot svg.iso-leaders {
+    display: block;
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    max-height: none;
+    margin: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+  }
+}
+.iso-leader path { fill: none; stroke: rgba(214, 226, 255, 0.4); stroke-width: 1; transition: stroke 0.35s var(--ease); }
+.iso-leader circle { fill: var(--iso-recess); stroke: var(--iso-line); stroke-width: 1; transition: fill 0.35s var(--ease), stroke 0.35s var(--ease); }
+.iso-leader .iso-leader-end { fill: var(--iso-line); stroke: none; }
+.iso-leader.hot path { stroke: var(--iso-accent); }
+.iso-leader.hot circle { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.iso-leader.hot .iso-leader-end { fill: var(--iso-accent); }
+}

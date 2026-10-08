@@ -1970,3 +1970,120 @@ TERMS = [
   ("25.4", "Failure or delay by Litprofit to exercise any right shall not constitute a "
            "waiver of that right.")]),
 ]
+
+
+# ============================================================
+# ISOMETRIC WORKING DRAWINGS (js/iso.js)
+# ============================================================
+# One machine per service page that did not have one. The readout strings
+# are deliberately free of figures: a flow rate, a test pressure or a stock
+# count on a drawing would read as a claim about this company, and none of
+# them is one. The stores lead says outright that the rack is a schematic.
+ISO = {
+ "en": {
+  "eyebrow": "How it works",
+  "credit": "Made with",
+  "pumps": dict(
+    h2="Open the valves, follow the flow",
+    lead="A pump skid with its valve station. The pump runs only with its suction open "
+         "and somewhere to send the liquid — shut both outlets and it stops instead "
+         "of pumping against a closed valve.",
+    hint="Click a valve · keys 1–3",
+    aria="Isometric pump skid with three valves. Click a valve or press 1, 2 or 3 to open "
+         "or shut it; the refrigerant lights the pipes it reaches.",
+    t=dict(receiver="RECEIVER", pump="PUMP", plant="TO PLANT",
+           r_on="pump on", r_off="pump off", r_suction="suction shut",
+           r_nooutlet="no outlet", r_plant="to plant", r_bypass="bypass")),
+  "spool": dict(
+    h2="Weld the joints, then test the spool",
+    lead="A pipe spool on the jig. Every joint is welded first; only a fully welded spool "
+         "goes to the pressure test — the same order the work follows in the workshop.",
+    hint="Click a joint to weld · T or the gauge tests · R resets",
+    aria="Isometric pipe spool on a welding jig with four joints. Click a joint or press "
+         "1 to 4 to weld it, T or the gauge to pressure-test, R to start again.",
+    t=dict(r_welds="welds", r_ready="ready to test", r_refused="test refused",
+           r_weld="weld", r_holding="pressure test holding", r_testing="testing")),
+  "stores": dict(
+    h2="What the stores hold",
+    lead="The warehouse in Klaipėda, by category. Pick one and its bins light up — "
+         "a schematic of how parts are kept, not a live stock list.",
+    hint="Click a bin · keys 1–5 · Esc clears",
+    aria="Isometric warehouse rack with fifteen bins in five categories. Click a bin or "
+         "press 1 to 5 to light every bin of that category; Escape clears.",
+    t=dict(cats=dict(C="Compressors", E="Engines", P="Pumps", T="Turbochargers", V="Valves"),
+           select="Select a category", r_bins="bins", r_none="nothing selected")),
+ },
+ "lt": {
+  "eyebrow": "Kaip tai veikia",
+  "credit": "Sukurta su",
+  "pumps": dict(
+    h2="Atidarykite vožtuvus ir sekite srautą",
+    lead="Siurblio agregatas su vožtuvų mazgu. Siurblys veikia tik atidarius "
+         "siurbimo vožtuvą ir turint kur nukreipti skystį — uždarius "
+         "abu išėjimus jis sustoja, o ne pumpuoja prieš uždarytą vožtuvą.",
+    hint="Spustelėkite vožtuvą · klavišai 1–3",
+    aria="Izometrinis siurblio agregatas su trimis vožtuvais. Spustelėkite "
+         "vožtuvą arba paspauskite 1, 2 ar 3, kad jį atidarytumėte ar "
+         "uždarytumėte; šaltnešis apšviečia vamzdžius, kuriuos pasiekia.",
+    t=dict(receiver="RESIVERIS", pump="SIURBLYS", plant="Į SISTEMĄ",
+           r_on="siurblys veikia", r_off="siurblys stovi", r_suction="siurbimas uždarytas",
+           r_nooutlet="nėra išėjimo", r_plant="į sistemą", r_bypass="apvadas")),
+  "spool": dict(
+    h2="Suvirinkite siūles, tada išbandykite",
+    lead="Vamzdžių sekcija ant stendo. Pirmiausia suvirinamos visos siūlės; "
+         "slėgio bandymui eina tik visiškai suvirinta sekcija — ta pačia tvarka, "
+         "kaip dirbtuvėse.",
+    hint="Spustelėkite siūlę · T arba manometras – bandymas · R – iš naujo",
+    aria="Izometrinė vamzdžių sekcija ant suvirinimo stendo su keturiomis "
+         "siūlėmis. Spustelėkite siūlę arba paspauskite 1–4, kad ją "
+         "suvirintumėte, T arba manometrą – slėgio bandymas, R – pradeti iš naujo.",
+    t=dict(r_welds="siūlės", r_ready="paruošta bandymui", r_refused="bandymas atmestas",
+           r_weld="suvirinkite", r_holding="slėgio bandymas laiko", r_testing="bandoma")),
+  "stores": dict(
+    h2="Kas laikoma sandėlyje",
+    lead="Sandėlis Klaipėdoje pagal kategorijas. Pasirinkite vieną — "
+         "užsidegs jos dėžės. Tai schema, kaip laikomos dalys, o ne gyvas "
+         "likučių sąrašas.",
+    hint="Spustelėkite dėžę · klavišai 1–5 · Esc – išvalyti",
+    aria="Izometrinis sandėlio stelažas su penkiolika dėžių penkiose "
+         "kategorijose. Spustelėkite dėžę arba paspauskite 1–5, kad "
+         "užsidegtų visos tos kategorijos dėžės; Esc išvalo.",
+    t=dict(cats=dict(C="Kompresoriai", E="Varikliai", P="Siurbliai", T="Turbokompresoriai",
+                     V="Vožtuvai"),
+           select="Pasirinkite kategoriją", r_bins="dėžių",
+           r_none="niekas nepasirinkta")),
+ },
+ "ru": {
+  "eyebrow": "Как это устроено",
+  "credit": "Сделано с",
+  "pumps": dict(
+    h2="Откройте клапаны и проследите поток",
+    lead="Насосный агрегат с узлом арматуры. Насос работает, только когда открыт всас и жидкости есть куда уйти — закройте оба выхода, и он остановится, а не будет давить в закрытый клапан.",
+    hint="Нажмите на клапан · клавиши 1–3",
+    aria="Изометрический насосный агрегат с тремя клапанами. Нажмите на клапан или клавишу 1, 2 или 3, чтобы открыть или закрыть его; хладагент подсвечивает трубы, до которых доходит.",
+    t=dict(receiver="РЕСИВЕР", pump="НАСОС", plant="В СИСТЕМУ",
+           r_on="насос работает", r_off="насос стоит", r_suction="всас закрыт",
+           r_nooutlet="нет выхода", r_plant="в систему", r_bypass="байпас")),
+  "spool": dict(
+    h2="Сварите стыки, потом испытайте",
+    lead="Трубная секция на стапеле. Сначала завариваются все стыки; на опрессовку идёт только полностью сваренная секция — в том же порядке, что и в цеху.",
+    hint="Нажмите на стык · T или манометр — опрессовка · R — заново",
+    aria="Изометрическая трубная секция на сварочном стапеле с четырьмя стыками. Нажмите на стык или клавишу 1–4, чтобы заварить его, T или манометр — опрессовка, R — начать заново.",
+    t=dict(r_welds="стыки", r_ready="готово к опрессовке", r_refused="опрессовка отклонена",
+           r_weld="заварите", r_holding="опрессовка держит", r_testing="испытание")),
+  "stores": dict(
+    h2="Что лежит на складе",
+    lead="Склад в Клайпеде по категориям. Выберите одну — загорятся её ячейки. Это схема того, как хранятся детали, а не живой список остатков.",
+    hint="Нажмите на ячейку · клавиши 1–5 · Esc — сброс",
+    aria="Изометрический складской стеллаж с пятнадцатью ячейками пяти категорий. Нажмите на ячейку или клавишу 1–5, чтобы подсветить все ячейки этой категории; Esc сбрасывает.",
+    t=dict(cats=dict(C="Компрессоры", E="Двигатели", P="Насосы",
+                     T="Турбокомпрессоры", V="Клапаны"),
+           select="Выберите категорию", r_bins="ячеек",
+           r_none="ничего не выбрано")),
+ },
+}
+
+# Home: the engine room that indexes the four service cards.
+ISO['en']['plant'] = {'hint': 'Click a zone · keys 1–4 · click again or Enter opens it', 'aria': 'Isometric engine room in four zones, one per service: refrigeration plant, pump skid, pipe runs and spares rack. Click a zone or press 1 to 4 to light it and its card; click again or press Enter to open that service.', 't': {'r_none': ''}}
+ISO['lt']['plant'] = {'hint': 'Spustelėkite zoną · klavišai 1–4 · dar kartą arba Enter – atidaryti', 'aria': 'Izometrinis mašinų skyrius su keturiomis zonomis, po vieną kiekvienai paslaugai: šaldymo įrenginys, siurblio agregatas, vamzdynai ir atsarginių dalių stelažas. Spustelėkite zoną arba paspauskite 1–4, kad ją pažymėtumėte; dar kartą arba Enter atidaro paslaugą.', 't': {'r_none': ''}}
+ISO['ru']['plant'] = {'hint': 'Нажмите на зону · клавиши 1–4 · ещё раз или Enter — открыть', 'aria': 'Изометрическое машинное отделение из четырёх зон, по одной на услугу: холодильная установка, насосный агрегат, трубопроводы и стеллаж запчастей. Нажмите на зону или клавишу 1–4, чтобы подсветить её и её карточку; ещё раз или Enter открывает услугу.', 't': {'r_none': ''}}

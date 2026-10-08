@@ -27,7 +27,7 @@
   <link rel="icon" href="/assets/brand/favicon.svg">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/montserrat-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/css/fonts.css?v=70e42e8ab0">
-  <link rel="stylesheet" href="/css/style.css?v=1dd3e57185">
+  <link rel="stylesheet" href="/css/style.css?v=e135d96cfc">
   <!-- Marks the document as scripted BEFORE the stylesheet paints, so the
        scroll-reveal rules only ever hide content that JS can bring back.
        Inline and synchronous on purpose: an external file would race. -->
@@ -80,11 +80,18 @@
   {"@context": "https://schema.org", "@type": "Service", "name": "Refrigeration pump and valve repair", "description": "Repair and selection of refrigerant pumps and of shut-off and regulating valves for marine and shore refrigeration systems, including pipework connection, installation, pressure testing and evacuation.", "serviceType": "Refrigeration pump and valve repair", "url": "https://litprofit.com/services/ship-engine-repair/", "provider": {"@type": "Organization", "name": "UAB \"Litprofit\"", "url": "https://litprofit.com/"}, "areaServed": {"@type": "Place", "name": "Worldwide"}}
   </script>
 
-    <div class="container">
-      <div class="page-media cornered reveal">
-        <img src="/assets/photos/svc-ref-pumps.webp" alt="A refrigerant pump sectioned on the bench, with shut-off, solenoid and regulating valves laid out beside it" width="1200" height="675">
-      </div>
+
+    <div class="container iso-plate" data-iso-plate>
+      <figure class="iso-fig cornered reveal">
+        <svg data-iso="pumps" role="img" tabindex="0" aria-label="Isometric pump skid with three valves. Click a valve or press 1, 2 or 3 to open or shut it; the refrigerant lights the pipes it reaches." data-t="{&quot;receiver&quot;: &quot;RECEIVER&quot;, &quot;pump&quot;: &quot;PUMP&quot;, &quot;plant&quot;: &quot;TO PLANT&quot;, &quot;r_on&quot;: &quot;pump on&quot;, &quot;r_off&quot;: &quot;pump off&quot;, &quot;r_suction&quot;: &quot;suction shut&quot;, &quot;r_nooutlet&quot;: &quot;no outlet&quot;, &quot;r_plant&quot;: &quot;to plant&quot;, &quot;r_bypass&quot;: &quot;bypass&quot;}"></svg>
+        <figcaption class="iso-bar">
+          <span class="iso-hint">Click a valve · keys 1–3</span>
+          <span class="iso-readout" data-iso-readout aria-live="polite"></span>
+        </figcaption>
+      </figure>
+      <p class="iso-credit">Made with <a href="https://iso-glow.vercel.app" rel="noopener" target="_blank">ISO-GLOW&nbsp;↗</a></p>
     </div>
+    <script src="/js/iso.js?v=7fd8b91c01" defer></script>
 
 
     <section class="container prose">

@@ -896,7 +896,7 @@ CERTIFICATES = [
 
 
 
-def card(s, level="h3", variant=""):
+def card(s, level="h3", variant="", media=True):
     """A service card. `level` keeps the document outline continuous: h2 where
     the cards are the page's top-level content, h3 where a section heading
     already sits above them. `variant` is "feature" or "compact"; the grid
@@ -919,19 +919,19 @@ def card(s, level="h3", variant=""):
         srcset = (' srcset="%s %dw, %s %dw" sizes="(min-width: 900px) %s, 100vw"'
                   % (u("/" + card_rel), cw, u("/assets/photos/" + f), w, slot))
 
-    return """          <a class="{cls}" href="{href}">
+    pic = """
             <span class="card-media">
               <img src="{img}" alt="{alt}" width="{w}" height="{h}" loading="lazy"{srcset}>
-            </span>
+            </span>""".format(img=u("/assets/photos/" + f), alt=alt, w=w, h=h, srcset=srcset) if media else ""
+    return """          <a class="{cls}" href="{href}">{pic}
             <span class="card-body">
               <span class="card-num">{num}</span>
               <{lv}>{title}</{lv}>
               <p>{short}</p>
               <span class="card-more">{more}</span>
             </span>
-          </a>""".format(cls=cls, srcset=srcset, href=u("/services/%s/" % s["slug"]),
-                         img=u("/assets/photos/" + f),
-                         alt=alt, w=w, h=h, lv=level, num=s["num"],
+          </a>""".format(cls=cls, pic=pic, href=u("/services/%s/" % s["slug"]),
+                         lv=level, num=s["num"],
                          title=s["title"], short=s["short"], more=T("read_more"))
 
 
@@ -977,7 +977,7 @@ def presentation_block():
                          title=text(T("pres_title")), note=text(T("pres_note")))
 
 
-def service_cards(level="h3"):
+def service_cards(level="h3", media=True):
     """Four cards, all the same.
 
     This was one feature card beside a stack of compact ones, on the argument
@@ -988,7 +988,7 @@ def service_cards(level="h3"):
     "four disciplines, one contractor". Four equal cards is what that sentence
     looks like.
     """
-    return "\n".join(card(x, level) for x in services())
+    return "\n".join(card(x, level, media=media) for x in services())
 
 
 def client_tile(c):
@@ -1219,7 +1219,8 @@ def hero_drawing(lit=False):
 # HOME
 # ============================================================
 def home():
-    cards = service_cards("h3")
+    # The services are the engine room's callouts (iso_home), not cards.
+    cards = ""
 
     logos = "\n".join(client_tile(c) for c in CLIENTS)
 
@@ -1336,9 +1337,7 @@ def home():
           <h2>{svc_h}</h2>
           <p class="lead">{svc_l}</p>
         </div>
-        <div class="card-grid">
-{cards}
-        </div>
+{iso_home}
       </div>
     </section>
 
@@ -1458,7 +1457,7 @@ def home():
                 cap_h=T("cap_h2"), cap_l=T("cap_lead"), cl_e=T("clients_eyebrow"),
                 cl_h=T("clients_h2"),
                 refrig_label=i18n.SVC[LANG]["refrigeration-systems"]["title"],
-                cards=cards, logos=logos, cycle=compressor_drawing(),
+                iso_home=iso_home(), cards=cards, logos=logos, cycle=compressor_drawing(),
                 machine=recip_3d(script=False),
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
@@ -2515,6 +2514,74 @@ def recip_drawing():
                          chart=capacity_chart())
 
 
+ISO_FIG = {"ship-engine-repair": "pumps", "hull-and-piping": "spool", "spare-parts": "stores"}
+
+
+def iso_home():
+    """The engine room with the four services as its callouts. The services
+    are not a list beside the drawing; they are its annotations, each with a
+    leader line to the zone it names (FIGS.plant in js/iso.js draws the
+    leaders, since only the script knows where a zone lands on screen).
+    Grid areas put 01 and 04 left, 03 and 02 right, next to their zones; the
+    source order stays 01-04 for anyone reading without the picture."""
+    I = i18n.ISO[LANG]
+    f = I["plant"]
+    calls = "\n".join("""            <a class="iso-call iso-call--{n}" href="{href}">
+              <span class="card-num">{num}</span>
+              <h3>{title}</h3>
+              <p>{short}</p>
+              <span class="card-more">{more}</span>
+            </a>""".format(n=int(x["num"]), href=u("/services/%s/" % x["slug"]), num=x["num"],
+                          title=x["title"], short=x["short"], more=T("read_more"))
+                       for x in services())
+    return """
+        <div class="iso-plate iso-plate--home" data-iso-plate>
+          <figure class="iso-fig iso-annot cornered reveal">
+            <svg class="iso-leaders" aria-hidden="true"></svg>
+            <div class="iso-annot-fig">
+              <svg data-iso="plant" role="img" tabindex="0" aria-label="{aria}" data-t="{t}"></svg>
+            </div>
+{calls}
+            <figcaption class="iso-bar">
+              <span class="iso-hint">{hint}</span>
+              <span class="iso-readout" data-iso-readout aria-live="polite"></span>
+            </figcaption>
+          </figure>
+        </div>
+        <script src="{js}" defer></script>""".format(
+        aria=attr(f["aria"]), t=attr(json.dumps(f["t"], ensure_ascii=False)),
+        hint=f["hint"], js=asset("/js/iso.js"), calls=calls)
+
+
+def iso_plate(slug):
+    """An isometric working drawing in place of a service page's banner photo
+    (js/iso.js). Each figure does the one thing its service is about --
+    valves route a pump's flow, joints are welded before the spool is tested,
+    bins light by category -- so none is wallpaper. The page head above
+    already carries the title and lead, so the figure takes no heading of its
+    own. Strings ride in data-t so the script carries no language."""
+    fig = ISO_FIG.get(slug)
+    if not fig:
+        return ""
+    I = i18n.ISO[LANG]
+    f = I[fig]
+    return """
+    <div class="container iso-plate" data-iso-plate>
+      <figure class="iso-fig cornered reveal">
+        <svg data-iso="{fig}" role="img" tabindex="0" aria-label="{aria}" data-t="{t}"></svg>
+        <figcaption class="iso-bar">
+          <span class="iso-hint">{hint}</span>
+          <span class="iso-readout" data-iso-readout aria-live="polite"></span>
+        </figcaption>
+      </figure>
+      <p class="iso-credit">{credit} <a href="https://iso-glow.vercel.app" rel="noopener" target="_blank">ISO-GLOW&nbsp;\u2197</a></p>
+    </div>
+    <script src="{js}" defer></script>
+""".format(fig=fig, aria=attr(f["aria"]),
+           t=attr(json.dumps(f["t"], ensure_ascii=False)), hint=f["hint"],
+           credit=I["credit"], js=asset("/js/iso.js"))
+
+
 def service_page(s):
     blocks = []
     for heading, paras in s["blocks"]:
@@ -2528,12 +2595,7 @@ def service_page(s):
                      [(T("home"), "/"), (T("svc_eyebrow"), "/services/"),
                       (s["title"], None)],
                      path="/services/%s/" % s["slug"]) + service_ld(s) + """
-    <div class="container">
-      <div class="page-media cornered reveal">
-        <img src="{img}" alt="{alt}" width="{w}" height="{h}">
-      </div>
-    </div>
-
+{media}
 {recip}
     <section class="container prose">
 {blocks}
@@ -2550,11 +2612,22 @@ def service_page(s):
         </div>
       </div>
     </section>
-{cta}""".format(img=u("/assets/photos/" + f), alt=alt, w=w, h=h,
-                blocks="\n\n".join(blocks), more=more,
+{cta}""".format(blocks="\n\n".join(blocks), more=more,
                 # The compressor plate belongs to one page: it is that page's
-                # machine. Putting a drawing on all four would make it wallpaper.
+                # machine. The other three get their own machine (iso_plate),
+                # never a copy of this one -- the same drawing on all four
+                # would be wallpaper.
                 recip=(recip_drawing() + recip_3d("unit")) if s["slug"] == "refrigeration-systems" else "",
+                # Three pages show their machine where the banner photo was;
+                # the photo still serves the cards, the share image and the
+                # structured data.
+                media=iso_plate(s["slug"]) or """
+    <div class="container">
+      <div class="page-media cornered reveal">
+        <img src="{img}" alt="{alt}" width="{w}" height="{h}">
+      </div>
+    </div>
+""".format(img=u("/assets/photos/" + f), alt=alt, w=w, h=h),
                 other_e=T("svc_eyebrow"), other_h=PT("svc_h1"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
