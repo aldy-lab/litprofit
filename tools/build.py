@@ -1462,7 +1462,7 @@ def home():
                 svc_h=T("svc_h2"), svc_l=T("svc_lead"), how_e=T("how_eyebrow"),
                 how_h=T("how_h2"), how_l=T("how_lead"), how1=T("how1"),
                 how2=T("how2"), how3=T("how3"), cap_e=T("cap_eyebrow"),
-                cap_h=T("cap_h2"), cap_l=T("cap_lead"), cl_e=T("clients_eyebrow"),
+                cap_h=T("cap_h2", founded=FOUNDED), cap_l=T("cap_lead"), cl_e=T("clients_eyebrow"),
                 cl_h=T("clients_h2"),
                 refrig_label=i18n.SVC[LANG]["refrigeration-systems"]["title"],
                 iso_home=iso_home(), cards=cards, logos=logos, cycle=compressor_drawing("05"),

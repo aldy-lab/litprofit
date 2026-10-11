@@ -454,6 +454,9 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 .section-head h2 { max-width: 20ch; }
 .section-head .lead { max-width: 54ch; }
 .section-head h2 { margin-bottom: 22px; }
+/* Same step where a heading and its lead stack in the left half of a split
+   (How we work, Capability): it was 0 there, the lead touching the heading. */
+.split > .reveal > h2 { margin-bottom: 22px; }
 
 /* Stacked, every section head measured 720px inside a 1440px container -- the
    right half of the page was empty under the heading four times over on the
@@ -1376,6 +1379,23 @@ a.card { position: relative; }
 .rail-prev { left: -16px; }
 .rail-next { right: -16px; }
 .rail-btn[disabled] { opacity: 0; pointer-events: none; }
+/* The card the rail is cut through used to end on a hard vertical line, with
+   the arrow sitting on top of the cut ("Allia|"). The edge now fades out on
+   whichever side still has cards behind it, so the partial card dissolves
+   under the arrow instead of being sliced. Keyed to the buttons' own disabled
+   state, which the script already keeps true to the scroll position. */
+.client-rail-wrap:has(.rail-next:not([disabled])) .client-rail {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 140px), transparent);
+          mask-image: linear-gradient(to right, #000 calc(100% - 140px), transparent);
+}
+.client-rail-wrap:has(.rail-prev:not([disabled])) .client-rail {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 140px);
+          mask-image: linear-gradient(to right, transparent, #000 140px);
+}
+.client-rail-wrap:has(.rail-prev:not([disabled])):has(.rail-next:not([disabled])) .client-rail {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 140px, #000 calc(100% - 140px), transparent);
+          mask-image: linear-gradient(to right, transparent, #000 140px, #000 calc(100% - 140px), transparent);
+}
 @media (hover: none) { .rail-btn { display: none; } }
 @media (max-width: 620px) { .cc { flex: 0 0 250px; } }
 
@@ -1915,6 +1935,20 @@ a.card { position: relative; }
 .footer-col a:hover { color: var(--white); }
 
 .footer-brand p { font-size: var(--text-m); color: var(--muted-2); max-width: 30ch; }
+/* Phones: five columns stacked one under another made a 1,221px footer, and
+   the eight site links alone were a screen. Two columns instead -- brand and
+   the site links take the full row, the short blocks pair up, and the links
+   flow in two columns; company details take a full row so a company number
+   is not broken across two lines. Every link keeps its tap height. */
+@media (max-width: 600px) {
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 30px 20px; padding-bottom: 34px; }
+  .footer-brand,
+  .footer-top > .footer-col:nth-child(4),
+  .footer-top > .footer-col:last-child { grid-column: 1 / -1; }
+  .footer-top > .footer-col:last-child ul { column-count: 2; column-gap: 20px; }
+  .footer-top > .footer-col:last-child li { break-inside: avoid; }
+  .footer-col .col-title { margin-bottom: 12px; }
+}
 
 /* ---------- the two hero controls ----------
    The work lamp and FROST, icon only, top right of the hero and directly over
@@ -2287,6 +2321,13 @@ html.is-frost #frostToggle {
    and only the drawing escapes. calc against 100% covers the scrollbar, which
    100vw includes and the element does not get.
    ============================================================ */
+:root {
+  /* How far a full-bleed sheet's edge sits outside the text column: the gap
+     between .bleed's left edge (min(100vw - 48px, 2160px), centred) and the
+     container's text edge (min(100vw, --container), centred, plus --pad).
+     Never negative -- on a phone the sheet is narrower than the column. */
+  --bleed-inset: max(0px, calc((min(100vw - 48px, 2160px) - min(100vw, var(--container))) / 2 + var(--pad)));
+}
 .bleed {
   /* Capped, not edge-to-edge. On a 3440px display true 100vw stretched a
      vessel profile to three and a half thousand pixels of thin line, which is
@@ -2707,6 +2748,12 @@ html.is-frost #frostToggle {
   color: var(--muted-2);
 }
 .cmp-tb b { color: var(--muted); font-weight: 600; }
+/* On a full-bleed sheet the drawing runs to the sheet edge and so does the
+   rule under it -- but the words in the title strip keep to the text column,
+   or every such section had two left edges, 24px and 58px, one above the
+   other. (The split 3D on the home page sits inside the column already.) */
+.cmp-section:not(.cmp-section--split) .bleed > .cmp-tb { padding-inline: var(--bleed-inset); }
+.cmp-section:not(.cmp-section--split) .bleed .cmp-hint { left: max(32px, var(--bleed-inset)); }
 
 @media (prefers-reduced-motion: reduce) {
   .cmp-canvas { cursor: default; }
@@ -3071,6 +3118,9 @@ html.is-frost #frostToggle {
   align-items: center;
 }
 .drawing > * { min-width: 0; }
+/* The drawing may run to the sheet edge; the parts list is text, and its
+   right edge keeps to the column like every heading and paragraph above it. */
+.drawing.bleed { padding-right: var(--bleed-inset); }
 
 .ga { width: 100%; height: auto; overflow: visible; }
 
@@ -3140,6 +3190,36 @@ html.is-frost #frostToggle {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 .ga .tb .tb-b { fill: var(--white); font-weight: 700; letter-spacing: 0.2em; }
+
+/* Phones. The sheet is drawn at 842 units and shown at ~340px, so a 13-unit
+   balloon number came out at 5px and the title block at 4. Here the marks a
+   reader needs -- balloon numbers, the overall dimensions -- are drawn at a
+   size that survives the scale (24 units, ~10px on screen), and the title
+   block, which only carries the sheet's name, steps aside. The dimension
+   label masks its own line with a stroke in the ground colour instead of the
+   fixed-size rect behind it, which a bigger label would outgrow. */
+@media (max-width: 700px) {
+  .ga .ball circle { r: 19px; }
+  .ga .ball text {
+    font-size: 18px;
+    dominant-baseline: central;
+    transform: translateY(-5px);
+  }
+  .ga .dim text {
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    paint-order: stroke;
+    stroke: var(--bg-2);
+    stroke-width: 10px;
+    stroke-linejoin: round;
+  }
+  .ga .tb { display: none; }
+}
+/* the narrowest sheets need the marks bigger still to stay legible */
+@media (max-width: 520px) {
+  .ga .ball circle { r: 24px; }
+  .ga .ball text, .ga .dim text { font-size: 24px; }
+}
 
 /* ---------- selection ---------- */
 .drawing[data-active] .prt .body,
