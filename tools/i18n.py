@@ -2087,3 +2087,20 @@ ISO = {
 ISO['en']['plant'] = {'hint': 'Click a zone · keys 1–4 · click again or Enter opens it', 'aria': 'Isometric engine room in four zones, one per service: refrigeration plant, pump skid, pipe runs and spares rack. Click a zone or press 1 to 4 to light it and its card; click again or press Enter to open that service.', 't': {'r_none': ''}}
 ISO['lt']['plant'] = {'hint': 'Spustelėkite zoną · klavišai 1–4 · dar kartą arba Enter – atidaryti', 'aria': 'Izometrinis mašinų skyrius su keturiomis zonomis, po vieną kiekvienai paslaugai: šaldymo įrenginys, siurblio agregatas, vamzdynai ir atsarginių dalių stelažas. Spustelėkite zoną arba paspauskite 1–4, kad ją pažymėtumėte; dar kartą arba Enter atidaro paslaugą.', 't': {'r_none': ''}}
 ISO['ru']['plant'] = {'hint': 'Нажмите на зону · клавиши 1–4 · ещё раз или Enter — открыть', 'aria': 'Изометрическое машинное отделение из четырёх зон, по одной на услугу: холодильная установка, насосный агрегат, трубопроводы и стеллаж запчастей. Нажмите на зону или клавишу 1–4, чтобы подсветить её и её карточку; ещё раз или Enter открывает услугу.', 't': {'r_none': ''}}
+
+# Touch versions of the figure hints: on a phone there are no keys to press
+# and nothing to click. Shown instead of "hint" under (hover: none).
+for _l, _d in {
+  "en": dict(pumps="Tap a valve to open or shut it", spool="Tap a joint to weld it \u00b7 tap the gauge to test",
+             stores="Tap a bin to light its category", plant="Tap a zone \u00b7 tap again to open it"),
+  "lt": dict(pumps="Bakstel\u0117kite vo\u017etuv\u0105, kad j\u012f atidarytum\u0117te ar u\u017edarytum\u0117te",
+             spool="Bakstel\u0117kite si\u016bl\u0119, kad j\u0105 suvirintum\u0117te \u00b7 manometras \u2013 bandymas",
+             stores="Bakstel\u0117kite d\u0117\u017e\u0119 \u2013 u\u017esidegs jos kategorija",
+             plant="Bakstel\u0117kite zon\u0105 \u00b7 dar kart\u0105 \u2013 atidaryti"),
+  "ru": dict(pumps="\u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u043d\u0430 \u043a\u043b\u0430\u043f\u0430\u043d, \u0447\u0442\u043e\u0431\u044b \u043e\u0442\u043a\u0440\u044b\u0442\u044c \u0438\u043b\u0438 \u0437\u0430\u043a\u0440\u044b\u0442\u044c",
+             spool="\u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u043d\u0430 \u0441\u0442\u044b\u043a, \u0447\u0442\u043e\u0431\u044b \u0437\u0430\u0432\u0430\u0440\u0438\u0442\u044c \u00b7 \u043c\u0430\u043d\u043e\u043c\u0435\u0442\u0440 \u2014 \u043e\u043f\u0440\u0435\u0441\u0441\u043e\u0432\u043a\u0430",
+             stores="\u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u043d\u0430 \u044f\u0447\u0435\u0439\u043a\u0443 \u2014 \u0437\u0430\u0433\u043e\u0440\u0438\u0442\u0441\u044f \u0435\u0451 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044f",
+             plant="\u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u043d\u0430 \u0437\u043e\u043d\u0443 \u00b7 \u0435\u0449\u0451 \u0440\u0430\u0437 \u2014 \u043e\u0442\u043a\u0440\u044b\u0442\u044c"),
+}.items():
+    for _k, _v in _d.items():
+        ISO[_l][_k]["thint"] = _v

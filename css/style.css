@@ -972,6 +972,31 @@ h4 { font-size: var(--h4); letter-spacing: -0.01em; }
 }
 .partner p { color: var(--muted); font-size: var(--text-m); }
 
+/* Wide screens: each card lies on its side -- the logo in a column of its
+   own, the role and the text beside it. Stacked, two cards made a 312px row
+   and the band a whole screen (670px) for two logos. The subgrid still lines
+   the two cards up: the role row and the text row are shared, so the text in
+   both starts on the same line whichever role wraps. */
+@media (min-width: 980px) {
+  .partner-grid { grid-template-rows: auto 1fr; }
+  .partner {
+    grid-row: span 2;
+    grid-template-columns: clamp(120px, 11vw, 160px) minmax(0, 1fr);
+    column-gap: clamp(22px, 2.4vw, 36px);
+    row-gap: 12px;
+    padding: clamp(24px, 2.4vw, 34px) clamp(26px, 2.8vw, 40px);
+  }
+  .partner .partner-role { grid-column: 2; grid-row: 1; }
+  .partner-logo { grid-column: 1; grid-row: 1 / span 2; align-self: center; margin: 0; }
+  .partner-logo img { height: auto; max-height: 52px; }
+  .partner p { grid-column: 2; grid-row: 2; }
+  .partners-band .section-head { margin-bottom: clamp(24px, 2.6vw, 36px); }
+}
+@media (max-width: 979px) {
+  .partner { padding: 24px 22px; gap: 12px; }
+  .partner-logo img { height: 38px; }
+}
+
 /* ============================================================
    FACT STRIP
    ============================================================ */
@@ -2556,6 +2581,14 @@ html.is-frost #frostToggle {
   cursor: grab;
 }
 .cmp.is-held .cmp-canvas { cursor: grabbing; }
+/* On a touch screen the canvas was a third of the viewport that ate every
+   vertical swipe: the page stopped scrolling under the thumb, twice per page.
+   pan-y hands vertical swipes back to the page; a sideways drag still turns
+   the machine (the browser cancels the pointer once it decides on a scroll,
+   so the two never fight). Tilt by vertical drag is the price, on touch only. */
+@media (hover: none) and (pointer: coarse) {
+  .cmp-canvas { touch-action: pan-y; }
+}
 
 /* ---------- callouts ----------
    Positioned by the renderer with transform only, so the browser never
@@ -3993,9 +4026,6 @@ a.card:active,
 .doc-get:active,
 .lang a:active,
 .hero-tool:active { transform: scale(0.94); }
-  transform: scale(0.97);
-  transition-duration: 0.14s;
-}
 /* The lift and the press are both transforms, so the press replaces the lift
    outright rather than fighting it -- which is what pressing something ought
    to look like. */
@@ -4719,4 +4749,10 @@ a.card:active,
 .iso-leader.hot path { stroke: var(--iso-accent); }
 .iso-leader.hot circle { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
 .iso-leader.hot .iso-leader-end { fill: var(--iso-accent); }
+
+/* Keyboard hints for a pointer, tap hints for a finger. */
+.iso-hint-touch { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .iso-hint-key { display: none; }
+  .iso-hint-touch { display: inline; }
 }

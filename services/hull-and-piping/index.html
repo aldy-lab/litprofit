@@ -27,7 +27,7 @@
   <link rel="icon" href="/assets/brand/favicon.svg">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/montserrat-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/css/fonts.css?v=70e42e8ab0">
-  <link rel="stylesheet" href="/css/style.css?v=d62dac5045">
+  <link rel="stylesheet" href="/css/style.css?v=3b5c8b07bd">
   <!-- Marks the document as scripted BEFORE the stylesheet paints, so the
        scroll-reveal rules only ever hide content that JS can bring back.
        Inline and synchronous on purpose: an external file would race. -->
@@ -85,7 +85,7 @@
       <figure class="iso-fig cornered reveal">
         <svg data-iso="spool" role="img" tabindex="0" aria-label="Isometric pipe spool on a welding jig with four joints. Click a joint or press 1 to 4 to weld it, T or the gauge to pressure-test, R to start again." data-t="{&quot;r_welds&quot;: &quot;welds&quot;, &quot;r_ready&quot;: &quot;ready to test&quot;, &quot;r_refused&quot;: &quot;test refused&quot;, &quot;r_weld&quot;: &quot;weld&quot;, &quot;r_holding&quot;: &quot;pressure test holding&quot;, &quot;r_testing&quot;: &quot;testing&quot;}"></svg>
         <figcaption class="iso-bar">
-          <span class="iso-hint">Click a joint to weld · T or the gauge tests · R resets</span>
+          <span class="iso-hint"><span class="iso-hint-key">Click a joint to weld · T or the gauge tests · R resets</span><span class="iso-hint-touch">Tap a joint to weld it · tap the gauge to test</span></span>
           <span class="iso-readout" data-iso-readout aria-live="polite"></span>
         </figcaption>
       </figure>
@@ -210,5 +210,9 @@
   </footer>
 
   <script src="/js/main.js?v=fba2464b8d"></script>
+  <!-- Motion (js/motion.js): drawings draft themselves, banners drift.
+       Self-hosted GSAP, fetched by motion-boot.js only when something it
+       animates comes near the screen. -->
+  <script src="/js/motion-boot.js?v=7352efda48" defer data-load="/js/vendor/gsap.min.js?v=9396f25632 /js/vendor/ScrollTrigger.min.js?v=05ca5ad88c /js/motion.js?v=7166a601a6"></script>
 </body>
 </html>
