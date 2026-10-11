@@ -620,6 +620,10 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
 {footer}
 
   <script src="{js}"></script>
+  <!-- Motion (js/motion.js): drawings draft themselves, banners drift.
+       Self-hosted GSAP, fetched by motion-boot.js only when something it
+       animates comes near the screen. -->
+  <script src="{motion_boot}" defer data-load="{gsap} {gsap_st} {motion}"></script>
 </body>
 </html>
 """.format(cvmsg=cvmsg, full_title=attr(full_title), full_title_text=text(full_title),
@@ -630,6 +634,9 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
            font=u("/assets/fonts/montserrat-latin.woff2"),
            fonts_css=asset("/css/fonts.css"), style_css=asset("/css/style.css"),
            js=asset("/js/main.js"), head_extra=head_extra,
+           gsap=asset("/js/vendor/gsap.min.js"), gsap_st=asset("/js/vendor/ScrollTrigger.min.js"),
+           motion=asset("/js/motion.js"),
+           motion_boot=asset("/js/motion-boot.js"),
            header=header(active if active is not None else path, path), body=body,
            pager=pager(path), footer=footer(), og=og_image(path))
 
@@ -1328,12 +1335,13 @@ def home():
       </div>
     </section>
 
-{screw}
-
+    <!-- Services come second: the first thing a superintendent needs to know
+         is what this company does for his ship. The twin-screw section used to
+         sit here, a rotor demo before the reader knew what was on offer. -->
     <section class="section section-alt" id="services">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{svc_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{svc_e}</p>
           <h2>{svc_h}</h2>
           <p class="lead">{svc_l}</p>
         </div>
@@ -1344,7 +1352,7 @@ def home():
     <section class="section">
       <div class="container split">
         <div class="reveal">
-          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>{how_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{how_e}</p>
           <h2>{how_h}</h2>
           <p class="lead">{how_l}</p>
         </div>
@@ -1367,13 +1375,13 @@ def home():
       </div>
     </section>
 
-{machine}
+{screw}
 {cycle}
     <section class="section section-alt">
       <div class="container">
         <div class="split" style="align-items: center">
           <div class="reveal">
-            <p class="eyebrow"><span class="eyebrow-num">07</span><span class="sep">//</span>{cap_e}</p>
+            <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{cap_e}</p>
             <h2 class="lightwords">{cap_h}</h2>
             <p class="lead">{cap_l}</p>
             <div class="btn-row">
@@ -1411,7 +1419,7 @@ def home():
     <section class="section" id="clients">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">08</span><span class="sep">//</span>{cl_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">07</span><span class="sep">//</span>{cl_e}</p>
           <h2>{cl_h}</h2>
         </div>
         <div class="client-rail-wrap reveal">
@@ -1430,7 +1438,7 @@ def home():
                 # 02, between the partners band and the services grid. The
                 # script tag rides with this one; the reciprocating machine at
                 # 05 asks for the same file and must not emit it twice.
-                screw=recip_3d("screw", num="02", split=True),
+                screw=recip_3d("screw", num="04", split=True),
                 rail_prev=attr(T("rail_prev")), rail_next=attr(T("rail_next")),
                 hero_drawing_lit=hero_drawing(lit=True),
                 he=T("hero_eyebrow"), hs=T("hero_since"), h1=T("hero_h1"),
@@ -1457,8 +1465,11 @@ def home():
                 cap_h=T("cap_h2"), cap_l=T("cap_lead"), cl_e=T("clients_eyebrow"),
                 cl_h=T("clients_h2"),
                 refrig_label=i18n.SVC[LANG]["refrigeration-systems"]["title"],
-                iso_home=iso_home(), cards=cards, logos=logos, cycle=compressor_drawing(),
-                machine=recip_3d(script=False),
+                iso_home=iso_home(), cards=cards, logos=logos, cycle=compressor_drawing("05"),
+                # The reciprocating machine (it was 05 here) lives on the
+                # refrigeration page only. Three machine bands in a row -- 2,535px,
+                # a third of this page -- each said what it was, none said what
+                # the company does, so the home page keeps the screw pair.
                 bitzer=u("/assets/partners/bitzer.webp"),
                 danfoss=u("/assets/partners/danfoss.svg"),
                 plant_img=u("/assets/photos/plant-room.webp"),
@@ -1498,7 +1509,7 @@ _UNUSED_PARTS = [
 ]
 
 
-def compressor_drawing():
+def compressor_drawing(num="06"):
     def balloon(x, y, n, key, lx, ly):
         """A numbered balloon with a leader line, drawing-office style."""
         return ('      <g class="ball" data-prt="{k}">'
@@ -1530,7 +1541,7 @@ def compressor_drawing():
     <section class="section section-alt drawing-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>{ga_e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{ga_e}</p>
           <h2>{ga_h}</h2>
           <p class="lead">{ga_l}</p>
         </div>
@@ -1654,7 +1665,7 @@ def compressor_drawing():
       </div>
     </section>
 """.format(fins=fins, hatch=hatch, sbolts=sbolts, dbolts=dbolts, buttons=buttons,
-           ga_e=T("ga_eyebrow"), ga_h=T("ga_h2"), ga_l=T("ga_lead"),
+           num=num, ga_e=T("ga_eyebrow"), ga_h=T("ga_h2"), ga_l=T("ga_lead"),
            tb1=i18n.TB[LANG][0].upper(), tb2=i18n.TB[LANG][1].upper(),
            balloons="\n".join([
                balloon(176, 240, "01", "motor", 210, 300),
@@ -2543,14 +2554,14 @@ def iso_home():
             </div>
 {calls}
             <figcaption class="iso-bar">
-              <span class="iso-hint">{hint}</span>
+              <span class="iso-hint"><span class="iso-hint-key">{hint}</span><span class="iso-hint-touch">{thint}</span></span>
               <span class="iso-readout" data-iso-readout aria-live="polite"></span>
             </figcaption>
           </figure>
         </div>
         <script src="{js}" defer></script>""".format(
         aria=attr(f["aria"]), t=attr(json.dumps(f["t"], ensure_ascii=False)),
-        hint=f["hint"], js=asset("/js/iso.js"), calls=calls)
+        hint=f["hint"], thint=f["thint"], js=asset("/js/iso.js"), calls=calls)
 
 
 def iso_plate(slug):
@@ -2570,7 +2581,7 @@ def iso_plate(slug):
       <figure class="iso-fig cornered reveal">
         <svg data-iso="{fig}" role="img" tabindex="0" aria-label="{aria}" data-t="{t}"></svg>
         <figcaption class="iso-bar">
-          <span class="iso-hint">{hint}</span>
+          <span class="iso-hint"><span class="iso-hint-key">{hint}</span><span class="iso-hint-touch">{thint}</span></span>
           <span class="iso-readout" data-iso-readout aria-live="polite"></span>
         </figcaption>
       </figure>
@@ -2578,7 +2589,7 @@ def iso_plate(slug):
     <script src="{js}" defer></script>
 """.format(fig=fig, aria=attr(f["aria"]),
            t=attr(json.dumps(f["t"], ensure_ascii=False)), hint=f["hint"],
-           js=asset("/js/iso.js"))
+           thint=f["thint"], js=asset("/js/iso.js"))
 
 
 def service_page(s):

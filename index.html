@@ -27,7 +27,7 @@
   <link rel="icon" href="/assets/brand/favicon.svg">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/montserrat-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/css/fonts.css?v=70e42e8ab0">
-  <link rel="stylesheet" href="/css/style.css?v=d62dac5045">
+  <link rel="stylesheet" href="/css/style.css?v=3b5c8b07bd">
   <!-- Marks the document as scripted BEFORE the stylesheet paints, so the
        scroll-reveal rules only ever hide content that JS can bring back.
        Inline and synchronous on purpose: an external file would race. -->
@@ -204,34 +204,13 @@
       </div>
     </section>
 
-
-    <section class="section section-alt cmp-section seam-top cmp-section--split">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>On the bench</p>
-          <h2>A twin-screw compressor, opened up</h2>
-          <p class="lead">Four lobes driving six, in a figure-of-eight bore — the size that comes off a reefer and onto our bench most often. The casing is drawn as glass because the casing is the least interesting part of it. Drag it round.</p>
-        </div>
-        <figure class="cmp bleed reveal" data-compressor data-machine="screw">
-          <div class="cmp-stage">
-            <canvas class="cmp-canvas" role="img" aria-label="A twin-screw compressor with the casing drawn transparent: two meshing helical rotors, their bearings at both ends, and the slide valve that controls capacity running beneath them."></canvas>
-            <span class="cmp-corner cmp-corner--tl"></span>
-            <span class="cmp-corner cmp-corner--tr"></span>
-            <span class="cmp-corner cmp-corner--bl"></span>
-            <span class="cmp-corner cmp-corner--br"></span>
-            <p class="cmp-hint">Drag to turn</p>
-          </div>
-          <p class="cmp-legend"><span class="cmp-tag" data-tag data-at="380,96,0"><b>01</b><span>Male rotor, 4 lobes</span></span><span class="cmp-tag" data-tag data-at="380,-70,0"><b>02</b><span>Female rotor, 6 flutes</span></span><span class="cmp-tag" data-tag data-at="380,250,0"><b>03</b><span>Casing</span></span><span class="cmp-tag" data-tag data-at="370,-178,0"><b>04</b><span>Slide valve</span></span><span class="cmp-tag" data-tag data-at="112,96,0"><b>05</b><span>Rotor bearings</span></span><span class="cmp-tag" data-tag data-at="120,170,0"><b>06</b><span>Suction, cold</span></span><span class="cmp-tag" data-tag data-at="640,170,0"><b>07</b><span>Discharge, hot</span></span></p>
-          <figcaption class="cmp-tb"><span>Twin-screw, oil-flooded</span><b>Arrangement // not a rotor profile</b></figcaption>
-        </figure>
-      </div>
-    </section>
-    <script src="/js/compressor.js?v=e258a0e3a3" defer></script>
-
+    <!-- Services come second: the first thing a superintendent needs to know
+         is what this company does for his ship. The twin-screw section used to
+         sit here, a rotor demo before the reader knew what was on offer. -->
     <section class="section section-alt" id="services">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>Services</p>
+          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>Services</p>
           <h2>Four disciplines, one contractor</h2>
           <p class="lead">Most jobs need more than one of these at once. Handling them under a single contract is what removes the coordination problem from the shipowner's desk.</p>
         </div>
@@ -267,7 +246,7 @@
               <span class="card-more">Read more</span>
             </a>
             <figcaption class="iso-bar">
-              <span class="iso-hint">Click a zone · keys 1–4 · click again or Enter opens it</span>
+              <span class="iso-hint"><span class="iso-hint-key">Click a zone · keys 1–4 · click again or Enter opens it</span><span class="iso-hint-touch">Tap a zone · tap again to open it</span></span>
               <span class="iso-readout" data-iso-readout aria-live="polite"></span>
             </figcaption>
           </figure>
@@ -279,7 +258,7 @@
     <section class="section">
       <div class="container split">
         <div class="reveal">
-          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>How we work</p>
+          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>How we work</p>
           <h2>Consult, organise, ensure</h2>
           <p class="lead">Three steps, in that order — it is how the company has described itself for years, and it holds up.</p>
         </div>
@@ -303,32 +282,33 @@
     </section>
 
 
-    <section class="section section-alt cmp-section seam-top">
+    <section class="section section-alt cmp-section seam-top cmp-section--split">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>The machine</p>
-          <h2>The compressor, in the round</h2>
-          <p class="lead">The size we overhaul most: four cylinders, 55 mm bore, 34 mm stroke. Built from the published envelope and shaded live in the browser — drag it round.</p>
+          <p class="eyebrow"><span class="eyebrow-num">04</span><span class="sep">//</span>On the bench</p>
+          <h2>A twin-screw compressor, opened up</h2>
+          <p class="lead">Four lobes driving six, in a figure-of-eight bore — the size that comes off a reefer and onto our bench most often. The casing is drawn as glass because the casing is the least interesting part of it. Drag it round.</p>
         </div>
-        <figure class="cmp bleed reveal" data-compressor data-machine="recip">
+        <figure class="cmp bleed reveal" data-compressor data-machine="screw">
           <div class="cmp-stage">
-            <canvas class="cmp-canvas" role="img" aria-label="A semi-hermetic four-cylinder reciprocating compressor seen in three quarters: ribbed motor housing, crankcase, two banks of cylinders in a V, and the suction and discharge connections."></canvas>
+            <canvas class="cmp-canvas" role="img" aria-label="A twin-screw compressor with the casing drawn transparent: two meshing helical rotors, their bearings at both ends, and the slide valve that controls capacity running beneath them."></canvas>
             <span class="cmp-corner cmp-corner--tl"></span>
             <span class="cmp-corner cmp-corner--tr"></span>
             <span class="cmp-corner cmp-corner--bl"></span>
             <span class="cmp-corner cmp-corner--br"></span>
             <p class="cmp-hint">Drag to turn</p>
           </div>
-          <p class="cmp-legend"><span class="cmp-tag" data-tag data-at="190,252,0"><b>01</b><span>Motor</span></span><span class="cmp-tag" data-tag data-at="470,110,152"><b>02</b><span>Crankcase</span></span><span class="cmp-tag" data-tag data-at="520,336,0"><b>03</b><span>Cylinder heads</span></span><span class="cmp-tag" data-tag data-at="768,195,0"><b>04</b><span>Suction line</span></span><span class="cmp-tag" data-tag data-at="150,312,0"><b>05</b><span>Discharge line</span></span></p>
-          <figcaption class="cmp-tb"><span>Semi-hermetic reciprocating</span><b>Built to the published envelope</b></figcaption>
+          <p class="cmp-legend"><span class="cmp-tag" data-tag data-at="380,96,0"><b>01</b><span>Male rotor, 4 lobes</span></span><span class="cmp-tag" data-tag data-at="380,-70,0"><b>02</b><span>Female rotor, 6 flutes</span></span><span class="cmp-tag" data-tag data-at="380,250,0"><b>03</b><span>Casing</span></span><span class="cmp-tag" data-tag data-at="370,-178,0"><b>04</b><span>Slide valve</span></span><span class="cmp-tag" data-tag data-at="112,96,0"><b>05</b><span>Rotor bearings</span></span><span class="cmp-tag" data-tag data-at="120,170,0"><b>06</b><span>Suction, cold</span></span><span class="cmp-tag" data-tag data-at="640,170,0"><b>07</b><span>Discharge, hot</span></span></p>
+          <figcaption class="cmp-tb"><span>Twin-screw, oil-flooded</span><b>Arrangement // not a rotor profile</b></figcaption>
         </figure>
       </div>
     </section>
+    <script src="/js/compressor.js?v=e258a0e3a3" defer></script>
 
     <section class="section section-alt drawing-section seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>General arrangement</p>
+          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>General arrangement</p>
           <h2>The machine we take apart most</h2>
           <p class="lead">A skid-mounted marine screw compressor package, in side elevation. Take a balloon to see what we do to that part.</p>
         </div>
@@ -494,7 +474,7 @@
       <div class="container">
         <div class="split" style="align-items: center">
           <div class="reveal">
-            <p class="eyebrow"><span class="eyebrow-num">07</span><span class="sep">//</span>Capability</p>
+            <p class="eyebrow"><span class="eyebrow-num">06</span><span class="sep">//</span>Capability</p>
             <h2 class="lightwords">A decade of refrigeration, on ships and ashore</h2>
             <p class="lead">Compressor overhauls, class-approved design documentation, plant installation and commissioning — on fishing vessels and shore installations alike.</p>
             <div class="btn-row">
@@ -532,7 +512,7 @@
     <section class="section" id="clients">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">08</span><span class="sep">//</span>Clients</p>
+          <p class="eyebrow"><span class="eyebrow-num">07</span><span class="sep">//</span>Clients</p>
           <h2>Who we work with</h2>
         </div>
         <div class="client-rail-wrap reveal">
@@ -629,5 +609,9 @@
   </footer>
 
   <script src="/js/main.js?v=fba2464b8d"></script>
+  <!-- Motion (js/motion.js): drawings draft themselves, banners drift.
+       Self-hosted GSAP, fetched by motion-boot.js only when something it
+       animates comes near the screen. -->
+  <script src="/js/motion-boot.js?v=7352efda48" defer data-load="/js/vendor/gsap.min.js?v=9396f25632 /js/vendor/ScrollTrigger.min.js?v=05ca5ad88c /js/motion.js?v=7166a601a6"></script>
 </body>
 </html>

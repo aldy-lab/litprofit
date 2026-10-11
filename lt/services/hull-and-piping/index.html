@@ -27,7 +27,7 @@
   <link rel="icon" href="/assets/brand/favicon.svg">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/montserrat-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/css/fonts.css?v=70e42e8ab0">
-  <link rel="stylesheet" href="/css/style.css?v=d62dac5045">
+  <link rel="stylesheet" href="/css/style.css?v=3b5c8b07bd">
   <!-- Marks the document as scripted BEFORE the stylesheet paints, so the
        scroll-reveal rules only ever hide content that JS can bring back.
        Inline and synchronous on purpose: an external file would race. -->
@@ -85,7 +85,7 @@
       <figure class="iso-fig cornered reveal">
         <svg data-iso="spool" role="img" tabindex="0" aria-label="Izometrinė vamzdžių sekcija ant suvirinimo stendo su keturiomis siūlėmis. Spustelėkite siūlę arba paspauskite 1–4, kad ją suvirintumėte, T arba manometrą – slėgio bandymas, R – pradeti iš naujo." data-t="{&quot;r_welds&quot;: &quot;siūlės&quot;, &quot;r_ready&quot;: &quot;paruošta bandymui&quot;, &quot;r_refused&quot;: &quot;bandymas atmestas&quot;, &quot;r_weld&quot;: &quot;suvirinkite&quot;, &quot;r_holding&quot;: &quot;slėgio bandymas laiko&quot;, &quot;r_testing&quot;: &quot;bandoma&quot;}"></svg>
         <figcaption class="iso-bar">
-          <span class="iso-hint">Spustelėkite siūlę · T arba manometras – bandymas · R – iš naujo</span>
+          <span class="iso-hint"><span class="iso-hint-key">Spustelėkite siūlę · T arba manometras – bandymas · R – iš naujo</span><span class="iso-hint-touch">Bakstelėkite siūlę, kad ją suvirintumėte · manometras – bandymas</span></span>
           <span class="iso-readout" data-iso-readout aria-live="polite"></span>
         </figcaption>
       </figure>
@@ -210,5 +210,9 @@
   </footer>
 
   <script src="/js/main.js?v=fba2464b8d"></script>
+  <!-- Motion (js/motion.js): drawings draft themselves, banners drift.
+       Self-hosted GSAP, fetched by motion-boot.js only when something it
+       animates comes near the screen. -->
+  <script src="/js/motion-boot.js?v=7352efda48" defer data-load="/js/vendor/gsap.min.js?v=9396f25632 /js/vendor/ScrollTrigger.min.js?v=05ca5ad88c /js/motion.js?v=7166a601a6"></script>
 </body>
 </html>

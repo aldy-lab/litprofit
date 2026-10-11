@@ -27,7 +27,7 @@
   <link rel="icon" href="/assets/brand/favicon.svg">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/montserrat-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/css/fonts.css?v=70e42e8ab0">
-  <link rel="stylesheet" href="/css/style.css?v=d62dac5045">
+  <link rel="stylesheet" href="/css/style.css?v=3b5c8b07bd">
   <!-- Marks the document as scripted BEFORE the stylesheet paints, so the
        scroll-reveal rules only ever hide content that JS can bring back.
        Inline and synchronous on purpose: an external file would race. -->
@@ -317,5 +317,9 @@
   </footer>
 
   <script src="/js/main.js?v=fba2464b8d"></script>
+  <!-- Motion (js/motion.js): drawings draft themselves, banners drift.
+       Self-hosted GSAP, fetched by motion-boot.js only when something it
+       animates comes near the screen. -->
+  <script src="/js/motion-boot.js?v=7352efda48" defer data-load="/js/vendor/gsap.min.js?v=9396f25632 /js/vendor/ScrollTrigger.min.js?v=05ca5ad88c /js/motion.js?v=7166a601a6"></script>
 </body>
 </html>
