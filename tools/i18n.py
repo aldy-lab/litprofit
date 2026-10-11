@@ -202,7 +202,7 @@ S["en"] = dict(
     ga_lead="A skid-mounted marine screw compressor package, in side elevation. "
             "Take a balloon to see what we do to that part.",
 
-    cap_eyebrow="Capability", cap_h2="A decade of refrigeration, on ships and ashore",
+    cap_eyebrow="Capability", cap_h2="Refrigeration since %(founded)s, on ships and ashore",
     cap_lead="Compressor overhauls, class-approved design documentation, plant "
              "installation and commissioning — on fishing vessels and shore "
              "installations alike.",
@@ -388,7 +388,7 @@ S["lt"] = dict(
     ga_lead="Ant rėmo sumontuotas jūrinis sraigtinis kompresorinis agregatas, "
             "šoninis vaizdas. Pasirinkite poziciją ir pamatysite, ką su ja darome.",
 
-    cap_eyebrow="Kompetencija", cap_h2="Dešimtmetis šaldymo darbų laivuose ir krante",
+    cap_eyebrow="Kompetencija", cap_h2="Šaldymo darbai nuo %(founded)s m. – laivuose ir krante",
     cap_lead="Kompresorių kapitalinis remontas, klasifikacinių bendrovių patvirtinti "
              "projektiniai dokumentai, įrangos montavimas ir paleidimas — tiek "
              "žvejybiniuose laivuose, tiek kranto įrenginiuose.",
@@ -507,7 +507,7 @@ S["ru"] = dict(
     ga_lead="Судовой винтовой компрессорный агрегат на раме, вид сбоку. "
             "Выберите позицию, чтобы увидеть, что мы с ней делаем.",
 
-    cap_eyebrow="Компетенции", cap_h2="Десятилетие холодильных работ на судах и на берегу",
+    cap_eyebrow="Компетенции", cap_h2="Холодильные работы с %(founded)s года — на судах и на берегу",
     cap_lead="Капитальный ремонт компрессоров, проектная документация, "
              "согласованная с классификационными обществами, монтаж и пусконаладка — "
              "как на рыболовных судах, так и на береговых установках.",
