@@ -2104,3 +2104,70 @@ for _l, _d in {
 }.items():
     for _k, _v in _d.items():
         ISO[_l][_k]["thint"] = _v
+
+
+# ============================================================
+# REFERENCE LIST (Completed works)
+# ============================================================
+# The disciplines as a reader names them in a filter or a table cell. The
+# four service slugs, plus engines: a line of work the company has (Completed
+# works lists the makes) with no service page of its own.
+REG_SCOPE = {
+    "en": {"refrigeration-systems": "Refrigeration", "ship-engine-repair": "Pumps & valves",
+           "hull-and-piping": "Hull & piping", "spare-parts": "Spare parts", "engines": "Engines"},
+    "lt": {"refrigeration-systems": "Šaldymas", "ship-engine-repair": "Siurbliai ir vožtuvai",
+           "hull-and-piping": "Korpusas ir vamzdynai", "spare-parts": "Atsarginės dalys",
+           "engines": "Varikliai"},
+    "ru": {"refrigeration-systems": "Холодильное", "ship-engine-repair": "Насосы и клапаны",
+           "hull-and-piping": "Корпус и трубы", "spare-parts": "Запчасти", "engines": "Двигатели"},
+}
+S["en"].update(
+    reg_eyebrow="Reference list", reg_h2="Work carried out, vessel by vessel",
+    reg_lead="One line per job: the year, the vessel, the owner and what was done. "
+             "Download it as a PDF for a tender file.",
+    reg_all="All", reg_filter="Filter by discipline", reg_pdf="Download PDF",
+    reg_n_jobs="Jobs listed: %(n)s", reg_n_vessels="vessels: %(n)s", reg_span="%(a)s–%(b)s",
+    reg_unnamed="Not named", prj_type="Type",
+)
+S["lt"].update(
+    reg_eyebrow="Referencijų sąrašas", reg_h2="Atlikti darbai, laivas po laivo",
+    reg_lead="Vienas darbas – viena eilutė: metai, laivas, savininkas ir kas atlikta. "
+             "Atsisiųskite PDF konkurso dokumentams.",
+    reg_all="Visi", reg_filter="Filtruoti pagal sritį", reg_pdf="Atsisiųsti PDF",
+    reg_n_jobs="Darbų sąraše: %(n)s", reg_n_vessels="laivų: %(n)s", reg_span="%(a)s–%(b)s",
+    reg_unnamed="Nenurodytas", prj_type="Tipas",
+)
+S["ru"].update(
+    reg_eyebrow="Референс-лист", reg_h2="Выполненные работы, судно за судном",
+    reg_lead="Одна работа — одна строка: год, судно, владелец и что сделано. "
+             "Скачайте PDF для тендерной документации.",
+    reg_all="Все", reg_filter="Фильтр по направлению", reg_pdf="Скачать PDF",
+    reg_n_jobs="Работ в списке: %(n)s", reg_n_vessels="судов: %(n)s", reg_span="%(a)s–%(b)s",
+    reg_unnamed="Не указано", prj_type="Тип",
+)
+
+S["en"].update(wc_cap="Jobs by year and discipline", wc_hint="Point at a mark to see the job",
+               reg_rev="Rev.")
+S["lt"].update(wc_cap="Darbai pagal metus ir sritį", wc_hint="Užveskite ant žymos – pamatysite darbą",
+               reg_rev="Red.")
+S["ru"].update(wc_cap="Работы по годам и направлениям", wc_hint="Наведите на отметку, чтобы увидеть работу",
+               reg_rev="Ред.")
+
+S["en"].update(fs_open="Open the job")
+S["lt"].update(fs_open="Atidaryti darbą")
+S["ru"].update(fs_open="Открыть работу")
+
+S["en"].update(tl_count="Jobs: %(n)s")
+S["lt"].update(tl_count="Darbų: %(n)s")
+S["ru"].update(tl_count="Работ: %(n)s")
+
+# Completed works, shorter. The h1 carries the year; the lead is one line.
+P["en"].update(cw_h1="Work done since %(founded)s", cw_lead="Engines and refrigeration, on ships and ashore.",
+               plant_e="Plant", plant_h2="What we work on")
+P["lt"].update(cw_h1="Darbai nuo %(founded)s m.", cw_lead="Varikliai ir šaldymas – laivuose ir krante.",
+               plant_e="Įranga", plant_h2="Su kuo dirbame")
+P["ru"].update(cw_h1="Работы с %(founded)s года", cw_lead="Двигатели и холод — на судах и на берегу.",
+               plant_e="Оборудование", plant_h2="С чем работаем")
+S["en"].update(reg_h2="Every job")
+S["lt"].update(reg_h2="Visi darbai")
+S["ru"].update(reg_h2="Все работы")

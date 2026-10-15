@@ -631,6 +631,187 @@
     };
   };
 
+
+  /* ============================================================
+     VESSEL -- one job, as the ship it was done on
+     ------------------------------------------------------------
+     Completed works cards. An isometric hull cut open where the work was:
+     over those spaces the deck is lifted off and the near side cut down, and
+     inside stands what the job was about -- a compressor package, a pump
+     skid, a pipe run with its welds, stacked spares, an engine block. Every
+     other space keeps its deck, and the superstructure of the vessel's kind
+     stands on one of those. The cut-open spaces are the only lit things;
+     the engine's heads fire in turn, pipes carry a pulse, the masthead
+     light blinks, and the water behind the stern carries a slow wake.
+     ============================================================ */
+  var VESSEL_N = 0;
+  var SEGS = [['pipe', 0, 74], ['er', 74, 146], ['hold', 146, 240], ['store', 240, 300]];
+  FIGS.vessel = function (svg, api, t) {
+    var ID = 'vsl' + (++VESSEL_N);
+    var kind = t.kind || 'trawler', zones = t.zones || [], scope = t.scope || '', labels = t.labels || {};
+    var shore = kind === 'shore';
+    var LEN = 300, BOW = 64, B = 84, HH = shore ? 70 : 52, WALL = 5;
+    /* tight to the ship: the wake and the mast are the extremes */
+    var K = frame([[-34, -10, 0], [LEN + BOW + 6, B / 2, 0], [-34, B + 10, 0], [LEN, B + 6, 0],
+                   [0, 0, 180]], 6);
+    /* The top of the frame is the highest thing any kind can carry -- the
+       reefer's four-tier house and mast (~152 up) -- placed at the stern
+       corner, because in isometric a point nearer the stern stands higher
+       on screen at the same height. Measured at mid-ship, the reefer's
+       mast was cut off. One frame for every kind keeps the cards aligned. */
+    var TOP = K.TOP, FRONT = K.FRONT, SIDE = K.SIDE, box = K.box;
+    var s = defs(ID);
+    function poly(pts, cls) { return '<path class="' + cls + '" d="' + K.path(pts) + ' Z"/>'; }
+    var open = SEGS.map(function (g) { return zones.indexOf(g[0]) !== -1; });
+
+    /* water, and a wake astern: three dashed lines that drift */
+    s += '<g transform="' + TOP(-60, -20, 0) + '">' +
+         '<rect class="iso-detail vsl-water" x="26" width="' + (LEN + BOW + 54) + '" height="' + (B + 40) + '"/>' +
+         [26, 46, 66, 86].map(function (v, i) {
+           return '<line class="vsl-wake" style="animation-delay:-' + (i * 0.9) + 's" x1="4" y1="' + (v + 2) + '" x2="' + (58 - i * 6) + '" y2="' + v + '"/>';
+         }).join('') + '</g>';
+
+    /* what stands in an opened space, by the job's discipline */
+    function inside(x0, x1) {
+      var o = '', w = x1 - x0, cx = x0 + w / 2, z = 6, y = 14;
+      if (scope === 'refrigeration-systems') {
+        o += '<g transform="' + FRONT(x0 + 4, WALL, HH - 6) + '">' + slits(4, w - 12, 4, 6, HH - 22) + '</g>';
+        o += box(x0 + 8, y + 10, z, 26, 30, 18, 'vsl-kit');
+        o += box(x0 + 34, y + 14, z, 18, 22, 14, 'vsl-kit');
+        if (w > 70) o += box(x0 + 58, y + 6, z, 14, 50, 12, 'vsl-kit');
+        o += '<g transform="' + FRONT(x0 + 8, y + 40, z + 18) + '"><circle class="iso-led vsl-led" cx="20" cy="5" r="2.4"/></g>';
+      } else if (scope === 'ship-engine-repair') {
+        o += box(x0 + 6, y + 8, z, w - 12, 40, 5, 'vsl-kit');
+        o += box(x0 + 10, y + 16, z + 5, 18, 22, 16, 'vsl-kit');
+        o += box(x0 + 32, y + 18, z + 5, 22, 18, 12, 'vsl-kit');
+        o += box(x0 + w - 18, y + 22, z + 5, 8, 8, 18, 'vsl-kit');
+        o += '<g transform="' + TOP(x0 + w - 14, y + 26, z + 23) + '"><circle class="iso-wheel vsl-wheel" r="7"/></g>';
+      } else if (scope === 'hull-and-piping') {
+        var py1 = y + 10, py2 = y + 40;
+        o += pipe(K, ID + '-in1', ID, [[x0 + 4, py1, z + 8], [x1 - 6, py1, z + 8], [x1 - 6, py1, HH - 8]]);
+        o += pipe(K, ID + '-in2', ID, [[x0 + 4, py2, z + 4], [x1 - 10, py2, z + 4]]);
+        [0.3, 0.62].forEach(function (f) {
+          o += box(x0 + w * f - 2, py1 - 3, z + 5, 5, 6, 6, 'vsl-weld');
+          o += box(x0 + w * f + 6, py2 - 3, z + 1, 5, 6, 6, 'vsl-weld');
+        });
+      } else if (scope === 'spare-parts') {
+        for (var r = 0; r < 2; r++) for (var c = 0; c < Math.max(2, Math.floor(w / 26)); c++) {
+          o += box(x0 + 6 + c * 24, y + 6 + r * 28, z, 20, 22, 14, 'vsl-kit');
+          if ((r + c) % 2) o += box(x0 + 6 + c * 24, y + 6 + r * 28, z + 14, 20, 22, 12, 'vsl-kit');
+        }
+      } else {
+        /* engines, and anything unnamed: a block, its heads, an exhaust */
+        o += box(x0 + 8, y + 12, z, w - 16, 34, 20, 'vsl-kit');
+        var n = Math.max(3, Math.floor((w - 20) / 12));
+        for (var k = 0; k < n; k++) {
+          o += '<g class="vsl-head" id="' + ID + '-h' + k + '">' + box(x0 + 12 + k * ((w - 24) / n), y + 18, z + 20, (w - 24) / n - 3, 22, 6) + '</g>';
+        }
+        o += box(cx - 3, y + 2, z + 14, 6, 6, HH - 4, 'vsl-kit');
+      }
+      return o;
+    }
+
+    /* the hull, space by space, aft to fore */
+    SEGS.forEach(function (g, i) {
+      var x0 = g[1], x1 = g[2], w = x1 - x0, H = HH;
+      if (!open[i]) {
+        s += box(x0, 0, 0, w, B, H);
+        s += '<g transform="' + TOP(x0, 0, H) + '"><rect class="iso-detail" x="4" y="6" width="' + (w - 8) + '" height="' + (B - 12) + '"/></g>';
+        return;
+      }
+      /* opened: floor, the far wall's inner face, the aft bulkhead's face,
+         the kit, then the near side cut down to a low coaming */
+      s += '<g class="vsl-cut" id="' + ID + '-' + g[0] + '">';
+      s += box(x0, 0, 0, w, B, 6, 'vsl-floor');
+      s += box(x0, 0, 6, w, WALL, H - 6, 'vsl-inwall');
+      if (i === 0 || open[i - 1]) s += box(x0, WALL, 6, WALL, B - 2 * WALL, H - 6);
+      s += '<g transform="' + TOP(x0 + WALL, WALL, 6) + '"><rect class="iso-halo" width="' + (w - WALL) + '" height="' + (B - 2 * WALL) + '" filter="url(#' + ID + '-bloom)"/></g>';
+      s += inside(x0, x1);
+      s += box(x0, B - WALL, 6, w, WALL, 12);
+      if (labels[g[0]]) s += '<title>' + esc(labels[g[0]]) + '</title>';
+      s += '</g>';
+    });
+    if (!shore) {
+      s += poly([[LEN, 0, HH], [LEN + BOW, B / 2, HH], [LEN, B, HH]], 'iso-face iso-top');
+      s += poly([[LEN, B, HH], [LEN + BOW, B / 2, HH], [LEN + BOW, B / 2, HH * 0.35], [LEN, B, 0]], 'iso-face iso-front');
+    } else {
+      SEGS.forEach(function (g, i) { if (!open[i]) s += box(g[1] + 12, 20, HH, 30, 30, 12); });
+    }
+
+    /* superstructure on a closed space, as near its proper place as it can */
+    var want = { trawler: ['hold', 'store', 'er'], factory: ['hold', 'store', 'er'],
+                 reefer: ['pipe', 'er', 'store'], longliner: ['store', 'hold', 'er'] }[kind] || [];
+    var at = null;
+    want.some(function (k) { var i = SEGS.map(function (g) { return g[0]; }).indexOf(k);
+      if (!open[i]) { at = SEGS[i]; return true; } return false; });
+    var wins = '';
+    if (!shore && at) {
+      var hw = Math.min(64, at[2] - at[1] - 8), hx = at[1] + (at[2] - at[1] - hw) / 2, z = HH;
+      var tiers = kind === 'reefer' ? 4 : kind === 'longliner' ? 2 : 3;
+      for (var ti = 0; ti < tiers; ti++) {
+        var ww = hw - ti * 9, dd = 56 - ti * 8;
+        s += box(hx + ti * 4.5, 14 + ti * 4, z, ww, dd, 15);
+        s += '<g transform="' + FRONT(hx + ti * 4.5, 14 + ti * 4 + dd, z + 15) + '"><rect class="iso-glass vsl-win" x="4" y="5" width="' + (ww - 8) + '" height="4"/></g>';
+        z += 15;
+      }
+      s += box(hx + hw / 2 - 1, 41, z, 2, 2, 36);
+      s += '<g transform="' + TOP(hx + hw / 2, 42, z + 36) + '"><circle class="vsl-mast" r="3.2" filter="url(#' + ID + '-soft)"/></g>';
+    }
+    if (!shore && (kind === 'trawler' || kind === 'factory') && !open[0]) {
+      s += box(8, 8, HH, 5, 5, 46) + box(8, B - 13, HH, 5, 5, 46) + box(8, 8, HH + 46, 5, B - 16, 5);
+    }
+    if (!shore && kind === 'reefer') {
+      SEGS.forEach(function (g, i) {
+        if (open[i] || g === at) return;
+        var x = g[1] + (g[2] - g[1]) / 2;
+        s += box(x, B / 2 - 2, HH, 4, 4, 52);
+        s += '<path class="iso-wire" d="' + K.path([[x + 2, B / 2, HH + 50], [x + 46, B / 2 + 18, HH + 8]]) + '"/>';
+      });
+    }
+
+    svg.setAttribute('viewBox', K.viewBox);
+    svg.insertAdjacentHTML('beforeend', s);
+
+    var cuts = Array.prototype.slice.call(svg.querySelectorAll('.vsl-cut'));
+    var flows = Array.prototype.slice.call(svg.querySelectorAll('.iso-flow'));
+    var heads = Array.prototype.slice.call(svg.querySelectorAll('.vsl-head'));
+    var winsEl = Array.prototype.slice.call(svg.querySelectorAll('.vsl-win'));
+    var card = svg.closest('.fs-card');
+    function power(on) { svg.classList.toggle('is-power', on); }
+    if (card) {
+      card.addEventListener('mouseenter', function () { power(true); });
+      card.addEventListener('mouseleave', function () { power(false); });
+      card.addEventListener('focusin', function () { power(true); });
+      card.addEventListener('focusout', function () { power(false); });
+    }
+    /* firing order: the heads light one after another, while on screen */
+    function fire() {
+      if (!heads.length || REDUCE) return;
+      var k = 0;
+      (function next() {
+        api.after(svg.classList.contains('is-power') ? 160 : 320, function () {
+          if (api.visible()) {
+            heads.forEach(function (h, i) { h.classList.toggle('fire', i === k % heads.length); });
+            k++;
+          }
+          next();
+        });
+      })();
+    }
+    return {
+      nofocus: true,
+      demo: function () {
+        cuts.forEach(function (el, i) { api.after(200 + i * 420, function () { el.classList.add('hot'); }); });
+        api.after(200 + cuts.length * 420, function () {
+          winsEl.forEach(function (w) { w.classList.add('hot'); });
+          flows.forEach(function (f) { f.classList.add('hot'); });
+          svg.classList.add('is-on');
+          fire();
+        });
+      }
+    };
+  };
+
   /* ============================================================
      MOUNT
      ============================================================ */
@@ -665,7 +846,8 @@
     };
 
     var h = make(svg, api, t) || {};
-    svg.setAttribute('tabindex', '0');
+    /* a figure inside a link (the job cards) is a picture, not a control */
+    if (!h.nofocus) svg.setAttribute('tabindex', '0');
     svg.addEventListener('keydown', function (e) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (h.key && h.key(e)) e.preventDefault();
