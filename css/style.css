@@ -2850,13 +2850,17 @@ html.is-frost #frostToggle {
 .prj-page > p, .prj-page > ul { max-width: 74ch; }
 .prj-page h2 { font-size: var(--h3); margin: 46px 0 16px; max-width: 24ch; }
 .prj-record {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  /* flex, not an auto-fit grid: the facts are optional, so their count
+     varies, and a grid left the last one alone beside an empty band. Here the
+     last row's cells grow to fill it, whatever the count. */
+  display: flex;
+  flex-wrap: wrap;
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--glass-border);
 }
 .prj-record > div {
+  flex: 1 1 190px;
   padding: 20px 22px;
   background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
 }
@@ -2896,7 +2900,7 @@ html.is-frost #frostToggle {
 }
 @media (max-width: 620px) {
   .prj-card { grid-template-columns: 1fr; gap: 10px; }
-  .prj-record { grid-template-columns: 1fr 1fr; }
+  .prj-record > div { flex-basis: 40%; }
 }
 
 /* ---------- capacity chart ----------
@@ -4835,4 +4839,576 @@ a.card:active,
 @media (hover: none) and (pointer: coarse) {
   .iso-hint-key { display: none; }
   .iso-hint-touch { display: inline; }
+}
+
+/* ============================================================
+   REFERENCE LIST (Completed works)
+   Set as the schedule on a drawing: a ruled table, mono column heads, the
+   year in the margin as a record number, the vessel as the thing the row is
+   about. One accent, on the rows you can open. Filters are the disciplines,
+   each with the count of rows it would leave.
+   ============================================================ */
+.rl-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 18px;
+}
+.rl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.rl-chip, .rl-pdf {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-s);
+  cursor: pointer;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+.rl-chip span {
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-size: var(--label);
+  color: var(--muted-2);
+  font-variant-numeric: tabular-nums;
+}
+.rl-chip[aria-pressed="true"] {
+  color: var(--white);
+  border-color: var(--iso-accent);
+  background: rgba(158, 201, 255, 0.08);
+}
+.rl-chip[aria-pressed="true"] span { color: var(--iso-accent); }
+.rl-pdf {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--white);
+  border-color: var(--line-2);
+}
+.rl-pdf::before { content: "\2193\00a0\00a0"; color: var(--iso-accent); }
+@media (hover: hover) and (pointer: fine) {
+  .rl-chip:hover, .rl-pdf:hover { color: var(--white); border-color: var(--line-2); }
+}
+.rl-print-head { display: none; }
+.rl-stats {
+  margin: 0 0 12px;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.rl-stats .sep { color: var(--grey-600); margin: 0 6px; }
+.rl-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  font-variant-numeric: tabular-nums;
+}
+.rl-table th {
+  text-align: left;
+  padding: 12px 18px;
+  font-family: var(--mono);
+  font-size: var(--label);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  border-bottom: 1px solid var(--line-2);
+}
+.rl-table td {
+  padding: 16px 18px;
+  border-top: 1px solid var(--line);
+  vertical-align: top;
+  color: var(--muted);
+  font-size: var(--text-m);
+}
+.rl-table tbody tr:first-child td { border-top: 0; }
+.rl-y { font-family: var(--mono); font-size: var(--text-s); letter-spacing: 0.12em; color: var(--muted-2); width: 1%; white-space: nowrap; }
+.rl-v b { display: block; color: var(--white); font-weight: 600; }
+.rl-v span {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.rl-w a { color: var(--white); text-decoration: underline; text-decoration-color: var(--iso-accent); text-underline-offset: 4px; }
+.rl-w a::after { content: "\00a0\2192"; color: var(--iso-accent); }
+.rl-s {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  white-space: nowrap;
+  text-align: right;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rl-table tbody tr { transition: background 0.2s var(--ease); }
+  .rl-table tbody tr:hover { background: rgba(255, 255, 255, 0.035); }
+}
+/* filtered out: a class, not [hidden] -- the row's own display would win */
+.rl-table tr.is-out { display: none; }
+
+/* Phones: a table of five columns at 350px is a list of crushed cells. Each
+   row becomes a record -- year and discipline on the first line, the vessel
+   large, then owner and work. Screen only: an A4 page is ~720px wide and
+   the PDF must stay a table. */
+@media screen and (max-width: 760px) {
+  .rl-table, .rl-table tbody, .rl-table tr, .rl-table td { display: block; }
+  .rl-table thead { display: none; }
+  .rl-table tr {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 14px;
+    padding: 16px 18px;
+    border-top: 1px solid var(--line);
+  }
+  .rl-table tbody tr:first-child { border-top: 0; }
+  .rl-table td { padding: 0; border: 0; }
+  .rl-y { grid-column: 1; grid-row: 1; width: auto; }
+  .rl-s { grid-column: 2; grid-row: 1; text-align: right; }
+  .rl-v { grid-column: 1 / -1; margin-top: 6px; }
+  .rl-o { grid-column: 1 / -1; font-size: var(--text-s); }
+  .rl-w { grid-column: 1 / -1; color: var(--text); }
+  .rl-table tr.is-out { display: none; }
+}
+
+/* The sample-data band: a preview build only, never in the repository. */
+.preview-band {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 8px 16px;
+  background: #ffd54a;
+  color: #000;
+  font: 700 13px/1.3 var(--mono, monospace);
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+/* Print: "Download PDF" prints the reference list alone, black on white,
+   with the company and the month in the head, ready for a tender file. */
+@media print {
+  /* display:none, not visibility: hidden content still takes its room, and
+     the PDF came out as one page of list and five blank sheets. */
+  html.print-rl body > *:not(main),
+  html.print-rl main > *:not(#reference-list),
+  html.print-rl #reference-list .section-head,
+  html.print-rl #reference-list .rl-head,
+  html.print-rl .rl-bar { display: none !important; }
+  html.print-rl body { background: #fff !important; }
+  html.print-rl body::before, html.print-rl body::after { display: none !important; }
+  html.print-rl #reference-list { padding: 0 !important; background: none !important; }
+  html.print-rl #reference-list .container { max-width: none; padding: 0; }
+  html.print-rl .rl.reveal { opacity: 1 !important; transform: none !important; }
+  html.print-rl .rl-print-head { display: block; font: 600 14px/1.4 sans-serif; color: #000; margin: 0 0 6px; }
+  html.print-rl .rl-stats, html.print-rl .rl-stats .sep { color: #333; }
+  html.print-rl .rl-table { background: none; border: 1px solid #999; }
+  html.print-rl .rl-table th, html.print-rl .rl-table td,
+  html.print-rl .rl-v b, html.print-rl .rl-v span, html.print-rl .rl-y,
+  html.print-rl .rl-s, html.print-rl .rl-w a { color: #000; }
+  html.print-rl .rl-table td, html.print-rl .rl-table th { border-color: #bbb; padding: 6px 8px; font-size: 10.5pt; }
+  html.print-rl .rl-w a { text-decoration: none; }
+  html.print-rl .rl-w a::after { content: none; }
+  html.print-rl .rl-table tr { break-inside: avoid; }
+  html.print-rl .rl-table tr.is-out { display: none; }
+}
+
+/* ============================================================
+   REFERENCE LIST, as a drawing
+   The first version was a heading, a lead and a table -- the same module as
+   every other block on the page, and it read as one. Now the list opens on
+   a chart of the work itself, and the table is set as a sheet: a double
+   border, numbered rows, ruled columns, the filters as tabs on its top edge
+   and the counts in a title block at its foot.
+   ============================================================ */
+.rl-head { margin-bottom: clamp(20px, 2.4vw, 34px); }
+.rl-head h2 { max-width: 22ch; }
+
+/* ---------- the chart ---------- */
+.wc { margin: 0 0 clamp(34px, 4vw, 60px); }
+.wc-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.wc-svg * { vector-effect: non-scaling-stroke; }
+.wc-yr { stroke: rgba(214, 226, 255, 0.06); stroke-width: 1; }
+.wc-axis { stroke: rgba(214, 226, 255, 0.35); stroke-width: 1; }
+.wc-yl { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; fill: var(--muted-2); text-anchor: middle; }
+.wc-ll { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; fill: var(--muted); }
+.wc-ln { font-family: var(--mono); font-size: 12px; fill: var(--muted-2); text-anchor: end; }
+.wc-rail { stroke: rgba(214, 226, 255, 0.2); stroke-width: 1; stroke-dasharray: 2 7; }
+.wc-key { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+.wc-mark {
+  fill: var(--navy-900, #070824);
+  stroke: rgba(214, 226, 255, 0.75);
+  stroke-width: 1.3;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.25s var(--ease), stroke 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.wc-job { cursor: pointer; outline: none; }
+.wc-job.is-lit .wc-mark { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.wc-halo { fill: var(--iso-accent); opacity: 0.35; filter: url(#wcGlow); }
+.wc-job:hover .wc-mark, .wc-job:focus-visible .wc-mark, .wc-job.is-hot .wc-mark {
+  stroke: var(--white); transform: scale(1.35);
+}
+.wc-job:not(.is-lit):hover .wc-mark, .wc-job:not(.is-lit).is-hot .wc-mark { fill: rgba(158, 201, 255, 0.35); }
+.wc-job.is-out { opacity: 0.15; }
+.wc-cap {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px;
+  margin-top: 10px;
+  font-family: var(--mono); font-size: var(--label); letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted-2);
+}
+.wc-read { color: var(--iso-accent); text-transform: none; letter-spacing: 0.06em; min-height: 1.4em; }
+@media (max-width: 700px) {
+  .wc-ll, .wc-ln, .wc-yl-odd { display: none; }
+  .wc-yl { font-size: 30px; }
+  .wc-mark { transform: scale(1.7); }
+  .wc-job:hover .wc-mark, .wc-job.is-hot .wc-mark { transform: scale(2.1); }
+  .wc-key { transform: scale(1.8); transform-box: fill-box; transform-origin: center; }
+}
+
+/* ---------- tabs on the sheet's edge ---------- */
+.rl-bar { margin-bottom: 0; align-items: flex-end; }
+.rl-chips { gap: 0; }
+.rl-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+.rl-chip[aria-pressed="true"] {
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-top));
+  border-color: var(--line-2);
+  box-shadow: inset 0 2px 0 var(--iso-accent);
+  position: relative; z-index: 1;
+}
+.rl-pdf { margin-bottom: 8px; border-radius: 0; }
+.rl-g { width: 12px; height: 12px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+
+/* ---------- the sheet ---------- */
+.rl-sheet {
+  position: relative;
+  padding: 6px;
+  border: 1px solid var(--line-2);
+}
+.rl-table { border-color: var(--line); }
+.rl-table th + th, .rl-table td + td { border-left: 1px solid rgba(214, 226, 255, 0.07); }
+.rl-n { width: 1%; white-space: nowrap; font-family: var(--mono); font-size: var(--label); letter-spacing: 0.12em; color: var(--muted-2); }
+th.rl-n { color: var(--muted-2); }
+.rl-y {
+  font-family: inherit;
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+/* the cell stays a table cell -- as a flex box it stopped filling the row,
+   so its rule and the row highlight ended halfway down */
+.rl-s-in { display: inline-flex; align-items: center; gap: 8px; }
+.rl-table tr.is-hot td { background: rgba(158, 201, 255, 0.07); }
+.rl-table tr.is-hot .rl-n { color: var(--iso-accent); }
+.rl-table tr:target td { background: rgba(158, 201, 255, 0.07); }
+.rl-table tr { scroll-margin-top: calc(var(--nav-h, 76px) + 20px); }
+
+/* title block */
+.rl-tb {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.rl-tb > span { padding: 11px 16px; }
+.rl-tb > span + span { border-left: 1px solid var(--line); }
+.rl-tb-b { color: var(--white); font-weight: 700; letter-spacing: 0.22em; }
+.rl-tb .rl-stats { margin: 0; text-align: right; }
+.rl-note { margin: 14px 0 0; max-width: 62ch; font-size: var(--text-s); color: var(--muted-2); }
+
+@media screen and (max-width: 760px) {
+  .rl-table th + th, .rl-table td + td { border-left: 0; }
+  .rl-table tr { grid-template-columns: auto auto 1fr; }
+  .rl-n { grid-column: 1; grid-row: 1; align-self: center; }
+  .rl-y { grid-column: 2; grid-row: 1; }
+  .rl-s { grid-column: 3; grid-row: 1; }
+  .rl-v, .rl-o, .rl-w { grid-column: 1 / -1; }
+  /* wrapped, not a sideways scroller that cut the third tab in half */
+  .rl-chips { gap: 6px; margin-bottom: 10px; }
+  .rl-chip { border: 1px solid var(--line); margin-bottom: 0; padding: 0 12px; white-space: nowrap; }
+  .rl-chip[aria-pressed="true"] { border-color: var(--line-2); }
+  .rl-s { text-align: right; }
+  .rl-tb { grid-template-columns: 1fr 1fr; }
+  .rl-tb > span:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); text-align: left; }
+  .rl-tb > span:nth-child(4) { border-top: 1px solid var(--line); }
+}
+
+/* ---------- selected jobs: each card carries its own hull ---------- */
+.prj-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); }
+.prj-card {
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "draw draw" "num scope" "body body";
+  gap: 14px 16px;
+  /* the grid stretches every card to the tallest; without this the spare
+     height was shared among the rows and the year line sat at a different
+     height in each card */
+  align-content: start;
+}
+.prj-card .prj-title { line-height: 1.25; }
+.prj-draw { grid-area: draw; display: block; padding: 6px 0 10px; border-bottom: 1px solid var(--line); }
+.prj-num { grid-area: num; padding-top: 0; }
+.prj-scope { grid-area: scope; padding-top: 0; }
+.prj-body { grid-area: body; }
+.mp { display: block; width: 100%; height: auto; }
+.mp * { vector-effect: non-scaling-stroke; }
+.mp-hull { fill: none; stroke: rgba(214, 226, 255, 0.55); stroke-width: 1.2; }
+.mp-wl { stroke: rgba(214, 226, 255, 0.18); stroke-width: 1; stroke-dasharray: 10 4 2 4; }
+.mp-sp { fill: none; stroke: rgba(214, 226, 255, 0.18); stroke-width: 1; stroke-dasharray: 4 4; }
+.mp-sp.is-work { fill: rgba(158, 201, 255, 0.16); stroke: var(--iso-accent); stroke-dasharray: none; }
+@media (hover: hover) and (pointer: fine) {
+  .prj-card:hover .mp-sp.is-work { fill: rgba(158, 201, 255, 0.3); }
+}
+@media (max-width: 900px) { .prj-scope { display: block; } }
+@media (max-width: 620px) { .prj-card { grid-template-columns: 1fr auto; } }
+
+@media print {
+  html.print-rl .wc, html.print-rl .rl-note { display: none !important; }
+  html.print-rl .rl-sheet { border-color: #999; padding: 4px; }
+  html.print-rl .rl-tb, html.print-rl .rl-tb > span { border-color: #999; color: #000; }
+  html.print-rl .rl-tb-b, html.print-rl .rl-n { color: #000; }
+  html.print-rl .rl-table th + th, html.print-rl .rl-table td + td { border-left-color: #ddd; }
+  html.print-rl .rl-g { stroke: #000; }
+  html.print-rl .rl-y { font-size: 11pt; }
+}
+
+/* ============================================================
+   SELECTED WORK -- a timeline, read downwards
+   Newest year first. Each year is a band: the number, very large, holds on
+   the left while the page scrolls through that year's jobs, and the next
+   year pushes it out (sticky). Between year and cards a rail runs down and
+   fills with light as the reader passes; each card's node lights as the
+   card arrives. No horizontal movement anywhere.
+   ============================================================ */
+.tl-head { margin-bottom: clamp(30px, 4vw, 64px); }
+.tl-head h2 { max-width: 20ch; }
+.tl-band {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
+  column-gap: clamp(28px, 4vw, 72px);
+}
+.tl-y {
+  position: sticky;
+  top: calc(var(--nav-h, 76px) + 6vh);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: clamp(30px, 4vw, 60px);
+}
+.tl-num {
+  /* sized to its column: four light figures at 10vw fill ~5/13 of the
+     row; at 13.5vw the year broke after the third digit */
+  font-size: clamp(96px, 10vw, 200px);
+  font-weight: 300;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  color: var(--white);
+  font-variant-numeric: tabular-nums;
+}
+.tl-count {
+  font-family: var(--mono); font-size: var(--label); letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted-2);
+  padding-left: 0.4em;
+}
+/* the rail: a hairline down the left of the cards, and over it a fill */
+.tl-cards {
+  position: relative;
+  display: grid;
+  gap: clamp(18px, 2vw, 28px);
+  padding: 0 0 clamp(30px, 4vw, 60px) clamp(30px, 3vw, 48px);
+  border-left: 1px solid var(--line);
+}
+.tl-cards::before {
+  content: "";
+  position: absolute;
+  left: -1px; top: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(180deg, var(--iso-accent-hi), var(--iso-accent));
+  box-shadow: 0 0 10px var(--iso-accent);
+  transform-origin: top;
+  transform: scaleY(0);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .tl-cards::before {
+      animation: tl-fill linear both;
+      animation-timeline: view();
+      animation-range: entry 40% exit 60%;
+    }
+    @keyframes tl-fill { to { transform: scaleY(1); } }
+  }
+}
+@supports not (animation-timeline: view()) { .tl-cards::before { transform: none; opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .tl-cards::before { transform: none; animation: none; } }
+
+/* each card hangs off the rail on a node that lights when it arrives */
+.fs-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(18px, 2vw, 30px);
+  align-items: center;
+  padding: clamp(18px, 1.8vw, 26px);
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, var(--glass-tint-top), var(--glass-tint-bottom));
+  color: inherit;
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+}
+.fs-card::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * clamp(30px, 3vw, 48px) - 5px);
+  top: clamp(26px, 2.6vw, 36px);
+  width: 9px; height: 9px;
+  border: 1px solid var(--line-2);
+  background: var(--navy-900, #070824);
+  transition: background 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.fs-card.is-in::before { background: var(--iso-accent); border-color: var(--iso-accent-hi); box-shadow: 0 0 14px var(--iso-accent); }
+.fs-card::after {
+  content: "";
+  position: absolute;
+  left: calc(-1 * clamp(30px, 3vw, 48px) + 5px);
+  top: calc(clamp(26px, 2.6vw, 36px) + 4px);
+  width: calc(clamp(30px, 3vw, 48px) - 6px);
+  height: 1px;
+  background: var(--line);
+}
+@media (hover: hover) and (pointer: fine) {
+  .fs-card:hover { border-color: var(--line-2); background: rgba(255, 255, 255, 0.05); }
+}
+.fs-iso { display: block; width: 100%; height: auto; overflow: clip; }
+.fs-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.fs-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-bottom: 4px;
+  font-family: var(--mono); font-size: var(--label); letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted-2); white-space: nowrap;
+}
+.fs-meta > span:first-child { color: var(--iso-accent); }
+.fs-meta > span:last-child { display: inline-flex; align-items: center; gap: 7px; }
+.fs-name { font-size: clamp(22px, 1.9vw, 30px); font-weight: 700; line-height: 1.05; letter-spacing: -0.015em; color: var(--white); }
+.fs-title { font-size: var(--text-m); color: var(--text); }
+.fs-facts { font-family: var(--mono); font-size: var(--label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); }
+.fs-open {
+  margin-top: 6px;
+  font-family: var(--mono); font-size: var(--label); letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--white);
+}
+.fs-open::after { content: "\00a0\2192"; color: var(--iso-accent); }
+
+@media (max-width: 1099px) {
+  .fs-card { grid-template-columns: 1fr; }
+}
+/* Phones: the year becomes the band's sticky heading over its cards, and
+   the rail runs down the left edge. */
+@media (max-width: 760px) {
+  .tl-band { grid-template-columns: 1fr; }
+  .tl-y {
+    top: var(--nav-h, 64px);
+    z-index: 2;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 0 12px;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, var(--navy-900, #070824) 70%, transparent);
+  }
+  .tl-num { font-size: clamp(64px, 20vw, 92px); }
+  .tl-cards { padding-left: 22px; }
+  .fs-card::before { left: -27px; }
+  .fs-card::after { left: -18px; width: 16px; }
+}
+
+/* the vessel figure's own pieces: only the opened spaces take the light */
+.vsl-water { stroke-dasharray: 3 6; }
+.vsl-wake { stroke: rgba(214, 226, 255, 0.32); stroke-width: 1; stroke-dasharray: 6 8; animation: vsl-wake 3.2s linear infinite; }
+@keyframes vsl-wake { to { stroke-dashoffset: -28; } }
+.vsl-cut .iso-halo { opacity: 0; transition: opacity 0.6s var(--ease); }
+.vsl-cut.hot .iso-halo { opacity: 0.75; }
+.is-power .vsl-cut.hot .iso-halo { opacity: 0.95; }
+.vsl-cut .iso-face { transition: fill 0.5s var(--ease), stroke 0.5s var(--ease); }
+.vsl-cut.hot .vsl-floor .iso-top { fill: color-mix(in srgb, var(--iso-accent) 42%, var(--iso-deck)); }
+.vsl-cut.hot .vsl-inwall .iso-face { fill: color-mix(in srgb, var(--iso-accent) 22%, var(--iso-body)); stroke: var(--iso-accent); }
+.vsl-cut.hot .vsl-kit .iso-face { stroke: var(--iso-accent); }
+.vsl-cut.hot .vsl-kit .iso-face.iso-top { fill: color-mix(in srgb, var(--iso-accent) 60%, var(--iso-deck)); }
+.vsl-cut.hot .vsl-kit .iso-face.iso-front { fill: color-mix(in srgb, var(--iso-accent) 18%, var(--iso-body)); }
+.vsl-cut.hot .vsl-weld .iso-face { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.vsl-cut.hot .vsl-wheel { stroke: var(--iso-accent-hi); fill: var(--iso-accent-dim); }
+.vsl-head .iso-face { transition: fill 0.12s linear, stroke 0.12s linear; }
+.vsl-cut.hot .vsl-head .iso-face { stroke: var(--iso-accent); }
+.vsl-head.fire .iso-face { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.is-on .vsl-led { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.vsl-win { fill: var(--iso-recess); stroke: var(--iso-detail); }
+.vsl-win.hot { fill: var(--iso-accent); stroke: var(--iso-accent-hi); }
+.vsl-mast { fill: var(--iso-recess); stroke: var(--iso-line); stroke-width: 1; }
+.is-on .vsl-mast { fill: var(--iso-accent-hi); stroke: none; animation: vsl-blink 2.4s steps(1, end) infinite; }
+@keyframes vsl-blink { 0%, 78% { opacity: 1; } 79%, 100% { opacity: 0.15; } }
+.iso-paused .vsl-wake, .iso-paused .vsl-mast { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .vsl-wake, .is-on .vsl-mast { animation: none; }
+}
+
+
+/* ============================================================
+   PLANT (Completed works) -- the makes, as two short lists beside one
+   workshop photograph. Replaces two long-paragraph sections, the client
+   schedule and the gallery.
+   ============================================================ */
+.plant-head { margin-bottom: clamp(24px, 3vw, 44px); }
+.plant {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(28px, 4vw, 72px);
+  align-items: start;
+}
+.plant-cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 48px); }
+.plant-col .eyebrow { margin-bottom: 14px; }
+.plant-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-2); }
+.plant-list li {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-l);
+  font-weight: 500;
+  color: var(--white);
+  overflow-wrap: anywhere;
+}
+.plant-shot { margin: 0; border: 1px solid var(--line); }
+.plant-shot img { display: block; width: 100%; height: auto; filter: saturate(0.6); }
+.plant-shot figcaption {
+  padding: 12px 16px;
+  font-size: var(--text-s);
+  color: var(--muted-2);
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 900px) {
+  .plant { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .plant-cols { grid-template-columns: 1fr; }
 }

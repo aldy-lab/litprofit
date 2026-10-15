@@ -296,6 +296,80 @@
     syncRail();
   }
 
+  /* ---------- selected work timeline ----------
+     A card's node on the rail lights as the card arrives. */
+  var tlCards = all(".tl .fs-card");
+  if (tlCards.length) {
+    if ("IntersectionObserver" in window) {
+      var tio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("is-in"); tio.unobserve(e.target); } });
+      }, { rootMargin: "0px 0px -35% 0px" });
+      tlCards.forEach(function (c) { tio.observe(c); });
+    } else {
+      tlCards.forEach(function (c) { c.classList.add("is-in"); });
+    }
+  }
+
+  /* ---------- reference list ----------
+     Filter chips narrow the table to one discipline; the count line follows
+     what is showing. "Download PDF" prints the list alone (the print styles
+     key on html.print-rl), so the browser's own Save as PDF makes the file. */
+  var reg = doc.querySelector("[data-rl]");
+  if (reg) {
+    var regRows = all("tbody tr", reg);
+    var regChips = all("[data-rl-scope]", reg);
+    regChips.forEach(function (chip) {
+      on(chip, "click", function () {
+        var sc = chip.getAttribute("data-rl-scope");
+        regChips.forEach(function (c) { c.setAttribute("aria-pressed", c === chip ? "true" : "false"); });
+        regRows.forEach(function (r) {
+          r.classList.toggle("is-out", !!sc && r.getAttribute("data-scope") !== sc);
+        });
+      });
+    });
+    /* the chart and the table point at each other: a mark lights its row,
+       a row lights its mark, and the line under the chart names the job */
+    var chart = doc.querySelector(".wc");
+    var marks = chart ? all(".wc-job", chart) : [];
+    var read = chart ? chart.querySelector("[data-wc-read]") : null;
+    var hint = read ? read.textContent : "";
+    var light = function (id, label) {
+      marks.forEach(function (m) { m.classList.toggle("is-hot", m.getAttribute("data-job") === id); });
+      regRows.forEach(function (r) { r.classList.toggle("is-hot", r.getAttribute("data-job") === id); });
+      if (read) read.textContent = label || hint;
+    };
+    marks.forEach(function (m) {
+      var go = function () { light(m.getAttribute("data-job"), m.getAttribute("data-label")); };
+      on(m, "mouseenter", go); on(m, "focus", go);
+      on(m, "mouseleave", function () { light(null); }); on(m, "blur", function () { light(null); });
+    });
+    regRows.forEach(function (r) {
+      on(r, "mouseenter", function () {
+        var m = chart && chart.querySelector('.wc-job[data-job="' + r.getAttribute("data-job") + '"]');
+        light(r.getAttribute("data-job"), m ? m.getAttribute("data-label") : "");
+      });
+      on(r, "mouseleave", function () { light(null); });
+    });
+    regChips.forEach(function (chip) {
+      on(chip, "click", function () {
+        var sc = chip.getAttribute("data-rl-scope");
+        marks.forEach(function (m) {
+          var row = doc.getElementById(m.getAttribute("data-job"));
+          m.classList.toggle("is-out", !!sc && !!row && row.getAttribute("data-scope") !== sc);
+        });
+      });
+    });
+
+    var regPrint = reg.querySelector("[data-rl-print]");
+    if (regPrint) {
+      on(regPrint, "click", function () {
+        doc.documentElement.classList.add("print-rl");
+        window.print();
+      });
+      on(window, "afterprint", function () { doc.documentElement.classList.remove("print-rl"); });
+    }
+  }
+
   /* ---------- current year in the footer ---------- */
   all("[data-year]").forEach(function (el) {
     el.textContent = String(new Date().getFullYear());

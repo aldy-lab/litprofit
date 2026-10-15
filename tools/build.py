@@ -25,6 +25,24 @@ import i18n
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Where the built site is written. The repo by default. LITPROFIT_OUT sends a
+# build somewhere else -- the only way a design preview may be built, see below.
+OUT = os.path.abspath(os.environ.get("LITPROFIT_OUT") or ROOT)
+
+# LITPROFIT_PREVIEW_DATA: a Python file defining PROJECTS with SAMPLE jobs, for
+# seeing the reference list and job pages before the client's real list
+# arrives. Refused unless the build is writing outside the repo, so sample
+# data can never land in a commit, and every page it builds says so in a band
+# across the top.
+PREVIEW = os.environ.get("LITPROFIT_PREVIEW_DATA") or ""
+if PREVIEW and (OUT == ROOT or OUT.startswith(ROOT + os.sep)):
+    raise SystemExit("LITPROFIT_PREVIEW_DATA needs LITPROFIT_OUT outside the repo")
+if PREVIEW:
+    _ns = {}
+    exec(compile(open(PREVIEW, encoding="utf-8").read(), PREVIEW, "exec"), _ns)
+    i18n.PROJECTS[:] = _ns["PROJECTS"]
+    print("PREVIEW: %d sample jobs from %s -> %s" % (len(i18n.PROJECTS), PREVIEW, OUT))
+
 # ============================================================
 # SITE CONFIG
 # ============================================================
@@ -610,7 +628,7 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
   <script>document.documentElement.className += " js";</script>
 {head_extra}</head>
 <body>
-
+{preview_band}
 {header}
 
   <main id="main">
@@ -626,7 +644,8 @@ def page(path, title, description, body, head_extra="", noindex=False, active=No
   <script src="{motion_boot}" defer data-load="{gsap} {gsap_st} {motion}"></script>
 </body>
 </html>
-""".format(cvmsg=cvmsg, full_title=attr(full_title), full_title_text=text(full_title),
+""".format(preview_band=('<div class="preview-band" role="note">PREVIEW \u2014 sample jobs, not real projects. Not for publication.</div>' if PREVIEW else ""),
+           cvmsg=cvmsg, full_title=attr(full_title), full_title_text=text(full_title),
            description=attr(description), canon=canonical(path),
            robots=robots, name=NAME, icon=u("/assets/brand/favicon.svg"),
            htmllang=i18n.LOCALE[LANG][0], oglocale=i18n.LOCALE[LANG][1],
@@ -651,7 +670,7 @@ WRITTEN = set()
 
 
 def write(path, html):
-    full = os.path.join(ROOT, path)
+    full = os.path.join(OUT, path)
     d = os.path.dirname(full)
     if d:
         os.makedirs(d, exist_ok=True)
@@ -1949,6 +1968,30 @@ def vessel_drawing(num="01"):
 # renders, nothing is linked and nothing enters the sitemap -- the site is
 # simply as it was. Add a job and it appears in all four places at once.
 # ============================================================
+def L(v):
+    """A project field may be one string or {"en": ..., "lt": ...}: the job's
+    own words in each language, falling back to English."""
+    if isinstance(v, dict):
+        return v.get(LANG) or v.get("en") or ""
+    if isinstance(v, (list, tuple)):
+        return [L(x) for x in v]
+    return v or ""
+
+
+def has_page(pr):
+    """A job gets a page of its own only when there is something to put on it
+    -- what was done. A one-line entry is a row in the reference list."""
+    return bool(pr.get("work"))
+
+
+def scope_label(slug, short=True):
+    """The discipline as a reader names it. Engines is a line of work the
+    company has (Completed works says so) with no service page of its own."""
+    if short:
+        return i18n.REG_SCOPE[LANG].get(slug, "")
+    return i18n.SVC[LANG].get(slug, {}).get("title") or i18n.REG_SCOPE[LANG].get(slug, "")
+
+
 def project_url(pr):
     return "/completed-works/%s/" % pr["slug"]
 
@@ -1959,8 +2002,8 @@ def project_card(pr):
     # as a date stamp; repeating it in the fact row said 2024 twice on one card.
     facts = []
     for label, val in ((T("prj_vessel"), pr.get("vessel")),
-                       (T("prj_owner"), pr.get("owner")),
-                       (T("prj_port"), pr.get("port"))):
+                       (T("prj_owner"), L(pr.get("owner"))),
+                       (T("prj_port"), L(pr.get("port")))):
         if val:
             facts.append('<span><i>%s</i>%s</span>' % (text(label), text(val)))
     days = pr.get("days")
@@ -1971,8 +2014,8 @@ def project_card(pr):
     # row it was the fifth item on a line and the card's whole right half was
     # empty; as a column it squares the card up and says at a glance which of
     # the four services the job belongs to.
-    svc = i18n.SVC[LANG].get(pr.get("scope"), {})
     return """          <a class="prj-card reveal" href="{href}">
+            <span class="prj-draw">{mini}</span>
             <span class="prj-num">{n}</span>
             <span class="prj-body">
               <span class="prj-title">{title}</span>
@@ -1981,18 +2024,20 @@ def project_card(pr):
             </span>
             <span class="prj-scope">{scope}</span>
           </a>""".format(href=u(project_url(pr)), n=pr.get("year", ""),
-                         title=text(pr["title"]), lead=text(pr["lead"]),
-                         facts="".join(facts), scope=text(svc.get("title", "")))
+                         mini=mini_profile(pr),
+                         title=text(L(pr["title"])), lead=text(L(pr.get("lead"))),
+                         facts="".join(facts), scope=text(scope_label(pr.get("scope"))))
 
 
-def projects_band():
-    if not i18n.PROJECTS:
+def projects_band(num="05"):
+    detailed = [p for p in i18n.PROJECTS if has_page(p)]
+    if not detailed:
         return ""
     return """
     <section class="section projects-band seam-top">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">05</span><span class="sep">//</span>{e}</p>
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
           <h2>{h}</h2>
           <p class="lead">{l}</p>
         </div>
@@ -2000,8 +2045,312 @@ def projects_band():
 {cards}
         </div>
       </div>
-    </section>""".format(e=T("prj_eyebrow"), h=T("prj_h2"), l=T("prj_lead"),
-                         cards="\n".join(project_card(p) for p in i18n.PROJECTS))
+    </section>""".format(num=num, e=T("prj_eyebrow"), h=T("prj_h2"), l=T("prj_lead"),
+                         cards="\n".join(project_card(p) for p in detailed))
+
+
+# Each discipline has a mark of its own, used in the chart and in the table
+# alike, so the two read as one drawing. Shape, not colour: the site keeps one
+# accent, and it belongs to whatever can be opened.
+RL_ORDER = ["refrigeration-systems", "ship-engine-repair", "hull-and-piping",
+            "spare-parts", "engines"]
+RL_GLYPH = {"refrigeration-systems": "circle", "ship-engine-repair": "diamond",
+            "hull-and-piping": "square", "spare-parts": "triangle", "engines": "hex"}
+
+
+def glyph(kind, cx, cy, r, cls=""):
+    c = (' class="%s"' % cls) if cls else ""
+    if kind == "circle":
+        return '<circle%s cx="%.1f" cy="%.1f" r="%.1f"/>' % (c, cx, cy, r)
+    if kind == "square":
+        return '<rect%s x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>' % (c, cx - r * .86, cy - r * .86, r * 1.72, r * 1.72)
+    import math
+    n, rot = {"diamond": (4, 0), "triangle": (3, -90), "hex": (6, 0)}[kind]
+    pts = " ".join("%.1f,%.1f" % (cx + r * math.cos(math.radians(rot + i * 360 / n)),
+                                  cy + r * math.sin(math.radians(rot + i * 360 / n)))
+                   for i in range(n))
+    return '<polygon%s points="%s"/>' % (c, pts)
+
+
+def glyph_svg(slug):
+    """The discipline mark as a 14px inline icon for the table."""
+    return ('<svg class="rl-g" viewBox="0 0 14 14" aria-hidden="true" focusable="false">%s</svg>'
+            % glyph(RL_GLYPH.get(slug, "circle"), 7, 7, 5.2))
+
+
+def job_id(p):
+    return "job-" + re.sub(r"[^a-z0-9-]", "", str(p.get("slug", "")).lower())
+
+
+def work_chart(jobs):
+    """Every job on one sheet: years across, the disciplines as rails down
+    the side, a mark per job where its year and discipline meet. Built from
+    the list itself, so it can only ever show what the list says. Jobs with a
+    page of their own are lit and open it; the rest point at their row."""
+    lanes = [sc for sc in RL_ORDER if any(p.get("scope") == sc for p in jobs)]
+    years = [int(p["year"]) for p in jobs if str(p.get("year", "")).isdigit()]
+    if not lanes or not years:
+        return ""
+    y0 = min([int(FOUNDED)] + years)
+    y1 = max([datetime.date.today().year] + years)
+    W, R, T0, LH = 1200.0, 24.0, 34.0, 46.0
+    # the label column fits the longest discipline name in this language:
+    # 12px mono at 0.14em is ~9 units a character, plus the mark and the count
+    LM = max(190.0, 34 + 9.2 * max(len(scope_label(sc)) for sc in lanes) + 48)
+    H = T0 + LH * len(lanes) + 46
+    band = (W - LM - R) / (y1 - y0 + 1)
+    X = lambda y: LM + (y - y0 + 0.5) * band
+    out = []
+    add = out.append
+    # year columns: a hairline per year, a label under every one that fits
+    step = 1 if band >= 44 else 2
+    for y in range(y0, y1 + 1):
+        x = X(y)
+        add('<line class="wc-yr" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (x, T0 - 8, x, T0 + LH * len(lanes)))
+        if (y - y0) % step == 0 or y == y1:
+            # every other label is marked so a phone, where the sheet is a
+            # third the size, can keep half of them and still read them
+            add('<text class="wc-yl%s" x="%.1f" y="%.1f">%d</text>'
+                % (" wc-yl-odd" if (y - y0) % 2 else "", x, H - 14, y))
+    base = T0 + LH * len(lanes)
+    add('<line class="wc-axis" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (LM, base, W - R, base))
+    for i, sc in enumerate(lanes):
+        cy = T0 + LH * (i + 0.5)
+        n = sum(1 for p in jobs if p.get("scope") == sc)
+        add('<g class="wc-lane">%s<text class="wc-ll" x="34" y="%.1f">%s</text>'
+            '<text class="wc-ln" x="%.1f" y="%.1f">%d</text>'
+            '<line class="wc-rail" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/></g>'
+            % (glyph(RL_GLYPH[sc], 18, cy, 6, "wc-key"), cy + 4, text(scope_label(sc).upper()),
+               LM - 14, cy + 4, n, LM, cy, W - R, cy))
+    # marks: jobs sharing a year and a rail spread across that year's column
+    cells = {}
+    for p in jobs:
+        if str(p.get("year", "")).isdigit() and p.get("scope") in lanes:
+            cells.setdefault((int(p["year"]), p["scope"]), []).append(p)
+    for (yr, sc), group in sorted(cells.items()):
+        cy = T0 + LH * (lanes.index(sc) + 0.5)
+        k = len(group)
+        for j, p in enumerate(group):
+            dx = (j - (k - 1) / 2.0) * min(16.0, band * 0.8 / max(k, 1))
+            cx = X(yr) + dx
+            lit = has_page(p)
+            name = L(p.get("vessel")) or L(p.get("vessel_type")) or ""
+            label = "%s \u00b7 %s \u2014 %s" % (yr, name, L(p["title"]))
+            href = u(project_url(p)) if lit else "#" + job_id(p)
+            add('<a class="wc-job%s" href="%s" data-job="%s" data-label="%s"><title>%s</title>'
+                '%s%s</a>'
+                % (" is-lit" if lit else "", attr(href), job_id(p), attr(label), text(label),
+                   ('<circle class="wc-halo" cx="%.1f" cy="%.1f" r="13"/>' % (cx, cy)) if lit else "",
+                   glyph(RL_GLYPH[sc], cx, cy, 7 if lit else 6, "wc-mark")))
+    return """
+          <figure class="wc reveal">
+            <svg class="wc-svg" viewBox="0 0 {w:.0f} {h:.0f}" role="img" aria-label="{alt}">
+              <defs><filter id="wcGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter></defs>
+              {body}
+            </svg>
+            <figcaption class="wc-cap"><span>{cap}</span><span class="wc-read" data-wc-read aria-live="polite">{hint}</span></figcaption>
+          </figure>""".format(w=W, h=H, alt=attr(T("wc_cap")), body="\n              ".join(out),
+                              cap=text(T("wc_cap")), hint=text(T("wc_hint")))
+
+
+def mini_profile(pr):
+    """The job page's hull, small, for the card: the compartments the work
+    was in are outlined, the rest are only dashed in."""
+    zones = [z for z in pr.get("zones", []) if z in JOB_SPACES]
+    sp = "".join('<rect class="mp-sp%s" x="%d" y="178" width="%d" height="%d"/>'
+                 % (" is-work" if k in zones else "", x, w, h)
+                 for k, (x, w, h, _l) in JOB_SPACES.items())
+    return ('<svg class="mp" viewBox="40 100 1130 190" aria-hidden="true" focusable="false">'
+            '<path class="mp-hull" d="M70 146 L70 250 Q70 266 108 266 L860 266 Q1012 266 1074 212 '
+            'L1150 116 Q620 174 70 146 Z"/><line class="mp-wl" x1="40" y1="230" x2="1170" y2="230"/>'
+            '%s</svg>' % sp)
+
+
+# ---- vessel profiles for the filmstrip ----
+# One hull per kind of vessel, drawn in the site's hand: a trawler has its
+# gantry aft and the wheelhouse forward of midships, a reefer its derricks
+# over the holds and the house aft, a longliner a small house well forward,
+# and a shore plant is a building. The compartments the work was in light up.
+def vessel_kind(pr):
+    k = pr.get("profile")
+    if k:
+        return k
+    vt = pr.get("vessel_type") or ""
+    t = (" ".join(vt.values()) if isinstance(vt, dict) else str(vt)).lower()
+    for word, kind in (("shore", "shore"), ("krant", "shore"), ("reefer", "reefer"),
+                       ("refri", "reefer"), ("longliner", "longliner"), ("factory", "factory"),
+                       ("trawler", "trawler"), ("tral", "trawler")):
+        if word in t:
+            return kind
+    return "trawler"
+
+
+DEFAULT_ZONE = {"refrigeration-systems": "hold", "ship-engine-repair": "er", "engines": "er",
+                "hull-and-piping": "pipe", "spare-parts": "store"}
+
+
+def filmstrip(num):
+    """The jobs as a timeline read downwards, newest year first. Each year is
+    a band: its number, very large, holds on the left while the page scrolls
+    through that year's jobs, and the next year pushes it out (CSS sticky).
+    A rail runs down between the year and the cards and fills with light as
+    the reader passes it; each card's node lights when the card arrives. The
+    cards carry the vessel as an isometric cutaway (FIGS.vessel, js/iso.js).
+    Up to twelve jobs -- those with pages first, then the newest; the
+    reference list below has every one."""
+    newest = sorted(i18n.PROJECTS, key=lambda p: str(p.get("year", "")), reverse=True)
+    jobs = [p for p in newest if has_page(p)] + [p for p in newest if not has_page(p)]
+    jobs = sorted(jobs[:12], key=lambda p: str(p.get("year", "")), reverse=True)
+    if not jobs:
+        return ""
+    n = len(jobs)
+    labels = {k: str(T(v[3])).split("|")[0] for k, v in JOB_SPACES.items()}
+    years = []
+    for p in jobs:
+        y = str(p.get("year", ""))
+        if not years or years[-1][0] != y:
+            years.append((y, []))
+        years[-1][1].append(p)
+    bands, i = [], 0
+    for y, group in years:
+        cards = []
+        for p in group:
+            i += 1
+            name = L(p.get("vessel")) or L(p.get("vessel_type")) or ""
+            # the type and how long she was alongside; owner and port are on
+            # the job page and in the reference list
+            facts = " \u00b7 ".join(x for x in (L(p.get("vessel_type")) if L(p.get("vessel")) else "",
+                                                 ("%s %s" % (p["days"], T("prj_days_unit"))) if p.get("days") else "") if x)
+            # Where the card cuts the hull open: the spaces the client named, or,
+            # failing that, where that discipline's work usually is. On the card
+            # this is an illustration; the job page shows only named spaces.
+            zones = [z for z in p.get("zones", []) if z in JOB_SPACES] or [DEFAULT_ZONE.get(p.get("scope"), "er")]
+            figure = json.dumps({"kind": vessel_kind(p), "labels": labels, "scope": p.get("scope", ""),
+                                 "zones": zones}, ensure_ascii=False)
+            tag, href = ("a", ' href="%s"' % u(project_url(p))) if has_page(p) else ("article", "")
+            cards.append("""
+              <{tag} class="fs-card" data-iso-plate{href}>
+                <svg class="fs-iso" data-iso="vessel" role="img" aria-label="{aria}" data-t="{t}"></svg>
+                <span class="fs-text">
+                  <span class="fs-meta"><span>{g}{scope}</span></span>
+                  <span class="fs-name">{name}</span>
+                  <span class="fs-title">{title}</span>
+                  <span class="fs-facts">{facts}</span>
+                  {more}
+                </span>
+              </{tag}>""".format(
+                tag=tag, href=href, ii="%02d" % i, n="%02d" % n,
+                g=glyph_svg(p.get("scope")), scope=text(scope_label(p.get("scope"))),
+                aria=attr("%s \u2014 %s" % (name, L(p["title"]))), t=attr(figure),
+                name=text(name), title=text(L(p["title"])), facts=text(facts),
+                more=('<span class="fs-open">%s</span>' % text(T("fs_open"))) if has_page(p) else ""))
+        bands.append("""
+          <div class="tl-band">
+            <div class="tl-y"><span class="tl-num">{y}</span><span class="tl-count">{c}</span></div>
+            <div class="tl-cards">{cards}
+            </div>
+          </div>""".format(y=text(y), c=text(T("tl_count", n=len(group))), cards="".join(cards)))
+    return """
+    <section class="section tl" id="selected-work">
+      <div class="container">
+        <div class="tl-body">{bands}
+        </div>
+      </div>
+    </section>
+    <script src="{js}" defer></script>""".format(num=num, e=T("prj_eyebrow"), h=T("prj_h2"),
+                                                 bands="".join(bands), js=asset("/js/iso.js"))
+
+def register(num):
+    """The reference list: every job on one line, newest first. This is the
+    document a superintendent or a tender asks for -- year, vessel, owner,
+    what was done -- so it is set as one, printable on its own as a PDF.
+    Rows whose job has a page link to it. The counts in the strip are counted
+    from the list itself, so they can only say what the list shows."""
+    jobs = sorted(i18n.PROJECTS, key=lambda p: str(p.get("year", "")), reverse=True)
+    if not jobs:
+        return ""
+    order = ["refrigeration-systems", "ship-engine-repair", "hull-and-piping",
+             "spare-parts", "engines"]
+    counts = {}
+    for p in jobs:
+        counts[p.get("scope")] = counts.get(p.get("scope"), 0) + 1
+    chips = ['<button type="button" class="rl-chip" data-rl-scope="" aria-pressed="true">'
+             '%s <span>%d</span></button>' % (text(T("reg_all")), len(jobs))]
+    for sc in order:
+        if counts.get(sc):
+            chips.append('<button type="button" class="rl-chip" data-rl-scope="%s" '
+                         'aria-pressed="false">%s%s <span>%d</span></button>'
+                         % (sc, glyph_svg(sc), text(scope_label(sc)), counts[sc]))
+    years = [int(p["year"]) for p in jobs if str(p.get("year", "")).isdigit()]
+    vessels = {L(p.get("vessel")) for p in jobs if L(p.get("vessel"))}
+    stats = [T("reg_n_jobs", n=len(jobs))]
+    if vessels:
+        stats.append(T("reg_n_vessels", n=len(vessels)))
+    if years:
+        stats.append(T("reg_span", a=min(years), b=max(years)) if min(years) != max(years)
+                     else str(min(years)))
+    rows = []
+    for i, p in enumerate(jobs, 1):
+        title = text(L(p["title"]))
+        if has_page(p):
+            title = '<a href="%s">%s</a>' % (u(project_url(p)), title)
+        vt = L(p.get("vessel_type"))
+        vname = L(p.get("vessel"))
+        if not vname and vt:
+            # an unnamed shore plant or a vessel the owner keeps private: the
+            # type is the most the row can say, so it becomes the row's name
+            vname, vt = vt, ""
+        rows.append(
+            '            <tr id="%s" data-scope="%s" data-job="%s">'
+            '<td class="rl-n">%02d</td>'
+            '<td class="rl-y">%s</td>'
+            '<td class="rl-v"><b>%s</b>%s</td>'
+            '<td class="rl-o">%s</td>'
+            '<td class="rl-w">%s</td>'
+            '<td class="rl-s">%s</td></tr>'
+            % (job_id(p), attr(p.get("scope", "")), job_id(p), i, text(str(p.get("year", ""))),
+               text(vname or T("reg_unnamed")),
+               ('<span>%s</span>' % text(vt)) if vt else "",
+               text(L(p.get("owner")) or "\u2014"), title,
+               '<span class="rl-s-in">%s%s</span>' % (glyph_svg(p.get("scope")),
+                                                     text(scope_label(p.get("scope"))))))
+    return """
+    <section class="section rl-section" id="reference-list">
+      <div class="container">
+        <div class="rl-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
+          <h2>{h}</h2>
+        </div>
+        <div class="rl reveal" data-rl>
+          <div class="rl-bar">
+            <div class="rl-chips" role="group" aria-label="{fl}">{chips}</div>
+            <button type="button" class="rl-pdf" data-rl-print>{pdf}</button>
+          </div>
+          <div class="rl-sheet">
+            <p class="rl-print-head"><b>{name}</b> \u2014 {e} \u2014 {date}</p>
+            <table class="rl-table">
+              <thead><tr><th scope="col" class="rl-n">{c0}</th><th scope="col">{c1}</th><th scope="col">{c2}</th><th scope="col">{c3}</th><th scope="col">{c4}</th><th scope="col">{c5}</th></tr></thead>
+              <tbody>
+{rows}
+              </tbody>
+            </table>
+            <div class="rl-tb">
+              <span class="rl-tb-b">{name}</span>
+              <span>{e}</span>
+              <span class="rl-stats">{stats}</span>
+              <span>{rev} {date}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>""".format(
+        num=num, e=T("reg_eyebrow"), h=T("reg_h2"), l=T("reg_lead"), fl=attr(T("reg_filter")),
+        c0="No.", rev=text(T("reg_rev")),
+        chips="".join(chips), pdf=text(T("reg_pdf")), name=NAME,
+        date=datetime.date.today().strftime("%Y-%m"),
+        stats=" <span class=\"sep\">//</span> ".join(text(x) for x in stats),
+        c1=text(T("prj_year")), c2=text(T("prj_vessel")), c3=text(T("prj_owner")),
+        c4=text(T("prj_work")), c5=text(T("prj_scope")), rows="\n".join(rows))
 
 
 # ---- where on the ship the job was ----
@@ -2066,7 +2415,7 @@ def job_profile(pr):
         <figcaption>{cap}<span class="jp-legend">{legend}</span></figcaption>
       </figure>""".format(
         body="\n".join("          " + x for x in P),
-        alt=attr("%s \u2014 %s" % (T("prj_where"), pr.get("vessel", ""))),
+        alt=attr("%s \u2014 %s" % (T("prj_where"), L(pr.get("vessel")))),
         cap=text(T("prj_where")),
         # Below 700px the labels inside the drawing are about four pixels per
         # character -- the home page hides its own there for the same reason.
@@ -2078,17 +2427,17 @@ def job_profile(pr):
 def project_page(pr):
     def row(label, val):
         return ('<div><span>%s</span><b>%s</b></div>' % (text(label), text(val))) if val else ""
-    svc = i18n.SVC[LANG].get(pr.get("scope"), {})
     facts = "".join([
-        row(T("prj_vessel"), pr.get("vessel")),
-        row(T("prj_owner"), pr.get("owner")),
+        row(T("prj_vessel"), L(pr.get("vessel"))),
+        row(T("prj_type"), L(pr.get("vessel_type"))),
+        row(T("prj_owner"), L(pr.get("owner"))),
         row(T("prj_year"), pr.get("year")),
-        row(T("prj_port"), pr.get("port")),
+        row(T("prj_port"), L(pr.get("port"))),
         row(T("prj_days"), "%s %s" % (pr["days"], T("prj_days_unit")) if pr.get("days") else ""),
-        row(T("prj_scope"), svc.get("title", "")),
+        row(T("prj_scope"), scope_label(pr.get("scope"), short=False)),
     ])
-    work = "".join("<li>%s</li>" % text(x) for x in pr.get("work", []))
-    plant = "".join("<li>%s</li>" % text(x) for x in pr.get("plant", []))
+    work = "".join("<li>%s</li>" % text(x) for x in L(pr.get("work", [])))
+    plant = "".join("<li>%s</li>" % text(x) for x in L(pr.get("plant", [])))
     shots = ""
     for name in pr.get("photos", []):
         rel = "assets/photos/%s.webp" % name
@@ -2097,11 +2446,11 @@ def project_page(pr):
         w, h = img_size(rel)
         shots += ('<figure class="prj-shot"><img src="%s" alt="%s" width="%d" height="%d" '
                   'loading="lazy" decoding="async"></figure>'
-                  % (u("/" + rel), attr(pr["title"]), w, h))
+                  % (u("/" + rel), attr(L(pr["title"])), w, h))
 
-    return page_head(T("prj_eyebrow"), pr["title"], pr["lead"],
+    return page_head(T("prj_eyebrow"), L(pr["title"]), L(pr.get("lead")),
                      [(T("home"), "/"), (PT("cw_eyebrow"), "/completed-works/"),
-                      (pr["title"], None)],
+                      (L(pr["title"]), None)],
                      path=project_url(pr)) + """
     <section class="container prj-page">
       <div class="prj-record reveal">{facts}</div>
@@ -2703,65 +3052,59 @@ def cw_matrix(items):
         '<span class="mx-name">%s</span></li>' % (i, text(x))
         for i, x in enumerate(items, 1))
 
+def _cw_shift():
+    """Sections the job list puts ahead of the standing ones."""
+    # the filmstrip and the reference list both appear once there is a job
+    return 2 if i18n.PROJECTS else 0
+
+
+def plant_section(num):
+    """The makes the company has had apart, engines and refrigeration side
+    by side, with one workshop photograph. It was two sections with a long
+    paragraph each, then the client list (which the home page and Partners
+    already carry), then a gallery of the same two photographs -- four bands
+    of reading for what is, in the end, two lists."""
+    name, w, h, key, _mod = SHOTS[0]
+    cols = "".join("""
+          <div class="plant-col">
+            <p class="eyebrow">{e}</p>
+            <ul class="plant-list">{items}</ul>
+          </div>""".format(e=e, items="".join("<li>%s</li>" % text(x) for x in items))
+                   for e, items in ((PT("cw_engines_e"), i18n.ENGINES), (PT("cw_refrig_e"), i18n.SYSTEMS)))
+    return """
+    <section class="section plant-section seam-top">
+      <div class="container">
+        <div class="plant-head reveal">
+          <p class="eyebrow"><span class="eyebrow-num">{num}</span><span class="sep">//</span>{e}</p>
+          <h2>{h}</h2>
+        </div>
+        <div class="plant reveal">
+          <div class="plant-cols">{cols}
+          </div>
+          <figure class="plant-shot cornered">
+            <img src="{img}" alt="{alt}" width="{w}" height="{h_}" loading="lazy" decoding="async">
+            <figcaption>{cap}</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>""".format(num=num, e=PT("plant_e"), h=PT("plant_h2"), cols=cols,
+                         img=u("/assets/photos/%s.webp" % name), alt=attr(PT(key)),
+                         w=w, h_=h, cap=text(PT(key)))
+
+
 def completed_works():
-    return page_head(PT("cw_eyebrow"), PT("cw_h1"), PT("cw_lead", founded=FOUNDED),
+    # Four blocks: the timeline, every job as a list, the plant, the call.
+    # The page head introduces the timeline, so the timeline carries no
+    # heading of its own; while there are no jobs the page is the plant and
+    # the call alone.
+    has = bool(i18n.PROJECTS)
+    return page_head(PT("cw_eyebrow"), PT("cw_h1", founded=FOUNDED), PT("cw_lead"),
                      [(T("home"), "/"), (PT("cw_eyebrow"), None)],
                      path="/completed-works/") + """
-    <div class="cw-body">
-    <!-- NOTE(LITPROFIT): what this page still wants, per project, is vessel or
-         plant name, year, port, scope of work and a photograph. That is the
-         single highest-value thing the client can supply; until it arrives the
-         page states the two strands and the plant behind them, and states
-         nothing it cannot evidence. -->
-    <section class="section">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">01</span><span class="sep">//</span>{e1}</p>
-          <h2>{h1}</h2>
-          <p class="lead">{p1}</p>
-        </div>
-        <ol class="mx">
-{mx1}
-        </ol>
-      </div>
-    </section>
-
-    <section class="section section-alt seam-top">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">02</span><span class="sep">//</span>{e2}</p>
-          <h2>{h2}</h2>
-          <p class="lead">{p2}</p>
-        </div>
-        <ol class="mx">
-{mx2}
-        </ol>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="eyebrow-num">03</span><span class="sep">//</span>{e3}</p>
-          <h2>{h3}</h2>
-        </div>
-        <ol class="mx mx--wide">
-{mx3}
-        </ol>
-        <p class="mx-more reveal"><a href="{partners}">{p_more}</a></p>
-      </div>
-    </section>
-    </div>
-{gallery}{projects}
-{cta}""".format(h1=PT("cw_engines"), p1=PT("cw_engines_p"), mx1=cw_matrix(i18n.ENGINES),
-                h2=PT("cw_refrig"), p2=PT("cw_refrig_p"), mx2=cw_matrix(i18n.SYSTEMS),
-                h3=PT("cw_who"), partners=u("/partners/"),
-                e1=PT("cw_engines_e"), e2=PT("cw_refrig_e"), e3=T("clients_eyebrow"),
-                mx3=cw_matrix([c[0] for c in CLIENTS]),
-                p_more=PT("p_clients_h2").lower(),
-                # 03 is the client schedule above; the gallery follows it
-                gallery=shots("04"),
-                projects=projects_band(),
+{cases}{register}{plant}
+{cta}""".format(cases=filmstrip("01"),
+                register=register("02") if has else "",
+                plant=plant_section("03" if has else "01"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
 
@@ -3834,8 +4177,10 @@ for _lang in i18n.LANGS:
     # and no /completed-works/<slug>/ exists -- add a job and the page, the
     # card and the sitemap line all appear together.
     for _pr in i18n.PROJECTS:
+        if not has_page(_pr):
+            continue
         _p = project_url(_pr)
-        write(outfile(_p), page(_p, _pr["title"], _pr["lead"], project_page(_pr)))
+        write(outfile(_p), page(_p, L(_pr["title"]), L(_pr.get("lead")), project_page(_pr)))
         SITEMAP_ROWS.append((_lang, _p))
 # 404 is served by GitHub Pages for any unmatched path anywhere on the host, so
 # there is one, in English, at the root.
