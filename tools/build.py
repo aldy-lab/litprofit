@@ -2189,6 +2189,52 @@ DEFAULT_ZONE = {"refrigeration-systems": "hold", "ship-engine-repair": "er", "en
                 "hull-and-piping": "pipe", "spare-parts": "store"}
 
 
+def directions_timeline():
+    """Until the client's job list arrives, the timeline carries the lines of
+    work instead of jobs: one card per discipline, each with its cutaway,
+    titled and described in the service pages' own approved words and linked
+    to them. The band is the company's whole span -- since FOUNDED to this
+    year -- because that is the one date range that is true of all of them.
+    Nothing here names a vessel, an owner or a year it cannot evidence."""
+    labels = {k: str(T(v[3])).split("|")[0] for k, v in JOB_SPACES.items()}
+    items = [(sv["slug"], sv["title"], sv["short"], u("/services/%s/" % sv["slug"])) for sv in services()]
+    items.append(("engines", PT("cw_engines"), T("dir_engines"), ""))
+    kinds = {"refrigeration-systems": "reefer", "ship-engine-repair": "trawler",
+             "hull-and-piping": "factory", "spare-parts": "longliner", "engines": "trawler"}
+    cards = []
+    for slug, title, short, href in items:
+        figure = json.dumps({"kind": kinds[slug], "labels": labels, "scope": slug,
+                             "zones": [DEFAULT_ZONE.get(slug, "er")]}, ensure_ascii=False)
+        tag, h = ("a", ' href="%s"' % href) if href else ("article", "")
+        cards.append("""
+              <{tag} class="fs-card" data-iso-plate{h}>
+                <svg class="fs-iso" data-iso="vessel" role="img" aria-label="{aria}" data-t="{t}"></svg>
+                <span class="fs-text">
+                  <span class="fs-meta"><span>{g}{label}</span></span>
+                  <span class="fs-name">{title}</span>
+                  <span class="fs-title">{short}</span>
+                  {more}
+                </span>
+              </{tag}>""".format(tag=tag, h=h, aria=attr(title), t=attr(figure), g=glyph_svg(slug),
+                                 label=text(scope_label(slug)), title=text(title), short=text(short),
+                                 more=('<span class="fs-open">%s</span>' % text(T("read_more"))) if href else ""))
+    return """
+    <section class="section tl" id="selected-work">
+      <div class="container">
+        <div class="tl-body">
+          <div class="tl-band">
+            <div class="tl-y"><span class="tl-num">{y0}</span><span class="tl-count">{span}</span></div>
+            <div class="tl-cards">{cards}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script src="{js}" defer></script>""".format(
+        y0=FOUNDED, span=text(T("dir_span", y=datetime.date.today().year, n=len(cards))),
+        cards="".join(cards), js=asset("/js/iso.js"))
+
+
 def filmstrip(num):
     """The jobs as a timeline read downwards, newest year first. Each year is
     a band: its number, very large, holds on the left while the page scrolls
@@ -2198,11 +2244,11 @@ def filmstrip(num):
     cards carry the vessel as an isometric cutaway (FIGS.vessel, js/iso.js).
     Up to twelve jobs -- those with pages first, then the newest; the
     reference list below has every one."""
+    if not i18n.PROJECTS:
+        return directions_timeline()
     newest = sorted(i18n.PROJECTS, key=lambda p: str(p.get("year", "")), reverse=True)
     jobs = [p for p in newest if has_page(p)] + [p for p in newest if not has_page(p)]
     jobs = sorted(jobs[:12], key=lambda p: str(p.get("year", "")), reverse=True)
-    if not jobs:
-        return ""
     n = len(jobs)
     labels = {k: str(T(v[3])).split("|")[0] for k, v in JOB_SPACES.items()}
     years = []
@@ -3095,8 +3141,8 @@ def plant_section(num):
 def completed_works():
     # Four blocks: the timeline, every job as a list, the plant, the call.
     # The page head introduces the timeline, so the timeline carries no
-    # heading of its own; while there are no jobs the page is the plant and
-    # the call alone.
+    # heading of its own. While there are no jobs the timeline carries the
+    # lines of work (directions_timeline) and there is no list.
     has = bool(i18n.PROJECTS)
     return page_head(PT("cw_eyebrow"), PT("cw_h1", founded=FOUNDED), PT("cw_lead"),
                      [(T("home"), "/"), (PT("cw_eyebrow"), None)],
@@ -3104,7 +3150,7 @@ def completed_works():
 {cases}{register}{plant}
 {cta}""".format(cases=filmstrip("01"),
                 register=register("02") if has else "",
-                plant=plant_section("03" if has else "01"),
+                plant=plant_section("03" if has else "02"),
                 cta=cta(T("cta_h2"), T("cta_p")))
 
 

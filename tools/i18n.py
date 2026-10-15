@@ -2171,3 +2171,11 @@ P["ru"].update(cw_h1="Работы с %(founded)s года", cw_lead="Двига
 S["en"].update(reg_h2="Every job")
 S["lt"].update(reg_h2="Visi darbai")
 S["ru"].update(reg_h2="Все работы")
+
+# Completed works before the job list: the lines of work, over the company's span.
+S["en"].update(dir_span="\u2192 %(y)s \u00b7 lines of work: %(n)s",
+               dir_engines="Overhauls of main and auxiliary engines, 4-stroke and 2-stroke, on fishing vessels and commercial ships.")
+S["lt"].update(dir_span="\u2192 %(y)s \u00b7 veiklos krypčių: %(n)s",
+               dir_engines="Pagrindinių ir pagalbinių variklių kapitalinis remontas žvejybiniuose ir komerciniuose laivuose, 4 ir 2 taktų.")
+S["ru"].update(dir_span="\u2192 %(y)s \u00b7 направлений: %(n)s",
+               dir_engines="Капитальный ремонт главных и вспомогательных двигателей, 4- и 2-тактных, на рыболовных и коммерческих судах.")
