@@ -130,7 +130,11 @@
   var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var bar = doc.querySelector(".progress");
-  var heroImg = doc.querySelector(".hero-drawing");
+  /* Both copies: the lit one inside the lamp is the same drawing, and when
+     only the dim one drifted the lamp lit lines a few pixels off the ones
+     under it as soon as the page had scrolled at all. */
+  var heroImgs = doc.querySelectorAll(".hero-drawing");
+  var heroImg = heroImgs[0];
 
   /* ---------- words light as the sentence crosses the screen ----------
      Split once, on load, into one span per word. textContent is read before
@@ -188,7 +192,8 @@
     if (heroImg && !calm) {
       var y = window.scrollY;
       if (y < d.clientHeight * 1.2) {
-        heroImg.style.transform = "translate3d(0," + (y * 0.12).toFixed(1) + "px,0)";
+        var tf = "translate3d(0," + (y * 0.12).toFixed(1) + "px,0)";
+        for (var hi = 0; hi < heroImgs.length; hi++) heroImgs[hi].style.transform = tf;
       }
     }
   }
@@ -671,6 +676,55 @@
 
     on(hero, "pointermove", function (e) { if (lampOn) track(e); });
 
+    /* A finger. The page scrolls when a finger drags, so the lamp gets a pad
+       of its own over the drawing (see .hero-pad): it takes touches only while
+       the lamp is on, and only above the copy, so the text still scrolls. */
+    var pad = doc.createElement("span");
+    pad.className = "hero-pad";
+    pad.setAttribute("aria-hidden", "true");
+    hero.insertBefore(pad, hero.firstChild.nextSibling);
+    var sweep = null;
+    var stopSweep = function () { if (sweep) { window.cancelAnimationFrame(sweep); sweep = null; } };
+    on(pad, "pointerdown", function (e) { stopSweep(); track(e); });
+
+    /* On a phone the lamp starts over the drawing, not under the button in
+       the corner, and crosses it once so it is plain that it moves. */
+    var startOverDrawing = function () {
+      var r = hero.getBoundingClientRect();
+      var art = hero.querySelector(".hero-drawing");
+      var a = art ? art.getBoundingClientRect() : r;
+      var x0 = r.width * 0.2, x1 = r.width * 0.72;
+      var top = Math.max(a.top - r.top, 0);
+      var y = Math.round(top + Math.min(a.height * 0.3, 150));
+      lx = Math.round(x0); ly = y; place();
+      if (calm) { lx = Math.round(r.width * 0.5); place(); return; }
+      var t0 = null, dur = 1400;
+      var step = function (t) {
+        if (t0 === null) t0 = t;
+        var k = Math.min((t - t0) / dur, 1);
+        var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        lx = Math.round(x0 + (x1 - x0) * e);
+        ly = Math.round(y + Math.sin(e * Math.PI) * 26);
+        place();
+        sweep = k < 1 && lampOn ? window.requestAnimationFrame(step) : null;
+      };
+      sweep = window.requestAnimationFrame(step);
+    };
+    var coarse = window.matchMedia("(pointer: coarse)");
+
+    /* On a phone the drawing fills the band above the copy; the stylesheet
+       fades it out at --band, so it never runs under the headline. */
+    var heroCopy = hero.querySelector(".hero-inner");
+    var measureBand = function () {
+      var art = hero.querySelector(".hero-drawing");
+      if (!art || !heroCopy) return;
+      var band = heroCopy.getBoundingClientRect().top - art.getBoundingClientRect().top;
+      hero.style.setProperty("--band", Math.max(Math.round(band), 60) + "px");
+    };
+    measureBand();
+    on(window, "resize", measureBand);
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(measureBand);
+
     /* The visible control. Same toggle the double-click drives, so the two
        cannot disagree; when it turns the lamp on from a button press there is
        no pointer position yet, so it starts under the button itself and then
@@ -687,7 +741,10 @@
     if (lampBtn) {
       on(lampBtn, "click", function (e) {
         lampOn = !lampOn;
-        if (lampOn) {
+        stopSweep();
+        if (lampOn && coarse.matches) {
+          startOverDrawing();
+        } else if (lampOn) {
           var b = lampBtn.getBoundingClientRect(), r = hero.getBoundingClientRect();
           lx = Math.round(b.left + b.width / 2 - r.left);
           ly = Math.round(b.top + b.height / 2 - r.top);
@@ -711,8 +768,10 @@
     });
 
     /* moving off the hero puts the lamp away */
-    on(hero, "pointerleave", function () {
-      if (!lampOn) return;
+    on(hero, "pointerleave", function (e) {
+      /* A finger "leaves" every time it lifts, so on touch this put the lamp
+         out the moment it was switched on. Touch turns it off at the button. */
+      if (!lampOn || e.pointerType !== "mouse") return;
       lampOn = false;
       paintLamp();
     });
