@@ -5412,3 +5412,118 @@ th.rl-n { color: var(--muted-2); }
 @media (max-width: 420px) {
   .plant-cols { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   HERO ON A PHONE
+   The plant drawing was a 229px strip behind the headline, masked out
+   exactly where it sat, so the work lamp had nothing to light and the first
+   screen was eyebrow, headline, four lines of lead and two stacked buttons.
+   Here the drawing gets the top of the screen and the copy settles on the
+   bottom: eyebrow, headline, one row of buttons, the figures. The lead goes
+   -- the headline and the figures already say what it said, and the
+   services band says it in full one scroll down.
+
+   Last in the file on purpose: these override rules above and would lose to
+   them on source order anywhere else.
+   ============================================================ */
+@media (max-width: 600px) {
+  .hero { align-items: flex-end; padding-bottom: 22px; }
+  .hero-inner { margin-top: 0; }
+  .hero .lead { display: none; }
+  .hero .eyebrow-plain {
+    margin-bottom: 14px;
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 10.4vw, 42px);
+    margin-bottom: 22px;
+    text-wrap: balance;
+  }
+  .hero .btn-row {
+    display: grid;
+    /* minmax(0, ...): a plain 1fr will not shrink below its longest word, and
+       the Lithuanian "Susitarti dėl pokalbio" pushed the second button off
+       the screen. The label wraps onto two lines instead. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 0;
+  }
+  .hero .btn-row .btn {
+    min-height: 48px;
+    padding: 8px;
+    letter-spacing: 0.06em;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+    text-wrap: balance;
+  }
+  .hero .facts { margin-top: 22px; }
+
+  /* The drawing at a size that can be read: the compressor sets and the
+     condensers, cropped from the left of the sheet, across the top band.
+     Both copies carry .hero-drawing, so the lit one keeps the same geometry. */
+  .hero-drawing {
+    inset: auto;
+    left: -14px;
+    top: calc(var(--nav-h) + 6px);
+    width: 255%;
+    max-width: none;   /* the global img/svg cap held it to the screen width */
+    height: auto;
+    aspect-ratio: 1600 / 940;
+    /* --band is the drawing's own top to the copy's top, written by main.js:
+       the drawing fades out exactly where the type starts, whatever the
+       phone's height. The fallback is the iPhone 13's. */
+    mask-image: linear-gradient(180deg, #000 0, #000 calc(var(--band, 200px) - 90px), transparent calc(var(--band, 200px) - 6px));
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(var(--band, 200px) - 90px), transparent calc(var(--band, 200px) - 6px));
+  }
+  .hero-drawing:not(.hero-drawing--lit) { opacity: 0.8; }
+
+  /* the tools sit over the drawing, clear of the copy */
+  .hero-tools { top: calc(var(--nav-h) + 10px); gap: 6px; }
+  .hero-tool { background: rgba(8, 8, 31, 0.55); }
+
+  /* A smaller lamp for a smaller sheet: 190px was half the screen. */
+  .hero-lamp {
+    background: radial-gradient(circle 120px at var(--mx, 50%) var(--my, 30%),
+        rgba(205, 218, 255, 0.14) 0%, transparent 70%);
+    mask-image: radial-gradient(circle 120px at var(--mx, 50%) var(--my, 30%),
+        #000 0%, rgba(0,0,0,0.75) 46%, transparent 74%);
+    -webkit-mask-image: radial-gradient(circle 120px at var(--mx, 50%) var(--my, 30%),
+        #000 0%, rgba(0,0,0,0.75) 46%, transparent 74%);
+  }
+}
+@media (max-width: 360px) {
+  .hero .eyebrow-plain { letter-spacing: 0.1em; font-size: 10px; }
+  .hero .btn-row .btn { font-size: 12px; letter-spacing: 0.04em; }
+  .hero .fact-label { letter-spacing: 0; font-size: 9px; }
+}
+
+/* The lamp light is cool, like a work lamp on a print, not a candle: the
+   warm tint read as yellowing paper. */
+.hero-lamp {
+  background: radial-gradient(circle 190px at var(--mx, 50%) var(--my, 45%),
+      rgba(205, 218, 255, 0.08) 0%, transparent 68%);
+}
+@media (max-width: 600px) {
+  .hero-lamp {
+    background: radial-gradient(circle 120px at var(--mx, 50%) var(--my, 30%),
+        rgba(205, 218, 255, 0.14) 0%, transparent 70%);
+  }
+}
+
+/* Where a finger moves the lamp. Injected by main.js over the hero, under the
+   copy; it only takes touches while the lamp is on, and only above the copy,
+   so the page still scrolls from the text and from everything below. */
+.hero-pad {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+@media (pointer: coarse) {
+  .hero-inner { position: relative; z-index: 2; }
+  .hero.is-lamp .hero-pad { pointer-events: auto; touch-action: none; }
+}
