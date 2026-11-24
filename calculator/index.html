@@ -1451,6 +1451,31 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 .enq-rate b{font-size:17px;color:var(--ink-1);font-variant-numeric:tabular-nums}
 /* the enquiry number is an identifier; wrapping it makes two of one */
 .imp-entry{margin:6px 0 14px;font-size:13px}
+.enq-pays{margin:16px 0 4px;padding-top:14px;border-top:1px solid var(--border)}
+.pay-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pay-h h3{margin:0;font-size:13px}
+.pay-tot{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pay-tot b.pos{color:var(--good-text)} .pay-tot b.wip{color:var(--warning)}
+.pay-bar{height:6px;border-radius:3px;background:color-mix(in srgb, var(--ink-3) 18%, transparent);overflow:hidden;margin:8px 0 10px}
+.pay-bar i{display:block;height:100%;background:var(--good)}
+.pay-list{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px}
+.pay-list td{padding:6px 6px;border-bottom:1px solid var(--grid);vertical-align:middle}
+.pay-list td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pay-list .pay-note{color:var(--ink-3);overflow-wrap:anywhere}
+.pay-del{min-height:28px;padding:2px 8px}
+.pay-none{margin:4px 0 8px}
+.pay-add{display:grid;grid-template-columns:150px 90px 130px minmax(0,1fr);gap:8px 10px;align-items:end}
+.pay-add label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--ink-3);min-width:0}
+.pay-add input{width:100%;font-size:16px}
+.pay-quick{grid-column:1 / -1;display:flex;gap:6px;flex-wrap:wrap}
+.pay-quick button{min-height:30px;padding:4px 10px;font-size:11px}
+#payAdd{grid-column:1 / -1;justify-self:start}
+.pay-base{margin:8px 0 0}
+.enq-derived{opacity:.75}
+@media (max-width:620px){
+  .pay-add{grid-template-columns:1fr 1fr}
+  .pay-add .pay-wide{grid-column:1 / -1}
+}
 .enq-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 14px}
 .enq-head-t{min-width:0}
 .enq-head .sheet{margin-bottom:4px}
@@ -2190,7 +2215,7 @@ en: {
     winRate:'Won of decided',ofDecided:'of those decided',
     cost:'Cost',sell:'Sell',margin:'Margin',marginPct:'Margin %',
     paid:'Paid',unpaid:'Unpaid',paidDate:'Paid on',invoice:'Invoice no.',
-    vSales:'Sales',vRegister:'Register',vFiltered:'The figures below follow the filters set in the register.',sales:{title:'Sales',lead:'Orders with a PO only, within the filters above. Cost and margin are counted where the cost is known.',sold:'Sold',cost:'Cost',margin:'Margin',avg:'Average order',perOrder:'per order',orders:'orders',withCost:'with a cost',fReceived:'Enquiries received',fQuoted:'Quoted to the client',fWon:'Won — PO received',ofReceived:'of received',ofQuoted:'of quoted',ofValue:'of the quoted value',byMonth:'Sales by month: cost and margin',monthNote:'by the month of the PO; % = margin',byClient:'Top clients',bySupplier:'Top manufacturers',more:'more',quality:'How the cost is known',qDoc:'From documents',qEst:'Estimated',qNone:'Not known',qLead:'Share of sales value. Documented = the supplier invoice, order confirmation, proforma or quote in the job folder, or a cost typed in by hand; estimated = the supplier’s median margin this year (marked “įvertinta” in the note).'},kTurnover:'Sold',kSoldNote:'with a PO',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
+    pay:{title:'Payments',of:'of',none:'No payments yet.',date:'Date',amount:'Amount, €',note:'Note',notePh:'advance, balance…',rest:'Balance',add:'+ Add payment',del:'Remove this payment',confirmDel:'Remove this payment?',needAmount:'Enter a percent or an amount.',baseIs:'Percent is of the order total, {sum} (the larger of the price and what was invoiced).',noBase:'The enquiry has no price yet, so only an amount can be entered.',derived:'Follows the payments below.',partTitle:'Part paid — open the card for the payments'},vSales:'Sales',vRegister:'Register',vFiltered:'The figures below follow the filters set in the register.',sales:{title:'Sales',lead:'Orders with a PO only, within the filters above. Cost and margin are counted where the cost is known.',sold:'Sold',cost:'Cost',margin:'Margin',avg:'Average order',perOrder:'per order',orders:'orders',withCost:'with a cost',fReceived:'Enquiries received',fQuoted:'Quoted to the client',fWon:'Won — PO received',ofReceived:'of received',ofQuoted:'of quoted',ofValue:'of the quoted value',byMonth:'Sales by month: cost and margin',monthNote:'by the month of the PO; % = margin',byClient:'Top clients',bySupplier:'Top manufacturers',more:'more',quality:'How the cost is known',qDoc:'From documents',qEst:'Estimated',qNone:'Not known',qLead:'Share of sales value. Documented = the supplier invoice, order confirmation, proforma or quote in the job folder, or a cost typed in by hand; estimated = the supplier’s median margin this year (marked “įvertinta” in the note).'},kTurnover:'Sold',kSoldNote:'with a PO',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
     recTitle:'From the sales folder',recDate:'Date',recKind:'Type',recWhat:'Document',recRef:'No.',recSum:'Amount',
     noCost:'no cost entered',costHint:'What the supplier charges. Leave blank if not known yet — blank is not zero.',
     report:'Register report',open:'Enquiry register',
@@ -2559,7 +2584,7 @@ lt: {
     winRate:'Laimėta iš nuspręstų',ofDecided:'iš nuspręstų',
     cost:'Savikaina',sell:'Pardavimas',margin:'Marža',marginPct:'Marža %',
     paid:'Apmokėta',unpaid:'Neapmokėta',paidDate:'Apmokėjimo data',invoice:'Sąskaitos nr.',
-    vSales:'Pardavimai',vRegister:'Registras',vFiltered:'Žemiau esantys skaičiai atitinka registre nustatytus filtrus.',sales:{title:'Pardavimai',lead:'Tik užsakymai su PO, pagal viršuje nustatytus filtrus. Savikaina ir marža skaičiuojamos ten, kur savikaina žinoma.',sold:'Parduota',cost:'Savikaina',margin:'Marža',avg:'Vidutinis užsakymas',perOrder:'vienam užsakymui',orders:'užsakymai',withCost:'su savikaina',fReceived:'Gautos užklausos',fQuoted:'Pasiūlyta klientui',fWon:'Laimėta — gautas PO',ofReceived:'gautų',ofQuoted:'pasiūlytų',ofValue:'pasiūlytos vertės',byMonth:'Pardavimai per mėnesį: savikaina ir marža',monthNote:'pagal PO mėnesį; % = marža',byClient:'Didžiausi klientai',bySupplier:'Didžiausi gamintojai',more:'kiti',quality:'Iš kur žinoma savikaina',qDoc:'Iš dokumentų',qEst:'Įvertinta',qNone:'Nežinoma',qLead:'Pardavimų vertės dalis. Iš dokumentų = tiekėjo sąskaita, užsakymo patvirtinimas, proforma ar pasiūlymas užsakymo aplanke arba ranka įvesta savikaina; įvertinta = tiekėjo metų vidutinė marža (pastaboje pažymėta „įvertinta“).'},kTurnover:'Parduota',kSoldNote:'gautas PO',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
+    pay:{title:'Apmokėjimai',of:'iš',none:'Apmokėjimų dar nėra.',date:'Data',amount:'Suma, €',note:'Pastaba',notePh:'avansas, likutis…',rest:'Likutis',add:'+ Pridėti apmokėjimą',del:'Pašalinti šį apmokėjimą',confirmDel:'Pašalinti šį apmokėjimą?',needAmount:'Įveskite procentą arba sumą.',baseIs:'Procentas skaičiuojamas nuo užsakymo sumos {sum} (didesnė iš kainos ir išrašytos sumos).',noBase:'Užklausa dar neturi kainos, todėl galima įvesti tik sumą.',derived:'Nustatoma pagal apmokėjimus žemiau.',partTitle:'Apmokėta iš dalies — apmokėjimai kortelėje'},vSales:'Pardavimai',vRegister:'Registras',vFiltered:'Žemiau esantys skaičiai atitinka registre nustatytus filtrus.',sales:{title:'Pardavimai',lead:'Tik užsakymai su PO, pagal viršuje nustatytus filtrus. Savikaina ir marža skaičiuojamos ten, kur savikaina žinoma.',sold:'Parduota',cost:'Savikaina',margin:'Marža',avg:'Vidutinis užsakymas',perOrder:'vienam užsakymui',orders:'užsakymai',withCost:'su savikaina',fReceived:'Gautos užklausos',fQuoted:'Pasiūlyta klientui',fWon:'Laimėta — gautas PO',ofReceived:'gautų',ofQuoted:'pasiūlytų',ofValue:'pasiūlytos vertės',byMonth:'Pardavimai per mėnesį: savikaina ir marža',monthNote:'pagal PO mėnesį; % = marža',byClient:'Didžiausi klientai',bySupplier:'Didžiausi gamintojai',more:'kiti',quality:'Iš kur žinoma savikaina',qDoc:'Iš dokumentų',qEst:'Įvertinta',qNone:'Nežinoma',qLead:'Pardavimų vertės dalis. Iš dokumentų = tiekėjo sąskaita, užsakymo patvirtinimas, proforma ar pasiūlymas užsakymo aplanke arba ranka įvesta savikaina; įvertinta = tiekėjo metų vidutinė marža (pastaboje pažymėta „įvertinta“).'},kTurnover:'Parduota',kSoldNote:'gautas PO',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
     recTitle:'Iš pardavimų aplanko',recDate:'Data',recKind:'Tipas',recWhat:'Dokumentas',recRef:'Nr.',recSum:'Suma',
     noCost:'savikaina neįvesta',costHint:'Kiek ima tiekėjas. Palikite tuščią, jei dar nežinoma — tuščia nėra nulis.',
     report:'Registro ataskaita',open:'Užklausų registras',
@@ -2928,7 +2953,7 @@ ru: {
     winRate:'Выиграно из решённых',ofDecided:'из решённых',
     cost:'Себестоимость',sell:'Продажа',margin:'Заработок',marginPct:'Наценка %',
     paid:'Оплачено',unpaid:'Не оплачено',paidDate:'Дата оплаты',invoice:'Счёт №',
-    vSales:'Продажи',vRegister:'Реестр',vFiltered:'Цифры ниже учитывают фильтры, заданные в реестре.',sales:{title:'Продажи',lead:'Только заказы с PO, в пределах фильтров выше. Себестоимость и заработок считаются там, где себестоимость известна.',sold:'Продано',cost:'Себестоимость',margin:'Заработок',avg:'Средний заказ',perOrder:'на заказ',orders:'заказов',withCost:'с себестоимостью',fReceived:'Получено запросов',fQuoted:'Предложено клиенту',fWon:'Выиграно — получен PO',ofReceived:'от полученных',ofQuoted:'от предложенных',ofValue:'от суммы предложений',byMonth:'Продажи по месяцам: себестоимость и заработок',monthNote:'по месяцу PO; % — маржа',byClient:'Крупнейшие клиенты',bySupplier:'Крупнейшие производители',more:'ещё',quality:'Откуда известна себестоимость',qDoc:'По документам',qEst:'Оценка',qNone:'Неизвестна',qLead:'Доля от суммы продаж. По документам — счёт поставщика, подтверждение заказа, проформа или предложение в папке заказа, либо себестоимость, введённая вручную; оценка — средняя маржа поставщика за год (в примечании пометка «įvertinta»).'},kTurnover:'Продано',kSoldNote:'получен заказ (PO)',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
+    pay:{title:'Оплаты',of:'из',none:'Оплат пока нет.',date:'Дата',amount:'Сумма, €',note:'Примечание',notePh:'аванс, остаток…',rest:'Остаток',add:'+ Добавить оплату',del:'Удалить эту оплату',confirmDel:'Удалить эту оплату?',needAmount:'Введите процент или сумму.',baseIs:'Процент считается от суммы заказа {sum} (большее из цены и выставленного).',noBase:'У запроса ещё нет цены, поэтому можно ввести только сумму.',derived:'Считается по оплатам ниже.',partTitle:'Оплачено частично — оплаты в карточке'},vSales:'Продажи',vRegister:'Реестр',vFiltered:'Цифры ниже учитывают фильтры, заданные в реестре.',sales:{title:'Продажи',lead:'Только заказы с PO, в пределах фильтров выше. Себестоимость и заработок считаются там, где себестоимость известна.',sold:'Продано',cost:'Себестоимость',margin:'Заработок',avg:'Средний заказ',perOrder:'на заказ',orders:'заказов',withCost:'с себестоимостью',fReceived:'Получено запросов',fQuoted:'Предложено клиенту',fWon:'Выиграно — получен PO',ofReceived:'от полученных',ofQuoted:'от предложенных',ofValue:'от суммы предложений',byMonth:'Продажи по месяцам: себестоимость и заработок',monthNote:'по месяцу PO; % — маржа',byClient:'Крупнейшие клиенты',bySupplier:'Крупнейшие производители',more:'ещё',quality:'Откуда известна себестоимость',qDoc:'По документам',qEst:'Оценка',qNone:'Неизвестна',qLead:'Доля от суммы продаж. По документам — счёт поставщика, подтверждение заказа, проформа или предложение в папке заказа, либо себестоимость, введённая вручную; оценка — средняя маржа поставщика за год (в примечании пометка «įvertinta»).'},kTurnover:'Продано',kSoldNote:'получен заказ (PO)',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
     recTitle:'Из папки продаж',recDate:'Дата',recKind:'Тип',recWhat:'Документ',recRef:'№',recSum:'Сумма',
     noCost:'себестоимость не внесена',costHint:'Сколько берёт поставщик. Оставьте пустым, если ещё не известно — пусто это не ноль.',
     report:'Отчёт по реестру',open:'Реестр запросов',
@@ -3576,6 +3601,24 @@ const CLOUD = (function(){
       });
       if(!res.ok) throw new Error('upload failed ' + res.status);
       return path;
+    },
+    /* Payments in parts (migrate-enquiry-payments.sql). Plain table writes:
+       row level security decides who may, and a trigger keeps the enquiry's
+       paid / paid_ex_vat / paid_date in step with them. */
+    async payments(enquiryId){
+      return await rest('enquiry_payments?select=*&enquiry_id=eq.' + encodeURIComponent(enquiryId) +
+                        '&order=paid_on.asc,created_at.asc') || [];
+    },
+    async paymentAdd(row){
+      return firstRow(await rest('enquiry_payments', { method: 'POST', body: JSON.stringify(row),
+        headers: { Prefer: 'return=representation' } }));
+    },
+    async paymentDelete(id){
+      await rest('enquiry_payments?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+    },
+    async enquiryOne(id){
+      const rows = await rest('enquiries_v?select=*&id=eq.' + encodeURIComponent(id));
+      return rows && rows[0] || null;
     },
     /* What the sales folder says about an enquiry (migrate-enquiry-records.sql) */
     async records(enquiryId){
@@ -5705,7 +5748,8 @@ function enqTotals(rows){
        counting the whole price as outstanding doubles the debt. */
     if(r.invoiced_ex_vat != null) invoiced += Number(r.invoiced_ex_vat) || 0;
     if(!r.paid && r.status === 'Gautas PO')
-      unpaid += Number(r.invoiced_ex_vat != null ? r.invoiced_ex_vat : r.price_ex_vat) || 0;
+      unpaid += Math.max(0, (Number(r.invoiced_ex_vat != null ? r.invoiced_ex_vat : r.price_ex_vat) || 0)
+                            - (Number(r.paid_ex_vat) || 0));
   });
   return { sell, cost, margin, costed, sellCosted, unpaid, days, invoiced,
            pct: sellCosted ? margin / sellCosted : null,
@@ -5914,7 +5958,9 @@ function viewEnquiries(){
         r.margin_pct == null ? '<span class="muted">&mdash;</span>' : pct(Number(r.margin_pct))}</td>
       <td data-label="${esc(e.delivery)}">${flag(r.delivered, e.delivered, e.undelivered)}</td>
       <td class="enq-edit" data-edit="paid" data-label="${esc(e.paid)}"
-          title="${esc(e.clickToEdit)}">${flag(r.paid, e.paid, e.unpaid)}</td>
+          title="${esc(e.clickToEdit)}">${!r.paid && Number(r.paid_ex_vat) > 0 && enqPayBase(r)
+            ? `<span class="enq-flag wip" title="${esc(e.pay.partTitle)}">${pct(Number(r.paid_ex_vat) / enqPayBase(r))}</span>`
+            : flag(r.paid, e.paid, e.unpaid)}</td>
     </tr>`; }).join('')
     /* sixteen columns, not twelve -- the empty-state row has been short since
        the money columns were added, so the message sat under two thirds of a
@@ -6492,7 +6538,9 @@ function wireEnquiries(){
       ev.stopPropagation();
       const row = (state.enquiries || []).find(r => r.id === td.closest('tr').dataset.enq);
       if(!row) return;
-      if(td.dataset.edit === 'paid') enqPatch(row, { paid: !row.paid });
+      /* a part-paid enquiry is settled by its payments, in the card */
+      if(td.dataset.edit === 'paid' && !row.paid && Number(row.paid_ex_vat) > 0) enqEdit(row);
+      else if(td.dataset.edit === 'paid') enqPatch(row, { paid: !row.paid });
       else enqCostCell(td, row);
     }));
   }
@@ -6546,6 +6594,7 @@ function enqEdit(row){
       ${r.updated_at ? `<p class="enq-meta">${esc(e.lastChanged)}:
         ${esc(new Date(r.updated_at).toLocaleString(LOCALES[state.lang]))}${
         PEOPLE[r.updated_by] ? ' &mdash; ' + esc(PEOPLE[r.updated_by]) : ''}</p>` : ''}
+      <div class="enq-pays" id="enqPays"></div>
       <div class="enq-records" id="enqRecords"></div>
       <div class="enq-actions">
         ${isNew ? '' : `<button type="button" value="del" class="ghost danger">${esc(e.del)}</button>`}
@@ -6556,6 +6605,7 @@ function enqEdit(row){
     </form>`;
   document.body.appendChild(dlg);
   if(!isNew) enqRecordsInto(dlg.querySelector('#enqRecords'), r.id);
+  if(!isNew && CLOUD.on) enqPaymentsInto(dlg.querySelector('#enqPays'), r, dlg.querySelector('form'));
 
   const form = dlg.querySelector('form');
   /* Where the keyboard was before this opened. Without it focus lands on
@@ -9950,6 +10000,103 @@ async function impRun(){
   box.querySelector('#impStop').disabled = true;
   box.querySelector('#impStart').disabled = false;
   CLOUD.enquiries().then(l => { state.enquiries = l; render(); }).catch(() => {});
+}
+
+
+/* ---------- payments in parts ----------
+   A share of the order is typed as a percent or as an amount and the other
+   is worked out: the order total is the larger of the price and what has
+   been invoiced (an advance invoice is half the order, not all of it). Once
+   an enquiry has payments, "paid" and its date follow them -- the database
+   enforces that, and the form shows it rather than offering a tick that
+   would be overruled. */
+function enqPayBase(r){ return Math.max(Number(r.invoiced_ex_vat) || 0, Number(r.price_ex_vat) || 0); }
+async function enqPaymentsInto(box, r, form){
+  if(!box) return;
+  const e = tr().enq, p = e.pay, L = LOCALES[state.lang];
+  let list = [];
+  const today = () => new Date().toISOString().slice(0, 10);
+  const lockPaid = () => {
+    if(!form || !list.length) return;
+    form.paid.checked = !!r.paid;
+    form.paid.onclick = ev => ev.preventDefault();
+    form.paid.closest('label').classList.add('enq-derived');
+    form.paid.closest('label').title = p.derived;
+    form.paid_date.value = r.paid_date || '';
+    form.paid_date.readOnly = true;
+    form.paid_date.title = p.derived;
+  };
+  const sync = async () => {
+    try {
+      list = await CLOUD.payments(r.id);
+      const fresh = await CLOUD.enquiryOne(r.id);
+      if(fresh){
+        /* the card saves with r.rev: a payment bumps it, and a stale rev
+           would make the next save report somebody else's edit */
+        Object.assign(r, fresh);
+        state.enquiries = (state.enquiries || []).map(x => x.id === fresh.id ? fresh : x);
+      }
+    } catch(err){ toast(err.message); }
+    draw(); lockPaid(); render();
+  };
+  const draw = () => {
+    const b = enqPayBase(r), sum = list.reduce((a, x) => a + (Number(x.amount) || 0), 0);
+    const share = b ? sum / b : 0, rest = Math.max(0, b - sum);
+    box.innerHTML = `<div class="pay-h"><h3>${esc(p.title)}</h3>
+        <span class="pay-tot">${fmt(sum)} € ${esc(p.of)} ${fmt(b)} € · <b class="${share >= 0.9999 ? 'pos' : sum ? 'wip' : ''}">${b ? pct(share) : '—'}</b></span></div>
+      <div class="pay-bar" role="img" aria-label="${b ? pct(share) : ''}"><i style="width:${Math.min(100, share * 100).toFixed(1)}%"></i></div>
+      ${list.length ? `<table class="pay-list"><tbody>${list.map(x => `<tr>
+          <td class="muted">${x.paid_on ? new Date(x.paid_on).toLocaleDateString(L) : '—'}</td>
+          <td class="num">${x.pct == null ? '' : fmt(Number(x.pct), 1) + ' %'}</td>
+          <td class="num"><b>${fmt(Number(x.amount))} €</b></td>
+          <td class="pay-note">${esc(x.note || '')}</td>
+          <td><button type="button" class="ghost pay-del" data-pay-del="${esc(x.id)}" title="${esc(p.del)}" aria-label="${esc(p.del)}">×</button></td>
+        </tr>`).join('')}</tbody></table>` : `<p class="hint pay-none">${esc(p.none)}</p>`}
+      <div class="pay-add">
+        <label>${esc(p.date)}<input type="date" id="payDate" value="${today()}"></label>
+        <label>%<input type="number" id="payPct" step="0.01" min="0" inputmode="decimal" placeholder="0"></label>
+        <label>${esc(p.amount)}<input type="number" id="payAmt" step="0.01" min="0" inputmode="decimal" placeholder="0.00"></label>
+        <label class="pay-wide">${esc(p.note)}<input id="payNote" placeholder="${esc(p.notePh)}"></label>
+        <div class="pay-quick">${[30, 50, 70, 100].map(v =>
+          `<button type="button" class="ghost" data-pay-q="${v}">${v}%</button>`).join('')}${
+          rest > 0 && sum > 0 ? `<button type="button" class="ghost" data-pay-q="rest">${esc(p.rest)} ${fmt(rest)} €</button>` : ''}</div>
+        <button type="button" class="primary" id="payAdd">${esc(p.add)}</button>
+      </div>
+      <p class="hint pay-base">${esc(b ? p.baseIs.replace('{sum}', fmt(b) + ' €') : p.noBase)}</p>`;
+    const $b = sel => box.querySelector(sel);
+    const pctIn = $b('#payPct'), amtIn = $b('#payAmt');
+    pctIn.addEventListener('input', () => { amtIn.value = b && pctIn.value !== '' ? (b * Number(pctIn.value) / 100).toFixed(2) : ''; });
+    amtIn.addEventListener('input', () => { pctIn.value = b && amtIn.value !== '' ? (Number(amtIn.value) / b * 100).toFixed(2) : ''; });
+    box.querySelectorAll('[data-pay-q]').forEach(btn => btn.addEventListener('click', () => {
+      const q = btn.dataset.payQ;
+      const amount = q === 'rest' ? rest : b * Number(q) / 100;
+      amtIn.value = amount.toFixed(2);
+      pctIn.value = b ? (amount / b * 100).toFixed(2) : '';
+    }));
+    const add = async () => {
+      const amount = Number(amtIn.value);
+      if(!(amount > 0)){ amtIn.focus(); toast(p.needAmount); return; }
+      $b('#payAdd').disabled = true;
+      try {
+        await CLOUD.paymentAdd({ enquiry_id: r.id, paid_on: $b('#payDate').value || today(),
+          pct: pctIn.value === '' ? null : Number(pctIn.value), amount: amount,
+          note: $b('#payNote').value.trim() || null });
+        await sync();
+      } catch(err){ toast(err.message); $b('#payAdd').disabled = false; }
+    };
+    $b('#payAdd').addEventListener('click', add);
+    /* Enter in here adds the payment; it must not submit the card around it */
+    box.querySelectorAll('.pay-add input').forEach(i => i.addEventListener('keydown', ev => {
+      if(ev.key === 'Enter'){ ev.preventDefault(); add(); }
+    }));
+    box.querySelectorAll('[data-pay-del]').forEach(btn => btn.addEventListener('click', async () => {
+      if(!confirm(p.confirmDel)) return;
+      try { await CLOUD.paymentDelete(btn.dataset.payDel); await sync(); } catch(err){ toast(err.message); }
+    }));
+  };
+  try { list = await CLOUD.payments(r.id); } catch(err){ list = []; }
+  if(!box.isConnected) return;
+  draw(); lockPaid();
 }
 
 /* The enquiry card lists what its folder holds. Fetched when the card opens:
