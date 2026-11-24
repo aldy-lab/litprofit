@@ -2027,7 +2027,7 @@ en: {
     winRate:'Won of decided',ofDecided:'of those decided',
     cost:'Cost',sell:'Sell',margin:'Margin',marginPct:'Margin %',
     paid:'Paid',unpaid:'Unpaid',paidDate:'Paid on',invoice:'Invoice no.',
-    kTurnover:'Sold',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
+    kTurnover:'Sold',kSoldNote:'with a PO',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
     recTitle:'From the sales folder',recDate:'Date',recKind:'Type',recWhat:'Document',recRef:'No.',recSum:'Amount',
     noCost:'no cost entered',costHint:'What the supplier charges. Leave blank if not known yet — blank is not zero.',
     report:'Register report',open:'Enquiry register',
@@ -2396,7 +2396,7 @@ lt: {
     winRate:'Laimėta iš nuspręstų',ofDecided:'iš nuspręstų',
     cost:'Savikaina',sell:'Pardavimas',margin:'Marža',marginPct:'Marža %',
     paid:'Apmokėta',unpaid:'Neapmokėta',paidDate:'Apmokėjimo data',invoice:'Sąskaitos nr.',
-    kTurnover:'Parduota',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
+    kTurnover:'Parduota',kSoldNote:'gautas PO',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
     recTitle:'Iš pardavimų aplanko',recDate:'Data',recKind:'Tipas',recWhat:'Dokumentas',recRef:'Nr.',recSum:'Suma',
     noCost:'savikaina neįvesta',costHint:'Kiek ima tiekėjas. Palikite tuščią, jei dar nežinoma — tuščia nėra nulis.',
     report:'Registro ataskaita',open:'Užklausų registras',
@@ -2765,7 +2765,7 @@ ru: {
     winRate:'Выиграно из решённых',ofDecided:'из решённых',
     cost:'Себестоимость',sell:'Продажа',margin:'Заработок',marginPct:'Наценка %',
     paid:'Оплачено',unpaid:'Не оплачено',paidDate:'Дата оплаты',invoice:'Счёт №',
-    kTurnover:'Продано',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
+    kTurnover:'Продано',kSoldNote:'получен заказ (PO)',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
     recTitle:'Из папки продаж',recDate:'Дата',recKind:'Тип',recWhat:'Документ',recRef:'№',recSum:'Сумма',
     noCost:'себестоимость не внесена',costHint:'Сколько берёт поставщик. Оставьте пустым, если ещё не известно — пусто это не ноль.',
     report:'Отчёт по реестру',open:'Реестр запросов',
@@ -5676,6 +5676,11 @@ function viewEnquiries(){
   const rows = enqSorted(enqRows());
 
   const T = enqTotals(rows);
+  /* Sold, cost and margin are about SALES: rows with a PO. Summed over the
+     whole register they added every rejected quote to "sold" -- 3.29 M
+     against 0.66 M actually sold -- and the margin with them. The table's
+     own footer still totals every row on screen. */
+  const W = enqTotals(rows.filter(r => r.status === 'Gautas PO'));
   const kpi = (label, n, tone, note) =>
     `<div class="enq-kpi${tone ? ' ' + tone : ''}"><b>${n}</b><span>${esc(label)}</span>${
       note ? `<i>${esc(note)}</i>` : ''}</div>`;
@@ -5773,10 +5778,10 @@ function viewEnquiries(){
       ${kpi(e.kRejected, count('Atmesta užklausa'), 'bad')}
     </div>
     <div class="enq-kpis enq-kpis--money">
-      ${kpi(e.kTurnover, fmt(T.sell, 0), '')}
-      ${kpi(e.kCost, T.costed ? fmt(T.cost, 0) : '—', '')}
-      ${kpi(e.kMargin, T.costed ? fmt(T.margin, 0) : '—', T.margin >= 0 ? 'ok' : 'bad',
-            T.costed ? (T.pct == null ? '' : pct(T.pct)) : e.noCost)}
+      ${kpi(e.kTurnover, fmt(W.sell, 0), '', e.kSoldNote)}
+      ${kpi(e.kCost, W.costed ? fmt(W.cost, 0) : '—', '')}
+      ${kpi(e.kMargin, W.costed ? fmt(W.margin, 0) : '—', W.margin >= 0 ? 'ok' : 'bad',
+            W.costed ? (W.pct == null ? '' : pct(W.pct)) : e.noCost)}
       ${kpi(e.kUnpaid, fmt(T.unpaid, 0), T.unpaid > 0 ? 'wip' : 'ok')}
     </div>
     ${(() => {
@@ -10996,6 +11001,8 @@ function printEnquiryReport(){
   const t = tr(), e = t.enq, L = LOCALES[state.lang], dash = '&mdash;';
   const rows = enqSorted(enqRows());
   const T = enqTotals(rows);
+  const W = enqTotals(rows.filter(r => r.status === 'Gautas PO'));   /* sales only, as on screen */
+  const won = rows.filter(r => r.status === 'Gautas PO').length;
   const f = enqState();
   const m = v => v == null ? dash : fmt(v);
   const d = v => v ? new Date(v).toLocaleDateString(L) : dash;
@@ -11052,12 +11059,11 @@ function printEnquiryReport(){
     ${scope.length ? `<p class="rp-scope">${scope.join(' &nbsp;&middot;&nbsp; ')}</p>` : ''}
 
     <div class="rp-kpis">
-      ${kpi(e.kTurnover, fmt(T.sell), rows.length + ' ' + esc(e.kReceived.toLowerCase()))}
-      ${kpi(e.kCost, T.costed ? fmt(T.cost) : dash,
-            T.costed < rows.length
-              ? `${T.costed}/${rows.length} ${esc(e.cost.toLowerCase())}` : '&nbsp;')}
-      ${kpi(e.kMargin, T.costed ? fmt(T.margin) : dash,
-            T.pct == null ? esc(e.noCost) : pct(T.pct))}
+      ${kpi(e.kTurnover, fmt(W.sell), won + ' ' + esc(e.kSoldNote))}
+      ${kpi(e.kCost, W.costed ? fmt(W.cost) : dash,
+            W.costed < won ? `${W.costed}/${won} ${esc(e.cost.toLowerCase())}` : '&nbsp;')}
+      ${kpi(e.kMargin, W.costed ? fmt(W.margin) : dash,
+            W.pct == null ? esc(e.noCost) : pct(W.pct))}
       ${kpi(e.kUnpaid, fmt(T.unpaid), esc(e.kPO))}
     </div>
 
