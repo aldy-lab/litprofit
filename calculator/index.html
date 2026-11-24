@@ -1924,6 +1924,131 @@ figure.chart figcaption{font-size:13px;font-weight:600;letter-spacing:0;margin-b
   table.kpi-table th{min-width:0;letter-spacing:.06em}
   table.kpi-table td,table.kpi-table th{padding:6px 5px}
 }
+
+/* =====================================================================
+   PHONES -- a pass over every screen at 390 and 320px. Last in the sheet,
+   so it wins on source order; desktop is untouched (every rule is inside a
+   width query).
+   ===================================================================== */
+@media (max-width:1024px){
+  /* A sheet in card mode is a column of cards, thousands of pixels tall. A
+     later narrow-screen rule capped its wrapper at 340-414px with overflow
+     visible, so the rows spilled out of the card and "+ Add row" sat on top
+     of them. Cards are not a scroll box. */
+  .tablewrap:has(table[data-sheet]),.tablewrap:has(#pfTable),.tablewrap:has(#enqTable){max-height:none;overflow:visible}
+  @media (max-width:639px){.tablewrap:has(table.co-table){max-height:none;overflow:visible}}
+  /* a row that has nothing in it yet folds to its name; tap to fill it in */
+  table[data-sheet] tbody tr.is-blank:not(.open){cursor:pointer;padding-bottom:8px}
+  table[data-sheet] tbody tr.is-blank:not(.open) > td:not(:nth-child(1)):not(:nth-child(2)){display:none}
+  table[data-sheet] tbody tr.is-blank:not(.open)::after{
+    content:attr(data-fill);display:block;grid-column:1 / -1;
+    font-size:11.5px;letter-spacing:.06em;color:var(--accent);padding:4px 0 0}
+  .toolbar #btnAddRow{width:100%;min-height:44px}
+}
+@media (max-width:639px){
+  /* fields: label above value, two to a row; text and choices take the width */
+  table[data-sheet] tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:12px;row-gap:4px;
+    padding:12px 14px;border-radius:var(--r)}
+  table[data-sheet] tbody td{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px;
+    padding:2px 0;border-bottom:0;min-width:0}
+  table[data-sheet] tbody td::before{flex:none;font-size:9.5px;letter-spacing:.1em;line-height:1.3}
+  table[data-sheet] tbody td:has(> input[type=text]){grid-column:1 / -1}
+  table[data-sheet] tbody td.calc{padding:6px 0 2px;font-size:14px;text-align:left}
+  table[data-sheet] tbody td.num input,table[data-sheet] tbody td .pct-in input{text-align:left}
+  table[data-sheet] tbody td input,table[data-sheet] tbody td select{min-height:40px;font-size:16px}
+  table[data-sheet] tbody td.rowacts{grid-column:1 / -1;flex-direction:row;justify-content:flex-end;gap:6px;padding-top:4px}
+  table[data-sheet] tbody td.rowacts .rowbtn{opacity:.6;min-width:40px;min-height:36px;font-size:16px}
+  table[data-sheet] tbody tr.is-blank:not(.open) td::before{display:none}
+  table[data-sheet] tbody tr.is-blank:not(.open) td input{background:none;border-color:transparent;min-height:30px;padding:2px 0;font-weight:600}
+  /* totals: two to a row as well */
+  table[data-sheet] tfoot tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:12px;padding:12px 14px;border-radius:var(--r)}
+  table[data-sheet] tfoot td{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border-bottom:0;padding:4px 0}
+  table[data-sheet] tfoot td:first-child{grid-column:1 / -1}
+  table[data-sheet] tfoot td:empty{display:none}
+  /* a folded row reads as a title and a line under it */
+  table[data-sheet] tbody tr.is-blank:not(.open) td:nth-child(1) input{font-size:15px;font-weight:600}
+  table[data-sheet] tbody tr.is-blank:not(.open) td:nth-child(2) input{font-size:13px;font-weight:400;color:var(--ink-2)}
+  table[data-sheet] tbody tr.is-blank:not(.open){row-gap:0;padding-top:10px}
+
+  /* the project card: label above the field, the field the full width */
+  .kv{grid-template-columns:1fr;gap:4px;max-width:none}
+  .kv label{margin-top:10px}
+  .kv input,.kv select{width:100%;min-height:42px;font-size:16px}
+
+  /* figures that must not break: the euro sign stays with its number */
+  .enq-kpi b,.co-kpi b,.tile .val{white-space:nowrap}
+  .enq-kpi b{font-size:clamp(17px,5.4vw,24px)}
+  .enq-kpis{grid-template-columns:1fr 1fr}
+  .co-kpis{grid-template-columns:1fr 1fr}
+  .co-kpi b{font-size:clamp(18px,5.6vw,24px)}
+
+  /* a reading table wider than the screen scrolls inside its card */
+  .card:has(> table.kpi-table),.card:has(> .tablewrap > table.kpi-table){overflow-x:auto}
+  /* the portfolio's per-currency total: the empty cells and the label for the
+     weighted margin made a tall blank box */
+  #pfTable tfoot td:empty,#pfTable tfoot td.muted{display:none}
+
+  /* company tables: one card per person / cost / document, labels above */
+  table.co-table,table.co-table tbody,table.co-table tfoot,table.co-table tr,table.co-table td{display:block;width:auto}
+  table.co-table thead{display:none}
+  table.co-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:12px;row-gap:8px;
+    position:relative;border:1px solid var(--grid);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;background:var(--surface-1)}
+  table.co-table tbody td{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:0;border:0;min-width:0;text-align:left}
+  table.co-table tbody td::before{content:attr(data-label);font-family:var(--mono);font-size:9.5px;line-height:1.3;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  table.co-table tbody td:first-child{grid-column:1 / -1;padding-right:44px}
+  table.co-table tbody td[colspan]{grid-column:1 / -1;padding:0}
+  table.co-table tbody td[colspan]::before,table.co-table tbody td:last-child::before{content:none}
+  table.co-table tbody tr:has(td[colspan]){display:block;border-style:dashed;background:none}
+  table.co-table tbody td:last-child:not([colspan]){position:absolute;top:8px;right:8px;padding:0}
+  table.co-table tbody td:last-child:empty{display:none}
+  table.co-table td input,table.co-table td select,table.co-table td.num input{width:100%;min-width:0;min-height:40px;font-size:16px;text-align:left}
+  table.co-table tbody td.co-derived{border-left:0;font-size:14px;padding:0;text-align:left}
+  table.co-table .co-del{min-width:40px;min-height:40px;font-size:18px}
+  table.co-table tfoot tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:12px;row-gap:6px;
+    border:1px solid var(--baseline);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;background:var(--surface-2)}
+  table.co-table tfoot td{display:flex;flex-direction:column;gap:2px;padding:0;border:0;text-align:left}
+  table.co-table tfoot td:empty{display:none}
+  table.co-table tfoot td[colspan]:first-child{grid-column:1 / -1;font-weight:600}
+  table.co-table tfoot td.num:not(:first-child)::before{content:attr(data-label);font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:400}
+  table.co-table tfoot tr td,table.co-table tfoot tr.co-sub td,table.co-table tfoot tr.co-total td{border:0;text-align:left;align-items:flex-start}
+  /* a department line reads as name ... amount, one line each */
+  table.co-table tfoot tr.co-sub{background:none;border:0;border-bottom:1px solid var(--grid);border-radius:0;
+    margin:0;padding:9px 2px;grid-template-columns:minmax(0,1fr) auto;align-items:baseline}
+  table.co-table tfoot tr.co-sub td[colspan]:first-child{grid-column:auto;font-weight:500}
+  table.co-table tfoot tr.co-sub td.num::before{content:none}
+  table.co-table tfoot tr.co-total{margin-top:12px}
+  .pf-filters label.co-check{display:flex;flex-direction:row;align-items:center;gap:10px;min-height:44px;font-size:13px}
+  .pf-filters label.co-check input[type=checkbox]{width:20px;height:20px;min-width:0;margin:0;flex:none}
+
+  /* settings: the name on its own line, the field and its unit under it */
+  .set-table,.set-table tbody,.set-table tr{display:block;width:auto}
+  .set-table thead{display:none}
+  .set-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:12px;align-items:center;
+    padding:10px 0;border-bottom:1px solid var(--grid)}
+  .set-table th[scope=row]{grid-column:1 / -1;width:auto;border:0;padding:0 0 6px}
+  table.set-table td,table.set-table th[scope=row]{border:0;padding:0;font-size:13px;line-height:1.35}
+  table.set-table th[scope=row]{font-size:14px;padding-bottom:6px}
+  table.set-table td .set-val input{width:96px;min-width:0;min-height:40px;font-size:16px}
+
+  /* any field under 16px makes iOS Safari zoom the page on focus */
+  #main input[type=text],#main input[type=search],#main input[type=number],#main input[type=date],
+  #main input[type=email],#main input:not([type]),#main select,#main textarea,
+  dialog input:not([type=checkbox]):not([type=radio]),dialog select,dialog textarea{font-size:16px}
+  /* the enquiry card: its buttons wrap instead of pushing Save off a 320px
+     screen, and they stay at the bottom while the long form scrolls */
+  .enq-actions{flex-wrap:wrap;position:sticky;bottom:-1px;z-index:2;background:var(--surface-1);
+    margin:14px -2px 0;padding:12px 2px calc(4px + env(safe-area-inset-bottom));border-top:1px solid var(--grid)}
+  .enq-actions button{min-height:44px}
+  .enq-actions .primary{flex:1 1 100%;order:9}
+  .notice-bar{font-size:12px;padding:10px 12px;gap:10px}
+  .notice-bar button{min-height:32px}
+  h2.sheet{font-size:15px}
+}
+@media (max-width:360px){
+  table[data-sheet] tbody tr,table[data-sheet] tfoot tr{column-gap:8px;padding:10px 12px}
+}
 </style>
 </head>
 <body>
@@ -5253,6 +5378,11 @@ window.addEventListener('scroll', e => {
 }, true);
 
 function render(){
+  renderInner();
+  markBlankRows();
+  labelCoTables();
+}
+function renderInner(){
   renderChrome();
   const m = $('#main');
   /* The register is company-wide, not project-scoped, so it is dispatched
@@ -10456,6 +10586,48 @@ function gridKeys(e){
   const next = tb.querySelector(`[data-r="${r + dir}"][data-k="${k}"]`);
   if(next){ next.focus(); if(next.select) next.select(); }
 }
+
+/* ---------- blank rows fold on a phone ----------
+   The sheets start with pre-named lines (Flights, Hotel, Freight ...), and on
+   a phone each is a card of a dozen empty fields: Logistics ran to 5,700px of
+   nothing. A row with no figure in it folds to its name until it is tapped.
+   Desktop ignores the class -- the rule is inside the card-mode query. */
+const FILL_TXT = { en: 'Fill in ▾', lt: 'Užpildyti ▾', ru: 'Заполнить ▾' };
+/* The company tables (people, fixed costs, documents) have no labels on their
+   cells, so on a phone a stacked row was a column of bare inputs. Each cell
+   takes its column name from the header, counting colspans so the totals row
+   lines up too. */
+function labelCoTables(){
+  document.querySelectorAll('table.co-table').forEach(tb => {
+    const heads = [...tb.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    tb.querySelectorAll('tbody tr, tfoot tr').forEach(tr => {
+      let i = 0;
+      [...tr.children].forEach(td => {
+        const span = Number(td.getAttribute('colspan')) || 1;
+        if(span === 1 && !td.hasAttribute('data-label')) td.dataset.label = heads[i] || '';
+        i += span;
+      });
+    });
+  });
+}
+function markBlankRows(){
+  document.querySelectorAll('table[data-sheet] tbody tr').forEach(tr => {
+    /* what a person typed decides it: a calculated column can be a constant
+       (the employer's tax rate shows 35 % on an empty Labor line) */
+    const nums = [...tr.querySelectorAll('input[type=number]')];
+    const blank = nums.length && nums.every(i => i.value === '' || Number(i.value) === 0);
+    tr.classList.toggle('is-blank', !!blank);
+    tr.dataset.fill = FILL_TXT[state.lang] || FILL_TXT.en;
+  });
+}
+document.addEventListener('click', ev => {
+  const tr = ev.target.closest && ev.target.closest('table[data-sheet] tbody tr.is-blank:not(.open)');
+  if(!tr) return;
+  tr.classList.add('open');
+  if(!ev.target.matches('input,select')){
+    const f = tr.querySelector('input[type=number],select'); if(f) f.focus();
+  }
+});
 
 /* ---------- the tab strip never scrolls ----------
    Twelve sheets do not fit beside the project picker, and a strip that
