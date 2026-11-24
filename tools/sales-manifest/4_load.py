@@ -27,7 +27,7 @@ except ImportError:
     if os.path.exists("/etc/ssl/cert.pem"):
         CTX.load_verify_locations("/etc/ssl/cert.pem")
 
-URL = os.environ["CALC_URL"].rstrip("/") + "/rest/v1/"
+URL = os.environ.get("CALC_REST") or os.environ["CALC_URL"].rstrip("/") + "/rest/v1/"   # CALC_REST: tests only
 KEY = os.environ["CALC_KEY"]
 H = {"apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json"}
 
