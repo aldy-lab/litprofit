@@ -499,7 +499,7 @@ button.icon.ai-x:focus-visible{outline:2px solid var(--accent);outline-offset:2p
 .notice-bar button{margin-left:auto;flex:none;padding:5px 10px;font-size:10px}
 
 /* ---------- narrow screens ---------- */
-@media (max-width:860px){
+@media (max-width:1024px){
   /* ---------- a sheet is a stack of cards, not a table ----------
      Labor is thirteen columns: on a 390px screen the grid hid 1188px of
      itself, so three columns were visible and every figure was somewhere off
@@ -1057,6 +1057,17 @@ button:active{transform:scale(.97);transition:transform .14s var(--ease)}
 .an-table td.ok b{color:var(--good-text)}
 .an-table td.bad b{color:var(--critical)}
 .an-table tbody tr:nth-child(even){background:var(--row-alt,transparent)}
+/* "Who converts" only appears once owners are filled in, and the import filled
+   them: five columns of full names put the card at 513px on a 390px phone and
+   the whole page scrolled sideways. The grid item may shrink, the cells are
+   tighter on a phone, and anything still too wide scrolls inside its card. */
+.enq-charts > *{min-width:0}
+.enq-charts figure.chart{min-width:0;overflow-x:auto}
+@media (max-width:600px){
+  .an-table td,.an-table th{padding:6px 4px}
+  .an-table th{font-size:9.5px;letter-spacing:.03em}
+  .an-table td{font-size:12px}
+}
 /* An author display always beats the hidden attribute, and this app styles
    .nice with one. Without this the picker's twin ignores hidden entirely. */
 [hidden]{display:none!important}
@@ -1439,7 +1450,27 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 .enq-rate{margin:0 0 14px;font-size:13px;color:var(--ink-2)}
 .enq-rate b{font-size:17px;color:var(--ink-1);font-variant-numeric:tabular-nums}
 /* the enquiry number is an identifier; wrapping it makes two of one */
+.imp-entry{margin:6px 0 14px;font-size:13px}
+.enq-rec{margin:14px 0 4px}
+.enq-rec summary{cursor:pointer;font-weight:600;font-size:13px;margin-bottom:8px}
+.enq-rec .tablewrap{max-height:320px;overflow:auto}
+.enq-rec-table td{font-size:12px;vertical-align:top}
+.enq-rec-detail{font-size:11px;color:var(--ink-3);margin-top:2px;overflow-wrap:anywhere}
+.imp-overlay{position:fixed;inset:0;z-index:200;background:rgba(5,6,20,.55);display:grid;place-items:center;padding:16px}
+.imp-overlay[hidden]{display:none}
+.imp-panel{width:min(640px,100%);max-height:calc(100vh - 32px);overflow:auto;margin:0}
+.imp-step{display:flex;flex-direction:column;gap:6px;margin:12px 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.imp-step input{font-size:16px;text-transform:none;letter-spacing:0}
+.imp-sum{font-size:13px;margin:10px 0}
+.imp-bar{height:6px;background:var(--accent-soft);border-radius:3px;overflow:hidden;margin:12px 0 6px}
+.imp-bar span{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.imp-prog{font-size:13px;font-variant-numeric:tabular-nums;min-height:1.4em}
+.imp-log{font-size:12px;max-height:220px;overflow:auto}
+.imp-log ul{margin:4px 0 10px 18px;padding:0}
+.imp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 #enqTable td.pf-id{white-space:nowrap}
+#enqTable .enq-folder{display:inline-block;margin-left:4px;padding:0 4px;color:var(--accent);text-decoration:none;font-weight:600;border-radius:3px}
+#enqTable .enq-folder:hover,#enqTable .enq-folder:focus-visible{background:var(--accent-soft)}
 
 /* ---------- two levels of navigation ----------
    The top row is the subject; the row under it belongs to it. Same weight of
@@ -1628,6 +1659,59 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
 .enq-hist b{font-weight:600;color:var(--ink-1)}
 .enq-hist i{font-style:normal;font-family:var(--mono);font-size:11.5px}
 .enq-hist u{text-decoration:none;color:var(--ink-3);font-size:11px;margin-left:auto}
+
+/* ---------- in-between widths: a Galaxy Z Fold opened, a tablet upright ----------
+   The sheets turned into cards only below 860px, and an opened Fold is about
+   884px wide: Labor came up as the desktop table, eight of its fifteen columns
+   on screen and Plan Total, Actual Total and Difference somewhere off to the
+   right. The card breakpoint above is 1024px now. A card one field wide at that
+   width is a ribbon three screens long, so from 640px the fields go two across.
+   Last in the stylesheet on purpose: it overrides rules above it at the same
+   specificity, and has to win on source order. */
+@media (min-width:640px) and (max-width:1024px){
+  table[data-sheet] tbody tr,table[data-sheet] tfoot tr,
+  #pfTable tbody tr,#pfTable tfoot tr,#enqTable tbody tr,#enqTable tfoot tr{
+    display:grid;grid-template-columns:1fr 1fr;column-gap:28px;padding:6px 16px 12px
+  }
+  table[data-sheet] td.rowacts,#pfTable td.pf-id{grid-column:1 / -1}
+  /* in two columns the last two fields both sit on the card's bottom edge */
+  table[data-sheet] tr > td:nth-last-child(2):nth-child(odd){border-bottom:0}
+}
+@media (max-width:1024px){
+  /* Text columns had their names on the left and number columns on the right,
+     because the label inherits the cell's alignment. In a card that read as two
+     different forms stitched together. Every name starts at the same edge now. */
+  table[data-sheet] td::before,#pfTable td::before,#enqTable td::before,
+  #pfTable tfoot td::before{text-align:left}
+  /* The card rule's padding:5px 0 lost to the plain "table.grid td{padding:4px
+     6px}" further down -- same specificity, later in the file -- so every cell
+     holding an input was 6px in from the computed cells under it, and the
+     column of names had a step in it. */
+  table[data-sheet] td,#pfTable td,#enqTable td{padding-left:0;padding-right:0}
+}
+/* At 884px the headline figures went four across: the portfolio's six left two
+   under them beside an empty hole, the dashboard's two rows of five left one
+   tile alone on a row. Six go three across; five go three and two, each row
+   filling the width, on a six-column track. */
+@media (min-width:761px) and (max-width:1100px){
+  .co-kpis{grid-template-columns:repeat(3,1fr)}
+  main .tiles:has(> .tile:nth-child(5):last-child){grid-template-columns:repeat(6,1fr)}
+  main .tiles:has(> .tile:nth-child(5):last-child) > .tile{grid-column:span 2}
+  main .tiles:has(> .tile:nth-child(5):last-child) > .tile:nth-child(n+4){grid-column:span 3}
+}
+/* A Fold's cover screen is 412px. Logo, save state, three icons and three
+   languages came to 489px, so the language switch fell onto a row of its own
+   and the header cost 100px of a narrow screen. The save state keeps its
+   coloured dot and drops the words -- they are still read out, font-size
+   leaves them in the accessibility tree -- and the languages tighten. */
+@media (max-width:520px){
+  header.app{flex-wrap:nowrap;gap:6px}
+  .brand img{height:18px}
+  .savetag{font-size:0;letter-spacing:0}
+  .savetag::before{margin-right:0;width:7px;height:7px}
+  .langs button{min-width:30px;padding:6px 4px;font-size:11px}
+  header.app .menu-wrap,header.app #btnHelp,header.app #btnTheme{flex:none}
+}
 </style>
 </head>
 <body>
@@ -1943,7 +2027,8 @@ en: {
     winRate:'Won of decided',ofDecided:'of those decided',
     cost:'Cost',sell:'Sell',margin:'Margin',marginPct:'Margin %',
     paid:'Paid',unpaid:'Unpaid',paidDate:'Paid on',invoice:'Invoice no.',
-    kTurnover:'Sold',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',
+    kTurnover:'Sold',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
+    recTitle:'From the sales folder',recDate:'Date',recKind:'Type',recWhat:'Document',recRef:'No.',recSum:'Amount',
     noCost:'no cost entered',costHint:'What the supplier charges. Leave blank if not known yet — blank is not zero.',
     report:'Register report',open:'Enquiry register',
     reportSub:'Enquiries, margin and what is still unpaid',
@@ -2311,7 +2396,8 @@ lt: {
     winRate:'Laimėta iš nuspręstų',ofDecided:'iš nuspręstų',
     cost:'Savikaina',sell:'Pardavimas',margin:'Marža',marginPct:'Marža %',
     paid:'Apmokėta',unpaid:'Neapmokėta',paidDate:'Apmokėjimo data',invoice:'Sąskaitos nr.',
-    kTurnover:'Parduota',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',
+    kTurnover:'Parduota',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
+    recTitle:'Iš pardavimų aplanko',recDate:'Data',recKind:'Tipas',recWhat:'Dokumentas',recRef:'Nr.',recSum:'Suma',
     noCost:'savikaina neįvesta',costHint:'Kiek ima tiekėjas. Palikite tuščią, jei dar nežinoma — tuščia nėra nulis.',
     report:'Registro ataskaita',open:'Užklausų registras',
     reportSub:'Užklausos, marža ir kas dar neapmokėta',
@@ -2679,7 +2765,8 @@ ru: {
     winRate:'Выиграно из решённых',ofDecided:'из решённых',
     cost:'Себестоимость',sell:'Продажа',margin:'Заработок',marginPct:'Наценка %',
     paid:'Оплачено',unpaid:'Не оплачено',paidDate:'Дата оплаты',invoice:'Счёт №',
-    kTurnover:'Продано',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',
+    kTurnover:'Продано',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
+    recTitle:'Из папки продаж',recDate:'Дата',recKind:'Тип',recWhat:'Документ',recRef:'№',recSum:'Сумма',
     noCost:'себестоимость не внесена',costHint:'Сколько берёт поставщик. Оставьте пустым, если ещё не известно — пусто это не ноль.',
     report:'Отчёт по реестру',open:'Реестр запросов',
     reportSub:'Запросы, заработок и что ещё не оплачено',
@@ -3326,6 +3413,16 @@ const CLOUD = (function(){
       });
       if(!res.ok) throw new Error('upload failed ' + res.status);
       return path;
+    },
+    /* What the sales folder says about an enquiry (migrate-enquiry-records.sql) */
+    async records(enquiryId){
+      return await rest('enquiry_records?select=*&enquiry_id=eq.' + encodeURIComponent(enquiryId) +
+                        '&order=doc_date.asc.nullslast,id.asc') || [];
+    },
+    async recordsImport(rows){
+      return await rest('rpc/import_enquiry_records', {
+        method: 'POST', body: JSON.stringify({ p_rows: rows })
+      });
     },
     async docInsert(row){
       return firstRow(await rest('rpc/create_document', {
@@ -4083,6 +4180,9 @@ function chartByClient(rows, pal, opt){
 const LOCALES = {en:'en-GB', lt:'lt-LT', ru:'ru-RU'};
 function fmt(n, dec=2){
   if(n===null||n===undefined||isNaN(n)) return '';
+  /* 0 - 0 is -0 in JavaScript, and Intl prints it as "-0": an empty project's
+     waterfall read -0 under every bar. Anything that rounds to zero is zero. */
+  if(Math.abs(n) < 0.5 * Math.pow(10, -dec)) n = 0;
   return new Intl.NumberFormat(LOCALES[state.lang]||'en-GB',{minimumFractionDigits:0,maximumFractionDigits:dec}).format(n);
 }
 
@@ -5420,7 +5520,7 @@ function enqSorted(rows){
 /* One pass, so the KPI cards, the table foot and the report can never
    disagree about what is in scope. */
 function enqTotals(rows){
-  let sell = 0, cost = 0, margin = 0, costed = 0, sellCosted = 0, unpaid = 0, days = 0;
+  let sell = 0, cost = 0, margin = 0, costed = 0, sellCosted = 0, unpaid = 0, days = 0, invoiced = 0;
   rows.forEach(r => {
     sell += Number(r.price_ex_vat) || 0;
     days += r.days_unquoted || 0;
@@ -5437,9 +5537,14 @@ function enqTotals(rows){
     }
     /* Only a sale that has actually been sold can be outstanding. An enquiry
        that was rejected is not money anybody is waiting for. */
-    if(!r.paid && r.status === 'Gautas PO') unpaid += Number(r.price_ex_vat) || 0;
+    /* What is owed is what was INVOICED, where the SharePoint list says so:
+       an advance is invoiced at half the price (SK26-100, SK26-103), and
+       counting the whole price as outstanding doubles the debt. */
+    if(r.invoiced_ex_vat != null) invoiced += Number(r.invoiced_ex_vat) || 0;
+    if(!r.paid && r.status === 'Gautas PO')
+      unpaid += Number(r.invoiced_ex_vat != null ? r.invoiced_ex_vat : r.price_ex_vat) || 0;
   });
-  return { sell, cost, margin, costed, sellCosted, unpaid, days,
+  return { sell, cost, margin, costed, sellCosted, unpaid, days, invoiced,
            pct: sellCosted ? margin / sellCosted : null,
            /* what share of the register can answer the margin question at all */
            coverage: rows.length ? costed / rows.length : 0 };
@@ -5611,7 +5716,10 @@ function viewEnquiries(){
       : '';
     return `<tr data-enq="${esc(r.id)}" tabindex="-1" style="cursor:pointer"${
       who ? ` title="${esc(e.lastChanged)}: ${esc(who)}"` : ''}>
-      <td class="pf-id"><b>${esc(r.number)}</b></td>
+      <td class="pf-id"><b>${esc(r.number)}</b>${
+        /^https:\/\/[a-z0-9-]+\.sharepoint\.com\//i.test(r.folder_url || '')
+          ? ` <a class="enq-folder" href="${esc(r.folder_url)}" target="_blank" rel="noopener"
+               title="${esc(e.folder)}" aria-label="${esc(e.folder)}">&#8599;</a>` : ''}</td>
       <td data-label="${esc(e.client)}">${esc(r.client) || '—'}</td>
       <td data-label="${esc(e.description)}">${esc(r.description) || '—'}</td>
       <td class="muted" data-label="${esc(e.date)}">${
@@ -5628,6 +5736,7 @@ function viewEnquiries(){
       <td class="num enq-edit" data-edit="cost" data-label="${esc(e.cost)}"
           title="${esc(e.clickToEdit)}">${money(r.cost_ex_vat)}</td>
       <td class="num" data-label="${esc(e.sell)}">${fmt(Number(r.price_ex_vat) || 0)}</td>
+      <td class="num" data-label="${esc(e.invoiced)}">${money(r.invoiced_ex_vat)}</td>
       <td class="num calc ${r.margin_eur == null ? '' : (r.margin_eur >= 0 ? 'pos' : 'neg')}"
           data-label="${esc(e.margin)}">${money(r.margin_eur)}</td>
       <td class="num" data-label="${esc(e.marginPct)}">${
@@ -5639,7 +5748,7 @@ function viewEnquiries(){
     /* sixteen columns, not twelve -- the empty-state row has been short since
        the money columns were added, so the message sat under two thirds of a
        table and the rest was blank */
-    : `<tr><td colspan="16" style="padding:26px;text-align:center" class="muted">${esc(e.none)}</td></tr>`;
+    : `<tr><td colspan="17" style="padding:26px;text-align:center" class="muted">${esc(e.none)}</td></tr>`;
 
   const quick = (k, label) =>
     `<button class="enq-chip${enqState().quick === k ? ' on' : ''}" data-quick="${k}">${esc(label)}</button>`;
@@ -5723,6 +5832,7 @@ function viewEnquiries(){
         <th title="${esc(e.quoted)}">${esc(e.hQuoted)}</th>
         ${th('days', e.hDays, 1, e.daysUnquoted)}${th('status', e.status)}
         ${th('poDate', e.hPo, 0, e.poDate)}${th('cost', e.cost, 1)}${th('price', e.sell, 1)}
+        <th class="num">${esc(e.invoiced)}</th>
         ${th('margin', e.margin, 1)}${th('marginPct', e.marginPct, 1)}
         <th title="${esc(e.delivery)}">${esc(e.hDelivery)}</th><th>${esc(e.paid)}</th>
       </tr></thead>
@@ -5732,6 +5842,7 @@ function viewEnquiries(){
         <td class="num">${T.days}</td><td></td><td></td>
         <td class="num">${T.costed ? fmt(T.cost) : '&mdash;'}</td>
         <td class="num">${fmt(T.sell)}</td>
+        <td class="num">${T.invoiced ? fmt(T.invoiced) : '&mdash;'}</td>
         <td class="num">${T.costed ? fmt(T.margin) : '&mdash;'}</td>
         <td class="num">${T.pct == null || !T.costed ? '&mdash;' : pct(T.pct)}</td>
         <td></td><td></td>
@@ -6006,7 +6117,7 @@ function wireEnquiries(){
     table.querySelectorAll('tr[data-enq]').forEach(tr_ => tr_.addEventListener('click', ev => {
       /* the two editable cells handle themselves; without this the row's own
          handler opens the dialog on top of the cell you just clicked */
-      if(ev.target.closest('.enq-edit')) return;
+      if(ev.target.closest('.enq-edit, .enq-folder')) return;
       const row = (state.enquiries || []).find(r => r.id === tr_.dataset.enq);
       if(row) enqEdit(row);
     }));
@@ -6069,6 +6180,7 @@ function enqEdit(row){
       ${r.updated_at ? `<p class="enq-meta">${esc(e.lastChanged)}:
         ${esc(new Date(r.updated_at).toLocaleString(LOCALES[state.lang]))}${
         PEOPLE[r.updated_by] ? ' &mdash; ' + esc(PEOPLE[r.updated_by]) : ''}</p>` : ''}
+      <div class="enq-records" id="enqRecords"></div>
       <div class="enq-actions">
         ${isNew ? '' : `<button type="button" value="del" class="ghost danger">${esc(e.del)}</button>`}
         <span class="spacer"></span>
@@ -6077,6 +6189,7 @@ function enqEdit(row){
       </div>
     </form>`;
   document.body.appendChild(dlg);
+  if(!isNew) enqRecordsInto(dlg.querySelector('#enqRecords'), r.id);
 
   const form = dlg.querySelector('form');
   /* Where the keyboard was before this opened. Without it focus lands on
@@ -7055,6 +7168,8 @@ function coDocsView(){
       </span>
     </label>
     <p class="doc-status" id="docStatus" role="status" aria-live="polite"></p>
+    ${!pid && CLOUD.on ? `<p class="imp-entry"><button id="docImportFolder" class="ghost">${
+      esc(impT().open)}</button> <span class="muted">${esc(impT().openHint)}</span></p>` : ''}
 
     <div class="pf-filters co-bar">
       <label>${esc(d.search)}<input type="search" id="docQ" value="${esc(f.q)}"
@@ -9116,6 +9231,7 @@ function wireCompany(){
   });
   on('docQ', 'input', e => { docState().q = e.target.value; persist(); render(); });
   on('docFile', 'change', e => docUpload(e.target.files));
+  on('docImportFolder', 'click', impOpen);
 
   /* Drag and drop on top of a real <label> around a real file input, the same
      way the careers form does it: the picker opens natively on the first
@@ -9322,6 +9438,175 @@ async function docUpload(files){
   }
   docSay(d.uploaded.replace('{n}', done), 'ok');
   persist(); render();
+}
+
+
+/* ---------- importing what a sales folder says ----------
+   "Pardavimai 2026" is a folder per enquiry -- quotes, invoices, payment
+   orders, e-mails, photographs -- nine thousand files, 4.6 GB. The register
+   needs the information in them, not the files: the folder is read on the
+   office computer into a manifest (tools/sales-manifest/) -- which enquiry
+   each document belongs to, its type, date, number, amount, the other party,
+   an e-mail's subject -- and this sends that, a few MB, into
+   enquiry_records. No file is uploaded.
+
+   The manifest holds client data, so it never enters this repository or this
+   page; it is picked from the disk. It runs under the signed-in person's own
+   session, and can be run again: a record already there is left alone. */
+const IMP_TXT = {
+  en: { open:'Import sales folder information', openHint:'The type, date, number and amount of every document in a year of enquiry folders. The files themselves stay on the disk.',
+        title:'Import sales folder information', lead:'Pick the manifest made from the sales folder. Only the information is imported — no file is uploaded.',
+        manifest:'Manifest (manifest.json)', start:'Start', stop:'Stop', close:'Close',
+        ready:'{n} documents for {e} enquiries.', newEnq:'{n} enquiries are not in the register and will be created.',
+        done:'Done. New records {up}, already there {skip}, failed {fail}.', prog:'{i} of {t} — new {up}, already there {skip}',
+        stopped:'Stopped. Start again to continue.', failList:'Failed:', creating:'Creating {n} enquiries…' },
+  lt: { open:'Importuoti pardavimų aplanko informaciją', openHint:'Kiekvieno metų užklausų aplankų dokumento tipas, data, numeris ir suma. Patys failai lieka diske.',
+        title:'Pardavimų aplanko informacijos importas', lead:'Pasirinkite iš pardavimų aplanko sudarytą aprašą. Importuojama tik informacija — failai neįkeliami.',
+        manifest:'Aprašas (manifest.json)', start:'Pradėti', stop:'Sustabdyti', close:'Uždaryti',
+        ready:'{n} dokumentų {e} užklausoms.', newEnq:'{n} užklausų nėra registre — jos bus sukurtos.',
+        done:'Baigta. Naujų įrašų {up}, jau buvo {skip}, nepavyko {fail}.', prog:'{i} iš {t} — nauji {up}, jau buvo {skip}',
+        stopped:'Sustabdyta. Paleiskite dar kartą — tęs toliau.', failList:'Nepavyko:', creating:'Kuriamos {n} užklausos…' },
+  ru: { open:'Импортировать информацию из папки продаж', openHint:'Тип, дата, номер и сумма каждого документа из папок запросов за год. Сами файлы остаются на диске.',
+        title:'Импорт информации из папки продаж', lead:'Выберите опись, составленную по папке продаж. Импортируется только информация — файлы не загружаются.',
+        manifest:'Опись (manifest.json)', start:'Начать', stop:'Остановить', close:'Закрыть',
+        ready:'{n} документов по {e} запросам.', newEnq:'{n} запросов нет в реестре — они будут созданы.',
+        done:'Готово. Новых записей {up}, уже были {skip}, ошибок {fail}.', prog:'{i} из {t} — новых {up}, уже были {skip}',
+        stopped:'Остановлено. Запустите снова — продолжит.', failList:'Ошибки:', creating:'Создаю {n} запросов…' }
+};
+function impT(){ return IMP_TXT[state.lang] || IMP_TXT.en; }
+function impFmt(s, o){ return s.replace(/\{(\w+)\}/g, (m, k) => (k in o ? o[k] : m)); }
+
+var IMP = { box: null, manifest: null, running: false, stop: false };
+
+function impOpen(){
+  const t = impT();
+  if(!IMP.box){
+    IMP.box = document.createElement('div');
+    IMP.box.className = 'imp-overlay';
+    IMP.box.setAttribute('role', 'dialog');
+    IMP.box.setAttribute('aria-modal', 'true');
+    document.body.appendChild(IMP.box);
+  }
+  IMP.box.innerHTML = `<div class="imp-panel card">
+    <h2 class="sheet">${esc(t.title)}</h2>
+    <p class="hint">${esc(t.lead)}</p>
+    <label class="imp-step">${esc(t.manifest)}<input type="file" id="impManifest" accept=".json,application/json"></label>
+    <p class="imp-sum" id="impSum"></p>
+    <div class="imp-bar"><span id="impBarFill"></span></div>
+    <p class="imp-prog" id="impProg" role="status" aria-live="polite"></p>
+    <div class="imp-log" id="impLog"></div>
+    <div class="imp-actions">
+      <button id="impStart" class="primary" disabled>${esc(t.start)}</button>
+      <button id="impStop" class="ghost" disabled>${esc(t.stop)}</button>
+      <button id="impClose" class="ghost">${esc(t.close)}</button>
+    </div></div>`;
+  IMP.box.hidden = false;
+  IMP.manifest = null;
+  const $i = id => IMP.box.querySelector('#' + id);
+  $i('impManifest').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    try { IMP.manifest = JSON.parse(await f.text()); } catch(err){ IMP.manifest = null; }
+    impSummary();
+  });
+  $i('impStart').addEventListener('click', impRun);
+  $i('impStop').addEventListener('click', () => { IMP.stop = true; });
+  $i('impClose').addEventListener('click', () => { if(!IMP.running) IMP.box.hidden = true; });
+}
+
+function impSummary(){
+  const t = impT(), m = IMP.manifest, out = [];
+  if(m && Array.isArray(m.entries)){
+    out.push(impFmt(t.ready, { n: m.entries.length, e: Object.keys(m.enquiries || {}).length }));
+    const known = new Set((state.enquiries || []).map(r => (r.number || '').trim()));
+    const missing = Object.keys(m.enquiries || {}).filter(k => !known.has(k));
+    if(missing.length) out.push(impFmt(t.newEnq, { n: missing.length }));
+  }
+  IMP.box.querySelector('#impSum').textContent = out.join(' ');
+  IMP.box.querySelector('#impStart').disabled = !(m && Array.isArray(m.entries) && !IMP.running);
+}
+
+/* The manifest's entry as a record: an e-mail is titled by its subject, a
+   file by its name; the path on the disk is kept so the file can be found. */
+function impRecord(e, enquiryId){
+  const name = e.rel.split('/').pop();
+  const note = e.note || '';
+  const mail = /^(.*?\. )?Laiškas: /.test(note);
+  const title = mail ? note.replace(/^(.*?\. )?Laiškas: /, '').split(' — priedai: ')[0] : name;
+  const detail = [mail ? 'Failas: ' + name : (e.label || ''),
+                  mail && note.indexOf(' — priedai: ') > 0 ? 'Priedai: ' + note.split(' — priedai: ')[1] : '']
+                 .filter(Boolean).join(' · ');
+  return { enquiry_id: enquiryId, sha256: e.sha256, kind: e.kind || 'other',
+           doc_date: e.doc_date || '', ref: e.ref || '', amount: e.amount == null ? '' : String(e.amount),
+           counterparty: e.counterparty || '', title: title, detail: detail, source: e.rel,
+           copies: String(1 + (e.copies ? e.copies.length : 0)) };
+}
+
+async function impRun(){
+  const t = impT(), m = IMP.manifest, box = IMP.box;
+  if(!m || IMP.running) return;
+  IMP.running = true; IMP.stop = false;
+  box.querySelector('#impStart').disabled = true;
+  box.querySelector('#impStop').disabled = false;
+  const prog = box.querySelector('#impProg'), bar = box.querySelector('#impBarFill'), log = box.querySelector('#impLog');
+  const c = { up: 0, skip: 0, fail: 0 }, fails = [];
+
+  /* the enquiry each document belongs to; the ones the register does not
+     have yet are created first, so nothing is left hanging off nothing */
+  const byNum = {};
+  (state.enquiries || []).forEach(r => { const k = (r.number || '').trim(); if(!byNum[k]) byNum[k] = r.id; });
+  const toCreate = Object.entries(m.enquiries || {}).filter(([k]) => !byNum[k]);
+  if(toCreate.length){
+    prog.textContent = impFmt(t.creating, { n: toCreate.length });
+    for(const [num, info] of toCreate){
+      try {
+        const row = await CLOUD.enquiryInsert(Object.assign({ number: num }, info.create || {}));
+        if(row){ byNum[num] = row.id; state.enquiries = [row].concat(state.enquiries || []); }
+      } catch(e){ fails.push(num + ': ' + (e.message || e)); c.fail++; }
+    }
+  }
+
+  const list = m.entries, BATCH = 250;
+  let i = 0;
+  for(; i < list.length && !IMP.stop; i += BATCH){
+    const part = list.slice(i, i + BATCH).filter(e => byNum[e.enquiry]).map(e => impRecord(e, byNum[e.enquiry]));
+    try {
+      const n = Number(await CLOUD.recordsImport(part)) || 0;
+      c.up += n; c.skip += part.length - n;
+    } catch(err){ c.fail += part.length; fails.push((i + 1) + '–' + (i + part.length) + ': ' + (err.message || err)); }
+    prog.textContent = impFmt(t.prog, { i: Math.min(i + BATCH, list.length), t: list.length, up: c.up, skip: c.skip });
+    bar.style.width = (Math.min(i + BATCH, list.length) / list.length * 100).toFixed(1) + '%';
+  }
+  log.innerHTML = fails.length ? `<p><b>${esc(t.failList)}</b></p><ul>${
+    fails.slice(0, 100).map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  prog.textContent = IMP.stop ? t.stopped : impFmt(t.done, c);
+  IMP.running = false;
+  box.querySelector('#impStop').disabled = true;
+  box.querySelector('#impStart').disabled = false;
+  CLOUD.enquiries().then(l => { state.enquiries = l; render(); }).catch(() => {});
+}
+
+/* The enquiry card lists what its folder holds. Fetched when the card opens:
+   8,700 rows do not belong in the register's own load. */
+async function enqRecordsInto(el, enquiryId){
+  if(!el || !enquiryId || !CLOUD.on) return;
+  const e = tr().enq, kinds = (tr().doc || {}).kind || {};
+  let rows = [];
+  try { rows = await CLOUD.records(enquiryId); } catch(err){ return; }
+  if(!rows.length) return;
+  const L = LOCALES[state.lang];
+  el.innerHTML = `<details class="enq-rec" open><summary>${esc(e.recTitle)} <span class="muted">// ${rows.length}</span></summary>
+    <div class="tablewrap"><table class="grid enq-rec-table"><thead><tr>
+      <th>${esc(e.recDate)}</th><th>${esc(e.recKind)}</th><th>${esc(e.recWhat)}</th>
+      <th>${esc(e.recRef)}</th><th class="num">${esc(e.recSum)}</th></tr></thead><tbody>${
+      rows.map(r => `<tr title="${esc(r.source || '')}">
+        <td class="muted">${r.doc_date ? new Date(r.doc_date).toLocaleDateString(L) : '—'}</td>
+        <td>${esc(kinds[r.kind] || r.kind)}</td>
+        <td>${esc(r.title || '')}${r.counterparty ? ` <span class="muted">· ${esc(r.counterparty)}</span>` : ''}${
+          r.detail ? `<div class="enq-rec-detail">${esc(r.detail)}</div>` : ''}</td>
+        <td>${esc(r.ref || '')}</td>
+        <td class="num">${r.amount == null ? '' : fmt(Number(r.amount))}</td></tr>`).join('')}
+    </tbody></table></div></details>`;
 }
 
 /* What the browser can actually render. Everything else gets the metadata and
