@@ -1451,7 +1451,22 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 .enq-rate b{font-size:17px;color:var(--ink-1);font-variant-numeric:tabular-nums}
 /* the enquiry number is an identifier; wrapping it makes two of one */
 .imp-entry{margin:6px 0 14px;font-size:13px}
-.sl{margin:22px 0 26px}
+.enq-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 14px}
+.enq-head-t{min-width:0}
+.enq-head .sheet{margin-bottom:4px}
+.enq-head .hint{margin:0}
+.enq-seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;padding:3px;gap:3px;background:var(--surface-1)}
+.enq-seg button{border:0;background:none;padding:8px 16px;border-radius:4px;font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);cursor:pointer;min-height:36px}
+.enq-seg button.on{background:var(--accent-soft);color:var(--ink-1);font-weight:600}
+.enq-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.enq-filtered{font-size:12.5px;color:var(--ink-3);margin:-4px 0 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.enq-summary .enq-kpis--money .enq-kpi.lead{box-shadow:inset 0 2px 0 var(--accent)}
+.enq-summary .enq-rate{margin-bottom:0}
+.brand .ver{margin-left:8px;padding:1px 6px;border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-3);opacity:.85}
+.sl-chart .sl-a{font-size:10px;fill:var(--ink-3);font-variant-numeric:tabular-nums}
+.sl-share{display:block;height:4px;margin:8px 0 2px;background:color-mix(in srgb, var(--ink-3) 16%, transparent);border-radius:2px;overflow:hidden;text-decoration:none}
+.sl-share s{display:block;height:100%;background:var(--series-1);text-decoration:none}
+.sl{margin:4px 0 26px}
 .sl{--sl-cost:color-mix(in srgb, var(--ink-3) 38%, var(--surface-1))}
 .sl-top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 14px}
 .sl-big{border:1px solid var(--line,var(--baseline));border-radius:4px;padding:14px 16px;min-width:0}
@@ -1466,7 +1481,7 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 .sl-step em{display:block;font-style:normal;font-size:13px;font-variant-numeric:tabular-nums;margin-top:4px}
 .sl-step i{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3);margin-top:2px}
 .sl-arrow{align-self:center;color:var(--ink-3);font-size:20px}
-.sl-chart svg{width:100%;height:auto;display:block;max-width:980px}
+.sl-chart svg{width:100%;height:auto;display:block;max-width:1200px}
 .sl-chart .sl-v{font-size:10.5px;fill:var(--ink-2);font-variant-numeric:tabular-nums}
 .sl-chart .sl-l{font-size:10.5px;fill:var(--ink-2)}
 .sl-chart .sl-p{font-size:10px;fill:var(--good-text,var(--good));font-weight:600}
@@ -1758,6 +1773,107 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
   .langs button{min-width:30px;padding:6px 4px;font-size:11px}
   header.app .menu-wrap,header.app #btnHelp,header.app #btnTheme{flex:none}
 }
+
+/* =====================================================================
+   v1.2 -- the same drawing-sheet look, with more air and one set of shapes.
+   Kept as one layer at the end of the sheet on purpose: it wins on source
+   order over every rule above it, and taking it out returns v1.1 exactly.
+   Nothing here changes a colour's meaning, a figure or a layout breakpoint.
+   ===================================================================== */
+:root{
+  --r:8px; --r-sm:6px;
+  --page:#080a27; --surface-1:#0d1034; --surface-2:#12164a;
+  --border:rgba(255,255,255,.09); --grid:rgba(255,255,255,.08);
+  --lift:0 1px 0 rgba(255,255,255,.035) inset, 0 10px 28px -18px rgba(0,0,0,.55);
+}
+:root[data-theme="light"]{
+  --page:#f3f5fa; --surface-1:#ffffff; --surface-2:#eef1f8;
+  --border:rgba(11,13,42,.10); --grid:rgba(11,13,42,.09);
+  --lift:0 1px 2px rgba(11,13,42,.04), 0 10px 26px -18px rgba(11,13,42,.22);
+}
+
+/* chrome: header, sections, sub-tabs, live strip, rivets */
+header.app{padding:12px 24px;gap:12px}
+nav.tabs{padding:0 16px}
+nav.tabs button{padding:14px 14px 12px;letter-spacing:.1em;border-bottom-width:2px;
+  transition:color .2s var(--ease),border-color .2s var(--ease),background .2s var(--ease)}
+nav.tabs button:hover{background:none;color:var(--ink-1)}
+.pulse{padding:8px 24px;gap:22px}
+.pulse i{font-size:10px;letter-spacing:.13em}
+.seam{height:20px;background-size:20px 20px;opacity:.16}
+
+/* page */
+main{padding:24px 24px 48px}
+.card{border-radius:var(--r);padding:20px 22px;margin-bottom:18px;box-shadow:var(--lift)}
+h2.sheet{font-size:16px;font-weight:600;margin:0 0 14px}
+h2.sheet .muted{font-size:11.5px;letter-spacing:.08em}
+.hint{font-size:12.5px;line-height:1.55}
+.notice-bar{border-radius:var(--r)}
+
+/* controls */
+button{border-radius:var(--r-sm);min-height:34px;letter-spacing:.1em}
+button.icon{border-radius:var(--r-sm)}
+select,input[type=text],input[type=number],input[type=date],input[type=search],input[type=email],input[type=password]{
+  border-radius:var(--r-sm);padding:7px 10px;border-color:var(--border);
+  transition:border-color .2s var(--ease),background .2s var(--ease)}
+select:hover,input[type=text]:hover,input[type=number]:hover,input[type=date]:hover,input[type=search]:hover{border-color:var(--baseline)}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+
+/* sheets: a cell to type in reads as a soft field, not an empty box */
+table.grid th{letter-spacing:.12em;padding:10px 8px}
+table.grid input,table.grid select{background:color-mix(in srgb, var(--ink-1) 3.5%, transparent);border-color:transparent}
+table.grid input:hover,table.grid select:hover{border-color:var(--border)}
+@media (hover:hover){ table.grid tbody tr:hover td{background:color-mix(in srgb, var(--accent) 6%, transparent)} }
+table.grid tr.totals td{background:var(--surface-2)}
+.tablewrap{border-radius:var(--r-sm)}
+
+/* one tile, everywhere: dashboard, company, register, analysis */
+.tiles{gap:12px;background:none;border:0}
+.tile,.enq-kpi,.co-kpi,.an-stat{border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--lift)}
+.tile{background:var(--surface-1)}
+.co-kpi{background:var(--surface-1)}
+.tile .lbl,.enq-kpi span,.co-kpi span{letter-spacing:.12em}
+.enq-kpis{gap:12px}
+.pf-chip,.enq-chip{border-radius:999px}
+
+/* the three sections read as a switch, the project's own tabs stay a strip */
+.sections{padding:10px 24px;gap:6px;align-items:center}
+.sections button{border-bottom:0;margin:0;padding:8px 16px;border-radius:var(--r-sm);font-size:12px;letter-spacing:.1em}
+.sections button:hover{background:color-mix(in srgb, var(--ink-1) 5%, transparent);color:var(--ink-1)}
+.sections button.active{background:var(--accent-soft);color:var(--ink-1);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent)}
+.tabrow{padding-left:24px}
+.tabrow > #projectSel{border-radius:var(--r-sm)}
+
+/* charts sit on the same rhythm as the cards around them */
+figure.chart figcaption{font-size:13px;font-weight:600;letter-spacing:0;margin-bottom:10px}
+
+@media (max-width:760px){
+  .sections{padding:8px 12px}
+  .sections button{padding:8px 12px}
+  .tabrow{padding-left:12px}
+  main{padding:16px 14px 40px}
+  .card{padding:16px;border-radius:var(--r-sm)}
+  header.app{padding:10px 14px;gap:8px}
+}
+@media (max-width:520px){ header.app{gap:6px} }
+/* Phones unclip .tablewrap because the sheets become cards there. A table
+   that stays a table -- People, Fixed costs, Documents -- then pushed the
+   page to 860px. Those scroll inside their own box instead. */
+@media (max-width:1024px){
+  .tablewrap:not(:has(table[data-sheet], #pfTable, #enqTable)){overflow-x:auto}
+}
+/* 320px: the language switch takes the second line rather than the page width */
+@media (max-width:360px){
+  header.app{flex-wrap:wrap;row-gap:6px}
+  .sections{gap:4px;padding:8px 10px}
+  .sections button{padding:8px 10px;letter-spacing:.06em}
+}
+/* the dashboard's KPI table: the 66px heading floor is for the wide sheets */
+@media (max-width:400px){
+  table.kpi-table th{min-width:0;letter-spacing:.06em}
+  table.kpi-table td,table.kpi-table th{padding:6px 5px}
+}
 </style>
 </head>
 <body>
@@ -1766,6 +1882,7 @@ table.grid td button.nice{padding:4px 6px;font-size:12.5px}
   <div class="brand">
     <img src="/assets/brand/logo-lockup.svg" alt="LITPROFIT">
     <small data-i18n="appSub"></small>
+    <small class="ver" title="Version">v1.2</small>
   </div>
   <span class="savetag" id="saveTag" role="status" aria-live="polite"></span>
   <span class="spacer"></span>
@@ -2073,7 +2190,7 @@ en: {
     winRate:'Won of decided',ofDecided:'of those decided',
     cost:'Cost',sell:'Sell',margin:'Margin',marginPct:'Margin %',
     paid:'Paid',unpaid:'Unpaid',paidDate:'Paid on',invoice:'Invoice no.',
-    sales:{title:'Sales',lead:'Orders with a PO only, within the filters above. Cost and margin are counted where the cost is known.',sold:'Sold',cost:'Cost',margin:'Margin',avg:'Average order',perOrder:'per order',orders:'orders',withCost:'with a cost',fReceived:'Enquiries received',fQuoted:'Quoted to the client',fWon:'Won — PO received',ofReceived:'of received',ofQuoted:'of quoted',ofValue:'of the quoted value',byMonth:'Sales by month: cost and margin',monthNote:'by the month of the PO; % = margin',byClient:'Top clients',bySupplier:'Top manufacturers',more:'more',quality:'How the cost is known',qDoc:'From documents',qEst:'Estimated',qNone:'Not known',qLead:'Share of sales value. Documented = the supplier invoice, order confirmation, proforma or quote in the job folder, or a cost typed in by hand; estimated = the supplier’s median margin this year (marked “įvertinta” in the note).'},kTurnover:'Sold',kSoldNote:'with a PO',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
+    vSales:'Sales',vRegister:'Register',vFiltered:'The figures below follow the filters set in the register.',sales:{title:'Sales',lead:'Orders with a PO only, within the filters above. Cost and margin are counted where the cost is known.',sold:'Sold',cost:'Cost',margin:'Margin',avg:'Average order',perOrder:'per order',orders:'orders',withCost:'with a cost',fReceived:'Enquiries received',fQuoted:'Quoted to the client',fWon:'Won — PO received',ofReceived:'of received',ofQuoted:'of quoted',ofValue:'of the quoted value',byMonth:'Sales by month: cost and margin',monthNote:'by the month of the PO; % = margin',byClient:'Top clients',bySupplier:'Top manufacturers',more:'more',quality:'How the cost is known',qDoc:'From documents',qEst:'Estimated',qNone:'Not known',qLead:'Share of sales value. Documented = the supplier invoice, order confirmation, proforma or quote in the job folder, or a cost typed in by hand; estimated = the supplier’s median margin this year (marked “įvertinta” in the note).'},kTurnover:'Sold',kSoldNote:'with a PO',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
     recTitle:'From the sales folder',recDate:'Date',recKind:'Type',recWhat:'Document',recRef:'No.',recSum:'Amount',
     noCost:'no cost entered',costHint:'What the supplier charges. Leave blank if not known yet — blank is not zero.',
     report:'Register report',open:'Enquiry register',
@@ -2442,7 +2559,7 @@ lt: {
     winRate:'Laimėta iš nuspręstų',ofDecided:'iš nuspręstų',
     cost:'Savikaina',sell:'Pardavimas',margin:'Marža',marginPct:'Marža %',
     paid:'Apmokėta',unpaid:'Neapmokėta',paidDate:'Apmokėjimo data',invoice:'Sąskaitos nr.',
-    sales:{title:'Pardavimai',lead:'Tik užsakymai su PO, pagal viršuje nustatytus filtrus. Savikaina ir marža skaičiuojamos ten, kur savikaina žinoma.',sold:'Parduota',cost:'Savikaina',margin:'Marža',avg:'Vidutinis užsakymas',perOrder:'vienam užsakymui',orders:'užsakymai',withCost:'su savikaina',fReceived:'Gautos užklausos',fQuoted:'Pasiūlyta klientui',fWon:'Laimėta — gautas PO',ofReceived:'gautų',ofQuoted:'pasiūlytų',ofValue:'pasiūlytos vertės',byMonth:'Pardavimai per mėnesį: savikaina ir marža',monthNote:'pagal PO mėnesį; % = marža',byClient:'Didžiausi klientai',bySupplier:'Didžiausi gamintojai',more:'kiti',quality:'Iš kur žinoma savikaina',qDoc:'Iš dokumentų',qEst:'Įvertinta',qNone:'Nežinoma',qLead:'Pardavimų vertės dalis. Iš dokumentų = tiekėjo sąskaita, užsakymo patvirtinimas, proforma ar pasiūlymas užsakymo aplanke arba ranka įvesta savikaina; įvertinta = tiekėjo metų vidutinė marža (pastaboje pažymėta „įvertinta“).'},kTurnover:'Parduota',kSoldNote:'gautas PO',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
+    vSales:'Pardavimai',vRegister:'Registras',vFiltered:'Žemiau esantys skaičiai atitinka registre nustatytus filtrus.',sales:{title:'Pardavimai',lead:'Tik užsakymai su PO, pagal viršuje nustatytus filtrus. Savikaina ir marža skaičiuojamos ten, kur savikaina žinoma.',sold:'Parduota',cost:'Savikaina',margin:'Marža',avg:'Vidutinis užsakymas',perOrder:'vienam užsakymui',orders:'užsakymai',withCost:'su savikaina',fReceived:'Gautos užklausos',fQuoted:'Pasiūlyta klientui',fWon:'Laimėta — gautas PO',ofReceived:'gautų',ofQuoted:'pasiūlytų',ofValue:'pasiūlytos vertės',byMonth:'Pardavimai per mėnesį: savikaina ir marža',monthNote:'pagal PO mėnesį; % = marža',byClient:'Didžiausi klientai',bySupplier:'Didžiausi gamintojai',more:'kiti',quality:'Iš kur žinoma savikaina',qDoc:'Iš dokumentų',qEst:'Įvertinta',qNone:'Nežinoma',qLead:'Pardavimų vertės dalis. Iš dokumentų = tiekėjo sąskaita, užsakymo patvirtinimas, proforma ar pasiūlymas užsakymo aplanke arba ranka įvesta savikaina; įvertinta = tiekėjo metų vidutinė marža (pastaboje pažymėta „įvertinta“).'},kTurnover:'Parduota',kSoldNote:'gautas PO',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
     recTitle:'Iš pardavimų aplanko',recDate:'Data',recKind:'Tipas',recWhat:'Dokumentas',recRef:'Nr.',recSum:'Suma',
     noCost:'savikaina neįvesta',costHint:'Kiek ima tiekėjas. Palikite tuščią, jei dar nežinoma — tuščia nėra nulis.',
     report:'Registro ataskaita',open:'Užklausų registras',
@@ -2811,7 +2928,7 @@ ru: {
     winRate:'Выиграно из решённых',ofDecided:'из решённых',
     cost:'Себестоимость',sell:'Продажа',margin:'Заработок',marginPct:'Наценка %',
     paid:'Оплачено',unpaid:'Не оплачено',paidDate:'Дата оплаты',invoice:'Счёт №',
-    sales:{title:'Продажи',lead:'Только заказы с PO, в пределах фильтров выше. Себестоимость и заработок считаются там, где себестоимость известна.',sold:'Продано',cost:'Себестоимость',margin:'Заработок',avg:'Средний заказ',perOrder:'на заказ',orders:'заказов',withCost:'с себестоимостью',fReceived:'Получено запросов',fQuoted:'Предложено клиенту',fWon:'Выиграно — получен PO',ofReceived:'от полученных',ofQuoted:'от предложенных',ofValue:'от суммы предложений',byMonth:'Продажи по месяцам: себестоимость и заработок',monthNote:'по месяцу PO; % — маржа',byClient:'Крупнейшие клиенты',bySupplier:'Крупнейшие производители',more:'ещё',quality:'Откуда известна себестоимость',qDoc:'По документам',qEst:'Оценка',qNone:'Неизвестна',qLead:'Доля от суммы продаж. По документам — счёт поставщика, подтверждение заказа, проформа или предложение в папке заказа, либо себестоимость, введённая вручную; оценка — средняя маржа поставщика за год (в примечании пометка «įvertinta»).'},kTurnover:'Продано',kSoldNote:'получен заказ (PO)',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
+    vSales:'Продажи',vRegister:'Реестр',vFiltered:'Цифры ниже учитывают фильтры, заданные в реестре.',sales:{title:'Продажи',lead:'Только заказы с PO, в пределах фильтров выше. Себестоимость и заработок считаются там, где себестоимость известна.',sold:'Продано',cost:'Себестоимость',margin:'Заработок',avg:'Средний заказ',perOrder:'на заказ',orders:'заказов',withCost:'с себестоимостью',fReceived:'Получено запросов',fQuoted:'Предложено клиенту',fWon:'Выиграно — получен PO',ofReceived:'от полученных',ofQuoted:'от предложенных',ofValue:'от суммы предложений',byMonth:'Продажи по месяцам: себестоимость и заработок',monthNote:'по месяцу PO; % — маржа',byClient:'Крупнейшие клиенты',bySupplier:'Крупнейшие производители',more:'ещё',quality:'Откуда известна себестоимость',qDoc:'По документам',qEst:'Оценка',qNone:'Неизвестна',qLead:'Доля от суммы продаж. По документам — счёт поставщика, подтверждение заказа, проформа или предложение в папке заказа, либо себестоимость, введённая вручную; оценка — средняя маржа поставщика за год (в примечании пометка «įvertinta»).'},kTurnover:'Продано',kSoldNote:'получен заказ (PO)',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
     recTitle:'Из папки продаж',recDate:'Дата',recKind:'Тип',recWhat:'Документ',recRef:'№',recSum:'Сумма',
     noCost:'себестоимость не внесена',costHint:'Сколько берёт поставщик. Оставьте пустым, если ещё не известно — пусто это не ноль.',
     report:'Отчёт по реестру',open:'Реестр запросов',
@@ -5815,10 +5932,21 @@ function viewEnquiries(){
   const years = [...new Set((state.enquiries || [])
     .map(r => (r.enquiry_date || '').slice(0, 4)).filter(Boolean))].sort().reverse();
 
-  return `${noticeBar()}<div class="card">
-    <h2 class="sheet">${esc(e.title)} <span class="muted" style="font-weight:400">// ${
-      t.showing} ${rows.length} ${t.of} ${all}</span></h2>
-    <p class="hint" style="margin:-8px 0 14px">${esc(e.lead)}</p>
+  const view = enqState().view === 'register' ? 'register' : 'sales';
+  const filtered = rows.length !== all;
+  return `${noticeBar()}<div class="enq-head">
+    <div class="enq-head-t">
+      <h2 class="sheet">${esc(e.title)} <span class="muted" style="font-weight:400">// ${
+        t.showing} ${rows.length} ${t.of} ${all}</span></h2>
+      <p class="hint">${esc(e.lead)}</p>
+    </div>
+    <div class="enq-seg" role="tablist" aria-label="${esc(e.title)}">
+      <button role="tab" data-enqview="sales" aria-selected="${view === 'sales'}" class="${view === 'sales' ? 'on' : ''}">${esc(e.vSales)}</button>
+      <button role="tab" data-enqview="register" aria-selected="${view === 'register'}" class="${view === 'register' ? 'on' : ''}">${esc(e.vRegister)}</button>
+    </div>
+  </div>
+  ${filtered && view === 'sales' ? `<p class="enq-filtered">${esc(e.vFiltered)} <button class="ghost" id="enqClear2">${esc(t.clearF)}</button></p>` : ''}
+  <div class="card enq-summary">
 
     <div class="enq-kpis">
       ${kpi(e.kReceived, rows.length, '')}
@@ -5827,11 +5955,11 @@ function viewEnquiries(){
       ${kpi(e.kRejected, count('Atmesta užklausa'), 'bad')}
     </div>
     <div class="enq-kpis enq-kpis--money">
-      ${kpi(e.kTurnover, fmt(W.sell, 0), '', e.kSoldNote)}
-      ${kpi(e.kCost, W.costed ? fmt(W.cost, 0) : '—', '')}
-      ${kpi(e.kMargin, W.costed ? fmt(W.margin, 0) : '—', W.margin >= 0 ? 'ok' : 'bad',
+      ${kpi(e.kTurnover, fmt(W.sell, 0) + ' €', 'lead', e.kSoldNote)}
+      ${kpi(e.kCost, W.costed ? fmt(W.cost, 0) + ' €' : '—', '')}
+      ${kpi(e.kMargin, W.costed ? fmt(W.margin, 0) + ' €' : '—', W.margin >= 0 ? 'ok' : 'bad',
             W.costed ? (W.pct == null ? '' : pct(W.pct)) : e.noCost)}
-      ${kpi(e.kUnpaid, fmt(T.unpaid, 0), T.unpaid > 0 ? 'wip' : 'ok')}
+      ${kpi(e.kUnpaid, fmt(T.unpaid, 0) + ' €', T.unpaid > 0 ? 'wip' : 'ok')}
     </div>
     ${(() => {
       /* Win rate over DECIDED enquiries. Counting the ones still in progress
@@ -5840,9 +5968,8 @@ function viewEnquiries(){
       return decided ? `<p class="enq-rate"><b>${pct(won / decided)}</b> ${esc(e.winRate)}
         <span class="muted">// ${won} / ${decided} ${esc(e.ofDecided)}</span></p>` : '';
     })()}
-
-    ${enqSales(rows, t)}
-
+  </div>
+  ${view === 'sales' ? enqSales(rows, t) + enqAnalysis(rows, t) : `<div class="card enq-reg">
     <div class="pf-filters enq-filters">
       <label>${esc(e.search)}<input type="search" id="enqQ" value="${esc(enqState().q)}"
         placeholder="${esc(e.searchPh)}"></label>
@@ -5922,9 +6049,7 @@ function viewEnquiries(){
       {title: e.byMonthMoney, empty: e.none, a: e.sell, b: e.margin})}</div>
     <div class="card">${enqBars(enqAgeing(rows, t).map(b => ({l: b.l, v: Math.round(b.v)})),
       {title: e.ageingBuckets, empty: e.none})}</div>
-  </div>
-
-  ${enqAnalysis(rows, t)}`;
+  </div>`}`;
 }
 
 
@@ -5953,14 +6078,15 @@ function enqSales(rows, t){
   /* funnel: received -> quoted -> won, by count and by value */
   const quoted = rows.filter(r => r.quoted_to_client || num(r.price_ex_vat) > 0);
   const qVal = quoted.reduce((a, r) => a + num(r.price_ex_vat), 0);
-  const step = (label, n, v, sub) => `<div class="sl-step"><b>${n}</b><span>${esc(label)}</span>${
+  const step = (label, n, v, sub, share) => `<div class="sl-step"><b>${n}</b><span>${esc(label)}</span>${
+    share != null ? `<u class="sl-share"><s style="width:${Math.max(2, share * 100).toFixed(1)}%"></s></u>` : ''}${
     v != null ? `<em>${eur(v)}</em>` : ''}${sub ? `<i>${esc(sub)}</i>` : ''}</div>`;
   const funnel = `<div class="sl-funnel">
-    ${step(s.fReceived, rows.length, null, '')}
+    ${step(s.fReceived, rows.length, null, '', 1)}
     <span class="sl-arrow" aria-hidden="true">→</span>
-    ${step(s.fQuoted, quoted.length, qVal, rows.length ? pct(quoted.length / rows.length) + ' ' + s.ofReceived : '')}
+    ${step(s.fQuoted, quoted.length, qVal, rows.length ? pct(quoted.length / rows.length) + ' ' + s.ofReceived : '', rows.length ? quoted.length / rows.length : 0)}
     <span class="sl-arrow" aria-hidden="true">→</span>
-    ${step(s.fWon, won.length, sold, quoted.length ? pct(won.length / quoted.length) + ' ' + s.ofQuoted + ' · ' + (qVal ? pct(sold / qVal) + ' ' + s.ofValue : '') : '')}
+    ${step(s.fWon, won.length, sold, quoted.length ? pct(won.length / quoted.length) + ' ' + s.ofQuoted + ' · ' + (qVal ? pct(sold / qVal) + ' ' + s.ofValue : '') : '', rows.length ? won.length / rows.length : 0)}
     <span class="sl-arrow" aria-hidden="true">·</span>
     ${step(s.avg, eur(sold / won.length), null, base ? s.margin + ' ' + pct(marg / base) : '')}
   </div>`;
@@ -5975,12 +6101,20 @@ function enqSales(rows, t){
     mm.set(k, o);
   });
   const months = [...mm.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  const W = 980, H = 260, pl = 8, pb = 42, pt = 24;
-  const mx = Math.max(1, ...months.map(([, o]) => o.sold));
-  const gw = (W - pl * 2) / Math.max(1, months.length);
+  const W = 980, H = 260, pl = 46, pb = 42, pt = 24;
+  const top = Math.max(1, ...months.map(([, o]) => o.sold));
+  /* a round step -- 10k, 20k, 25k, 50k -- and the top of the scale on a step */
+  const stepK = [1e3, 2e3, 2.5e3, 5e3, 1e4, 2e4, 2.5e4, 5e4, 1e5, 2e5, 2.5e5, 5e5].find(v => top / v <= 4) || 1e6;
+  const mx = Math.ceil(top / stepK) * stepK;
+  const gw = (W - pl - 8) / Math.max(1, months.length);
+  const grid = Array.from({ length: Math.round(mx / stepK) + 1 }, (_, i) => i * stepK).map(v => {
+    const y = H - pb - v / mx * (H - pb - pt);
+    return `<line x1="${pl}" x2="${W - 8}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--grid)" stroke-dasharray="${v ? '2 4' : ''}"/>
+      <text x="${pl - 8}" y="${(y + 3.5).toFixed(1)}" text-anchor="end" class="sl-a">${v ? fmt(v / 1000, 0) + 'k' : '0'}</text>`;
+  }).join('');
   const monthName = k => new Date(k + '-01T00:00:00').toLocaleDateString(L, { month: 'short' });
   const bars = months.map(([k, o], i) => {
-    const x = pl + i * gw + gw * 0.16, w = gw * 0.68, sc = (H - pb - pt) / mx;
+    const x = pl + i * gw + gw * 0.18, w = gw * 0.64, sc = (H - pb - pt) / mx;
     const hS = o.sold * sc, hC = o.cost * sc, y = H - pb - hS;
     const m = o.base ? (o.base - o.cost) / o.base : null;
     return `<g><title>${esc(monthName(k))}: ${eur(o.sold)} · ${esc(s.cost)} ${eur(o.cost)} · ${esc(s.margin)} ${eur(o.base - o.cost)}</title>
@@ -5991,8 +6125,7 @@ function enqSales(rows, t){
       <text x="${(x + w / 2).toFixed(1)}" y="${H - pb + 30}" text-anchor="middle" class="sl-p">${m == null ? '' : Math.round(m * 100) + '%'}</text></g>`;
   }).join('');
   const monthsSvg = `<figure class="chart sl-chart"><figcaption>${esc(s.byMonth)}</figcaption>
-    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.byMonth)}">
-      <line x1="${pl}" y1="${H - pb}" x2="${W - pl}" y2="${H - pb}" stroke="var(--grid)"/>${bars}</svg>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.byMonth)}">${grid}${bars}</svg>
     <div class="legend sl-legend"><span><i style="background:var(--sl-cost)"></i>${esc(s.cost)}</span>
       <span><i style="background:var(--series-1)"></i>${esc(s.margin)}</span>
       <span class="muted">${esc(s.monthNote)}</span></div></figure>`;
@@ -6314,8 +6447,14 @@ function wireEnquiries(){
   on('enqOwner',      'change', ev => set('owner', ev.target.value));
   on('enqYear',       'change', ev => set('year', ev.target.value));
   on('enqClear', 'click', () => {
-    state.enq = null; persist(); render();
+    const v = enqState().view; state.enq = null; enqState().view = v; persist(); render();
   });
+  on('enqClear2', 'click', () => {
+    const v = enqState().view; state.enq = null; enqState().view = v; persist(); render();
+  });
+  document.querySelectorAll('[data-enqview]').forEach(b => b.addEventListener('click', () => {
+    enqState().view = b.dataset.enqview; persist(); render();
+  }));
   on('enqAdd', 'click', () => enqEdit(null));
   on('enqCsv', 'click', () => enqCsv());
   on('enqPdf', 'click', () => printEnquiryReport());
