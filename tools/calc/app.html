@@ -1861,6 +1861,24 @@ table.grid tr.totals td{background:var(--surface-2)}
 .enq-kpis{gap:12px}
 .pf-chip,.enq-chip{border-radius:999px}
 
+/* the project's tabs: tighter, and what does not fit goes under More */
+nav.tabs button{padding:14px 11px 12px;letter-spacing:.08em}
+nav.tabs.fit{overflow:visible;position:relative;z-index:30;
+  /* the trailing fade is for a strip that scrolls; this one does not, and a
+     mask clips everything outside the strip -- the More menu included */
+  -webkit-mask-image:none;mask-image:none}
+nav.tabs > button[hidden]{display:none}
+.tab-more{position:relative;display:flex;flex:none}
+.tab-more-btn{display:inline-flex;align-items:center;gap:6px}
+.tab-more-btn svg{width:10px;height:6px}
+.tab-more-n{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+  background:var(--accent-soft);color:var(--ink-1);font-size:10px;letter-spacing:0;font-weight:600}
+.tab-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:40;min-width:230px;display:flex;flex-direction:column;
+  padding:6px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--lift),0 18px 40px -20px rgba(0,0,0,.6)}
+.tab-menu[hidden]{display:none}
+nav.tabs .tab-menu button{text-align:left;border:0;border-radius:var(--r-sm);padding:10px 12px;white-space:nowrap;color:var(--ink-2)}
+nav.tabs .tab-menu button:hover,nav.tabs .tab-menu button:focus-visible{background:var(--accent-soft);color:var(--ink-1)}
+
 /* the three sections read as a switch, the project's own tabs stay a strip */
 .sections{padding:10px 24px;gap:6px;align-items:center}
 .sections button{border-bottom:0;margin:0;padding:8px 16px;border-radius:var(--r-sm);font-size:12px;letter-spacing:.1em}
@@ -4843,6 +4861,7 @@ function renderChrome(){
   if(off) state.tab = tabs[0];
   renderSections();
   $('#tabs').innerHTML = tabs.map(k=>`<button data-tab="${k}" class="${state.tab===k?'active':''}">${t.tabs[k]}</button>`).join('');
+  fitTabs();
   /* Ten sheets, and on a 390px screen three of them fit. Nothing ever scrolled
      the strip, so opening Materials left the strip sitting at Portfolio and
      the sheet you were actually on was off-screen -- on a phone there was no
@@ -10412,6 +10431,65 @@ function gridKeys(e){
   const r = +el.dataset.r, k = el.dataset.k;
   const next = tb.querySelector(`[data-r="${r + dir}"][data-k="${k}"]`);
   if(next){ next.focus(); if(next.select) next.select(); }
+}
+
+/* ---------- the tab strip never scrolls ----------
+   Twelve sheets do not fit beside the project picker, and a strip that
+   scrolls sideways hides where you are and what else there is. As many tabs
+   as fit are shown; the rest go under "More", and the tab you are on is
+   always among the visible ones. Re-fitted when the strip changes width. */
+const TAB_MORE = { en: 'More', lt: 'Daugiau', ru: 'Ещё' };
+function fitTabs(){
+  const nav = $('#tabs');
+  if(!nav) return;
+  const old = nav.querySelector('.tab-more');
+  if(old) old.remove();
+  const btns = [...nav.querySelectorAll(':scope > button[data-tab]')];
+  btns.forEach(b => { b.hidden = false; });
+  nav.classList.remove('fit');
+  if(nav.scrollWidth <= nav.clientWidth + 1) return;
+
+  nav.classList.add('fit');
+  const wrap = document.createElement('span');
+  wrap.className = 'tab-more';
+  wrap.innerHTML = `<button type="button" class="tab-more-btn" aria-haspopup="true" aria-expanded="false">${
+    esc(TAB_MORE[state.lang] || TAB_MORE.en)} <span class="tab-more-n"></span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button>
+    <div class="tab-menu" role="menu" hidden></div>`;
+  nav.appendChild(wrap);
+  const room = nav.clientWidth;
+  const used = () => btns.filter(b => !b.hidden).reduce((a, b) => a + b.offsetWidth, 0) + wrap.offsetWidth;
+  /* drop from the end, never the active one */
+  for(let i = btns.length - 1; i >= 0 && used() > room; i--){
+    if(!btns[i].classList.contains('active')) btns[i].hidden = true;
+  }
+  const hidden = btns.filter(b => b.hidden);
+  if(!hidden.length){ wrap.remove(); nav.classList.remove('fit'); return; }
+  wrap.querySelector('.tab-more-n').textContent = hidden.length;
+  const menu = wrap.querySelector('.tab-menu');
+  menu.innerHTML = hidden.map(b => `<button type="button" role="menuitem" data-tab="${b.dataset.tab}">${b.innerHTML}</button>`).join('');
+  const toggle = wrap.querySelector('.tab-more-btn');
+  const close = () => { menu.hidden = true; toggle.setAttribute('aria-expanded', 'false'); };
+  toggle.addEventListener('click', ev => {
+    ev.stopPropagation();
+    const open = menu.hidden;
+    menu.hidden = !open; toggle.setAttribute('aria-expanded', String(open));
+    if(open){ const f = menu.querySelector('button'); if(f) f.focus(); }
+  });
+  menu.addEventListener('keydown', ev => { if(ev.key === 'Escape'){ close(); toggle.focus(); } });
+}
+/* one listener for the page: a click anywhere but the menu closes it */
+document.addEventListener('click', ev => {
+  const wrap = document.querySelector('#tabs .tab-more');
+  if(!wrap || wrap.contains(ev.target)) return;
+  const menu = wrap.querySelector('.tab-menu');
+  if(menu && !menu.hidden){ menu.hidden = true; wrap.querySelector('.tab-more-btn').setAttribute('aria-expanded', 'false'); }
+}, true);
+if(window.ResizeObserver){
+  let fitPending = 0;
+  new ResizeObserver(() => {
+    cancelAnimationFrame(fitPending);
+    fitPending = requestAnimationFrame(fitTabs);
+  }).observe(document.getElementById('tabs'));
 }
 
 /* ================= events ================= */
