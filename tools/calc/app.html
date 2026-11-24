@@ -1879,6 +1879,13 @@ nav.tabs > button[hidden]{display:none}
 nav.tabs .tab-menu button{text-align:left;border:0;border-radius:var(--r-sm);padding:10px 12px;white-space:nowrap;color:var(--ink-2)}
 nav.tabs .tab-menu button:hover,nav.tabs .tab-menu button:focus-visible{background:var(--accent-soft);color:var(--ink-1)}
 
+/* revenue: paid as a percent, tinted by how far it has got */
+.pct-in{display:inline-flex;align-items:center;gap:6px;width:100%}
+.pct-in input{text-align:right;min-width:64px}
+.pct-in i{font-style:normal;color:var(--ink-3);font-size:12px}
+.pct-in.full input{color:var(--good-text);font-weight:600}
+.pct-in.part input{color:var(--warning);font-weight:600}
+
 /* the three sections read as a switch, the project's own tabs stay a strip */
 .sections{padding:10px 24px;gap:6px;align-items:center}
 .sections button{border-bottom:0;margin:0;padding:8px 16px;border-radius:var(--r-sm);font-size:12px;letter-spacing:.1em}
@@ -2268,7 +2275,7 @@ en: {
     admin:'Admin overhead rate',adminN:'% of direct project cost',
     margin:'Target margin',marginN:'% of total revenue',
     note:'Settings are stored per project — the same way the Excel file keeps them per workbook.'},
-  cols:{category:'Category',description:'Description',planRev:'Plan Revenue',actRev:'Actual Revenue',diff:'Difference',revenue:'Revenue',status:'Status',invoice:'Invoice No.',paid:'Paid?',
+  cols:{category:'Category',description:'Description',planRev:'Plan Revenue',actRev:'Actual Revenue',diff:'Difference',revenue:'Revenue',status:'Status',invoice:'Invoice No.',paid:'Paid?',paidPct:'Paid, %',
     employee:'Employee',role:'Role',days:'Days',hours:'Hours',grossRate:'Gross Rate / h',grossSalary:'Gross Salary',burdenPct:'Employer Burden %',empCost:'Employer Cost',travelDays:'Travel Days',allowance:'Daily Allowance',planTotal:'Plan Total',actTotal:'Actual Total',
     company:'Company / Person',scope:'Scope',rate:'Rate / h',travel:'Travel',accom:'Accommodation',materials:'Materials',other:'Other',
     type:'Type',qty:'Qty',unitCost:'Unit Cost',supplier:'Supplier / Note',
@@ -2637,7 +2644,7 @@ lt: {
     admin:'Administracinių išlaidų tarifas',adminN:'% nuo tiesioginių sąnaudų',
     margin:'Tikslinė marža',marginN:'% nuo visų pajamų',
     note:'Nustatymai saugomi kiekvienam projektui atskirai — kaip Excel faile.'},
-  cols:{category:'Kategorija',description:'Aprašymas',planRev:'Planuojamos pajamos',actRev:'Faktinės pajamos',diff:'Skirtumas',revenue:'Pajamos',status:'Būsena',invoice:'Sąskaitos Nr.',paid:'Apmokėta?',
+  cols:{category:'Kategorija',description:'Aprašymas',planRev:'Planuojamos pajamos',actRev:'Faktinės pajamos',diff:'Skirtumas',revenue:'Pajamos',status:'Būsena',invoice:'Sąskaitos Nr.',paid:'Apmokėta?',paidPct:'Apmokėta, %',
     employee:'Darbuotojas',role:'Pareigos',days:'Dienos',hours:'Valandos',grossRate:'Bruto įkainis / val.',grossSalary:'Bruto atlyginimas',burdenPct:'Darbdavio mokesčiai %',empCost:'Darbdavio kaina',travelDays:'Kelionės dienos',allowance:'Dienpinigiai',planTotal:'Planas iš viso',actTotal:'Faktas iš viso',
     company:'Įmonė / asmuo',scope:'Darbų apimtis',rate:'Įkainis / val.',travel:'Kelionė',accom:'Apgyvendinimas',materials:'Medžiagos',other:'Kita',
     type:'Tipas',qty:'Kiekis',unitCost:'Vieneto kaina',supplier:'Tiekėjas / pastaba',
@@ -3006,7 +3013,7 @@ ru: {
     admin:'Административные накладные',adminN:'% от прямых затрат',
     margin:'Целевая маржа',marginN:'% от общей выручки',
     note:'Настройки хранятся для каждого проекта отдельно — как в файле Excel.'},
-  cols:{category:'Категория',description:'Описание',planRev:'План доходов',actRev:'Факт доходов',diff:'Разница',revenue:'Доход',status:'Статус',invoice:'№ счёта',paid:'Оплачено?',
+  cols:{category:'Категория',description:'Описание',planRev:'План доходов',actRev:'Факт доходов',diff:'Разница',revenue:'Доход',status:'Статус',invoice:'№ счёта',paid:'Оплачено?',paidPct:'Оплачено, %',
     employee:'Сотрудник',role:'Должность',days:'Дни',hours:'Часы',grossRate:'Ставка брутто / ч',grossSalary:'Зарплата брутто',burdenPct:'Налоги работодателя %',empCost:'Затраты работодателя',travelDays:'Дни в командировке',allowance:'Суточные',planTotal:'План итого',actTotal:'Факт итого',
     company:'Компания / лицо',scope:'Объём работ',rate:'Ставка / ч',travel:'Проезд',accom:'Проживание',materials:'Материалы',other:'Прочее',
     type:'Тип',qty:'Кол-во',unitCost:'Цена за ед.',supplier:'Поставщик / примечание',
@@ -4108,7 +4115,7 @@ function newProject(lang, seq){
     id: uid(),
     settings: defaultSettings(),
     card: { projectId:'PRJ-'+num, client:'', site:'', pm:'', start:'', end:'', contract:null, advance:null, terms:45 },
-    revenue: DEF_ORDER.revenue.map(k=>({k,cat:null,desc:null,plan:null,actual:null,status:D.revenue[k][2],invoice:'',paid:false})),
+    revenue: DEF_ORDER.revenue.map(k=>({k,cat:null,desc:null,plan:null,actual:null,status:D.revenue[k][2],invoice:'',paid:false,paidPct:null})),
     labor: [1,2,3].map(()=>({name:'',role:'',days:null,hours:null,rate:null,travelDays:null,country:'',allowance:null,actual:null})),
     subs: [1,2,3].map(()=>({name:'',scope:'',hours:null,rate:null,travel:null,accom:null,materials:null,other:null,actual:null})),
     travel: DEF_ORDER.travel.map(k=>({k,type:null,desc:null,qty:null,unit:null,actual:null,supplier:''})),
@@ -4185,6 +4192,12 @@ function computeDash(p){
     target:N(s.targetMargin), onTarget: marginActual >= N(s.targetMargin) };       // H7 =IF(H5>=H4,...)
 }
 
+/* how much of a revenue line has been paid, 0..1 */
+function paidShare(r){
+  const v = r.paidPct != null && r.paidPct !== '' ? Number(r.paidPct) : (r.paid ? 100 : 0);
+  return Math.min(1, Math.max(0, (isNaN(v) ? 0 : v) / 100));
+}
+
 /* ================= extra metrics =================
    computeDash() is a faithful copy of the workbook's Dashboard sheet and stays
    that way -- anything the spreadsheet did not calculate goes here instead, so
@@ -4192,8 +4205,11 @@ function computeDash(p){
 function computeExtra(p){
   const sum = (arr, fn) => arr.reduce((a, r) => a + fn(r), 0);
   const d = computeDash(p);
-  const invoiced = sum(p.revenue, r => (r.status === 'invoiced' || r.paid) ? N(r.actual) : 0);
-  const paid     = sum(p.revenue, r => r.paid ? N(r.actual) : 0);
+  /* The revenue sheet's one figure is stored in `plan` (see its column note).
+     These two read `actual`, which the sheet no longer writes, so Invoiced
+     and Paid on the dashboard sat at 0 whatever was entered. */
+  const invoiced = sum(p.revenue, r => (r.status === 'invoiced' || paidShare(r) > 0) ? N(r.plan) : 0);
+  const paid     = sum(p.revenue, r => N(r.plan) * paidShare(r));
   const hours    = sum(p.labor, r => N(r.hours));
   const crew     = p.labor.filter(r => String(r.name || '').trim() || N(r.hours)).length;
   const rebill   = sum(p.materials, r => N(r.rebillAmt)) + sum(p.logistics, r => N(r.rebill));
@@ -4465,7 +4481,9 @@ function sheetConfigsAll(){
       {k:'plan',t:'num',l:c.revenue,sum:true},
       {k:'status',t:'sel',l:c.status,opts:'status'},
       {k:'invoice',t:'text',l:c.invoice,w:'9%'},
-      {k:'paid',t:'sel',l:c.paid,opts:'bool'}
+      /* A percent, not yes/no: yards pay in parts. Stored as paidPct; a line
+         saved before this with paid:true reads as 100 % (F.paidShare). */
+      {k:'paidPct',t:'pct',l:c.paidPct}
     ]},
     labor: { key:'labor', cols:[
       {k:'name',t:'text',l:c.employee,w:'12%',ac:1},
@@ -4532,7 +4550,7 @@ function sheetConfigsAll(){
 }
 function emptyRow(key){
   return {
-    revenue:{cat:'',desc:'',plan:null,actual:null,status:'pending',invoice:'',paid:false},
+    revenue:{cat:'',desc:'',plan:null,actual:null,status:'pending',invoice:'',paid:false,paidPct:null},
     labor:{name:'',role:'',days:null,hours:null,rate:null,travelDays:null,country:'',allowance:null,actual:null},
     subs:{name:'',scope:'',hours:null,rate:null,travel:null,accom:null,materials:null,other:null,actual:null},
     travel:{type:'',desc:'',qty:null,unit:null,actual:null,supplier:''},
@@ -5300,7 +5318,7 @@ function viewSheet(key){
     bool: [{v:'0',l:t.no},{v:'1',l:t.yes}]
   };
   let head = cfg.cols.map(col=>
-    `<th class="${col.t==='num'||col.t==='calc'?'num':''}"${col.w?` style="width:${col.w}"`:''}>${esc(col.l)}</th>`
+    `<th class="${col.t==='num'||col.t==='calc'||col.t==='pct'?'num':''}"${col.w?` style="width:${col.w}"`:''}>${esc(col.l)}</th>`
   ).join('') + '<th></th>';
   let body = rows.map((r,i)=>{
     /* Every cell carries its own column name. On a phone the heading row is
@@ -5311,6 +5329,12 @@ function viewSheet(key){
       const L = ` data-label="${esc(col.l)}"`;
       if(col.t==='text') return `<td${L}><input type="text"${ro}${col.ac?` list="dl-${key}-${col.k}"`:''} data-r="${i}" data-k="${col.k}" value="${esc(cellVal(key, r, col.k))}"></td>`;
       if(col.t==='num') return `<td class="num"${L}><input type="number"${ro} step="any" data-r="${i}" data-k="${col.k}" value="${r[col.k]??''}"${col.ph?` placeholder="${esc(String(col.ph()))}"`:''}></td>`;
+      if(col.t==='pct'){
+        const pv = r[col.k] != null && r[col.k] !== '' ? r[col.k] : (r.paid ? 100 : '');
+        const share = pv === '' ? 0 : Math.min(100, Math.max(0, Number(pv)));
+        const tone = pv === '' || share === 0 ? 'none' : share >= 100 ? 'full' : 'part';
+        return `<td class="num pct-cell"${L}><span class="pct-in ${tone}"><input type="number"${ro} min="0" max="100" step="1" inputmode="decimal" data-r="${i}" data-k="${col.k}" value="${pv}" placeholder="0"><i>%</i></span></td>`;
+      }
       if(col.t==='sel'){
         const cur = col.opts==='bool' ? (r[col.k]?'1':'0') : r[col.k];
         return `<td${L}><select${ro} data-r="${i}" data-k="${col.k}" data-opts="${col.opts}">${opts[col.opts].map(o=>`<option value="${o.v}"${o.v===cur?' selected':''}>${esc(o.l)}</option>`).join('')}</select></td>`;
@@ -11103,6 +11127,13 @@ $('#main').addEventListener('input', e=>{
   /* a dropdown changes in one move, so it is its own step */
   pushUndo(el.tagName==='SELECT' ? null : 'cell:' + proj().id + ':' + key + ':' + i + ':' + k);
   if(el.tagName==='SELECT') row[k] = el.dataset.opts==='bool' ? el.value==='1' : el.value;
+  else if(el.type==='number' && k === 'paidPct'){
+    const v = el.value === '' ? null : Math.min(100, Math.max(0, +el.value));
+    row[k] = v;
+    row.paid = v != null && v >= 100;
+    const box = el.closest('.pct-in');
+    if(box) box.className = 'pct-in ' + (v == null || v === 0 ? 'none' : v >= 100 ? 'full' : 'part');
+  }
   else if(el.type==='number') row[k] = el.value==='' ? null : +el.value;
   else row[k] = el.value;
   touch(); recalcSheet(key, tb); paintPulse(); markDirty();
@@ -11210,6 +11241,7 @@ function exportCsv(){
         if(col.t==='calc'){ const v = col.f(r,p.settings); return col.fmt ? q(col.fmt(v)) : num(v); }
         if(col.t==='sel') return q(col.opts==='bool' ? (r[col.k]?t.yes:t.no) : (t.statuses[r[col.k]]||r[col.k]));
         if(col.t==='num') return num(col.eff ? col.eff(r) : r[col.k]);
+        if(col.t==='pct') return num(Math.round(paidShare(r) * 100));
         return q(cellVal(key, r, col.k));
       }).join(';'));
     });
@@ -11408,6 +11440,7 @@ function printProjectReport(){
         if(col.t==='sel') return `<td>${esc(col.opts==='bool'?(r[col.k]?t.yes:t.no):(t.statuses[r[col.k]]||''))}</td>`;
         if(col.t==='num'){ const v = col.eff ? col.eff(r) : r[col.k];
           return `<td class="num">${v===null||v===undefined?'':m(v)}</td>`; }
+        if(col.t==='pct') return `<td class="num">${Math.round(paidShare(r) * 100)} %</td>`;
         return `<td>${esc(cellVal(key, r, col.k))}</td>`;
       }).join('')+'</tr>';
     });
