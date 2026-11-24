@@ -1451,6 +1451,52 @@ input.enq-cell{width:100%;box-sizing:border-box;border:1px solid var(--accent);
 .enq-rate b{font-size:17px;color:var(--ink-1);font-variant-numeric:tabular-nums}
 /* the enquiry number is an identifier; wrapping it makes two of one */
 .imp-entry{margin:6px 0 14px;font-size:13px}
+.sl{margin:22px 0 26px}
+.sl{--sl-cost:color-mix(in srgb, var(--ink-3) 38%, var(--surface-1))}
+.sl-top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 14px}
+.sl-big{border:1px solid var(--line,var(--baseline));border-radius:4px;padding:14px 16px;min-width:0}
+.sl-big span{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.sl-big b{display:block;font-size:clamp(20px,2.4vw,28px);font-weight:700;margin:6px 0 2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl-big i{font-style:normal;font-size:12px;color:var(--ink-3)}
+.sl-big.ok b{color:var(--good-text,var(--good))}
+.sl-funnel{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.sl-step{flex:1 1 180px;min-width:0;padding:6px 4px}
+.sl-step b{display:block;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.sl-step span{display:block;font-size:12px;color:var(--ink-2);margin-top:2px}
+.sl-step em{display:block;font-style:normal;font-size:13px;font-variant-numeric:tabular-nums;margin-top:4px}
+.sl-step i{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.sl-arrow{align-self:center;color:var(--ink-3);font-size:20px}
+.sl-chart svg{width:100%;height:auto;display:block;max-width:980px}
+.sl-chart .sl-v{font-size:10.5px;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+.sl-chart .sl-l{font-size:10.5px;fill:var(--ink-2)}
+.sl-chart .sl-p{font-size:10px;fill:var(--good-text,var(--good));font-weight:600}
+.sl-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;margin-top:6px}
+.sl-legend i,.sl-qk i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.sl-hb{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.sl-hr{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) auto 3.2em;align-items:center;gap:10px;font-size:12.5px}
+.sl-hn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl-ht{height:9px;background:color-mix(in srgb, var(--ink-3) 14%, transparent);border-radius:2px;overflow:hidden}
+.sl-ht i{display:block;height:100%;background:var(--series-1);border-radius:2px}
+.sl-hr b{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.sl-hr em{font-style:normal;color:var(--good-text,var(--good));text-align:right;font-variant-numeric:tabular-nums}
+.sl-more{font-size:12px;margin:4px 0 0}
+.sl-q{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:10px 0 8px;background:color-mix(in srgb, var(--ink-3) 14%, transparent)}
+.sl-q i,.sl-qk i{display:block}
+.sl-q .doc,.sl-qk .doc{background:var(--series-1)}
+.sl-q .est,.sl-qk .est{background:color-mix(in srgb, var(--series-1) 40%, transparent)}
+.sl-q .none,.sl-qk .none{background:var(--critical)}
+.sl-qk{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px}
+.sl-qk i{display:inline-block}
+@media (max-width:760px){
+  .sl-top{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sl-arrow{display:none}
+  /* the months stay legible: the chart scrolls inside its card, the page does not */
+  .sl-chart{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .sl-chart svg{min-width:640px}
+  /* name, amount, margin on one line; the bar under them, full width */
+  .sl-hr{grid-template-columns:minmax(0,1fr) auto 2.8em;row-gap:4px;column-gap:8px;font-size:12.5px}
+  .sl-ht{grid-column:1 / -1;grid-row:2}
+}
 .enq-rec{margin:14px 0 4px}
 .enq-rec summary{cursor:pointer;font-weight:600;font-size:13px;margin-bottom:8px}
 .enq-rec .tablewrap{max-height:320px;overflow:auto}
@@ -1544,8 +1590,8 @@ button.nice{
   border:1px solid var(--border);border-radius:2px;
   padding:7px 9px;font:inherit;font-size:13px;line-height:1.2;text-align:left;
   /* The filter labels are uppercase mono and the trigger sits inside that
-     label, so it inherited both. "OCHEAN WHALE COMPANY" in a list of sixty-
-     three clients is a wall; the label names the field, the value is a name. */
+     label, so it inherited both. A long company name in capitals, in a list of
+     sixty-three clients, is a wall; the label names the field, the value is a name. */
   text-transform:none;letter-spacing:normal;
   transition:border-color .16s var(--ease),background .16s var(--ease)
 }
@@ -2027,7 +2073,7 @@ en: {
     winRate:'Won of decided',ofDecided:'of those decided',
     cost:'Cost',sell:'Sell',margin:'Margin',marginPct:'Margin %',
     paid:'Paid',unpaid:'Unpaid',paidDate:'Paid on',invoice:'Invoice no.',
-    kTurnover:'Sold',kSoldNote:'with a PO',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
+    sales:{title:'Sales',lead:'Orders with a PO only, within the filters above. Cost and margin are counted where the cost is known.',sold:'Sold',cost:'Cost',margin:'Margin',avg:'Average order',perOrder:'per order',orders:'orders',withCost:'with a cost',fReceived:'Enquiries received',fQuoted:'Quoted to the client',fWon:'Won — PO received',ofReceived:'of received',ofQuoted:'of quoted',ofValue:'of the quoted value',byMonth:'Sales by month: cost and margin',monthNote:'by the month of the PO; % = margin',byClient:'Top clients',bySupplier:'Top manufacturers',more:'more',quality:'How the cost is known',qDoc:'From documents',qEst:'Estimated',qNone:'Not known',qLead:'Share of sales value. Documented = the supplier invoice, order confirmation, proforma or quote in the job folder, or a cost typed in by hand; estimated = the supplier’s median margin this year (marked “įvertinta” in the note).'},kTurnover:'Sold',kSoldNote:'with a PO',kCost:'Cost',kMargin:'Margin',kUnpaid:'Unpaid',invoiced:'Invoiced',folder:'Open the job folder in SharePoint',
     recTitle:'From the sales folder',recDate:'Date',recKind:'Type',recWhat:'Document',recRef:'No.',recSum:'Amount',
     noCost:'no cost entered',costHint:'What the supplier charges. Leave blank if not known yet — blank is not zero.',
     report:'Register report',open:'Enquiry register',
@@ -2396,7 +2442,7 @@ lt: {
     winRate:'Laimėta iš nuspręstų',ofDecided:'iš nuspręstų',
     cost:'Savikaina',sell:'Pardavimas',margin:'Marža',marginPct:'Marža %',
     paid:'Apmokėta',unpaid:'Neapmokėta',paidDate:'Apmokėjimo data',invoice:'Sąskaitos nr.',
-    kTurnover:'Parduota',kSoldNote:'gautas PO',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
+    sales:{title:'Pardavimai',lead:'Tik užsakymai su PO, pagal viršuje nustatytus filtrus. Savikaina ir marža skaičiuojamos ten, kur savikaina žinoma.',sold:'Parduota',cost:'Savikaina',margin:'Marža',avg:'Vidutinis užsakymas',perOrder:'vienam užsakymui',orders:'užsakymai',withCost:'su savikaina',fReceived:'Gautos užklausos',fQuoted:'Pasiūlyta klientui',fWon:'Laimėta — gautas PO',ofReceived:'gautų',ofQuoted:'pasiūlytų',ofValue:'pasiūlytos vertės',byMonth:'Pardavimai per mėnesį: savikaina ir marža',monthNote:'pagal PO mėnesį; % = marža',byClient:'Didžiausi klientai',bySupplier:'Didžiausi gamintojai',more:'kiti',quality:'Iš kur žinoma savikaina',qDoc:'Iš dokumentų',qEst:'Įvertinta',qNone:'Nežinoma',qLead:'Pardavimų vertės dalis. Iš dokumentų = tiekėjo sąskaita, užsakymo patvirtinimas, proforma ar pasiūlymas užsakymo aplanke arba ranka įvesta savikaina; įvertinta = tiekėjo metų vidutinė marža (pastaboje pažymėta „įvertinta“).'},kTurnover:'Parduota',kSoldNote:'gautas PO',kCost:'Savikaina',kMargin:'Marža',kUnpaid:'Neapmokėta',invoiced:'Išstatyta',folder:'Atidaryti užsakymo aplanką SharePoint',
     recTitle:'Iš pardavimų aplanko',recDate:'Data',recKind:'Tipas',recWhat:'Dokumentas',recRef:'Nr.',recSum:'Suma',
     noCost:'savikaina neįvesta',costHint:'Kiek ima tiekėjas. Palikite tuščią, jei dar nežinoma — tuščia nėra nulis.',
     report:'Registro ataskaita',open:'Užklausų registras',
@@ -2765,7 +2811,7 @@ ru: {
     winRate:'Выиграно из решённых',ofDecided:'из решённых',
     cost:'Себестоимость',sell:'Продажа',margin:'Заработок',marginPct:'Наценка %',
     paid:'Оплачено',unpaid:'Не оплачено',paidDate:'Дата оплаты',invoice:'Счёт №',
-    kTurnover:'Продано',kSoldNote:'получен заказ (PO)',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
+    sales:{title:'Продажи',lead:'Только заказы с PO, в пределах фильтров выше. Себестоимость и заработок считаются там, где себестоимость известна.',sold:'Продано',cost:'Себестоимость',margin:'Заработок',avg:'Средний заказ',perOrder:'на заказ',orders:'заказов',withCost:'с себестоимостью',fReceived:'Получено запросов',fQuoted:'Предложено клиенту',fWon:'Выиграно — получен PO',ofReceived:'от полученных',ofQuoted:'от предложенных',ofValue:'от суммы предложений',byMonth:'Продажи по месяцам: себестоимость и заработок',monthNote:'по месяцу PO; % — маржа',byClient:'Крупнейшие клиенты',bySupplier:'Крупнейшие производители',more:'ещё',quality:'Откуда известна себестоимость',qDoc:'По документам',qEst:'Оценка',qNone:'Неизвестна',qLead:'Доля от суммы продаж. По документам — счёт поставщика, подтверждение заказа, проформа или предложение в папке заказа, либо себестоимость, введённая вручную; оценка — средняя маржа поставщика за год (в примечании пометка «įvertinta»).'},kTurnover:'Продано',kSoldNote:'получен заказ (PO)',kCost:'Себестоимость',kMargin:'Заработок',kUnpaid:'Не оплачено',invoiced:'Выставлено',folder:'Открыть папку заказа в SharePoint',
     recTitle:'Из папки продаж',recDate:'Дата',recKind:'Тип',recWhat:'Документ',recRef:'№',recSum:'Сумма',
     noCost:'себестоимость не внесена',costHint:'Сколько берёт поставщик. Оставьте пустым, если ещё не известно — пусто это не ноль.',
     report:'Отчёт по реестру',open:'Реестр запросов',
@@ -5611,9 +5657,12 @@ function enqBars(items, opt){
    different question and the one the two price columns exist to answer. */
 function enqMonthMoney(rows){
   const by = new Map();
+  /* sold means a PO: this summed every quote, rejected ones too, as "sold" */
   rows.forEach(r => {
-    if(!r.enquiry_date) return;
-    const k = r.enquiry_date.slice(0, 7);
+    if(r.status !== 'Gautas PO') return;
+    const d = r.po_date || r.enquiry_date;
+    if(!d) return;
+    const k = d.slice(0, 7);
     const o = by.get(k) || { sell: 0, margin: 0 };
     o.sell += Number(r.price_ex_vat) || 0;
     if(r.margin_eur != null) o.margin += Number(r.margin_eur);
@@ -5792,6 +5841,8 @@ function viewEnquiries(){
         <span class="muted">// ${won} / ${decided} ${esc(e.ofDecided)}</span></p>` : '';
     })()}
 
+    ${enqSales(rows, t)}
+
     <div class="pf-filters enq-filters">
       <label>${esc(e.search)}<input type="search" id="enqQ" value="${esc(enqState().q)}"
         placeholder="${esc(e.searchPh)}"></label>
@@ -5874,6 +5925,177 @@ function viewEnquiries(){
   </div>
 
   ${enqAnalysis(rows, t)}`;
+}
+
+
+/* ================= sales, as a picture =================
+   Everything here is the rows with a PO, inside whatever filter is set. The
+   register above it is every enquiry; this is what was actually sold, what it
+   cost and what it left, and how much of the cost is documented rather than
+   estimated -- shown, so nobody presents an estimate as a fact. */
+function enqSalesKind(r){
+  if(r.cost_ex_vat == null) return 'none';
+  const n = r.note || '';
+  return /Savikaina: įvert/.test(n) ? 'est' : 'doc';
+}
+function enqSales(rows, t){
+  const e = t.enq, s = e.sales, L = LOCALES[state.lang];
+  const won = rows.filter(r => r.status === 'Gautas PO');
+  if(!won.length) return '';
+  const num = v => Number(v) || 0;
+  const eur = v => fmt(Math.round(v), 0) + ' €';
+  const sold = won.reduce((a, r) => a + num(r.price_ex_vat), 0);
+  const costed = won.filter(r => r.cost_ex_vat != null);
+  const cost = costed.reduce((a, r) => a + num(r.cost_ex_vat), 0);
+  const base = costed.reduce((a, r) => a + num(r.price_ex_vat), 0);
+  const marg = base - cost;
+
+  /* funnel: received -> quoted -> won, by count and by value */
+  const quoted = rows.filter(r => r.quoted_to_client || num(r.price_ex_vat) > 0);
+  const qVal = quoted.reduce((a, r) => a + num(r.price_ex_vat), 0);
+  const step = (label, n, v, sub) => `<div class="sl-step"><b>${n}</b><span>${esc(label)}</span>${
+    v != null ? `<em>${eur(v)}</em>` : ''}${sub ? `<i>${esc(sub)}</i>` : ''}</div>`;
+  const funnel = `<div class="sl-funnel">
+    ${step(s.fReceived, rows.length, null, '')}
+    <span class="sl-arrow" aria-hidden="true">→</span>
+    ${step(s.fQuoted, quoted.length, qVal, rows.length ? pct(quoted.length / rows.length) + ' ' + s.ofReceived : '')}
+    <span class="sl-arrow" aria-hidden="true">→</span>
+    ${step(s.fWon, won.length, sold, quoted.length ? pct(won.length / quoted.length) + ' ' + s.ofQuoted + ' · ' + (qVal ? pct(sold / qVal) + ' ' + s.ofValue : '') : '')}
+    <span class="sl-arrow" aria-hidden="true">·</span>
+    ${step(s.avg, eur(sold / won.length), null, base ? s.margin + ' ' + pct(marg / base) : '')}
+  </div>`;
+
+  /* months: cost + margin stacked = sold; margin % under each month */
+  const mm = new Map();
+  won.forEach(r => {
+    const d = r.po_date || r.enquiry_date; if(!d) return;
+    const k = d.slice(0, 7), o = mm.get(k) || { sold: 0, cost: 0, base: 0 };
+    o.sold += num(r.price_ex_vat);
+    if(r.cost_ex_vat != null){ o.cost += num(r.cost_ex_vat); o.base += num(r.price_ex_vat); }
+    mm.set(k, o);
+  });
+  const months = [...mm.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  const W = 980, H = 260, pl = 8, pb = 42, pt = 24;
+  const mx = Math.max(1, ...months.map(([, o]) => o.sold));
+  const gw = (W - pl * 2) / Math.max(1, months.length);
+  const monthName = k => new Date(k + '-01T00:00:00').toLocaleDateString(L, { month: 'short' });
+  const bars = months.map(([k, o], i) => {
+    const x = pl + i * gw + gw * 0.16, w = gw * 0.68, sc = (H - pb - pt) / mx;
+    const hS = o.sold * sc, hC = o.cost * sc, y = H - pb - hS;
+    const m = o.base ? (o.base - o.cost) / o.base : null;
+    return `<g><title>${esc(monthName(k))}: ${eur(o.sold)} · ${esc(s.cost)} ${eur(o.cost)} · ${esc(s.margin)} ${eur(o.base - o.cost)}</title>
+      <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(1, hS - hC).toFixed(1)}" fill="var(--series-1)" rx="1.5"/>
+      <rect x="${x.toFixed(1)}" y="${(H - pb - hC).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, hC).toFixed(1)}" fill="var(--sl-cost)"/>
+      <text x="${(x + w / 2).toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="middle" class="sl-v">${fmt(Math.round(o.sold / 1000), 0)}k</text>
+      <text x="${(x + w / 2).toFixed(1)}" y="${H - pb + 15}" text-anchor="middle" class="sl-l">${esc(monthName(k))}</text>
+      <text x="${(x + w / 2).toFixed(1)}" y="${H - pb + 30}" text-anchor="middle" class="sl-p">${m == null ? '' : Math.round(m * 100) + '%'}</text></g>`;
+  }).join('');
+  const monthsSvg = `<figure class="chart sl-chart"><figcaption>${esc(s.byMonth)}</figcaption>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.byMonth)}">
+      <line x1="${pl}" y1="${H - pb}" x2="${W - pl}" y2="${H - pb}" stroke="var(--grid)"/>${bars}</svg>
+    <div class="legend sl-legend"><span><i style="background:var(--sl-cost)"></i>${esc(s.cost)}</span>
+      <span><i style="background:var(--series-1)"></i>${esc(s.margin)}</span>
+      <span class="muted">${esc(s.monthNote)}</span></div></figure>`;
+
+  /* horizontal bars: who buys, whose parts */
+  const hbars = (title, key, keep) => {
+    const by = new Map();
+    const fold = key === 'supplier' ? null : enqFolder(won.map(r => r.client));
+    won.forEach(r => {
+      const k = (key === 'supplier' ? enqMakerKey(r.supplier) : fold(r.client)) || '—';
+      const o = by.get(k) || { sold: 0, cost: 0, base: 0, n: 0 };
+      o.sold += num(r.price_ex_vat); o.n++;
+      if(r.cost_ex_vat != null){ o.cost += num(r.cost_ex_vat); o.base += num(r.price_ex_vat); }
+      by.set(k, o);
+    });
+    const all = [...by.entries()].sort((a, b) => b[1].sold - a[1].sold);
+    const top = all.slice(0, keep), max = Math.max(1, ...top.map(([, o]) => o.sold));
+    return `<figure class="chart"><figcaption>${esc(title)}</figcaption><div class="sl-hb">${
+      top.map(([k, o]) => `<div class="sl-hr">
+        <span class="sl-hn" title="${esc(k)}">${esc(k)}</span>
+        <span class="sl-ht"><i style="width:${(o.sold / max * 100).toFixed(1)}%"></i></span>
+        <b>${eur(o.sold)}</b><em>${o.base ? Math.round((o.base - o.cost) / o.base * 100) + '%' : '—'}</em></div>`).join('')}
+      ${all.length > keep ? `<p class="muted sl-more">+${all.length - keep} ${esc(s.more)} · ${
+        eur(all.slice(keep).reduce((a, [, o]) => a + o.sold, 0))}</p>` : ''}</div></figure>`;
+  };
+
+  /* how much of the cost is documented */
+  const share = { doc: 0, est: 0, none: 0 };
+  won.forEach(r => { share[enqSalesKind(r)] += num(r.price_ex_vat); });
+  const tot = Math.max(1, sold);
+  const seg = (k, cls) => share[k] ? `<i class="${cls}" style="width:${(share[k] / tot * 100).toFixed(1)}%"></i>` : '';
+  const quality = `<figure class="chart"><figcaption>${esc(s.quality)}</figcaption>
+    <div class="sl-q">${seg('doc', 'doc')}${seg('est', 'est')}${seg('none', 'none')}</div>
+    <div class="sl-qk">
+      <span><i class="doc"></i>${esc(s.qDoc)} <b>${pct(share.doc / tot)}</b></span>
+      <span><i class="est"></i>${esc(s.qEst)} <b>${pct(share.est / tot)}</b></span>
+      ${share.none ? `<span><i class="none"></i>${esc(s.qNone)} <b>${pct(share.none / tot)}</b></span>` : ''}
+    </div><p class="hint an-lead">${esc(s.qLead)}</p></figure>`;
+
+  return `<section class="sl" aria-label="${esc(s.title)}">
+    <h3 class="an-h">${esc(s.title)}</h3>
+    <p class="hint an-lead">${esc(s.lead)}</p>
+    <div class="card">${funnel}</div>
+    <div class="card">${monthsSvg}</div>
+    <div class="enq-charts">
+      <div class="card">${hbars(s.byClient, 'client', 8)}</div>
+      <div class="card">${hbars(s.bySupplier, 'supplier', 8)}</div>
+    </div>
+    <div class="card">${quality}</div>
+  </section>`;
+}
+/* One company, one bar, however the register spelled it: legal forms, quotes,
+   digits and case go, and names are compared by their first word. Two first
+   words that differ by one letter, or where one starts the other, are the same
+   company. No name is written into this code -- the repository is public. */
+const ENQ_LEGAL = /^(sia|uab|ou|oü|mb|ltd|llc|gmbh|co|as|ab|sl|s\.l|inc|limited|company|fzco|ag|bv|srl|spa|europe)$/i;
+function enqWords(name){
+  return String(name || '').replace(/["„“”'(),.\/]/g, ' ').split(/\s+/)
+    .filter(w => w && !ENQ_LEGAL.test(w) && !/^\d+$/.test(w));
+}
+function enqFirst(name){
+  const w = enqWords(name)[0] || '';
+  return w.toLowerCase().replace(/\d+$/, '').replace(/[^a-z0-9ąčęėįšųūžäöüõ]/g, '');
+}
+function enqNear(a, b){
+  if(a === b) return true;
+  if(a.length >= 4 && b.length >= 4 && (a.indexOf(b) === 0 || b.indexOf(a) === 0)) return true;
+  if(Math.min(a.length, b.length) < 5 || Math.abs(a.length - b.length) > 1) return false;
+  let i = 0, j = 0, d = 0;                       // one insertion, deletion or swap
+  while(i < a.length && j < b.length){
+    if(a[i] === b[j]){ i++; j++; continue; }
+    if(++d > 1) return false;
+    if(a.length > b.length) i++; else if(b.length > a.length) j++; else { i++; j++; }
+  }
+  return d + (a.length - i) + (b.length - j) <= 1;
+}
+/* Built per render from the rows on screen: key -> the label most rows use. */
+function enqFolder(names){
+  const groups = [];
+  names.forEach(n => {
+    const k = enqFirst(n); if(!k) return;
+    let g = groups.find(x => x.keys.some(y => enqNear(y, k)));
+    if(!g){ g = { keys: [], labels: new Map() }; groups.push(g); }
+    if(g.keys.indexOf(k) < 0) g.keys.push(k);
+    const label = enqWords(n).join(' ');
+    const nice = label === label.toUpperCase() && label.length > 4
+      ? label.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()) : label;
+    g.labels.set(nice, (g.labels.get(nice) || 0) + 1);
+  });
+  return n => {
+    const k = enqFirst(n);
+    const g = k && groups.find(x => x.keys.some(y => enqNear(y, k)));
+    if(!g) return '—';
+    /* the shortest of the most used spellings reads best on a bar */
+    return [...g.labels.entries()].sort((a, b) => b[1] - a[1] || a[0].length - b[0].length)[0][0];
+  };
+}
+/* A manufacturer per bar; "X + Y" stays a combination, each part folded. */
+function enqMakerKey(s){
+  const parts = String(s || '').split(/\s*(?:\+|,|\/\/|&| and )\s*/).map(p => enqWords(p)[0]).filter(w => w && w.length > 1);   /* "S.L." is not a maker */
+  if(!parts.length) return '—';
+  const nice = w => w.length <= 3 ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1).toLowerCase();
+  return [...new Set(parts.map(nice))].join(' + ');
 }
 
 /* The analysis block. Kept out of the render above because that function is
