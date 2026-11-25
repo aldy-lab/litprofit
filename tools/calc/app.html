@@ -436,6 +436,8 @@ button.icon.ai-x:focus-visible{outline:2px solid var(--accent);outline-offset:2p
   position:fixed;inset:0;z-index:200;display:grid;place-items:center;
   background:var(--navy-900);padding:24px
 }
+.signin-card[hidden]{display:none}
+.signin-hello{margin:-6px 0 6px;font-size:14px;line-height:1.5;color:#d6d9ee}
 .signin-card{
   width:min(380px,100%);display:grid;gap:9px;
   background:#0c0e30;border:1px solid rgba(255,255,255,.10);padding:34px 30px
@@ -2046,8 +2048,192 @@ figure.chart figcaption{font-size:13px;font-weight:600;letter-spacing:0;margin-b
   .notice-bar button{min-height:32px}
   h2.sheet{font-size:15px}
 }
+/* SIGNED IN, the header carries one more button -- the advisor -- and on a
+   390px phone it came to 444px: the whole app scrolled sideways for everyone
+   who logs in, which is everyone who uses it. The check that passed ran
+   signed out. The advisor keeps its words for screen readers and shows "AI";
+   the hidden language <select> stops taking a gap; the languages tighten. */
+@media (max-width:520px){
+  header.app{gap:4px}
+  header.app .ai-btn{font-size:0;letter-spacing:0;padding:6px 7px;min-width:34px;min-height:34px;flex:none}
+  header.app .ai-btn::before{content:"AI";font-size:11px;letter-spacing:.1em;font-weight:600}
+  header.app #langSel.nice-native{position:absolute}
+  header.app .langs button{min-width:27px;padding:6px 3px}
+}
+@media (max-width:400px){
+  header.app .brand img{height:15px}
+  header.app button.icon{width:31px}
+}
 @media (max-width:360px){
   table[data-sheet] tbody tr,table[data-sheet] tfoot tr{column-gap:8px;padding:10px 12px}
+}
+/* =====================================================================
+   DOCUMENTS -- tiles with the file on them, a Back step, a preview with
+   the details beside it.
+   ===================================================================== */
+.doc-nav{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;margin:0 0 14px}
+.doc-backbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 16px 8px 12px;
+  border:1px solid var(--baseline);border-radius:var(--r,6px);background:var(--surface-1);
+  font-size:12px;letter-spacing:.12em;color:var(--ink-1)}
+.doc-backbtn:hover{border-color:var(--accent);background:var(--accent-soft)}
+.doc-where{font-size:12px;color:var(--ink-3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 160px}
+.doc-where em{font-style:normal;opacity:.5;margin:0 4px}
+.doc-where b{color:var(--ink-1);font-weight:600}
+.doc-seg{margin-left:auto}
+.doc-seg button{padding:6px 12px;min-height:32px;font-size:11px}
+.drop-zone.is-compact{margin-top:14px}
+.drop-zone.is-compact .drop-face{padding:16px 14px}
+.drop-zone.is-compact .drop-main{font-size:13px}
+.doc-search{margin-bottom:12px}
+.doc-none{color:var(--ink-3);font-size:13px;padding:28px 0;text-align:center;border:1px dashed var(--grid);border-radius:var(--r,6px)}
+
+.doc-files{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin:2px 0 8px}
+.doc-file{display:grid;grid-template-rows:auto auto auto auto;align-content:start;gap:3px;text-align:left;
+  padding:0 0 12px;border:1px solid var(--grid);border-radius:var(--r,6px);background:var(--surface-1);
+  overflow:hidden;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;min-width:0;
+  transition:border-color .2s var(--ease,ease),transform .2s var(--ease,ease),box-shadow .2s var(--ease,ease)}
+.doc-file:hover{border-color:var(--accent);background:var(--surface-1);box-shadow:var(--lift,0 6px 18px rgba(0,0,0,.08))}
+.doc-file:active{transform:scale(.985)}
+.doc-file:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.doc-thumb{position:relative;display:grid;place-items:center;aspect-ratio:4 / 3;margin-bottom:8px;
+  background:var(--surface-2);border-bottom:1px solid var(--grid);overflow:hidden}
+.doc-thumb.is-pdf,.doc-thumb.is-none,.doc-thumb.is-text{aspect-ratio:4 / 3}
+.doc-thumb .doc-timg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.doc-thumb.is-pdf .doc-timg{object-position:top center;inset:10px 14% 0;width:72%;height:calc(100% - 10px);
+  box-shadow:0 1px 6px rgba(0,0,0,.18)}
+.doc-thumb.has-img .doc-timg{opacity:1}
+.doc-thumb.has-img .doc-ext{opacity:0}
+.doc-ext{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--ink-2);
+  padding:10px 12px;border:1px solid var(--baseline);border-radius:3px;background:var(--surface-1);
+  min-width:58px;text-align:center}
+.doc-thumb.is-pdf .doc-ext{color:var(--critical)}
+.doc-flag{position:absolute;left:8px;top:8px;z-index:1;font-family:var(--mono);font-size:10.5px;
+  padding:3px 7px;border-radius:3px;background:var(--warning,#b7791f);color:#fff}
+.doc-flag.is-gone{background:var(--critical)}
+.doc-fname{padding:0 12px;font-weight:600;color:var(--ink-1);line-height:1.3;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.doc-fmeta{padding:0 12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 10px;
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.doc-fmeta b{color:var(--ink-1);font-weight:600;white-space:nowrap}
+.doc-fsub{padding:0 12px;font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* preview: the file large, the details beside it */
+.dp-panel{grid-template-rows:auto minmax(0,1fr);grid-template-columns:minmax(0,1fr) 320px;border-radius:var(--r,6px);overflow:hidden}
+.dp-head{grid-column:1 / -1;gap:12px}
+.dp-back{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:7px 14px 7px 10px;flex:none;
+  border:1px solid var(--baseline);border-radius:var(--r,6px);font-size:11.5px}
+.dp-body{grid-column:1;min-height:0}
+.dp-body.is-pages{display:block;padding:8px;background:var(--surface-2)}
+.dp-page{display:block;width:100%;height:auto;margin:0 auto 8px;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.2)}
+.dp-none{display:grid;justify-items:center;gap:14px;padding:30px}
+.dp-none .doc-ext{font-size:18px;padding:16px 20px}
+.dp-side{grid-column:2;grid-row:2;display:flex;flex-direction:column;min-height:0;overflow:auto;
+  border-left:1px solid var(--baseline);background:var(--surface-1)}
+.dp-form{display:grid;gap:12px;padding:16px}
+.dp-side-h{margin:0;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.dp-field{display:grid;gap:5px}
+.dp-field > span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.dp-field input,.dp-field select{width:100%;min-height:38px}
+.dp-field.num input{text-align:left}
+.dp-field .doc-left{font-family:var(--mono);font-size:11px}
+.dp-field.doc-soon .doc-left{color:var(--warning,#b7791f)}
+.dp-field.doc-gone .doc-left{color:var(--critical)}
+.dp-facts-row{display:flex;flex-wrap:wrap;gap:8px 24px;padding-top:4px;border-top:1px solid var(--grid)}
+.dp-note{margin:0;font-size:11.5px;color:var(--ink-3)}
+.dp-acts{display:grid;gap:8px;padding:0 16px 16px;margin-top:auto}
+.dp-btn{display:flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border-radius:var(--r,6px);
+  font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;border:1px solid var(--grid)}
+a.dp-btn.primary{background:var(--ink-1);border-color:var(--ink-1);color:var(--page);font-weight:600}
+a.dp-btn:not([href]){opacity:.45;pointer-events:none}
+.dp-btn.danger{color:var(--critical)}
+
+@media (max-width:700px){
+  .dp-panel{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;height:100dvh;border-radius:0;border:0}
+  .dp-head{padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top))}
+  .dp-title b{font-size:13.5px}
+  .dp-x{display:none}
+  /* one scrolling column: the file, then its details */
+
+  .dp-panel{overflow:auto}
+  .dp-body{grid-column:1;grid-row:2;height:auto;min-height:58dvh;max-height:none}
+  .dp-body iframe{height:70dvh}
+  .dp-body img{max-height:70dvh}
+  .dp-side{grid-column:1;grid-row:3;border-left:0;border-top:1px solid var(--baseline);overflow:visible}
+  .dp-field input,.dp-field select{min-height:44px;font-size:16px}
+  .dp-acts{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+}
+@media (max-width:639px){
+  .doc-files{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .doc-fname{font-size:12.5px}
+  .doc-seg{margin-left:0}
+  .doc-where{flex-basis:100%;order:3}
+  .doc-backbtn{min-height:44px}
+}
+/* =====================================================================
+   ACCESS -- who may sign in. Roles explained in words, one row per
+   person, a sign-in link instead of a password.
+   ===================================================================== */
+.acc-roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.acc-role{display:grid;gap:6px;align-content:start;padding:12px 14px;border:1px solid var(--grid);border-radius:var(--r,6px);
+  font-size:12.5px;line-height:1.45;color:var(--ink-2)}
+.acc-chip{justify-self:start;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;border:1px solid var(--baseline);color:var(--ink-1);font-weight:600}
+.acc-chip.is-admin{background:var(--ink-1);border-color:var(--ink-1);color:var(--page)}
+.acc-chip.is-manager{background:var(--accent-soft)}
+.acc-err{margin:0 0 14px;padding:10px 12px;border-left:2px solid var(--critical);background:rgba(255,154,154,.10);
+  color:var(--critical);font-size:13px}
+.acc-link{margin:0 0 18px;padding:14px 16px;border:1px solid var(--accent);border-radius:var(--r,6px);background:var(--accent-soft)}
+.acc-link-h{margin:0 0 8px;font-weight:600;color:var(--ink-1)}
+.acc-link-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.acc-link-row input{flex:1 1 240px;min-width:0;font-family:var(--mono);font-size:12px}
+.acc-mail{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-1);text-decoration:underline;
+  text-underline-offset:3px;padding:8px 4px}
+.acc-note{margin:8px 0 0;font-size:12px;color:var(--ink-2)}
+.acc-add{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.4fr) minmax(0,.9fr) auto;gap:10px;align-items:end;
+  padding:14px 16px;margin:0 0 18px;border:1px dashed var(--baseline);border-radius:var(--r,6px)}
+.acc-add-h{grid-column:1 / -1;margin:0;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.acc-add label,.acc-rl{display:grid;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.acc-add input,.acc-add select{width:100%;min-height:38px;font-family:var(--font);letter-spacing:0;text-transform:none}
+.acc-add button{min-height:38px}
+.acc-list{display:grid;border-top:1px solid var(--grid)}
+.acc-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(140px,.8fr) minmax(0,1.2fr) 310px;gap:14px;align-items:center;
+  padding:12px 2px;border-bottom:1px solid var(--grid)}
+.acc-row.is-blocked{opacity:.6}
+.acc-who{display:grid;gap:2px;min-width:0}
+.acc-nm{border:1px solid transparent;background:none;padding:4px 6px;margin-left:-6px;font-weight:600;font-size:14px;color:var(--ink-1);width:100%}
+.acc-nm:hover{border-color:var(--grid)}
+.acc-em{font-size:12px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-em i{font-style:normal;color:var(--accent)}
+.acc-ext{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--warning,#b7791f);margin-left:6px;cursor:help}
+.acc-rl > span{display:none}
+.acc-rl select{width:100%;min-height:36px;font-family:var(--font);letter-spacing:0;text-transform:none}
+.acc-st{display:grid;gap:2px;font-size:12px;color:var(--ink-3)}
+.acc-dot{display:inline-flex;align-items:center;gap:7px;font-weight:600;color:var(--ink-1);font-size:12.5px}
+.acc-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good,#2e8b57)}
+.acc-dot.is-pending::before{background:var(--warning,#b7791f)}
+.acc-dot.is-blocked::before{background:var(--critical)}
+.acc-acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
+.acc-acts button{white-space:nowrap}
+.acc-acts button{min-height:36px}
+.acc-acts button.danger{color:var(--critical)}
+.acc-sb{margin-top:14px}
+@media (max-width:900px){
+  .acc-roles{grid-template-columns:1fr}
+  .acc-add{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .acc-add button{grid-column:1 / -1}
+  .acc-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:10px}
+  .acc-who{grid-column:1 / -1}
+  .acc-acts{grid-column:1 / -1;justify-content:flex-start}
+}
+@media (max-width:639px){
+  .acc-add{grid-template-columns:minmax(0,1fr)}
+  .acc-add input,.acc-add select,.acc-rl select{min-height:44px;font-size:16px}
+  .acc-nm{font-size:16px}
+  .acc-rl > span{display:block}
+  .acc-row{grid-template-columns:minmax(0,1fr);padding:14px 2px}
+  .acc-acts button{min-height:44px;flex:1 1 auto}
+  .acc-link-row button,.acc-mail{flex:1 1 auto;text-align:center;min-height:44px}
 }
 </style>
 </head>
@@ -2158,6 +2344,20 @@ figure.chart figcaption{font-size:13px;font-weight:600;letter-spacing:0;margin-b
     <p class="signin-msg" id="siMsg" role="alert"></p>
     <button type="button" class="ghost signin-link" id="siForgot"></button>
   </form>
+  <!-- Reached from a sign-in link an admin sent: the person is already signed
+       in by the link and chooses their own password here. -->
+  <form class="signin-card" id="setpassForm" hidden>
+    <img src="__BASE__/assets/brand/logo-lockup.svg" alt="LITPROFIT" class="signin-mark">
+    <p class="signin-sub" id="spSub"></p>
+    <p class="signin-hello" id="spHello"></p>
+    <input type="email" id="spEmail" autocomplete="username" hidden readonly>
+    <label for="spPass" id="spPassL"></label>
+    <input type="password" id="spPass" autocomplete="new-password" minlength="8" required>
+    <label for="spPass2" id="spPass2L"></label>
+    <input type="password" id="spPass2" autocomplete="new-password" minlength="8" required>
+    <button type="submit" class="primary" id="spGo"></button>
+    <p class="signin-msg" id="spMsg" role="alert"></p>
+  </form>
 </div>
 
 <!-- Two people opened the same job. Never auto-resolved: whichever way it
@@ -2253,6 +2453,21 @@ en: {
     needInk:'Nothing has been drawn yet.',
     confirmDel:'Delete act {n}? This cannot be undone.'},
   actPrint:T_ACT_PRINT,
+  acc:{title:'Access to the calculator',lead:'Who can sign in and what they see. A new person gets a link and chooses their own password - nobody else ever knows it.',
+    roles:{admin:'Admin',manager:'Manager',staff:'Employee'},
+    roleN:{admin:'Everything, plus people, company costs and this screen.',manager:'All projects and enquiries, including revenue, margin and the portfolio.',staff:'Project costs and work acts only. No revenue, margin, portfolio or enquiries.'},
+    add:'Add a person',name:'Name',email:'Email',role:'Role',create:'Create and get the link',
+    linkFor:'Sign-in link for {name}',copy:'Copy',copied:'Copied',mail:'Send by email',
+    linkNote:'The link works once. The person opens it, chooses a password and is signed in. If it has expired, press "New link".',
+    mailSubj:'Access to the LITPROFIT calculator',mailBody:'Hello {name},\n\nhere is your link to the LITPROFIT project calculator. Open it and choose your password:\n\n{link}\n\nAfterwards you sign in at {site} with {email}.',
+    newLink:'New link',block:'Block',unblock:'Unblock',
+    st:{active:'Active',pending:'Invited, not signed in yet',blocked:'Blocked'},
+    last:'Last sign-in',never:'never',you:'you',showBlocked:'Show blocked',
+    confirmBlock:'Block {name}? They lose access immediately (at most an hour on an already open page). Their records stay as they are. You can unblock at any time.',
+    exists:'This email already has an account. Find it in the list and press "New link".',
+    errSelf:'You cannot change your own role or block yourself.',errLast:'This is the last active admin. Make someone else an admin first.',
+    errBadEmail:'Check the email address.',errFn:'The access service did not answer. If this repeats, it has not been deployed yet.',
+    needsCloud:'Access is managed in the online version, signed in as an admin.',ext:'outside address',extN:'Not a litprofit.com address. The same sign-in system also serves another site; blocking here blocks it there too.',loading:'Loading\u2026',saved:'Saved.'},
   doc:{title:'Documents',
     lead:'Invoices, quotes, contracts and certificates, filed against the job they belong to. Nothing here is read automatically \u2014 the amount and the date are the ones you type.',
     drop:'Drop files here, or choose them',
@@ -2270,6 +2485,7 @@ en: {
     dropInto:'Drop files here \u2014 they go into {folder}',
     expiringSoon:'expiring within 90 days',expired:'expired',daysLeft:'{n} days left',
     allFiles:'Everything',openFile:'Open the file',loading:'Opening\u2026',
+    back:'Back',vTiles:'Tiles',vList:'List',hFolder:'Folder',details:'Details',delFile:'Delete file',saveAuto:'Changes save as you make them.',
     noPreview:'No preview for this kind of file. Open it to read it.',
     kind:{invoice_in:'Invoice in',invoice_out:'Invoice out',quote:'Quote',contract:'Contract',
       certificate:'Certificate',report:'Report',photo:'Photo',other:'Other'},
@@ -2386,7 +2602,7 @@ en: {
     conflict:'Somebody else saved this enquiry while you had it open. Reload and try again.',
     staffOnly:'The enquiry register is not part of your access.'},
   appSub:'Project Profitability Calculator',themeDark:'Dark',themeLight:'Light',
-  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',acts:'Work carried out',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',enquiries:'Enquiries',settings:'Settings',people:'People',overheads:'Fixed costs',burn:'Break-even',docs:'Documents',pdocs:'Documents'},
+  tabs:{portfolio:'Portfolio',dashboard:'Dashboard',card:'Project Card',acts:'Work carried out',revenue:'Revenue',labor:'Labor',subs:'Subcontractors',travel:'Travel',materials:'Materials & Tools',logistics:'Logistics & Other',enquiries:'Enquiries',settings:'Settings',people:'People',overheads:'Fixed costs',burn:'Break-even',docs:'Documents',pdocs:'Documents',access:'Access'},
   newProj:'+ New project',dupProj:'Duplicate',delProj:'Delete',csv:'Export CSV',json:'Backup JSON',importJson:'Import',print:'Print report',
   addRow:'+ Add row',total:'Total',yes:'Yes',no:'No',
   confirmDel:'Delete this project? This cannot be undone.',
@@ -2548,7 +2764,7 @@ en: {
     sev:{watch:'watch', act:'act', urgent:'urgent'}
   },
   cloud:{
-    signInSub:'Project Profitability Calculator',
+    signInSub:'Project Profitability Calculator',linkExpired:'This sign-in link has expired or was already used. Ask your administrator for a new one.',setTitle:'Choose a password',setHello:'Hello, {name}. Choose the password you will sign in with. Your login is {email}.',newPass:'New password (8+ characters)',newPass2:'The same password again',savePass:'Save and sign in',passShort:'At least 8 characters.',passMismatch:'The two passwords differ.',
     importAdds:'Add {n} project(s) from this backup to the shared database? Existing projects are kept — nothing is replaced.',
     importPartial:'Only {n} of {total} projects could be uploaded. Check the connection and import the file again; the ones already added will appear twice, so delete the duplicates.',
     email:'Email',password:'Password',signIn:'Sign in',signingIn:'Signing in…',
@@ -2622,6 +2838,21 @@ lt: {
     needName:'Pirma įveskite atstovo vardą.',
     needInk:'Dar nieko nenupiešta.',
     confirmDel:'Ištrinti aktą {n}? Atkurti nebus galima.'},
+  acc:{title:'Prieiga prie skaičiuoklės',lead:'Kas gali prisijungti ir ką mato. Naujas žmogus gauna nuorodą ir pats susikuria slaptažodį – niekas kitas jo nežino.',
+    roles:{admin:'Administratorius',manager:'Vadovas',staff:'Darbuotojas'},
+    roleN:{admin:'Viskas, taip pat žmonės, įmonės išlaidos ir šis ekranas.',manager:'Visi projektai ir užklausos, įskaitant pajamas, maržą ir portfelį.',staff:'Tik projektų išlaidos ir darbų aktai. Be pajamų, maržos, portfelio ir užklausų.'},
+    add:'Pridėti žmogų',name:'Vardas',email:'El. paštas',role:'Rolė',create:'Sukurti ir gauti nuorodą',
+    linkFor:'Prisijungimo nuoroda: {name}',copy:'Kopijuoti',copied:'Nukopijuota',mail:'Siųsti el. paštu',
+    linkNote:'Nuoroda veikia vieną kartą. Žmogus ją atidaro, susikuria slaptažodį ir yra prijungiamas. Jei nebegalioja – „Nauja nuoroda“.',
+    mailSubj:'Prieiga prie LITPROFIT skaičiuoklės',mailBody:'Sveiki, {name},\n\nčia jūsų nuoroda į LITPROFIT projektų skaičiuoklę. Atidarykite ją ir susikurkite slaptažodį:\n\n{link}\n\nVėliau jungsitės adresu {site} su {email}.',
+    newLink:'Nauja nuoroda',block:'Blokuoti',unblock:'Atblokuoti',
+    st:{active:'Aktyvus',pending:'Pakviestas, dar neprisijungė',blocked:'Užblokuotas'},
+    last:'Paskutinis prisijungimas',never:'niekada',you:'jūs',showBlocked:'Rodyti užblokuotus',
+    confirmBlock:'Blokuoti {name}? Prieiga nutrūks iš karto (jau atidarytame puslapyje – ne vėliau kaip po valandos). Jo įrašai lieka. Atblokuoti galima bet kada.',
+    exists:'Šiam el. paštui paskyra jau yra. Raskite ją sąraše ir spauskite „Nauja nuoroda“.',
+    errSelf:'Negalite keisti savo rolės ar blokuoti savęs.',errLast:'Tai paskutinis aktyvus administratorius. Pirmiausia paskirkite kitą.',
+    errBadEmail:'Patikrinkite el. pašto adresą.',errFn:'Prieigos paslauga neatsakė. Jei kartojasi – ji dar neįdiegta.',
+    needsCloud:'Prieiga valdoma internetinėje versijoje, prisijungus administratoriumi.',ext:'išorinis adresas',extN:'Ne litprofit.com adresas. Ta pati prisijungimo sistema aptarnauja ir kitą svetainę; užblokavus čia, užblokuojama ir ten.',loading:'Įkeliama\u2026',saved:'Išsaugota.'},
   doc:{title:'Dokumentai',
     lead:'Sąskaitos, pasiūlymai, sutartys ir sertifikatai, priskirti darbui, kuriam priklauso. Niekas neskaitoma automatiškai \u2014 sumą ir datą įvedate jūs.',
     drop:'Nutempkite failus čia arba pasirinkite',
@@ -2639,6 +2870,7 @@ lt: {
     dropInto:'Nutempkite failus \u2014 jie pateks į „{folder}“',
     expiringSoon:'baigia galioti per 90 dienų',expired:'nebegalioja',daysLeft:'liko {n} d.',
     allFiles:'Viskas',openFile:'Atidaryti failą',loading:'Atidaroma\u2026',
+    back:'Atgal',vTiles:'Plytelės',vList:'Sąrašas',hFolder:'Aplankas',details:'Duomenys',delFile:'Ištrinti failą',saveAuto:'Pakeitimai išsaugomi iš karto.',
     noPreview:'Šio tipo failo peržiūros nėra. Atidarykite jį, kad perskaitytumėte.',
     kind:{invoice_in:'Gauta sąskaita',invoice_out:'Išrašyta sąskaita',quote:'Pasiūlymas',contract:'Sutartis',
       certificate:'Sertifikatas',report:'Ataskaita',photo:'Nuotrauka',other:'Kita'},
@@ -2755,7 +2987,7 @@ lt: {
     conflict:'Kitas naudotojas išsaugojo šią užklausą, kol ji buvo atidaryta. Perkraukite ir bandykite dar kartą.',
     staffOnly:'Užklausų registras nepriklauso jūsų prieigai.'},
   appSub:'Projektų pelningumo skaičiuoklė',themeDark:'Tamsi',themeLight:'Šviesi',
-  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',acts:'Atlikti darbai',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',enquiries:'Užklausos',settings:'Nustatymai',people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Nenuostolingumas',docs:'Dokumentai',pdocs:'Dokumentai'},
+  tabs:{portfolio:'Portfelis',dashboard:'Suvestinė',card:'Projekto kortelė',acts:'Atlikti darbai',revenue:'Pajamos',labor:'Darbo sąnaudos',subs:'Subrangovai',travel:'Kelionės',materials:'Medžiagos ir įrankiai',logistics:'Logistika ir kita',enquiries:'Užklausos',settings:'Nustatymai',people:'Žmonės',overheads:'Pastovios išlaidos',burn:'Nenuostolingumas',docs:'Dokumentai',pdocs:'Dokumentai',access:'Prieiga'},
   newProj:'+ Naujas projektas',dupProj:'Kopijuoti',delProj:'Ištrinti',csv:'Eksportuoti CSV',json:'Atsarginė kopija',importJson:'Importuoti',print:'Spausdinti ataskaitą',
   addRow:'+ Pridėti eilutę',total:'Iš viso',yes:'Taip',no:'Ne',
   confirmDel:'Ištrinti šį projektą? Veiksmo atšaukti negalima.',
@@ -2917,7 +3149,7 @@ lt: {
     sev:{watch:'stebėti', act:'veikti', urgent:'skubu'}
   },
   cloud:{
-    signInSub:'Projektų pelningumo skaičiuoklė',
+    signInSub:'Projektų pelningumo skaičiuoklė',linkExpired:'Ši prisijungimo nuoroda nebegalioja arba jau panaudota. Paprašykite administratoriaus naujos.',setTitle:'Susikurkite slaptažodį',setHello:'Sveiki, {name}. Susikurkite slaptažodį, kuriuo jungsitės. Jūsų prisijungimas – {email}.',newPass:'Naujas slaptažodis (8+ simboliai)',newPass2:'Tas pats slaptažodis dar kartą',savePass:'Išsaugoti ir prisijungti',passShort:'Bent 8 simboliai.',passMismatch:'Slaptažodžiai nesutampa.',
     importAdds:'Įkelti {n} projektą (-us) iš šios kopijos į bendrą duomenų bazę? Esami projektai išliks — niekas nebus pakeista.',
     importPartial:'Pavyko įkelti tik {n} iš {total} projektų. Patikrinkite ryšį ir importuokite failą dar kartą; jau įkelti projektai kartosis, tad dublikatus ištrinkite.',
     email:'El. paštas',password:'Slaptažodis',signIn:'Prisijungti',signingIn:'Jungiamasi…',
@@ -2991,6 +3223,21 @@ ru: {
     needName:'Сначала введите имя представителя.',
     needInk:'Пока ничего не нарисовано.',
     confirmDel:'Удалить акт {n}? Отменить нельзя.'},
+  acc:{title:'Доступ к калькулятору',lead:'Кто может входить и что видит. Новый человек получает ссылку и сам придумывает пароль — его не знает никто, кроме него.',
+    roles:{admin:'Админ',manager:'Менеджер',staff:'Сотрудник'},
+    roleN:{admin:'Всё, плюс люди, расходы компании и этот экран.',manager:'Все проекты и запросы, включая выручку, маржу и портфель.',staff:'Только затраты по проектам и акты работ. Без выручки, маржи, портфеля и запросов.'},
+    add:'Добавить человека',name:'Имя',email:'Эл. почта',role:'Роль',create:'Создать и получить ссылку',
+    linkFor:'Ссылка для входа: {name}',copy:'Копировать',copied:'Скопировано',mail:'Отправить письмом',
+    linkNote:'Ссылка одноразовая. Человек открывает её, придумывает пароль и сразу входит. Если она истекла — «Новая ссылка».',
+    mailSubj:'Доступ к калькулятору LITPROFIT',mailBody:'Здравствуйте, {name}!\n\nВот ваша ссылка на калькулятор проектов LITPROFIT. Откройте её и придумайте пароль:\n\n{link}\n\nДальше входите на {site} с адресом {email}.',
+    newLink:'Новая ссылка',block:'Заблокировать',unblock:'Разблокировать',
+    st:{active:'Активен',pending:'Приглашён, ещё не входил',blocked:'Заблокирован'},
+    last:'Последний вход',never:'не входил',you:'вы',showBlocked:'Показать заблокированных',
+    confirmBlock:'Заблокировать {name}? Доступ пропадёт сразу (на уже открытой странице — не позже чем через час). Его записи останутся как есть. Разблокировать можно в любой момент.',
+    exists:'На эту почту уже есть аккаунт. Найдите его в списке и нажмите «Новая ссылка».',
+    errSelf:'Нельзя менять свою роль или блокировать себя.',errLast:'Это последний активный админ. Сначала назначьте админом кого-то ещё.',
+    errBadEmail:'Проверьте адрес почты.',errFn:'Сервис доступа не ответил. Если повторяется — он ещё не установлен.',
+    needsCloud:'Доступом управляют в онлайн-версии, войдя как админ.',ext:'внешний адрес',extN:'Адрес не на litprofit.com. Та же система входа обслуживает и другой сайт: блокировка здесь заблокирует и там.',loading:'Загрузка\u2026',saved:'Сохранено.'},
   doc:{title:'Документы',
     lead:'Счета, предложения, договоры и сертификаты, привязанные к работе, к которой относятся. Ничего не распознаётся автоматически \u2014 сумму и дату вводите вы.',
     drop:'Перетащите файлы сюда или выберите',
@@ -3002,12 +3249,13 @@ ru: {
     dInvoiced:'Дата счёта',dSent:'Отправлено',dSigned:'Подписан',dIssued:'Выдан',
     dTaken:'Снято',dDated:'Дата',
     pSupplier:'Поставщик',pClient:'Клиент',pIssuer:'Кем выдан',pParty:'Вторая сторона',
-    folderLead:'Только те колонки, которые у документа этого типа действительно есть. Смените папку в строке — она переедет.',
+    folderLead:'Нажмите на файл, чтобы посмотреть его и изменить данные.',
     searchAll:'по всем папкам',searchJob:'по файлам этой работы',
     projLead:'Всё, что относится к этой работе \u2014 предложения, счета, фотографии, сертификаты. Всё, что сюда кладут, к ней и привязывается.',
     dropInto:'Перетащите файлы \u2014 они попадут в «{folder}»',
     expiringSoon:'заканчивается в ближайшие 90 дней',expired:'истёк',daysLeft:'осталось {n} дн.',
     allFiles:'Всё',openFile:'Открыть файл',loading:'Открывается\u2026',
+    back:'Назад',vTiles:'Плитки',vList:'Список',hFolder:'Папка',details:'Данные',delFile:'Удалить файл',saveAuto:'Изменения сохраняются сразу.',
     noPreview:'Для такого типа файла предпросмотра нет. Откройте его, чтобы прочитать.',
     kind:{invoice_in:'Входящий счёт',invoice_out:'Исходящий счёт',quote:'Предложение',contract:'Договор',
       certificate:'Сертификат',report:'Отчёт',photo:'Фото',other:'Прочее'},
@@ -3124,7 +3372,7 @@ ru: {
     conflict:'Кто-то сохранил этот запрос, пока он был открыт. Обновите страницу и повторите.',
     staffOnly:'Реестр запросов не входит в ваш доступ.'},
   appSub:'Калькулятор рентабельности проектов',themeDark:'Тёмная',themeLight:'Светлая',
-  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',acts:'Выполненные работы',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',enquiries:'Запросы',settings:'Настройки',people:'Люди',overheads:'Постоянные расходы',burn:'Безубыточность',docs:'Документы',pdocs:'Документы'},
+  tabs:{portfolio:'Портфель',dashboard:'Сводка',card:'Карточка проекта',acts:'Выполненные работы',revenue:'Доходы',labor:'Персонал',subs:'Субподрядчики',travel:'Командировки',materials:'Материалы и инструменты',logistics:'Логистика и прочее',enquiries:'Запросы',settings:'Настройки',people:'Люди',overheads:'Постоянные расходы',burn:'Безубыточность',docs:'Документы',pdocs:'Документы',access:'Доступ'},
   newProj:'+ Новый проект',dupProj:'Дублировать',delProj:'Удалить',csv:'Экспорт CSV',json:'Резервная копия',importJson:'Импорт',print:'Печать отчёта',
   addRow:'+ Добавить строку',total:'Итого',yes:'Да',no:'Нет',
   confirmDel:'Удалить этот проект? Действие необратимо.',
@@ -3286,7 +3534,7 @@ ru: {
     sev:{watch:'следить', act:'делать', urgent:'срочно'}
   },
   cloud:{
-    signInSub:'Калькулятор рентабельности проектов',
+    signInSub:'Калькулятор рентабельности проектов',linkExpired:'Ссылка для входа устарела или уже использована. Попросите у администратора новую.',setTitle:'Придумайте пароль',setHello:'Здравствуйте, {name}. Придумайте пароль, с которым будете входить. Ваш логин — {email}.',newPass:'Новый пароль (от 8 символов)',newPass2:'Тот же пароль ещё раз',savePass:'Сохранить и войти',passShort:'Не меньше 8 символов.',passMismatch:'Пароли не совпадают.',
     importAdds:'Добавить {n} проект(ов) из этой копии в общую базу данных? Существующие проекты сохранятся — ничего не будет заменено.',
     importPartial:'Удалось загрузить только {n} из {total} проектов. Проверьте соединение и импортируйте файл снова; уже загруженные появятся дважды — удалите дубликаты.',
     email:'Эл. почта',password:'Пароль',signIn:'Войти',signingIn:'Вход…',
@@ -3623,6 +3871,44 @@ const CLOUD = (function(){
       await auth('recover', { email: email });
     },
 
+    /* A sign-in link (invite or password reset) lands here with the session
+       in the address: #access_token=...&refresh_token=...&type=invite. Take
+       it, ask the auth server who it belongs to, and keep it -- the person is
+       signed in, and the next thing they see is "choose your password". */
+    async adoptLink(params){
+      const at = params.get('access_token');
+      if(!at) return null;
+      let r;
+      try {
+        r = await fetch(API + '/auth/v1/user', { headers: { apikey: KEY, Authorization: 'Bearer ' + at } });
+      } catch(err){ throw offline(); }
+      if(!r.ok) throw new Error('link');
+      const user = await r.json();
+      keep({ access_token: at, refresh_token: params.get('refresh_token'),
+             expires_in: Number(params.get('expires_in')) || 3600, user });
+      return user;
+    },
+    async setPassword(password){
+      if(!session || !session.access_token) throw new Error('link');
+      let r;
+      try {
+        r = await fetch(API + '/auth/v1/user', {
+          method: 'PUT',
+          headers: { apikey: KEY, 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+          body: JSON.stringify({ password })
+        });
+      } catch(err){ throw offline(); }
+      let j = {};
+      try { j = await r.json(); } catch(e){}
+      if(!r.ok) throw new Error(j.msg || j.error_description || j.error || ('HTTP ' + r.status));
+      return true;
+    },
+    /* Accounts: everything goes through the `users` function, which checks
+       on the server that the caller is an admin. */
+    async users(action, payload){
+      return fn('users', Object.assign({ action }, payload || {}));
+    },
+
     /* people, so a row can say who last touched it */
     async people(){
       const rows = await rest('profiles?select=id,name,email');
@@ -3824,6 +4110,22 @@ const CLOUD = (function(){
        link that works forever is a link that leaks forever. Sixty seconds is
        long enough to start a download and short enough to be useless if it is
        pasted anywhere. */
+    /* Many at once, for thumbnails: one request for a folder of forty files
+       instead of forty. Returns { path: url }; a path the server refused is
+       simply absent. */
+    async docLinks(paths, seconds){
+      const res = await fetch(API + '/storage/v1/object/sign/documents', {
+        method: 'POST',
+        headers: Object.assign(authHeaders(), { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ expiresIn: seconds || 600, paths })
+      });
+      if(!res.ok) return {};
+      const out = {};
+      (await res.json() || []).forEach(x => {
+        if(x && x.signedURL && !x.error) out[x.path] = API + '/storage/v1' + x.signedURL;
+      });
+      return out;
+    },
     async docLink(path, seconds){
       const res = await fetch(API + '/storage/v1/object/sign/documents/' + encodeURI(path), {
         method: 'POST',
@@ -4870,7 +5172,7 @@ const MANAGER_TABS = ['card','pdocs','revenue','labor','subs','travel','material
    and this is the company itself: what it costs to open the doors. Its own
    tab strip rather than an eleventh project tab, because none of it is
    project-scoped and it must be readable on an account with no projects. */
-const COMPANY_TABS = ['people','overheads','burn','docs'];
+const COMPANY_TABS = ['people','overheads','burn','docs','access'];
 
 function tabList(){
   /* ...and only if this person may see it. Without the second half the list
@@ -5381,6 +5683,7 @@ function render(){
   renderInner();
   markBlankRows();
   labelCoTables();
+  if(state.tab === 'docs' || state.tab === 'pdocs') docThumbs();
 }
 function renderInner(){
   renderChrome();
@@ -5403,7 +5706,8 @@ function renderInner(){
      before the same guard for the same reason. */
   if(COMPANY_TABS.indexOf(state.tab) !== -1){
     m.innerHTML = viewCompany(state.tab);
-    m.dataset.view = state.tab === 'burn' ? 'page' : 'sheet';
+    if(state.tab === 'access') wireAccess();
+    m.dataset.view = (state.tab === 'burn' || state.tab === 'access') ? 'page' : 'sheet';
     wireCompany();
     paintPulse(); measureChrome(); enhanceSelects();
     return;
@@ -7504,10 +7808,162 @@ function coBurnLocal(){
 }
 function coBurn(){ return state.burn || coBurnLocal(); }
 
+/* ---- access: who may sign in, and as what ----
+   Everything here goes through the `users` edge function, which checks on
+   the server that the caller is an admin; this screen only draws what it is
+   given. A new person gets a link, never a password from someone else. */
+const ACC = { list: null, me: null, busy: false, err: '', link: null, showBlocked: false };
+
+async function accLoad(force){
+  if(!CLOUD.on || ACC.busy) return;
+  if(ACC.list && !force) return;
+  ACC.busy = true; ACC.err = '';
+  try {
+    const r = await CLOUD.users('list');
+    ACC.list = r.users || []; ACC.me = r.me;
+  } catch(e){ ACC.err = accErr(e); if(!ACC.list) ACC.list = []; }
+  ACC.busy = false;
+  if(state.tab === 'access') render();
+}
+function accErr(e){
+  const a = tr().acc, m = (e && e.message) || '';
+  if(m === 'exists') return a.exists;
+  if(m === 'self') return a.errSelf;
+  if(m === 'last admin') return a.errLast;
+  if(m === 'bad email') return a.errBadEmail;
+  if(e && (e.status === 404 || e.offline || /fetch|HTTP 5/i.test(m))) return a.errFn;
+  return m || a.errFn;
+}
+function accSite(){ return location.origin + location.pathname; }
+
+function accView(){
+  const t = tr(), a = t.acc;
+  if(!CLOUD.on) return `<div class="card"><h2 class="sheet">${esc(a.title)}</h2><p class="muted">${esc(a.needsCloud)}</p></div>`;
+  if(!ACC.list){ accLoad(); return `<div class="card"><h2 class="sheet">${esc(a.title)}</h2><p class="muted">${esc(a.loading)}</p></div>`; }
+  const roleOpts = sel => ['staff','manager','admin'].map(r =>
+    `<option value="${r}"${r === sel ? ' selected' : ''}>${esc(a.roles[r])}</option>`).join('');
+  const rows = ACC.list.slice()
+    .filter(u => ACC.showBlocked || !u.blocked)
+    .sort((x, y) => (x.blocked - y.blocked) || (x.name || x.email).localeCompare(y.name || y.email));
+  const nBlocked = ACC.list.filter(u => u.blocked).length;
+  const date = v => v ? new Date(v).toLocaleString(state.lang === 'en' ? 'en-GB' : state.lang,
+    { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : a.never;
+  const L = ACC.link;
+  const mail = L ? 'mailto:' + encodeURIComponent(L.email) + '?subject=' + encodeURIComponent(a.mailSubj)
+    + '&body=' + encodeURIComponent(a.mailBody.replace('{name}', L.name).replace('{link}', L.url)
+      .replace('{site}', accSite()).replace('{email}', L.email)) : '';
+  return `<div class="card acc">
+    <h2 class="sheet">${esc(a.title)}</h2>
+    <p class="hint" style="margin:-8px 0 16px">${esc(a.lead)}</p>
+
+    <div class="acc-roles">${['admin','manager','staff'].map(r =>
+      `<div class="acc-role"><b class="acc-chip is-${r}">${esc(a.roles[r])}</b><span>${esc(a.roleN[r])}</span></div>`).join('')}</div>
+
+    ${ACC.err ? `<p class="acc-err" role="alert">${esc(ACC.err)}</p>` : ''}
+
+    ${L ? `<div class="acc-link" role="status">
+      <p class="acc-link-h">${esc(a.linkFor.replace('{name}', L.name))}</p>
+      <div class="acc-link-row"><input id="accLinkUrl" readonly value="${esc(L.url)}" aria-label="${esc(a.linkFor.replace('{name}', L.name))}">
+        <button type="button" class="primary" id="accCopy">${esc(a.copy)}</button>
+        <a class="acc-mail" href="${esc(mail)}">${esc(a.mail)}</a></div>
+      <p class="acc-note">${esc(a.linkNote)}</p>
+    </div>` : ''}
+
+    <form class="acc-add" id="accAdd" autocomplete="off">
+      <p class="acc-add-h">${esc(a.add)}</p>
+      <label>${esc(a.name)}<input id="accName" required maxlength="120"></label>
+      <label>${esc(a.email)}<input id="accEmail" type="email" required inputmode="email" autocapitalize="off"></label>
+      <label>${esc(a.role)}<select id="accRole">${roleOpts('staff')}</select></label>
+      <button type="submit" class="primary" id="accCreate">${esc(a.create)}</button>
+    </form>
+
+    <div class="acc-list">${rows.map(u => {
+      const me = u.id === ACC.me;
+      const st = u.blocked ? 'blocked' : (u.pending ? 'pending' : 'active');
+      return `<div class="acc-row${u.blocked ? ' is-blocked' : ''}" data-uid="${esc(u.id)}">
+        <div class="acc-who">
+          <input class="acc-nm" data-acc-name value="${esc(u.name || '')}" aria-label="${esc(a.name)}" ${u.blocked ? 'disabled' : ''}>
+          <span class="acc-em">${esc(u.email)}${me ? ` <i>· ${esc(a.you)}</i>` : ''}${
+            /@litprofit\.com$/i.test(u.email || '') ? '' : ` <b class="acc-ext" title="${esc(a.extN)}">${esc(a.ext)}</b>`}</span>
+        </div>
+        <label class="acc-rl"><span>${esc(a.role)}</span><select data-acc-role ${me || u.blocked ? 'disabled' : ''}>${roleOpts(u.role)}</select></label>
+        <div class="acc-st"><b class="acc-dot is-${st}">${esc(a.st[st])}</b><span>${esc(a.last)}: ${esc(date(u.last_sign_in_at))}</span></div>
+        <div class="acc-acts">
+          ${u.blocked ? '' : `<button type="button" class="ghost" data-acc-link>${esc(a.newLink)}</button>`}
+          ${me ? '' : `<button type="button" class="ghost${u.blocked ? '' : ' danger'}" data-acc-${u.blocked ? 'unblock' : 'block'}>${esc(u.blocked ? a.unblock : a.block)}</button>`}
+        </div>
+      </div>`;
+    }).join('')}</div>
+    ${nBlocked ? `<label class="co-check acc-sb"><input type="checkbox" id="accShowBlocked"${ACC.showBlocked ? ' checked' : ''}> ${esc(a.showBlocked)} (${nBlocked})</label>` : ''}
+  </div>`;
+}
+
+async function accDo(action, payload, okMsg){
+  ACC.err = '';
+  try {
+    const r = await CLOUD.users(action, Object.assign({ redirect: accSite() }, payload));
+    if(okMsg) toast(okMsg, 'ok');
+    return r;
+  } catch(e){ ACC.err = accErr(e); render(); return null; }
+}
+function wireAccess(){
+  const main = $('#main');
+  if(!main || main.dataset.accWired) return;
+  main.dataset.accWired = '1';
+  main.addEventListener('submit', async ev => {
+    if(ev.target.id !== 'accAdd') return;
+    ev.preventDefault();
+    const name = $('#accName').value.trim(), email = $('#accEmail').value.trim(), role = $('#accRole').value;
+    const btn = $('#accCreate'); if(btn) btn.disabled = true;
+    const r = await accDo('create', { name, email, role });
+    if(btn) btn.disabled = false;
+    if(r && r.link){ ACC.link = { url: r.link, name: name || email, email }; await accLoad(true); render(); }
+  });
+  main.addEventListener('change', async ev => {
+    if(state.tab !== 'access') return;
+    if(ev.target.id === 'accShowBlocked'){ ACC.showBlocked = ev.target.checked; render(); return; }
+    const row = ev.target.closest && ev.target.closest('[data-uid]');
+    if(!row) return;
+    const id = row.getAttribute('data-uid');
+    if(ev.target.matches('[data-acc-role]')){
+      const r = await accDo('role', { id, role: ev.target.value }, tr().acc.saved);
+      await accLoad(true);
+      if(!r) render();
+    } else if(ev.target.matches('[data-acc-name]')){
+      const r = await accDo('name', { id, name: ev.target.value }, tr().acc.saved);
+      if(r){ const u = ACC.list.find(x => x.id === id); if(u) u.name = ev.target.value.trim(); }
+    }
+  });
+  main.addEventListener('click', async ev => {
+    if(state.tab !== 'access') return;
+    if(ev.target.id === 'accCopy'){
+      const inp = $('#accLinkUrl');
+      try { await navigator.clipboard.writeText(inp.value); }
+      catch(e){ inp.select(); try { document.execCommand('copy'); } catch(_){} }
+      ev.target.textContent = tr().acc.copied;
+      return;
+    }
+    const row = ev.target.closest && ev.target.closest('[data-uid]');
+    if(!row) return;
+    const id = row.getAttribute('data-uid');
+    const u = (ACC.list || []).find(x => x.id === id); if(!u) return;
+    if(ev.target.closest('[data-acc-link]')){
+      const r = await accDo('link', { id });
+      if(r && r.link){ ACC.link = { url: r.link, name: u.name || u.email, email: u.email }; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    } else if(ev.target.closest('[data-acc-block]')){
+      if(!confirm(tr().acc.confirmBlock.replace('{name}', u.name || u.email))) return;
+      if(await accDo('block', { id }, tr().acc.saved)) await accLoad(true);
+    } else if(ev.target.closest('[data-acc-unblock]')){
+      if(await accDo('unblock', { id }, tr().acc.saved)) await accLoad(true);
+    }
+  });
+}
+
 function viewCompany(tab){
   if(tab === 'people')    return coPeopleView();
   if(tab === 'overheads') return coOverheadsView();
   if(tab === 'docs')      return coDocsView();
+  if(tab === 'access')    return accView();
   return coBurnView();
 }
 
@@ -7665,6 +8121,12 @@ function docFolderGrid(t){
 
 /* ---- one row, with only the columns its folder declares ---- */
 function docCell(r, field, t){
+  const x = docInput(r, field, t);
+  return `<td class="${x.cls}">${x.html}</td>`;
+}
+/* The field itself, without its cell: the list puts it in a <td>, the preview
+   puts it under a label. One definition, so the two cannot drift. */
+function docInput(r, field, t){
   const d = t.doc;
   const projList = state.projects || [];
   const enqList = (state.enquiries || []).slice(0, 300);
@@ -7675,22 +8137,160 @@ function docCell(r, field, t){
   if(field === 'doc_date' || field === 'valid_until'){
     const v = r[field] || '';
     const late = field === 'valid_until' && r.days_left != null && r.days_left <= 90;
-    return `<td class="${late ? (r.days_left < 0 ? 'doc-gone' : 'doc-soon') : ''}">
-      <input data-df="${field}" type="date" value="${esc(v)}">
+    return { cls: late ? (r.days_left < 0 ? 'doc-gone' : 'doc-soon') : '', html:
+      `<input data-df="${field}" type="date" value="${esc(v)}">
       ${late ? `<span class="doc-left">${r.days_left < 0
-          ? esc(d.expired) : d.daysLeft.replace('{n}', r.days_left)}</span>` : ''}</td>`;
+          ? esc(d.expired) : d.daysLeft.replace('{n}', r.days_left)}</span>` : ''}` };
   }
   if(field === 'amount')
-    return `<td class="num"><input data-df="amount" type="number" step="0.01"
-      value="${r.amount == null ? '' : r.amount}"></td>`;
+    return { cls: 'num', html: `<input data-df="amount" type="number" step="0.01" inputmode="decimal"
+      value="${r.amount == null ? '' : r.amount}">` };
   if(field === 'project_id')
-    return `<td><select data-df="project_id">${opts(projList, r.project_id,
-      x => x.id, x => (x.card ? x.card.projectId : x.id))}</select></td>`;
+    return { cls: '', html: `<select data-df="project_id">${opts(projList, r.project_id,
+      x => x.id, x => (x.card ? x.card.projectId : x.id))}</select>` };
   if(field === 'enquiry_id')
-    return `<td><select data-df="enquiry_id">${opts(enqList, r.enquiry_id,
-      x => x.id, x => x.number + (x.client ? ' \u2014 ' + x.client : ''))}</select></td>`;
-  return `<td><input data-df="${field}" value="${esc(r[field] || '')}"></td>`;
+    return { cls: '', html: `<select data-df="enquiry_id">${opts(enqList, r.enquiry_id,
+      x => x.id, x => x.number + (x.client ? ' \u2014 ' + x.client : ''))}</select>` };
+  return { cls: '', html: `<input data-df="${field}" value="${esc(r[field] || '')}">` };
 }
+
+/* ---- tiles: what the file IS, before anything else ----
+   A list of file names says "IMG_4412.jpg" and "Scan 2026-03-12.pdf"; nobody
+   can tell which is the signed act. A tile shows the photograph or the first
+   page, the name under it and the two facts that tell files of one folder
+   apart (date and amount). Tap opens the large preview, where the details are
+   edited -- the list view keeps the inline fields for bulk work. */
+function docExt(rec){
+  const m = /\.([a-z0-9]{1,5})$/i.exec(rec.filename || '');
+  return m ? m[1].toUpperCase() : 'FILE';
+}
+function docTiles(rows, t, showKind){
+  const d = t.doc;
+  if(!rows.length) return `<p class="doc-none">${esc(d.none)}</p>`;
+  return `<div class="doc-files">${rows.map(r => {
+    const pk = docPreviewKind(r);
+    const near = r.days_left != null && r.days_left <= 90;
+    const date = r.doc_date || (r.created_at || '').slice(0, 10);
+    const amt = r.amount != null && r.amount !== '' ? price(r.amount) : '';
+    const sub = showKind ? d.kind[r.kind] : (r.counterparty || r.ref || r.project_ref || r.enquiry_ref || '');
+    return `<button type="button" class="doc-file" data-doc-open="${esc(r.id)}">
+      <span class="doc-thumb is-${pk}" data-thumb="${pk}" data-path="${esc(r.path || '')}">
+        <span class="doc-ext">${esc(docExt(r))}</span>
+        ${near ? `<span class="doc-flag${r.days_left < 0 ? ' is-gone' : ''}">${esc(r.days_left < 0
+          ? d.expired : d.daysLeft.replace('{n}', r.days_left))}</span>` : ''}
+      </span>
+      <span class="doc-fname">${esc(r.filename)}</span>
+      <span class="doc-fmeta">${esc(date)}${amt ? `<b>${esc(amt)}</b>` : ''}</span>
+      ${sub ? `<span class="doc-fsub">${esc(sub)}</span>` : ''}
+    </button>`;
+  }).join('')}</div>`;
+}
+
+/* Thumbnails. Signed for ten minutes in one request per screen (the storage
+   API signs a list), drawn once and kept for the session: render() rebuilds
+   the screen on every keystroke, and re-downloading forty photographs for each
+   one is how a phone runs out of data. A PDF's first page is drawn by pdf.js,
+   served from this site -- no third party sees which documents are opened. */
+const THUMBS = new Map();      /* path -> { url, at } or { img } */
+let PDFJS = null;
+function pdfjsLoad(){
+  if(PDFJS) return PDFJS;
+  PDFJS = new Promise((ok, no) => {
+    const sc = document.createElement('script');
+    sc.src = '__BASE__/assets/vendor/pdfjs-3.11.174/pdf.min.js';
+    sc.onload = () => {
+      const lib = window.pdfjsLib;
+      if(!lib){ no(new Error('pdfjs')); return; }
+      lib.GlobalWorkerOptions.workerSrc = '__BASE__/assets/vendor/pdfjs-3.11.174/pdf.worker.min.js';
+      ok(lib);
+    };
+    sc.onerror = () => { PDFJS = null; no(new Error('pdfjs')); };
+    document.head.appendChild(sc);
+  });
+  return PDFJS;
+}
+async function pdfThumb(url, width){
+  const lib = await pdfjsLoad();
+  const doc = await lib.getDocument({ url, disableAutoFetch: true, disableStream: true }).promise;
+  try {
+    const page = await doc.getPage(1);
+    const v1 = page.getViewport({ scale: 1 });
+    const scale = Math.min(3, (width * Math.min(2, window.devicePixelRatio || 1)) / v1.width);
+    const vp = page.getViewport({ scale });
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    return cv.toDataURL('image/jpeg', 0.82);
+  } finally { doc.destroy(); }
+}
+function thumbPaint(el, src){
+  if(!el || el.querySelector('img.doc-timg')) return;
+  const img = new Image();
+  img.className = 'doc-timg'; img.alt = ''; img.decoding = 'async';
+  img.onload = () => el.classList.add('has-img');
+  img.onerror = () => { THUMBS.delete(el.getAttribute('data-path')); };
+  img.src = src;
+  el.prepend(img);
+}
+let THUMB_IO = null;
+async function docThumbs(){
+  const els = [...document.querySelectorAll('.doc-thumb[data-thumb="image"],.doc-thumb[data-thumb="pdf"]')];
+  if(!els.length || !CLOUD.on) return;
+  /* what is already drawn goes straight back on */
+  const now = Date.now(), todo = [];
+  els.forEach(el => {
+    const path = el.getAttribute('data-path'), c = THUMBS.get(path);
+    if(c && c.img) thumbPaint(el, c.img);
+    else if(c && c.url && now - c.at < 8 * 60e3) { if(el.getAttribute('data-thumb') === 'image') thumbPaint(el, c.url); else todo.push(el); }
+    else todo.push(el);
+  });
+  if(!todo.length) return;
+  const need = [...new Set(todo.map(el => el.getAttribute('data-path')))]
+    .filter(p => { const c = THUMBS.get(p); return !(c && c.url && now - c.at < 8 * 60e3); });
+  if(need.length){
+    try {
+      const links = await CLOUD.docLinks(need, 600);
+      need.forEach(p => { if(links[p]) THUMBS.set(p, { url: links[p], at: Date.now() }); });
+    } catch(e){ return; }
+  }
+  if(THUMB_IO) THUMB_IO.disconnect();
+  THUMB_IO = new IntersectionObserver(entries => entries.forEach(async en => {
+    if(!en.isIntersecting) return;
+    THUMB_IO.unobserve(en.target);
+    const el = en.target, path = el.getAttribute('data-path'), c = THUMBS.get(path);
+    if(!c || !c.url) return;
+    if(el.getAttribute('data-thumb') === 'image'){ thumbPaint(el, c.url); return; }
+    if(c.busy) return;
+    c.busy = true;
+    try {
+      const img = await pdfThumb(c.url, el.clientWidth || 220);
+      THUMBS.set(path, { img });
+      document.querySelectorAll('.doc-thumb[data-path="' + CSS.escape(path) + '"]').forEach(x => thumbPaint(x, img));
+    } catch(e){ c.busy = false; }
+  }), { rootMargin: '200px 0px' });
+  todo.forEach(el => THUMB_IO.observe(el));
+}
+
+/* The phone's back gesture and the browser's Back button step out of the
+   preview, then out of the folder -- the way they do in every other app --
+   instead of leaving the calculator. Each step in pushes one history entry. */
+function docPush(tag){ try { history.pushState({ lpDoc: tag }, ''); } catch(e){} }
+function docStepBack(){
+  if(DOC_PREVIEW){ docPreviewClose(); return true; }
+  if(state.tab !== 'docs' && state.tab !== 'pdocs') return false;
+  const f = docState();
+  if(!f.kind && !(f.q || '').trim()) return false;
+  if((f.q || '').trim()) f.q = ''; else f.kind = '';
+  persist(); render();
+  return true;
+}
+function docBack(){
+  if(history.state && history.state.lpDoc) history.back();   /* popstate does the step */
+  else docStepBack();
+}
+window.addEventListener('popstate', () => { docStepBack(); });
 
 function coDocsView(){
   const t = tr(), d = t.doc, f = docState();
@@ -7704,12 +8304,25 @@ function coDocsView(){
      invoices folder is full of photographs. */
   const dropKind = f.kind || 'other';
 
-  const head = inFolder
-    ? `<p class="doc-crumb"><button type="button" class="doc-back" data-folder="">${
-        esc(d.allFiles)}</button> <span>/</span> <b>${esc(d.kind[f.kind])}</b></p>`
+  /* A STEP BACK, said in words. The only way out of a folder was a small
+     underlined "Everything" in a breadcrumb, which nobody reads as a button;
+     on a phone people reached for the browser's back instead and left the
+     app. Now there is a real Back button, and the phone's own back gesture
+     does the same thing (see docPush). */
+  const listView = state.docView === 'list';
+  const head = (inFolder || searching)
+    ? `<div class="doc-nav">
+        <button type="button" class="doc-backbtn" data-doc-back>\u2190 ${esc(d.back)}</button>
+        ${inFolder ? '' : `<span class="doc-where">${esc(d.search)}: <b>\u201c${esc(f.q.trim())}\u201d</b></span>`}
+        <span class="enq-seg doc-seg" role="tablist">
+          <button type="button" role="tab" data-doc-view="tiles" class="${listView ? '' : 'on'}" aria-selected="${!listView}">${esc(d.vTiles)}</button>
+          <button type="button" role="tab" data-doc-view="list" class="${listView ? 'on' : ''}" aria-selected="${listView}">${esc(d.vList)}</button>
+        </span>
+      </div>`
     : '';
 
-  const table = (inFolder || searching) ? (() => {
+  const table = (inFolder || searching) && !listView ? docTiles(rows, t, searching && !inFolder)
+              : (inFolder || searching) ? (() => {
     /* When searching across folders the rows are of mixed kinds, so the
        columns fall back to the common ones and each row says which folder it
        is in. Inside a folder they are that folder's own. */
@@ -7739,15 +8352,7 @@ function coDocsView(){
   const pid = docScope();
   const mine = docScoped();
 
-  return `${noticeBar()}<div class="card">
-    <h2 class="sheet">${esc(d.title)}${pid
-      ? ` <span class="muted" style="font-weight:400">// ${esc(proj().card.projectId || '')}</span>`
-      : ''}${inFolder ? ' // ' + esc(d.kind[f.kind]) : ''}</h2>
-    <p class="hint" style="margin:-8px 0 14px">${esc(
-      inFolder ? d.folderLead : (pid ? d.projLead : d.lead))}</p>
-    ${head}
-
-    <label class="drop-zone" data-doc-drop data-drop-kind="${dropKind}">
+  const drop = `<label class="drop-zone${inFolder || searching ? ' is-compact' : ''}" data-doc-drop data-drop-kind="${dropKind}">
       <input type="file" id="docFile" multiple class="drop-input"
              accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.csv,.txt">
       <span class="drop-face">
@@ -7756,29 +8361,45 @@ function coDocsView(){
         <span class="drop-hint">${esc(d.dropHint)}</span>
       </span>
     </label>
-    <p class="doc-status" id="docStatus" role="status" aria-live="polite"></p>
-    ${!pid && CLOUD.on ? `<p class="imp-entry"><button id="docImportFolder" class="ghost">${
-      esc(impT().open)}</button> <span class="muted">${esc(impT().openHint)}</span></p>` : ''}
-
-    <div class="pf-filters co-bar">
+    <p class="doc-status" id="docStatus" role="status" aria-live="polite"></p>`;
+  const search = `<div class="pf-filters co-bar doc-search">
       <label>${esc(d.search)}<input type="search" id="docQ" value="${esc(f.q)}"
         placeholder="${esc(pid ? d.searchJob : d.searchAll)}"></label>
       ${/* TWO NUMBERS THAT ARE NOT THE SAME THING.
              Standing in Certificates on a job with six files it read "2 / 6",
              and the only sensible way to read that is two certificates out of
-             six certificates -- so four of them look missing. They are not:
-             the six are the job's whole store and the two are this folder.
-             Reported as "why 2/6, delete those four", where the four were the
-             signed contract, the offer and two invoices.
-             A fraction now appears only when SEARCHING, where both numbers do
-             mean the same thing -- matches, out of the files searched -- and
-             it is spelled out in words. A folder just says how many are in
-             it. */ ''}
+             six certificates -- so four of them look missing. A fraction
+             appears only when SEARCHING, where both numbers mean the same
+             thing, and it is spelled out in words. A folder just says how
+             many are in it. */ ''}
       ${searching
         ? `<span class="muted">${esc(t.showing)} ${rows.length} ${esc(t.of)} ${mine.length}</span>`
         : (inFolder ? `<span class="muted">${rows.length}</span>` : '')}
-    </div>
+    </div>`;
+  const title = `<h2 class="sheet">${esc(d.title)}${pid
+      ? ` <span class="muted" style="font-weight:400">// ${esc(proj().card.projectId || '')}</span>`
+      : ''}${inFolder ? ' // ' + esc(d.kind[f.kind]) : ''}</h2>`;
 
+  /* Inside a folder the files come first: the way out, the search, the files
+     themselves, and only then the box to add more. They used to sit under
+     the upload box, the import and the search -- on a phone, two screens
+     down, so a folder looked empty until you scrolled. */
+  if(inFolder || searching) return `${noticeBar()}<div class="card">
+    ${title}
+    ${head}
+    ${search}
+    ${table}
+    ${drop}
+    <p class="hint co-foot">${esc(d.foot)}</p>
+  </div>`;
+
+  return `${noticeBar()}<div class="card">
+    ${title}
+    <p class="hint" style="margin:-8px 0 14px">${esc(pid ? d.projLead : d.lead)}</p>
+    ${drop}
+    ${!pid && CLOUD.on ? `<p class="imp-entry"><button id="docImportFolder" class="ghost">${
+      esc(impT().open)}</button> <span class="muted">${esc(impT().openHint)}</span></p>` : ''}
+    ${search}
     ${table}
     <p class="hint co-foot">${esc(d.foot)}</p>
   </div>`;
@@ -9818,7 +10439,10 @@ function wireCompany(){
                   start_date: new Date().toISOString().slice(0, 10) };
     await coCreate('person', row);
   });
-  on('docQ', 'input', e => { docState().q = e.target.value; persist(); render(); });
+  on('docQ', 'input', e => {
+    if(!(docState().q || '').trim() && e.target.value.trim()) docPush('search');
+    docState().q = e.target.value; persist(); render();
+  });
   on('docFile', 'change', e => docUpload(e.target.files));
   on('docImportFolder', 'click', impOpen);
 
@@ -9882,10 +10506,16 @@ function wireCompany(){
      the rest. */
   document.addEventListener('click', ev => {
     if(!DOC_PREVIEW) return;
-    if(ev.target.closest('[data-dp-close]')) docPreviewClose();
+    if(ev.target.closest('[data-dp-close]')){ docBack(); return; }
+    if(ev.target.closest('[data-dp-del]')){ docDelete(DOC_PREVIEW.id); return; }
   });
   document.addEventListener('keydown', ev => {
-    if(DOC_PREVIEW && ev.key === 'Escape'){ ev.preventDefault(); docPreviewClose(); }
+    if(DOC_PREVIEW && ev.key === 'Escape'){ ev.preventDefault(); docBack(); }
+  });
+  /* the details in the preview save the way the list's fields do */
+  document.addEventListener('change', ev => {
+    const form = ev.target.closest && ev.target.closest('#docPreview [data-doc]');
+    if(form && ev.target.matches('[data-df]')) docFieldChanged(form, { fromPreview: true, repaint: ev.target.getAttribute('data-df') === 'kind' });
   });
 
   main.addEventListener('change', ev => {
@@ -9907,10 +10537,15 @@ function wireCompany(){
       const k = folder.getAttribute('data-folder');
       /* Clicking the folder you are in goes back to all of them, so the same
          control is the way out. */
+      const into = docState().kind !== k && k;
       docState().kind = (docState().kind === k) ? '' : k;
-      persist(); render();
+      if(into) docPush('folder');
+      persist(); render(); window.scrollTo(0, 0);
       return;
     }
+    if(ev.target.closest('[data-doc-back]')){ docBack(); return; }
+    const dv = ev.target.closest('[data-doc-view]');
+    if(dv){ state.docView = dv.getAttribute('data-doc-view'); persist(); render(); return; }
     const open = ev.target.closest('[data-doc-open]');
     if(open){ ev.preventDefault(); docPreview(open.getAttribute('data-doc-open')); return; }
     /* data-co-del, not data-del. The sheet engine already emits
@@ -9926,25 +10561,8 @@ function wireCompany(){
     if(!row) return;
     const kind = del.getAttribute('data-co-del');
     const id = row.getAttribute('data-' + kind);
-    if(kind === 'doc'){
-      const rec = (state.documents || []).find(x => x.id === id);
-      if(!rec) return;
-      if(!confirm(tr().doc.confirmDel.replace('{name}', rec.filename))) return;
-      /* The object first, then the row -- the mirror of the upload order, and
-         for the mirror reason: a row pointing at a file that is gone is worse
-         than a file nobody references. */
-      try { if(CLOUD.on) await CLOUD.docDelete(id, rec.path); }
-      catch(e){
-        /* "Could not save" for a refusal sent somebody back to try again, and
-           again. A permission is not a failure to retry, it is an answer. */
-        const denied = /42501|not permitted|permission/i.test((e && e.message) || '');
-        toast(denied ? tr().doc.noDelete : tr().co.saveFailed, 'bad');
-        return;
-      }
-      state.documents = (state.documents || []).filter(x => x.id !== id);
-      persist(); render();
-      return;
-    }
+    if(kind === 'doc'){ docDelete(id); return; }
+
     const label = (row.querySelector('[data-f="name"]') || {}).value || '';
     if(!confirm(tr().co.confirmDel.replace('{name}', label))) return;
     await coDelete(kind, id);
@@ -10308,12 +10926,14 @@ function docPreviewKind(rec){
   return 'none';
 }
 
-var DOC_PREVIEW = null;   /* the record on screen, so Escape knows what to close */
+var DOC_PREVIEW = null;
+var DOC_PREVIEW_URL = null;   /* its signed link, once the server has given one */   /* the record on screen, so Escape knows what to close */
 
 function docPreviewClose(){
   const el = $('#docPreview');
   if(el) el.remove();
   DOC_PREVIEW = null;
+  DOC_PREVIEW_URL = null;
   document.body.classList.remove('has-overlay');
 }
 
@@ -10323,10 +10943,8 @@ async function docPreview(id){
   if(!rec) return;
   if(!CLOUD.on){ docSay(d.needsCloud, 'bad'); return; }
 
-  docPreviewClose();
+  if(DOC_PREVIEW) docPreviewClose(); else docPush('preview');
   const kind = docPreviewKind(rec);
-  const fact = (label, value) => value
-    ? `<div class="dp-fact"><span>${esc(label)}</span><b>${esc(value)}</b></div>` : '';
 
   const el = document.createElement('div');
   el.id = 'docPreview';
@@ -10338,46 +10956,25 @@ async function docPreview(id){
     <div class="dp-scrim" data-dp-close></div>
     <div class="dp-panel">
       <div class="dp-head">
+        <button type="button" class="dp-back" data-dp-close>← ${esc(d.back)}</button>
         <div class="dp-title">
           <b>${esc(rec.filename)}</b>
-          <span>${esc(d.kind[rec.kind] || rec.kind)} \u00b7 ${humanSize(rec.size_bytes)}</span>
+          <span>${esc(d.kind[rec.kind] || rec.kind)} · ${humanSize(rec.size_bytes)}</span>
         </div>
-        <a class="dp-out" href="#" data-dp-out>${esc(d.openFile)}</a>
-        <button type="button" class="dp-x" data-dp-close aria-label="${esc(t.close || 'Close')}">\u00d7</button>
+        <button type="button" class="dp-x" data-dp-close aria-label="${esc(t.close || 'Close')}">×</button>
       </div>
       <div class="dp-body" data-dp-body>
         <p class="dp-loading">${esc(d.loading)}</p>
       </div>
-      <div class="dp-facts">
-        ${docSchema(rec.kind).fields.map(x => {
-          /* The countdown belongs ON the expiry line, not under a second one
-             with the same heading. Two facts labelled "Valid until", one a
-             date and one a number of days, read as two different fields. */
-          if(x === 'valid_until'){
-            if(!rec.valid_until) return '';
-            const near = rec.days_left != null && rec.days_left <= 90;
-            const tone = !near ? '' : (rec.days_left < 0 ? ' is-gone' : ' is-soon');
-            const tail = !near ? '' : ' \u00b7 ' + (rec.days_left < 0
-              ? d.expired : d.daysLeft.replace('{n}', rec.days_left));
-            return `<div class="dp-fact${tone}"><span>${esc(docLabel(rec.kind, x, d))}</span>` +
-                   `<b>${esc(rec.valid_until + tail)}</b></div>`;
-          }
-          const v = x === 'amount'     ? (rec.amount == null ? '' : price(rec.amount))
-                  : x === 'project_id' ? rec.project_ref
-                  : x === 'enquiry_id' ? rec.enquiry_ref
-                  : rec[x];
-          return fact(docLabel(rec.kind, x, d), v);
-        }).join('')}
-        ${fact(d.hWho, rec.uploaded_by)}
-        ${fact(d.hFiled, (rec.created_at || '').slice(0, 10))}
-      </div>
+      <div class="dp-side" data-dp-side></div>
     </div>`;
   document.body.appendChild(el);
   document.body.classList.add('has-overlay');
   DOC_PREVIEW = rec;
+  docPreviewFacts();
 
-  const close = el.querySelector('.dp-x');
-  if(close) close.focus();
+  const back = el.querySelector('.dp-back');
+  if(back) back.focus();
 
   /* Five minutes, not sixty seconds: a preview is looked at rather than
      clicked, and a PDF whose link expires mid-scroll reloads the frame into
@@ -10385,21 +10982,85 @@ async function docPreview(id){
   let url = null;
   try { url = await CLOUD.docLink(rec.path, 300); } catch(e){}
   const body = el.querySelector('[data-dp-body]');
-  const out = el.querySelector('[data-dp-out]');
-  if(!body) return;
+  if(!body || DOC_PREVIEW !== rec) return;
   if(!url){ body.innerHTML = `<p class="dp-loading is-error">${esc(d.linkFailed)}</p>`; return; }
-  if(out) out.setAttribute('href', url);
+  DOC_PREVIEW_URL = url;
+  el.querySelectorAll('[data-dp-out]').forEach(a => a.setAttribute('href', url));
 
   if(kind === 'image'){
     body.innerHTML = `<img src="${esc(url)}" alt="${esc(rec.filename)}">`;
+  } else if(kind === 'pdf' && matchMedia('(max-width:700px), (hover:none)').matches){
+    /* A PDF in a frame on a phone shows the first page as a picture you
+       cannot scroll (iOS) or a download button (Android). Draw the pages
+       instead, one under another, the way a phone reads a document. */
+    body.classList.add('is-pages');
+    body.innerHTML = `<p class="dp-loading">${esc(d.loading)}</p>`;
+    try {
+      const lib = await pdfjsLoad();
+      const pdf = await lib.getDocument({ url }).promise;
+      body.innerHTML = '';
+      const w = Math.max(280, body.clientWidth - 16);
+      for(let n = 1; n <= Math.min(pdf.numPages, 30); n++){
+        if(DOC_PREVIEW !== rec) break;
+        const page = await pdf.getPage(n);
+        const v1 = page.getViewport({ scale: 1 });
+        const vp = page.getViewport({ scale: (w * Math.min(2, window.devicePixelRatio || 1)) / v1.width });
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+        cv.className = 'dp-page';
+        body.appendChild(cv);
+        await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      }
+      pdf.destroy();
+    } catch(e){
+      body.classList.remove('is-pages');
+      body.innerHTML = `<iframe src="${esc(url)}" title="${esc(rec.filename)}"></iframe>`;
+    }
   } else if(kind === 'pdf' || kind === 'text'){
     /* An <iframe>, not <object>: object falls back to its own content on
        failure and shows nothing at all, while a frame at least shows the
        browser's own message. */
     body.innerHTML = `<iframe src="${esc(url)}" title="${esc(rec.filename)}"></iframe>`;
   } else {
-    body.innerHTML = `<p class="dp-loading">${esc(d.noPreview)}</p>`;
+    body.innerHTML = `<div class="dp-none"><span class="doc-ext">${esc(docExt(rec))}</span>
+      <p class="dp-loading">${esc(d.noPreview)}</p>
+      <a class="primary dp-btn" href="${esc(url)}" target="_blank" rel="noopener" data-dp-out>${esc(d.openFile)}</a></div>`;
   }
+}
+
+/* The details beside the file: the same fields as the list, labelled, and
+   saved on change. The folder is one of them, so a misfiled scan is moved
+   from here. Rebuilt when the folder changes, because the folder decides
+   which fields there are. */
+function docPreviewFacts(){
+  const side = document.querySelector('#docPreview [data-dp-side]');
+  const rec = DOC_PREVIEW;
+  if(!side || !rec) return;
+  const t = tr(), d = t.doc;
+  const field = (label, x) => `<label class="dp-field ${x.cls}"><span>${esc(label)}</span>${x.html}</label>`;
+  const staticFact = (label, value) => value
+    ? `<div class="dp-fact"><span>${esc(label)}</span><b>${esc(value)}</b></div>` : '';
+  const editable = canMoney() || canPayroll();
+  side.innerHTML = `
+    <div class="dp-form" data-doc="${esc(rec.id)}">
+      <p class="dp-side-h">${esc(d.details)}</p>
+      ${editable ? field(d.hFolder, { cls: '', html: `<select data-df="kind">${DOC_KINDS.map(k =>
+          `<option value="${k}"${rec.kind === k ? ' selected' : ''}>${esc(d.kind[k])}</option>`).join('')}</select>` })
+        : staticFact(d.hFolder, d.kind[rec.kind])}
+      ${docSchema(rec.kind).fields.map(x => editable
+          ? field(docLabel(rec.kind, x, d), docInput(rec, x, t))
+          : staticFact(docLabel(rec.kind, x, d), x === 'amount' ? (rec.amount == null ? '' : price(rec.amount))
+              : x === 'project_id' ? rec.project_ref : x === 'enquiry_id' ? rec.enquiry_ref : rec[x])).join('')}
+      <div class="dp-facts-row">
+        ${staticFact(d.hWho, rec.uploaded_by)}
+        ${staticFact(d.hFiled, (rec.created_at || '').slice(0, 10))}
+      </div>
+      ${editable ? `<p class="dp-note">${esc(d.saveAuto)}</p>` : ''}
+    </div>
+    <div class="dp-acts">
+      <a class="dp-btn primary"${DOC_PREVIEW_URL ? ` href="${esc(DOC_PREVIEW_URL)}"` : ''} target="_blank" rel="noopener" data-dp-out>${esc(d.openFile)}</a>
+      ${docCanDelete(rec) ? `<button type="button" class="ghost danger dp-btn" data-dp-del>${esc(d.delFile)}</button>` : ''}
+    </div>`;
 }
 
 /* Kept as the way OUT of the app to the file itself; the preview is what a
@@ -10414,21 +11075,59 @@ async function docOpen(path){
   } catch(e){ docSay(d.linkFailed, 'bad'); }
 }
 
-async function docFieldChanged(rowEl){
+async function docDelete(id){
+  const rec = (state.documents || []).find(x => x.id === id);
+  if(!rec) return;
+  if(!confirm(tr().doc.confirmDel.replace('{name}', rec.filename))) return;
+  /* The object first, then the row -- the mirror of the upload order, and
+     for the mirror reason: a row pointing at a file that is gone is worse
+     than a file nobody references. */
+  try { if(CLOUD.on) await CLOUD.docDelete(id, rec.path); }
+  catch(e){
+    /* "Could not save" for a refusal sent somebody back to try again, and
+       again. A permission is not a failure to retry, it is an answer. */
+    const denied = /42501|not permitted|permission/i.test((e && e.message) || '');
+    toast(denied ? tr().doc.noDelete : tr().co.saveFailed, 'bad');
+    return;
+  }
+  state.documents = (state.documents || []).filter(x => x.id !== id);
+  persist(); render();
+  if(DOC_PREVIEW && DOC_PREVIEW.id === id) docBack();
+}
+
+async function docFieldChanged(rowEl, opts){
+  opts = opts || {};
   const id = rowEl.getAttribute('data-doc');
   const cur = (state.documents || []).find(x => x.id === id);
   if(!cur) return;
+  /* EVERY field, not only the ones on screen. save_document writes each
+     column from the row it is given, so a field this folder does not show
+     (the note on an invoice, the reference on a photograph) went in as
+     missing and came back NULL -- an edit to the amount silently erased the
+     note. Start from what the record holds; the screen overrides it. */
   const patch = {};
+  ['kind','doc_date','ref','amount','counterparty','valid_until','note','project_id','enquiry_id']
+    .forEach(k => { patch[k] = cur[k] == null ? '' : String(cur[k]); });
   rowEl.querySelectorAll('[data-df]').forEach(el => {
     patch[el.getAttribute('data-df')] = el.value;
   });
-  if(!CLOUD.on){ Object.assign(cur, patch); persist(); return; }
+  /* The list is NOT redrawn after its own edits: that would take the cursor
+     out of the next field mid-Tab. The preview's edits redraw the screen
+     behind it, so the tile shows the new date or the new folder. */
+  const after = () => {
+    if(!opts.fromPreview) return;
+    render();
+    if(opts.repaint && DOC_PREVIEW && DOC_PREVIEW.id === id) docPreviewFacts();
+  };
+  if(!CLOUD.on){ Object.assign(cur, patch); persist(); after(); return; }
   try {
     const saved = await CLOUD.docSave(id, cur.rev, patch);
     if(!saved){ toast(tr().co.conflict, 'bad'); return; }
     state.documents = (state.documents || []).map(x => x.id === id ? saved : x);
+    if(DOC_PREVIEW && DOC_PREVIEW.id === id) DOC_PREVIEW = saved;
     persist();
     toast(tr().co.saved, 'ok');
+    after();
   } catch(e){ toast(tr().co.saveFailed, 'bad'); }
 }
 
@@ -12304,7 +13003,56 @@ applyTheme();
 render();
 paintSaveState();
 /* With no database configured this never runs and nothing above changes. */
-if(CLOUD.on) bootCloud();
+/* A sign-in link from an admin (invite or password reset) arrives with the
+   session in the address. Take it, wipe it from the address bar -- a token
+   in the history is a token anyone at this computer can reuse -- and ask
+   for a password before anything else. */
+async function startCloud(){
+  const h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+  const kind = h.get('type');
+  const clean = () => { try { history.replaceState(null, '', location.pathname + location.search); } catch(e){} };
+  if(h.get('error') || h.get('error_code')){ clean(); showSignIn(tr().cloud.linkExpired); return; }
+  if(h.get('access_token') && /^(invite|recovery|magiclink|signup)$/.test(kind || '')){
+    clean();
+    try { showSetPassword(await CLOUD.adoptLink(h)); }
+    catch(e){ showSignIn(tr().cloud.linkExpired); }
+    return;
+  }
+  bootCloud();
+}
+function showSetPassword(user){
+  const t = tr().cloud;
+  const name = (user && user.user_metadata && user.user_metadata.name) || (user && user.email || '').split('@')[0];
+  $('#signinForm').hidden = true;
+  $('#setpassForm').hidden = false;
+  $('#spSub').textContent = t.setTitle;
+  $('#spHello').textContent = t.setHello.replace('{name}', name).replace('{email}', (user && user.email) || '');
+  $('#spEmail').value = (user && user.email) || '';
+  $('#spPassL').textContent = t.newPass;
+  $('#spPass2L').textContent = t.newPass2;
+  $('#spGo').textContent = t.savePass;
+  $('#spMsg').textContent = '';
+  $('#signin').hidden = false;
+  setTimeout(() => { const f = $('#spPass'); if(f) f.focus(); }, 40);
+}
+$('#setpassForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const t = tr().cloud, msg = $('#spMsg'), btn = $('#spGo');
+  const a = $('#spPass').value, b = $('#spPass2').value;
+  if(a.length < 8){ msg.textContent = t.passShort; return; }
+  if(a !== b){ msg.textContent = t.passMismatch; return; }
+  btn.disabled = true; msg.textContent = '';
+  try {
+    await CLOUD.setPassword(a);
+    $('#spPass').value = ''; $('#spPass2').value = '';
+    $('#setpassForm').hidden = true; $('#signinForm').hidden = false;
+    $('#signin').hidden = true;
+    await bootCloud();
+  } catch(err){
+    msg.textContent = /link|401|jwt|expired/i.test(err.message) ? t.linkExpired : err.message;
+  } finally { btn.disabled = false; }
+});
+if(CLOUD.on) startCloud();
 </script>
 </body>
 </html>
